@@ -1,0 +1,33 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: carevia-postgres
+    environment:
+      POSTGRES_DB: carevia
+      POSTGRES_USER: carevia
+      POSTGRES_PASSWORD: carevia
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build: .
+    container_name: carevia-backend
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/carevia
+      SPRING_DATASOURCE_USERNAME: carevia
+      SPRING_DATASOURCE_PASSWORD: carevia
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+
+
+
