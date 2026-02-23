@@ -1,7 +1,9 @@
 "use client";
+
 import { useState } from "react";
-import Link from "next/link";
 import { motion } from "framer-motion";
+import Link from "next/link";
+import { easeOut, easeInOut } from "framer-motion";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -22,7 +24,7 @@ export default function LoginPage() {
       y: 0,
       transition: {
         duration: 0.6 * animationSpeed,
-        ease: "easeOut",
+        ease: easeOut,
         when: "beforeChildren",
         staggerChildren: 0.1 * animationSpeed,
       },
@@ -34,7 +36,7 @@ export default function LoginPage() {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5 * animationSpeed, ease: "easeOut" },
+      transition: { duration: 0.5 * animationSpeed, ease: easeOut },
     },
   };
 
@@ -45,7 +47,7 @@ export default function LoginPage() {
       opacity: 1,
       transition: {
         duration: 0.7 * animationSpeed,
-        ease: "easeOut",
+        ease: easeOut,
       },
     },
   };
@@ -55,7 +57,7 @@ export default function LoginPage() {
     rest: { scale: 1 },
     hover: {
       scale: 1.03,
-      transition: { duration: 0.2 * animationSpeed, ease: "easeInOut" },
+      transition: { duration: 0.2 * animationSpeed, ease: easeInOut },
     },
     tap: { scale: 0.98 },
   };
@@ -64,24 +66,22 @@ export default function LoginPage() {
     rest: { boxShadow: "0 0 0 rgba(0, 0, 0, 0)" },
     hover: {
       boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
-      transition: { duration: 0.3 * animationSpeed, ease: "easeInOut" },
+      transition: { duration: 0.3 * animationSpeed, ease: easeInOut },
     },
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-slate-50 p-4">
+    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-pink-50 via-purple-50 to-blue-50 p-4">
       <motion.div
-        className="relative w-full max-w-4xl h-[600px] bg-white rounded-3xl overflow-hidden shadow-lg flex"
+        className="relative w-full max-w-4xl h-[600px] bg-white rounded-3xl overflow-hidden shadow-xl flex"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        layoutId="authCard"
-        layout
       >
         {/* Left side with blob design */}
-        <div className="relative w-2/5 bg-amber-300 p-8 flex flex-col justify-center overflow-hidden">
+        <div className="relative w-2/5 bg-gradient-to-br from-pink-500 to-purple-600 p-8 flex flex-col justify-center overflow-hidden">
           <motion.div
-            className="absolute top-10 left-10 w-24 h-24 rounded-full bg-pink-200 opacity-80"
+            className="absolute top-10 left-10 w-24 h-24 rounded-full bg-pink-300 opacity-60"
             variants={blobVariants}
             style={{
               animation: "snakeMove 15s ease-in-out infinite",
@@ -89,7 +89,7 @@ export default function LoginPage() {
           ></motion.div>
 
           <motion.div
-            className="absolute bottom-20 right-[-50px] w-40 h-40 bg-pink-200 rounded-full"
+            className="absolute bottom-20 right-[-50px] w-40 h-40 bg-purple-300 opacity-50 rounded-full"
             variants={blobVariants}
             transition={{ delay: 0.2 }}
             style={{
@@ -98,7 +98,7 @@ export default function LoginPage() {
           ></motion.div>
 
           <motion.div
-            className="absolute top-40 right-[-30px] w-32 h-20 bg-amber-100 rounded-full"
+            className="absolute top-40 right-[-30px] w-32 h-20 bg-pink-200 opacity-60 rounded-full"
             variants={blobVariants}
             transition={{ delay: 0.4 }}
           ></motion.div>
@@ -107,7 +107,7 @@ export default function LoginPage() {
             className="text-7xl font-bold text-white mb-4 relative z-10"
             variants={itemVariants}
           >
-            Blob
+            Carevia
             <br />
             login
           </motion.h1>
@@ -179,7 +179,6 @@ export default function LoginPage() {
         <motion.div
           className="w-3/5 p-10 flex flex-col justify-center"
           variants={containerVariants}
-          layout
         >
           <div className="flex items-start">
             <motion.div
@@ -189,49 +188,20 @@ export default function LoginPage() {
               transition={{ duration: 0.5, ease: "easeOut" }}
             >
               <motion.div
-                className="relative h-16 w-16 rounded-xl bg-gradient-to-br from-amber-300 to-amber-500 flex items-center justify-center"
+                className="relative h-16 w-16 rounded-xl bg-gradient-to-br from-pink-500 to-purple-600 flex items-center justify-center"
                 animate={{
                   rotate: [0, 5, -5, 0],
                   scale: [1, 1.05, 0.95, 1],
                 }}
                 transition={{
                   duration: 4,
-                  ease: "easeInOut",
+                  ease: easeInOut,
                   times: [0, 0.25, 0.75, 1],
                   repeat: Infinity,
                   repeatType: "reverse",
                 }}
               >
-                <motion.svg
-                  width="32"
-                  height="32"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ delay: 0.3, duration: 0.5 }}
-                >
-                  <motion.path
-                    d="M12 2L18 6V18L12 22L6 18V6L12 2Z"
-                    stroke="white"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    initial={{ pathLength: 0 }}
-                    animate={{ pathLength: 1 }}
-                    transition={{ duration: 1.5, ease: "easeInOut" }}
-                  />
-                  <motion.path
-                    d="M12 8L16 10.5V15.5L12 18L8 15.5V10.5L12 8Z"
-                    fill="white"
-                    strokeWidth="0.5"
-                    stroke="white"
-                    initial={{ opacity: 0, scale: 0 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    transition={{ delay: 0.8, duration: 0.7 }}
-                  />
-                </motion.svg>
+                <span className="text-white font-bold text-3xl">C</span>
                 <motion.div
                   className="absolute -top-1 -right-1 h-3 w-3 bg-white rounded-full"
                   animate={{
@@ -247,14 +217,13 @@ export default function LoginPage() {
             </motion.div>
           </div>
 
-          <motion.div className="mb-8" variants={itemVariants} layout>
+          <motion.div className="mb-8" variants={itemVariants}>
             <motion.h2
               className="text-4xl text-gray-700 font-medium mb-3"
-              layoutId="formTitle"
             >
               My account
             </motion.h2>
-            <motion.p className="text-xl text-gray-600" layoutId="formSubtitle">
+            <motion.p className="text-xl text-gray-600">
               Sign in to continue
             </motion.p>
           </motion.div>
@@ -275,7 +244,7 @@ export default function LoginPage() {
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent transition-all duration-300"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-300"
                     placeholder="your@email.com"
                     required
                   />
@@ -296,7 +265,7 @@ export default function LoginPage() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent transition-all duration-300"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-300"
                     placeholder="••••••••"
                     required
                   />
@@ -313,39 +282,37 @@ export default function LoginPage() {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 text-amber-500 focus:ring-amber-400 border-gray-300 rounded cursor-pointer"
+                  className="h-4 w-4 text-pink-600 focus:ring-pink-500 border-gray-300 rounded cursor-pointer"
                   whileTap={{ scale: 0.9 }}
                 />
                 <motion.label
                   htmlFor="remember-me"
                   className="ml-2 block text-sm text-gray-700 cursor-pointer"
-                  whileHover={{ color: "#F0A500" }}
+                  whileHover={{ color: "#ec4899" }}
                 >
                   Remember me
                 </motion.label>
               </div>
 
               <div className="text-sm">
-                <motion.div whileHover={{ x: 2 }}>
-                  <Link
-                    href="/auth/forgot-password"
-                    className="text-amber-500 hover:text-amber-600 transition-colors duration-200"
-                  >
-                    Forgot password?
-                  </Link>
-                </motion.div>
+                <motion.a
+                  href="#"
+                  className="text-pink-600 hover:text-pink-700 transition-colors duration-200"
+                  whileHover={{ x: 2 }}
+                >
+                  Forgot password?
+                </motion.a>
               </div>
             </motion.div>
 
             <motion.div variants={itemVariants}>
               <motion.button
                 type="submit"
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors duration-200"
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition-all duration-200"
                 variants={buttonHoverVariants}
                 initial="rest"
                 whileHover="hover"
                 whileTap="tap"
-                layoutId="authButton"
               >
                 Sign in
                 <motion.svg
@@ -373,18 +340,15 @@ export default function LoginPage() {
             className="mt-8 text-center"
             variants={itemVariants}
             transition={{ delay: 0.2 }}
-            layoutId="authFooter"
           >
             <p className="text-gray-600">
               Don't have an account?{" "}
-              <motion.span whileHover={{ scale: 1.05 }}>
-                <Link
-                  href="/auth/register"
-                  className="text-amber-500 hover:text-amber-600 font-medium transition-colors duration-200"
-                >
-                  Sign up
-                </Link>
-              </motion.span>
+              <Link
+                href="/auth/signup"
+                className="text-pink-600 hover:text-pink-700 font-medium transition-colors duration-200"
+              >
+                Sign up
+              </Link>
             </p>
           </motion.div>
         </motion.div>

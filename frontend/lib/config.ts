@@ -119,8 +119,8 @@ export const buildQueryString = (
  */
 export const API_ENDPOINTS = {
   // Auth
-  LOGIN: "/auth/login",
-  REGISTER: "/auth/register",
+  LOGIN: "/auth/signin",
+  REGISTER: "/auth/signup",
   REFRESH: "/auth/refresh",
 
   // Products

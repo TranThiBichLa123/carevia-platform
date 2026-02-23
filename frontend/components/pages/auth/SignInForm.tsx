@@ -33,10 +33,8 @@ import authApi from "../../../lib/authApi";
 const loginSchema = z.object({
   email: z.string().email("Invalid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
-  termsAccepted: z.literal(true, {
-    errorMap: () => ({
-      message: "You must accept the terms and privacy policy",
-    }),
+  termsAccepted: z.boolean().refine((val) => val === true, {
+    message: "You must accept the terms and privacy policy",
   }),
 });
 
@@ -59,7 +57,7 @@ const SignInForm = () => {
 
   const login = async (data: LoginFormData): Promise<boolean> => {
     try {
-      const response = await authApi.post("/auth/login", {
+      const response = await authApi.post("/auth/signin", {
         email: data.email,
         password: data.password,
       });
@@ -249,6 +247,7 @@ const SignInForm = () => {
                     <span className="flex items-center gap-2">
                       <LogIn size={16} />
                       Sign In
+
                     </span>
                   )}
                 </Button>

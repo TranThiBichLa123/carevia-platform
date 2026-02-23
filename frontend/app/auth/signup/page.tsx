@@ -1,4 +1,5 @@
 "use client";
+
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -23,21 +24,8 @@ export default function SignupPage() {
       opacity: 1,
       transition: {
         duration: 0.6 * animationSpeed,
-        ease: "easeOut",
-        when: "beforeChildren",
         staggerChildren: 0.1 * animationSpeed,
-      },
-    },
-  };
-
-  const formVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.6 * animationSpeed,
-        ease: "easeOut",
+        delayChildren: 0,
       },
     },
   };
@@ -47,7 +35,7 @@ export default function SignupPage() {
     visible: {
       opacity: 1,
       y: 0,
-      transition: { duration: 0.5 * animationSpeed, ease: "easeOut" },
+      transition: { duration: 0.5 * animationSpeed },
     },
   };
 
@@ -59,7 +47,7 @@ export default function SignupPage() {
       transition: {
         duration: 0.7 * animationSpeed,
         delay: custom * 0.1 * animationSpeed,
-        ease: "easeOut",
+        ease: "easeOut" as const,
       },
     }),
   };
@@ -69,7 +57,7 @@ export default function SignupPage() {
     rest: { scale: 1 },
     hover: {
       scale: 1.03,
-      transition: { duration: 0.2 * animationSpeed, ease: "easeInOut" },
+      transition: { duration: 0.2 * animationSpeed },
     },
     tap: { scale: 0.98 },
   };
@@ -78,12 +66,12 @@ export default function SignupPage() {
     rest: { boxShadow: "0 0 0 rgba(0, 0, 0, 0)" },
     hover: {
       boxShadow: "0 4px 12px rgba(0, 0, 0, 0.05)",
-      transition: { duration: 0.3 * animationSpeed, ease: "easeInOut" },
+      transition: { duration: 0.3 * animationSpeed },
     },
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-amber-300 p-4 overflow-hidden">
+    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-pink-400 via-purple-400 to-blue-400 p-4 overflow-hidden">
       {/* Background blob shapes - absolute positioned within the container */}
       <motion.div
         className="fixed top-[15%] left-[10%] w-64 h-64 rounded-full bg-pink-200 opacity-70"
@@ -97,7 +85,7 @@ export default function SignupPage() {
       ></motion.div>
 
       <motion.div
-        className="fixed bottom-[20%] left-[20%] w-96 h-96 rounded-full bg-amber-100 opacity-60"
+        className="fixed bottom-[20%] left-[20%] w-96 h-96 rounded-full bg-purple-200 opacity-60"
         variants={blobVariants}
         initial="hidden"
         animate="visible"
@@ -130,7 +118,7 @@ export default function SignupPage() {
       ></motion.div>
 
       <motion.div
-        className="fixed top-[10%] right-[30%] w-24 h-24 rounded-full bg-amber-200 opacity-70"
+        className="fixed top-[10%] right-[30%] w-24 h-24 rounded-full bg-purple-300 opacity-70"
         variants={blobVariants}
         initial="hidden"
         animate="visible"
@@ -140,25 +128,22 @@ export default function SignupPage() {
         }}
       ></motion.div>
 
-      {/* Form container with shared layoutId for smooth transition */}
+      {/* Form container */}
       <motion.div
         className="relative w-full max-w-xl bg-white rounded-3xl overflow-hidden shadow-xl"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
-        layoutId="authCard"
-        layout
       >
-        <motion.div className="p-10" layout>
-          <motion.div className="mb-8" variants={itemVariants} layout>
+        <motion.div className="p-10">
+          <motion.div className="mb-8" variants={itemVariants}>
             <motion.h2
               className="text-4xl text-gray-800 font-bold mb-2"
-              layoutId="formTitle"
             >
               Create Account
             </motion.h2>
-            <motion.p className="text-lg text-gray-600" layoutId="formSubtitle">
-              Join our creative community
+            <motion.p className="text-lg text-gray-600">
+              Join Carevia community
             </motion.p>
           </motion.div>
 
@@ -177,7 +162,7 @@ export default function SignupPage() {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent transition-all duration-300"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-300"
                   placeholder="Jane Doe"
                   required
                 />
@@ -198,7 +183,7 @@ export default function SignupPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent transition-all duration-300"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-300"
                   placeholder="your@email.com"
                   required
                 />
@@ -220,7 +205,7 @@ export default function SignupPage() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent transition-all duration-300"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-300"
                     placeholder="••••••••"
                     required
                   />
@@ -241,7 +226,7 @@ export default function SignupPage() {
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-amber-300 focus:border-transparent transition-all duration-300"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-300"
                     placeholder="••••••••"
                     required
                   />
@@ -255,29 +240,29 @@ export default function SignupPage() {
                   id="terms"
                   name="terms"
                   type="checkbox"
-                  className="h-4 w-4 mt-1 text-amber-500 focus:ring-amber-400 border-gray-300 rounded cursor-pointer"
+                  className="h-4 w-4 mt-1 text-pink-600 focus:ring-pink-500 border-gray-300 rounded cursor-pointer"
                   required
                   whileTap={{ scale: 0.9 }}
                 />
                 <motion.label
                   htmlFor="terms"
                   className="ml-2 block text-sm text-gray-600"
-                  whileHover={{ color: "#F0A500" }}
+                  whileHover={{ color: "#ec4899" }}
                 >
                   I agree to the{" "}
-                  <Link
-                    href="/terms"
-                    className="text-amber-500 hover:text-amber-600 underline transition-colors"
+                  <a
+                    href="#"
+                    className="text-pink-600 hover:text-pink-700 underline transition-colors"
                   >
                     Terms of Service
-                  </Link>{" "}
+                  </a>{" "}
                   and{" "}
-                  <Link
-                    href="/privacy"
-                    className="text-amber-500 hover:text-amber-600 underline transition-colors"
+                  <a
+                    href="#"
+                    className="text-pink-600 hover:text-pink-700 underline transition-colors"
                   >
                     Privacy Policy
-                  </Link>
+                  </a>
                 </motion.label>
               </div>
             </motion.div>
@@ -285,12 +270,11 @@ export default function SignupPage() {
             <motion.div variants={itemVariants} className="pt-2">
               <motion.button
                 type="submit"
-                className="w-full flex items-center justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-gray-800 hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-amber-500 transition-colors duration-200"
+                className="w-full flex items-center justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition-all duration-200"
                 variants={buttonHoverVariants}
                 initial="rest"
                 whileHover="hover"
                 whileTap="tap"
-                layoutId="authButton"
               >
                 Create Account
                 <motion.svg
@@ -317,18 +301,15 @@ export default function SignupPage() {
               className="mt-6 text-center"
               variants={itemVariants}
               transition={{ delay: 0.2 }}
-              layoutId="authFooter"
             >
               <p className="text-gray-600">
                 Already have an account?{" "}
-                <motion.span whileHover={{ scale: 1.05 }}>
-                  <Link
-                    href="/auth/login"
-                    className="text-amber-500 hover:text-amber-600 font-medium transition-colors duration-200"
-                  >
-                    Sign in
-                  </Link>
-                </motion.span>
+                <Link
+                  href="/auth/signin"
+                  className="text-pink-600 hover:text-pink-700 font-medium transition-colors duration-200"
+                >
+                  Sign in
+                </Link>
               </p>
             </motion.div>
           </form>
