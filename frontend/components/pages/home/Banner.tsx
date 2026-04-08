@@ -2,33 +2,49 @@ import { fetchData } from "@/lib/api";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
+import { Banners } from "@/type";
 
-interface Banner {
-  _id: string;
-  name: string;
-  title: string;
-  startFrom: number;
-  image: string;
-  bannerType: string;
-}
+
+
+// Mock data cho banner khi API không trả về dữ liệu
+const mockBanners: Banners[] = [
+  {
+    _id: "1",
+    name: "New Collection",
+    title: "Baby Essentials For Every Moment",
+    image: "https://images.unsplash.com/photo-1519689680058-324335c77eba?w=800&h=500&fit=crop",
+    startFrom: new Date().getTime(),
+    bannerType: "featured",
+  },
+  {
+    _id: "2",
+    name: "Special Offer",
+    title: "Up To 50% Off",
+    image: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400&h=500&fit=crop",
+    startFrom: new Date().getTime(),
+    bannerType: "featured",
+  },
+];
 
 const Banner = async () => {
-  let banners: Banner[] = [];
+  let banners: Banners[] = [];
   try {
-    const data = await fetchData<Banner[]>("/banners");
+    const data = await fetchData<Banners[]>("/banners");
     banners = data;
   } catch (error) {
     console.log("error", error);
   }
+
+  // Sử dụng mock data nếu API không trả về dữ liệu
+  if (banners?.length === 0) {
+    banners = mockBanners;
+  }
+
   const imageOne = banners[0];
   const imageTwo = banners[1];
 
-  if (banners?.length === 0) {
-    return null;
-  }
-
   return (
-    <div className="grid grid-cols-1 md:grid-cols-4 gap-3 md:gap-0">
+    <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
       <div className="md:col-span-3 relative group overflow-hidden rounded-md">
         <Image
           src={imageOne?.image}
@@ -38,16 +54,16 @@ const Banner = async () => {
           priority
           className="w-full h-72 md:min-h-[400px] object-cover group-hover:scale-110 hoverEffect"
         />
-        <div className="absolute top-0 left-0 w-full h-full flex flex-col gap-3 items-center justify-center text-babyshopWhite">
-          <p className="font-bold text-sm">{imageOne?.name}</p>
-          <h2 className="text-4xl font-medium max-w-96 text-center capitalize">
+        <div className="absolute top-0 left-0 w-full h-full flex flex-col gap-3 items-center justify-center">
+          <p className="text-amber-400 font-semibold text-sm italic">{imageOne?.name}</p>
+          <h2 className="text-3xl md:text-4xl font-medium max-w-md text-center capitalize text-gray-900">
             {imageOne?.title}
           </h2>
           <Link
             href={"/shop"}
-            className="capitalize bg-babyshopWhite rounded-full font-medium text-babyshopBlack px-6 py-2 text-base hover:bg-babyshopSky/10 border border-transparent hover:border hover:border-babyshopWhite hoverEffect"
+            className="bg-white rounded-full font-medium text-gray-900 px-6 py-2.5 text-base hover:bg-transparent hover:text-white hover:border-white border border-gray-200 hoverEffect"
           >
-            shop now
+            Shop Now
           </Link>
         </div>
       </div>
@@ -59,16 +75,16 @@ const Banner = async () => {
           height={500}
           className="w-full h-72 md:min-h-[400px] object-cover group-hover:scale-110 hoverEffect"
         />
-        <div className="absolute top-10 left-0 w-full h-full flex flex-col gap-3 items-center justify-start text-babyshopWhite">
-          <p className="font-bold text-sm">{imageTwo?.name}</p>
-          <h2 className="text-4xl font-medium max-w-96 text-center capitalize">
+        <div className="absolute top-8 left-0 w-full h-full flex flex-col gap-2 items-center justify-start text-white">
+          <p className="font-semibold text-sm">{imageTwo?.name}</p>
+          <h2 className="text-2xl md:text-3xl font-medium max-w-48 text-center capitalize">
             {imageTwo?.title}
           </h2>
           <Link
             href={"/shop"}
-            className="capitalize bg-babyshopWhite rounded-full font-medium text-babyshopBlack px-6 py-2 text-base hover:bg-babyshopPurple/10 border border-transparent hover:border hover:border-babyshopWhite hoverEffect"
+            className="bg-white rounded-full font-medium text-gray-900 px-6 py-2.5 text-base hover:bg-transparent hover:text-white hover:border-white border border-gray-300 hoverEffect"
           >
-            shop now
+            Shop Now
           </Link>
         </div>
       </div>

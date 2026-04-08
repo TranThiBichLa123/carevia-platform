@@ -27,23 +27,26 @@ const ProductCard = ({ product }: { product: Product }) => {
         />
       </Link>
 
+
+
       {/* Wishlist Button */}
       <div className="absolute top-2 right-2 z-10">
         <WishlistButton product={product} className="bg-white shadow-sm" />
       </div>
-
       <hr />
       <div className="px-4 py-2 space-y-1">
-        <p className="uppercase text-xs font-medium text-babyshopTextLight">
+        <p className="uppercase text-xs font-medium text-gray-500">
           {product?.category?.name}
         </p>
-        <p className="line-clamp-2 text-sm">{product?.name}</p>
+        <p className="line-clamp-2 text-sm h-10">{product?.name}</p>
         <PriceContainer
           price={product?.price}
           discountPercentage={product?.discountPercentage}
         />
         <AddToCartButton product={product} />
       </div>
+
+
     </div>
   );
 };

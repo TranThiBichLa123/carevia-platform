@@ -20,7 +20,7 @@ export default function RootLayout({
       <body className={`antialiased`}>
         <AuthInitializer />
         <Header />
-        <div className="bg-babyshopLightBg min-h-screen pb-20">{children}</div>
+        <div className="bg-gray-100 min-h-screen pb-20">{children}</div>
         <Footer />
         <Toaster
           position="bottom-right"

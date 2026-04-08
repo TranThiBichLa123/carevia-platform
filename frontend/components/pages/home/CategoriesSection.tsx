@@ -29,7 +29,7 @@ const CategoriesSection = async () => {
   );
 
   return (
-    <div className="hidden md:inline-flex flex-col bg-babyshopWhite h-full p-5 border rounded-md">
+    <div className="hidden md:inline-flex flex-col bg-white h-full p-5 rounded-lg shadow-sm">
       {/* Featured Categories Section */}
       <p className="font-semibold text-lg mb-3">Featured</p>
       <div className="mb-6">
@@ -83,6 +83,10 @@ const CategoriesSection = async () => {
           ))
         ) : (
           <p className="text-gray-500">No hot categories available</p>
+
+          // Không có categories từ API - hiện tại đang hiển thị "No featured/hot categories available"
+          // Điều này có nghĩa là API /categories không trả về data hoặc không có categories nào có categoryType là "Featured" hoặc "Hot Categories"
+
         )}
       </div>
 

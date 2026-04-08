@@ -3,7 +3,7 @@ import React from "react";
 
 const HrLine = ({ className }: { className?: string }) => {
   return (
-    <div className={cn("w-full h-[1px] bg-babyshopBlack/20", className)} />
+    <div className={cn("w-full h-[1px] bg-black/20", className)} />
   );
 };
 

@@ -12,9 +12,9 @@ const PriceContainer = ({ price, discountPercentage }: Props) => {
     <div className="flex items-center gap-2 text-sm">
       <PriceFormatter
         amount={price}
-        className="text-babyshopTextLight line-through font-medium"
+        className="text-gray-500 line-through font-medium"
       />
-      <PriceFormatter amount={discountedPrice} className="text-babyshopRed" />
+      <PriceFormatter amount={discountedPrice} className="text-red-600" />
     </div>
   );
 };

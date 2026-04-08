@@ -19,8 +19,11 @@ export default async function Home() {
   ];
 
   return (
-    <div>
-      <Container className="min-h-screen flex py-7 gap-3">
+    <div className="bg-gray-100 min-h-screen">
+      <Container className="min-h-screen flex py-3 gap-3">
+        {/* py-7 = padding trên + dưới là 1.75rem (28px)
+pt-X = chỉ padding trên
+Tăng số (vd: py-10, pt-8) = khoảng cách lớn hơn */}
         <CategoriesSection />
         <div className="flex-1">
           <Banner />

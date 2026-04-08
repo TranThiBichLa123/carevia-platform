@@ -35,7 +35,7 @@ const EmptyListDesign = ({ message, resetFilters }: EmptyListProps) => {
       {/* Message */}
       <h3 className="text-xl font-semibold text-gray-800 mb-2">
         No Products Found
-      </h3>
+      </h3>    
       <p className="text-gray-600 text-center max-w-md mb-6">
         {message ||
           "Sorry, no products match your selected filters. Try adjusting or resetting the filters to find what you're looking for."}

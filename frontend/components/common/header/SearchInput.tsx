@@ -2,7 +2,7 @@
 import { Input } from "../../../components/ui/input";
 import { fetchData } from "../../../lib/api";
 import { Product } from "@/type";
-import { Loader2, Search, X } from "lucide-react";
+import { Loader2, Search, X, Camera, Mic } from "lucide-react";
 import Link from "next/link";
 import React, { useState, useEffect, useCallback, useRef } from "react";
 import { useDebounce } from "use-debounce";
@@ -103,26 +103,51 @@ const SearchInput = () => {
           <Search className="w-5 h-5 text-white hover:text-babyshopRed hoverEffect" />
         )}
       </button>
+
+      {/* chỉnh ô tìm kiếm trong này */}
       <form
         className="relative hidden lg:flex items-center"
         onSubmit={(e) => e.preventDefault()}
       >
-        <Input
-          placeholder="Search Products..."
-          className="flex-1 rounded-md py-5 focus-visible:ring-0 focus-visible:border-babyshopRed bg-white text-babyshopText placeholder:font-semibold placeholder:tracking-wide pr-16"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          onFocus={() => setShowResults(true)}
-        />
-        {search ? (
-          <X
-            onClick={() => setSearch("")}
-            className="w-5 h-5 absolute right-3 top-2.5 text-babyshopText hover:text-babyshopRed hoverEffect cursor-pointer"
+
+        <div className="relative w-full">
+          <Input
+            placeholder="Search Products..."
+            className="flex-1 rounded-md py-5 bg-gray-50 border border-gray-200 text-babyshopText placeholder:font-medium pl-4 pr-28 text-sm focus-visible:ring-0"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            onFocus={() => setShowResults(true)}
           />
-        ) : (
-          <Search className="absolute right-3 top-3 w-5 h-5 text-babyshopText" />
-        )}
+
+          <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-3">
+            <button
+              type="button"
+              className="text-babyshopText opacity-90 hover:opacity-100"
+              aria-label="Camera search"
+            >
+              <Camera className="w-5 h-5" />
+            </button>
+
+            <button
+              type="button"
+              className="text-babyshopText opacity-90 hover:opacity-100"
+              aria-label="Voice search"
+            >
+              <Mic className="w-5 h-5" />
+            </button>
+
+            {search ? (
+              <X
+                onClick={() => setSearch("")}
+                className="w-5 h-5 text-babyshopText hover:text-babyshopRed hoverEffect cursor-pointer"
+              />
+            ) : (
+              <Search className="w-5 h-5 text-babyshopText" />
+            )}
+          </div>
+        </div>
       </form>
+      {/* end chỉnh ô tìm kiếm trong này */}
 
       {/* Mobile search overlay */}
       <AnimatePresence>

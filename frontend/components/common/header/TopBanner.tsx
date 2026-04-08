@@ -7,17 +7,17 @@ import SelectCurrency from "./SelectCurrency";
 
 const TopBanner = () => {
   return (
-    <div className="w-full bg-babyshopPurple text-babyShopLightWhite py-1 text-sm font-medium">
+    <div className="w-full bg-[#A96BDE] text-white py-1 text-sm font-medium">
       <Container className="grid grid-cols-1 md:grid-cols-3">
         <div className="flex items-center gap-5">
           {topHelpCenter?.map((item) => (
-            <Link
-              key={item?.title}
-              href={item?.href}
-              className="hover:text-babyshopWhite hoverEffect"
-            >
-              {item?.title}
-            </Link>
+              <Link
+                key={item?.title}
+                href={item?.href}
+                className="hover:text-white hoverEffect"
+              >
+                {item?.title}
+              </Link>
           ))}
         </div>
         <p className="text-center hidden md:inline-flex">

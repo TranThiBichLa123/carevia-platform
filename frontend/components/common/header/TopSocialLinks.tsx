@@ -16,7 +16,7 @@ const TopSocialLinks = () => {
         <Link
           key={item?.title}
           href={item?.href}
-          className="hover:text-babyshopWhite hoverEffect"
+          className="text-white hover:text-white hoverEffect"
         >
           {item?.icon}
         </Link>

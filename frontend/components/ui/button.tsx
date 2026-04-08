@@ -10,11 +10,11 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default:
-          "bg-babyshopSky text-primary-foreground shadow-xs hover:bg-babyshopSky/90",
+          "bg-sky-500 text-primary-foreground shadow-xs hover:bg-sky-600",
         destructive:
           "bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60",
         outline:
-          "border border-babyshopSky bg-transparent shadow-xs hover:bg-babyshopSky/20 hover:text-accent-foreground",
+          "border border-sky-500 bg-transparent shadow-xs hover:bg-sky-500/20 hover:text-accent-foreground",
         secondary:
           "bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80",
         ghost:
