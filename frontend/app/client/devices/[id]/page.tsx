@@ -20,7 +20,7 @@ const ProductDetails = async ({
   let product: Product | undefined;
 
   try {
-    product = await fetchData(`/products/${id}`);
+    product = await fetchData(`/devices/${id}`);
   } catch (error) {
     console.log("Chưa có API, đang dùng mock data cho ID:", id);
   }

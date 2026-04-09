@@ -85,7 +85,7 @@ const CategoriesSection = () => {
       )}
     </div>
   );
-   return (
+  return (
     <nav className="hidden md:flex items-center bg-white h-12 border-t border-gray-100">
       {/* 1. DANH MỤC SẢN PHẨM */}
       <div className="flex items-center gap-2 px-4 py-3 cursor-pointer hover:text-[#20afb2] transition-colors border-r border-gray-100">
@@ -95,23 +95,41 @@ const CategoriesSection = () => {
         </span>
       </div>
 
-      {/* 2. HOT CATEGORIES */}
-      <NavItem title="Hot Categories" items={hotCategories} />
+      {/* 2. DANH MỤC NỔI BẬT */}
+      <NavItem title="Danh mục nổi bật" items={hotCategories} />
 
-      {/* 3. FEATURED */}
-      <NavItem title="Featured" items={featuredCategories} />
+      {/* 3. GỢI Ý CHO BẠN */}
+      <NavItem title="Gợi ý cho bạn" items={featuredCategories} />
 
-      {/* 4. QUICK LINKS */}
-      <NavItem title="Quick Links" items={[
+      {/* 4. TRUY CẬP NHANH */}
+      <NavItem title="Truy cập nhanh" items={[
         { name: 'Tất cả sản phẩm', emoji: '🛍️', path: '/devices' },
         { name: 'Sản phẩm mới', emoji: '🆕', path: '/new-arrivals' },
+        { name: 'Dưới 1 triệu', emoji: '💰', path: '/under-1m' },
+        { name: 'Đơn hàng của tôi', emoji: '📦', path: '/my-orders' }
       ]} />
 
-      {/* 5. ĐẶT LỊCH TRẢI NGHIỆM (Link đơn) */}
-      <NavItem title="Đặt lịch trải nghiệm" path="/booking" />
+      {/* 5. ĐẶT LỊCH TRẢI NGHIỆM (Đã thêm Dropdown) */}
+      <NavItem
+        title="Đặt lịch trải nghiệm"
+        items={[
+          { name: 'Đặt lịch ngay', emoji: '📅', path: '/booking' },
+          { name: 'Lịch của tôi', emoji: '📋', path: '/my-bookings' }
+        ]}
+      />
+      {/* 6. MUA THEO LOẠI DA */}
+      <NavItem title="Mua theo loại da" items={skinTypes} />
+      {/* 7. HỖ TRỢ KHÁCH HÀNG */}
+      <NavItem
+        title="Hỗ trợ khách hàng"
+        items={[
+          { name: 'Trung tâm hỗ trợ', emoji: '❓', path: '/help-center' },
+          { name: 'Thông tin giao hàng', emoji: '🚚', path: '/shipping-policy' },
+          { name: 'Đổi trả & Hoàn tiền', emoji: '🔄', path: '/returns-refunds' },
+          { name: 'Liên hệ', emoji: '📞', path: '/contact' }
+        ]}
+      />
 
-      {/* 6. SHOP BY SKIN TYPE */}
-      <NavItem title="Shop by Skin Type" items={skinTypes} />
     </nav>
   );
 };

@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Shirt, Star, ArrowRight, Sparkles } from "lucide-react";
+import { Target, Star, ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 
 interface ProductsResponse {
@@ -67,7 +67,7 @@ const SkinConcernSection = () => {
       <div className="flex items-center justify-between mb-8">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Shirt className="w-5 h-5 text-primary" />
+            <Target className="w-5 h-5 text-primary" />
             <Badge variant="outline" className="text-primary border-primary">
               Giải pháp chuyên biệt
             </Badge>
@@ -97,77 +97,65 @@ const SkinConcernSection = () => {
           ))
         ) : (
           <>
-            {/* Placeholder products when no apparel products found */}
-            <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200">
-              <CardContent className="p-6">
-                <div className="bg-primary-light rounded-lg p-4 mb-4">
-                  <Shirt className="w-8 h-8 text-primary mx-auto" />
+            {/* Mảng dữ liệu giả để map cho gọn code và dễ quản lý */}
+            {[
+              {
+                title: "Da khô thiếu ẩm",
+                desc: "Thiết bị dưỡng ẩm chuyên sâu",
+                img: "https://file.hstatic.net/1000041114/article/dull-skin_57004436aa1b45208777c428192e0ac4_1024x1024.png",
+                link: "/shop?search=dry-skin"
+              },
+              {
+                title: "Chống lão hóa",
+                desc: "Công nghệ nâng cơ xóa nhăn",
+                img: "https://citrinedermaclinic.vn/wp-content/uploads/2025/12/Nang-Co-Xoa-Nhan-Toan-Dien-So-Sanh-Tac-Dong-Cua-2-Cong-Nghe-HIFU-RF.jpg",
+                link: "/shop?search=anti-aging"
+              },
+              {
+                title: "Trị mụn, thâm",
+                desc: "Ánh sáng blue light & LED",
+                img: "https://dalieudhyd.vn/wp-content/uploads/2020/12/Blue-Light-Therapy.jpg",
+                link: "/shop?search=acne"
+              },
+              {
+                title: "Sáng da đều màu",
+                desc: "Thiết bị làm sáng da hiệu quả",
+                img: "https://media.vov.vn/sites/default/files/styles/large/public/2026-03/da_sam_mau.jpg",
+                link: "/shop?search=brightening"
+              }
+            ].map((item, index) => (
+              <Card key={index} className="flex flex-col group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-gray-200 hover:border-primary/50 p-0 h-full">
+                {/* Header Image: Tràn viền giống mẫu */}
+                <div className="relative h-48 w-full overflow-hidden">
+                  <img
+                    src={item.img}
+                    alt={item.title}
+                    className="w-full h-full object-cover group-hover:scale-105 transition duration-500"
+                  />
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Da khô thiếu ẩm</h3>
-                <p className="text-muted-foreground text-sm mb-4">
-                  Thiết bị dưỡng ẩm chuyên sâu
-                </p>
-                <Link href="/shop?search=onesie">
-                  <Button className="w-full text-white bg-primary hover:bg-primary-hover">
-                    Mua ngay
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
 
-            <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200">
-              <CardContent className="p-6">
-                <div className="bg-primary-light rounded-lg p-4 mb-4">
-                  <Star className="w-8 h-8 text-primary mx-auto" />
-                </div>
-                <h3 className="font-semibold text-lg mb-2">Chống lão hóa</h3>
-                <p className="text-muted-foreground text-sm mb-4">
-                  Công nghệ nâng cơ xóa nhăn
-                </p>
-                <Link href="/shop?search=dress">
-                  <Button className="w-full text-white bg-primary hover:bg-primary-hover">
-                    Mua ngay
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
+                {/* Content Area: Dùng flex-grow để đẩy nút xuống dưới */}
+                <CardContent className="p-6 flex flex-col flex-grow">
+                  <h3 className="font-semibold text-lg mb-2">{item.title}</h3>
+                  <p className="text-muted-foreground text-sm mb-4 leading-relaxed">
+                    {item.desc}
+                  </p>
 
-            <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200">
-              <CardContent className="p-6">
-                <div className="bg-primary-light rounded-lg p-4 mb-4">
-                  <Sparkles className="w-8 h-8 text-primary mx-auto" />
-                </div>
-                <h3 className="font-semibold text-lg mb-2">Trị mụn, thâm</h3>
-                <p className="text-muted-foreground text-sm mb-4">
-                  Ánh sáng blue light & LED
-                </p>
-                <Link href="/shop?search=romper">
-                  <Button className="w-full text-white bg-primary hover:bg-primary-hover">
-                    Mua ngay
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
-
-            <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200">
-              <CardContent className="p-6">
-                <div className="bg-primary-light rounded-lg p-4 mb-4">
-                  <Shirt className="w-8 h-8 text-primary mx-auto" />
-                </div>
-                <h3 className="font-semibold text-lg mb-2">Sáng da đều màu</h3>
-                <p className="text-muted-foreground text-sm mb-4">
-                  Thiết bị làm sáng da hiệu quả
-                </p>
-                <Link href="/shop?search=pants">
-                  <Button className="w-full text-white bg-primary hover:bg-primary-hover">
-                    Mua ngay
-                  </Button>
-                </Link>
-              </CardContent>
-            </Card>
+                  {/* Nút bấm nằm sát đáy card */}
+                  <div className="mt-auto">
+                    <Link href={item.link}>
+                      <Button className="w-full text-white bg-primary hover:bg-primary-hover">
+                        Mua ngay
+                      </Button>
+                    </Link>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
           </>
         )}
       </div>
+
 
       {/* Promotional Banners */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">

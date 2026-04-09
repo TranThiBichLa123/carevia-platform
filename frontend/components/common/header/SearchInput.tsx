@@ -17,11 +17,11 @@ interface ProductsResponse {
 }
 
 const placeholders = [
-  "Hang moi ve",
-  "DEAL HOT hom nay",
-  "San pham ban chay",
-  "San pham duoc yeu thich",
-  "Tim kiem tai day",
+  "Hàng mới về",
+  "DEAL HOT hôm nay",
+  "Sản phẩm bán chạy",
+  "Sản phẩm được yêu thích",
+  "Tìm kiếm tại đây",
 ];
 
 const SearchInput = () => {
@@ -276,7 +276,7 @@ const SearchInput = () => {
                           className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50 px-4 py-3 cursor-pointer"
                         >
                           <Link
-                            href={`/client/product/${product._id}`}
+                            href={`/client/devices/${product._id}`}
                             className="flex items-center gap-3"
                           >
                             {product.image && (
@@ -304,7 +304,7 @@ const SearchInput = () => {
                       ))}
                       <div className="px-4 py-2 bg-gray-50 border-t border-gray-200">
                         <Link
-                          href={`/client/product?search=${encodeURIComponent(search)}`}
+                          href={`/client/devices?search=${encodeURIComponent(search)}`}
                           onClick={closeSearch}
                           className="text-sm text-babyshopSky font-medium hover:underline"
                         >
@@ -383,7 +383,7 @@ const SearchInput = () => {
                     }}
                   >
                     <Link
-                      href={`/client/product/${product._id}`}
+                      href={`/client/devices/${product._id}`}
                       className="flex items-center gap-3"
                     >
                       {product.image && (
@@ -413,7 +413,7 @@ const SearchInput = () => {
               ))}
               <div className="px-4 py-2 bg-gray-50 border-t border-gray-200">
                 <Link
-                  href={`/client/product?search=${encodeURIComponent(search)}`}
+                  href={`/client/devices?search=${encodeURIComponent(search)}`}
                   onClick={() => {
                     setShowResults(false);
                   }}

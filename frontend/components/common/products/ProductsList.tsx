@@ -41,7 +41,7 @@ const ProductsList = async () => {
         </div>
 
         <Link
-          href="/client/product"
+          href="/client/devices"
           className="flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-sky-600 transition-colors"
         >
           Xem tất cả <ChevronRight className="w-4 h-4" />

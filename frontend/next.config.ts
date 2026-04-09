@@ -18,6 +18,11 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "picsum.photos", // Thêm dòng này để sửa lỗi bạn đang gặp
       },
+       {
+        protocol: 'https',
+        hostname: 'www.wearebodybeautiful.com',
+        pathname: '**',
+      },
     ]
   }
 };

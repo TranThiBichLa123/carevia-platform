@@ -132,8 +132,8 @@ export const API_ENDPOINTS = {
   REFRESH: "/auth/refresh",
 
   // Products
-  PRODUCTS: "/products",
-  PRODUCT_BY_ID: (id: string) => `/products/${id}`,
+  PRODUCTS: "/devices",
+  PRODUCT_BY_ID: (id: string) => `/devices/${id}`,
 
   // Categories
   CATEGORIES: "/categories",

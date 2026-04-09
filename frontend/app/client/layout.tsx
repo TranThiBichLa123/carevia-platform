@@ -6,8 +6,8 @@ import { Toaster } from "sonner";
 import AuthInitializer from "@/components/pages/auth/AuthInitializer";
 
 export const metadata: Metadata = {
-  title: "Babyshop | Online shopping places",
-  description: "Babyshop for onlne shopping",
+  title: "SkinDeviceShop | Online shopping places",
+  description: "SkinDeviceShop for online shopping",
 };
 
 export default function RootLayout({

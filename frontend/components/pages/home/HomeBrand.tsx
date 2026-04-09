@@ -38,7 +38,8 @@ const HomeBrand = ({ brands }: Props) => {
 
   return (
     <div className="mt-1">
-      <SectionView title="Thương hiệu nổi bật" href="/shop" hrefTitle="Xem tất cả" />
+      {/* <SectionView title="Thương hiệu nổi bật" href="/client/brand" hrefTitle="Xem tất cả" /> */}
+      <SectionView title="Thương hiệu nổi bật" href="/client/brand" hrefTitle="Xem tất cả" />
 
       {/* Container chính với hiệu ứng mượt */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-5 transition-all duration-700 ease-in-out">
@@ -47,7 +48,7 @@ const HomeBrand = ({ brands }: Props) => {
           return (
             <Link
               key={`${brand?._id}-${index}`}
-              href={`/shop?brand=${brand?._id}`}
+              href={`/client/shop?brand=${brand?._id}`}
               className={`${color} rounded-4xl overflow-hidden relative h-52 group hover:scale-[1.03] transition-all duration-500 shadow-xl`}
             >
               {/* Background Image Overlay */}
@@ -72,7 +73,7 @@ const HomeBrand = ({ brands }: Props) => {
                       alt={brand?.name || ""}
                       width={80}
                       height={80}
-                       className="w-full h-full object-contain p-2"
+                      className="w-full h-full object-cover"
                     />
                   </div>
                   <span className="text-white font-bold text-lg">{brand?.name}</span>

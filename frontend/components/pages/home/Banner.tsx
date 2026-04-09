@@ -4,8 +4,6 @@ import Link from "next/link";
 import React from "react";
 import { Banners } from "@/type";
 
-
-
 // Mock data cho banner khi API không trả về dữ liệu
 const mockBanners: Banners[] = [
   {
@@ -20,7 +18,7 @@ const mockBanners: Banners[] = [
     _id: "2",
     name: "Special Offer",
     title: "Up To 50% Off",
-    image: "https://images.unsplash.com/photo-1515488042361-ee00e0ddd4e4?w=400&h=500&fit=crop",
+    image: "https://www.wearebodybeautiful.com/wp-content/uploads/2022/07/Anti-ageing-skincare-beauty-tech-devices-multi-1.jpg",
     startFrom: new Date().getTime(),
     bannerType: "featured",
   },
