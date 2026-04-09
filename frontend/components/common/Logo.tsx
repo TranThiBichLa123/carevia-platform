@@ -6,7 +6,7 @@ import React from "react";
 
 const Logo = ({ className }: { className?: string }) => {
   return (
-    <Link href={"/"}>
+    <Link href={"/client"}>
       <Image src={logo} alt="logo" className={cn("w-32 lg:w-44", className)} />
     </Link>
   );

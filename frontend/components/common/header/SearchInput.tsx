@@ -1,10 +1,12 @@
 "use client";
-import { Input } from "../../../components/ui/input";
-import { fetchData } from "../../../lib/api";
+
 import { Product } from "@/type";
+import { mockProducts } from "../../../constants/data";
+import { Input } from "../../../components/ui/input";
+import { fetchData, hasExplicitApiEndpoint } from "../../../lib/api";
 import { Loader2, Search, X, Camera, Mic } from "lucide-react";
 import Link from "next/link";
-import React, { useState, useEffect, useCallback, useRef } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDebounce } from "use-debounce";
 import { motion, AnimatePresence } from "framer-motion";
 import AddToCartButton from "../products/AddToCartButton";
@@ -13,6 +15,14 @@ interface ProductsResponse {
   products: Product[];
   total: number;
 }
+
+const placeholders = [
+  "Hang moi ve",
+  "DEAL HOT hom nay",
+  "San pham ban chay",
+  "San pham duoc yeu thich",
+  "Tim kiem tai day",
+];
 
 const SearchInput = () => {
   const [search, setSearch] = useState("");
@@ -23,38 +33,84 @@ const SearchInput = () => {
   const [error, setError] = useState<string | null>(null);
   const [showResults, setShowResults] = useState(false);
   const [showSearch, setShowSearch] = useState(false);
+  const [placeholderIndex, setPlaceholderIndex] = useState(0);
   const searchRef = useRef<HTMLDivElement>(null);
   const mobileInputRef = useRef<HTMLInputElement>(null);
 
-  const fetchFeaturedProducts = useCallback(async () => {
-    try {
-      const response = await fetchData<ProductsResponse>("/products?page඿");
-      setFeaturedProducts(response.products);
-    } catch (error) {
-      console.error("Error fetching featured products:", error);
+  const filterMockProducts = useCallback((searchTerm: string) => {
+    const normalizedTerm = searchTerm.trim().toLowerCase();
+
+    if (!normalizedTerm) {
+      return [];
     }
+
+    return mockProducts.filter((product: Product) => {
+      const searchableText = [
+        product.name,
+        product.description,
+        product.category?.name,
+        product.brand?.name,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase();
+
+      return searchableText.includes(normalizedTerm);
+    });
   }, []);
 
-  const fetchProducts = useCallback(async (searchTerm: string) => {
-    if (!searchTerm.trim()) {
-      setProducts([]);
+  const fetchFeaturedProducts = useCallback(async () => {
+    if (!hasExplicitApiEndpoint()) {
+      setFeaturedProducts(mockProducts.slice(0, 6));
       return;
     }
 
-    setLoading(true);
-    setError(null);
-
     try {
-      const response = await fetchData<ProductsResponse>(
-        `/products?page=1&limit=10&search=${encodeURIComponent(searchTerm)}`
-      );
-      setProducts(response.products);
+      const response = await fetchData<ProductsResponse>("/products?page=1&limit=6");
+      setFeaturedProducts(response.products);
     } catch {
-      setError("Failed to fetch products");
-      // console.error("Search error:", err);
-    } finally {
-      setLoading(false);
+      setFeaturedProducts(mockProducts.slice(0, 6));
     }
+  }, []);
+
+  const fetchProducts = useCallback(
+    async (searchTerm: string) => {
+      if (!searchTerm.trim()) {
+        setProducts([]);
+        setError(null);
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+
+      if (!hasExplicitApiEndpoint()) {
+        setProducts(filterMockProducts(searchTerm).slice(0, 10));
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetchData<ProductsResponse>(
+          `/products?page=1&limit=10&search=${encodeURIComponent(searchTerm)}`
+        );
+        setProducts(response.products);
+      } catch {
+        setProducts(filterMockProducts(searchTerm).slice(0, 10));
+        setError("Dang hien thi ket qua tu du lieu mau");
+      } finally {
+        setLoading(false);
+      }
+    },
+    [filterMockProducts]
+  );
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setPlaceholderIndex((prevIndex) => (prevIndex + 1) % placeholders.length);
+    }, 3000);
+
+    return () => clearInterval(timer);
   }, []);
 
   useEffect(() => {
@@ -86,16 +142,21 @@ const SearchInput = () => {
   }, [showSearch]);
 
   const toggleMobileSearch = () => {
-    setShowSearch(!showSearch);
+    setShowSearch((prev) => !prev);
     if (!showSearch) {
       setSearch("");
       setShowResults(true);
     }
   };
 
+  const closeSearch = () => {
+    setShowResults(false);
+    setShowSearch(false);
+    setSearch("");
+  };
+
   return (
     <div ref={searchRef} className="relative lg:w-full">
-      {/* Desktop search */}
       <button onClick={toggleMobileSearch} className="lg:hidden mt-1.5">
         {showSearch ? (
           <X className="w-5 h-5 text-white hover:text-babyshopRed hoverEffect" />
@@ -104,20 +165,37 @@ const SearchInput = () => {
         )}
       </button>
 
-      {/* chỉnh ô tìm kiếm trong này */}
       <form
         className="relative hidden lg:flex items-center"
         onSubmit={(e) => e.preventDefault()}
       >
-
         <div className="relative w-full">
           <Input
-            placeholder="Search Products..."
-            className="flex-1 rounded-md py-5 bg-gray-50 border border-gray-200 text-babyshopText placeholder:font-medium pl-4 pr-28 text-sm focus-visible:ring-0"
+            className="flex-1 rounded-md py-5 bg-gray-50 border border-gray-200 text-babyshopText pl-4 pr-28 text-sm focus-visible:ring-0"
             value={search}
-            onChange={(e) => setSearch(e.target.value)}
+            onChange={(e) => {
+              setSearch(e.target.value);
+              setShowResults(true);
+            }}
             onFocus={() => setShowResults(true)}
           />
+
+          {search === "" && (
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none overflow-hidden h-5 flex items-center">
+              <AnimatePresence mode="wait">
+                <motion.span
+                  key={placeholderIndex}
+                  initial={{ y: 20, opacity: 0 }}
+                  animate={{ y: 0, opacity: 1 }}
+                  exit={{ y: -20, opacity: 0 }}
+                  transition={{ duration: 0.5, ease: "easeInOut" }}
+                  className="text-gray-400 font-medium text-sm block"
+                >
+                  {placeholders[placeholderIndex]}
+                </motion.span>
+              </AnimatePresence>
+            </div>
+          )}
 
           <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-3">
             <button
@@ -147,9 +225,7 @@ const SearchInput = () => {
           </div>
         </div>
       </form>
-      {/* end chỉnh ô tìm kiếm trong này */}
 
-      {/* Mobile search overlay */}
       <AnimatePresence>
         {showSearch && (
           <motion.div
@@ -179,17 +255,14 @@ const SearchInput = () => {
                 )}
               </div>
 
-              {/* Mobile search results */}
               {showResults && (
                 <div className="mt-2 bg-white rounded-md shadow-lg overflow-y-auto border border-gray-200 max-h-[50vh]">
                   {loading ? (
                     <div className="flex items-center justify-center px-6 gap-2 py-4 text-center">
                       <Loader2 className="w-5 h-5 animate-spin text-babyshopRed" />
-                      <span className="font-medium text-gray-600">
-                        Searching...
-                      </span>
+                      <span className="font-medium text-gray-600">Searching...</span>
                     </div>
-                  ) : products?.length > 0 ? (
+                  ) : products.length > 0 ? (
                     <div className="py-2">
                       <div className="px-4 py-2 bg-gray-50 border-b border-gray-200">
                         <p className="text-sm font-medium text-gray-700">
@@ -199,19 +272,15 @@ const SearchInput = () => {
                       {products.map((product) => (
                         <div
                           key={product._id}
-                          onClick={() => {
-                            setShowResults(false);
-                            setSearch("");
-                            setShowSearch(false);
-                          }}
+                          onClick={closeSearch}
                           className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50 px-4 py-3 cursor-pointer"
                         >
                           <Link
-                            href={`/product/${product._id}`}
+                            href={`/client/product/${product._id}`}
                             className="flex items-center gap-3"
                           >
                             {product.image && (
-                              <div className="w-12 h-12 bg-gray-50 rounded flex-shrink-0 overflow-hidden">
+                              <div className="w-12 h-12 bg-gray-50 rounded shrink-0 overflow-hidden">
                                 <img
                                   src={product.image}
                                   alt={product.name}
@@ -223,29 +292,20 @@ const SearchInput = () => {
                               <h3 className="text-sm font-medium text-gray-800 line-clamp-1">
                                 {product.name}
                               </h3>
-                              {product.price && (
-                                <p className="text-sm font-semibold text-babyshopSky mt-0.5">
-                                  ${product.price}
-                                </p>
-                              )}
-                              {(product.category?.name ||
-                                product.brand?.name) && (
-                                <p className="text-sm text-babyshopTextLight">
-                                  {product.category?.name || "No Category"} -{" "}
-                                  {product.brand?.name || "No Brand"}
-                                </p>
-                              )}
+                              <p className="text-sm font-semibold text-babyshopSky mt-0.5">
+                                ${product.price}
+                              </p>
+                              <p className="text-sm text-babyshopTextLight">
+                                {product.category?.name || "No Category"} - {product.brand?.name || "No Brand"}
+                              </p>
                             </div>
                           </Link>
                         </div>
                       ))}
                       <div className="px-4 py-2 bg-gray-50 border-t border-gray-200">
                         <Link
-                          href={`/shop?search=${encodeURIComponent(search)}`}
-                          onClick={() => {
-                            setShowResults(false);
-                            setShowSearch(false);
-                          }}
+                          href={`/client/product?search=${encodeURIComponent(search)}`}
+                          onClick={closeSearch}
                           className="text-sm text-babyshopSky font-medium hover:underline"
                         >
                           View all results
@@ -256,40 +316,35 @@ const SearchInput = () => {
                     <>
                       <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
                         {!search ? (
-                          <p className="text-sm font-medium text-gray-700">
-                            Popular Products
-                          </p>
+                          <p className="text-sm font-medium text-gray-700">Popular Products</p>
                         ) : (
                           <p className="text-sm font-medium text-gray-700">
-                            No results for &quot;
-                            <span className="text-babyshopRed">{search}</span>
-                            &quot;
+                            No results for &quot;<span className="text-babyshopRed">{search}</span>&quot;
                           </p>
                         )}
                       </div>
                       <div>
-                        {featuredProducts?.length > 0 &&
-                          featuredProducts.map((item) => (
-                            <div
-                              key={item._id}
-                              className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50"
+                        {featuredProducts.map((item) => (
+                          <div
+                            key={item._id}
+                            className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50"
+                          >
+                            <button
+                              onClick={() => {
+                                setSearch(item.name);
+                                setShowResults(true);
+                              }}
+                              className="flex items-center gap-3 w-full text-left px-4 py-3 hover:cursor-pointer"
                             >
-                              <button
-                                onClick={() => {
-                                  setSearch(item.name);
-                                  setShowResults(true);
-                                }}
-                                className="flex items-center gap-3 w-full text-left px-4 py-3 hover:cursor-pointer"
-                              >
-                                <Search className="text-babyshopText w-5 h-5" />
-                                <div>
-                                  <h3 className="text-sm font-medium text-gray-800 line-clamp-1">
-                                    {item.name}
-                                  </h3>
-                                </div>
-                              </button>
-                            </div>
-                          ))}
+                              <Search className="text-babyshopText w-5 h-5" />
+                              <div>
+                                <h3 className="text-sm font-medium text-gray-800 line-clamp-1">
+                                  {item.name}
+                                </h3>
+                              </div>
+                            </button>
+                          </div>
+                        ))}
                       </div>
                     </>
                   )}
@@ -300,7 +355,6 @@ const SearchInput = () => {
         )}
       </AnimatePresence>
 
-      {/* Desktop search results dropdown */}
       {showResults && !showSearch && (
         <div className="absolute top-full mt-1 left-0 right-0 bg-white rounded-md shadow-lg z-50 max-h-[70vh] overflow-y-auto border border-gray-200 lg:block hidden">
           {loading ? (
@@ -308,17 +362,13 @@ const SearchInput = () => {
               <Loader2 className="w-5 h-5 animate-spin text-babyshopRed" />
               <span className="font-medium text-gray-600">Searching...</span>
             </div>
-          ) : products?.length > 0 ? (
+          ) : products.length > 0 ? (
             <div className="py-0">
               <div className="px-4 py-2 bg-gray-50 border-b border-gray-200">
                 <p className="text-sm font-medium text-gray-700">
                   Search Results ({products.length})
                 </p>
-                {error && (
-                  <p className="text-sm font-medium text-babyshopRed">
-                    {error}
-                  </p>
-                )}
+                {error && <p className="text-sm font-medium text-babyshopRed">{error}</p>}
               </div>
               {products.map((product) => (
                 <div
@@ -333,11 +383,11 @@ const SearchInput = () => {
                     }}
                   >
                     <Link
-                      href={`/product/${product._id}`}
+                      href={`/client/product/${product._id}`}
                       className="flex items-center gap-3"
                     >
                       {product.image && (
-                        <div className="w-12 h-12 bg-gray-50 rounded flex-shrink-0 overflow-hidden">
+                        <div className="w-12 h-12 bg-gray-50 rounded shrink-0 overflow-hidden">
                           <img
                             src={product.image}
                             alt={product.name}
@@ -349,17 +399,12 @@ const SearchInput = () => {
                         <h3 className="text-sm font-medium text-gray-800 line-clamp-1">
                           {product.name}
                         </h3>
-                        {product.price && (
-                          <p className="text-sm font-semibold text-babyshopSky mt-0.5">
-                            ${product.price}
-                          </p>
-                        )}
-                        {(product.category?.name || product.brand?.name) && (
-                          <p className="text-sm text-babyshopTextLight">
-                            {product.category?.name || "No Category"} -{" "}
-                            {product.brand?.name || "No Brand"}
-                          </p>
-                        )}
+                        <p className="text-sm font-semibold text-babyshopSky mt-0.5">
+                          ${product.price}
+                        </p>
+                        <p className="text-sm text-babyshopTextLight">
+                          {product.category?.name || "No Category"} - {product.brand?.name || "No Brand"}
+                        </p>
                       </div>
                     </Link>
                   </div>
@@ -368,7 +413,7 @@ const SearchInput = () => {
               ))}
               <div className="px-4 py-2 bg-gray-50 border-t border-gray-200">
                 <Link
-                  href={`/shop?search=${encodeURIComponent(search)}`}
+                  href={`/client/product?search=${encodeURIComponent(search)}`}
                   onClick={() => {
                     setShowResults(false);
                   }}
@@ -382,39 +427,35 @@ const SearchInput = () => {
             <>
               <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
                 {!search ? (
-                  <p className="text-sm font-medium text-gray-700">
-                    Popular Products
-                  </p>
+                  <p className="text-sm font-medium text-gray-700">Popular Products</p>
                 ) : (
                   <p className="text-sm font-medium text-gray-700">
-                    No results for &quot;
-                    <span className="text-babyshopRed">{search}</span>&quot;
+                    No results for &quot;<span className="text-babyshopRed">{search}</span>&quot;
                   </p>
                 )}
               </div>
               <div>
-                {featuredProducts?.length > 0 &&
-                  featuredProducts.map((item) => (
-                    <div
-                      key={item._id}
-                      className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50"
+                {featuredProducts.map((item) => (
+                  <div
+                    key={item._id}
+                    className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50"
+                  >
+                    <button
+                      onClick={() => {
+                        setSearch(item.name);
+                        setShowResults(true);
+                      }}
+                      className="flex items-center gap-3 w-full text-left px-4 py-3 hover:cursor-pointer"
                     >
-                      <button
-                        onClick={() => {
-                          setSearch(item.name);
-                          setShowResults(true);
-                        }}
-                        className="flex items-center gap-3 w-full text-left px-4 py-3 hover:cursor-pointer"
-                      >
-                        <Search className="text-babyshopText w-5 h-5" />
-                        <div>
-                          <h3 className="text-sm font-medium text-gray-800 line-clamp-1">
-                            {item.name}
-                          </h3>
-                        </div>
-                      </button>
-                    </div>
-                  ))}
+                      <Search className="text-babyshopText w-5 h-5" />
+                      <div>
+                        <h3 className="text-sm font-medium text-gray-800 line-clamp-1">
+                          {item.name}
+                        </h3>
+                      </div>
+                    </button>
+                  </div>
+                ))}
               </div>
             </>
           )}

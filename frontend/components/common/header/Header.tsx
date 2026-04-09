@@ -10,6 +10,7 @@ import Sidebar from "./Sidebar";
 import Logo from "../Logo";
 import OrdersIcon from "./OrdersIcon";
 import WishlistIcon from "./WishlistIcon";
+import CategoriesSection from "@/components/pages/home/CategoriesSection";
 
 const Header = () => {
   const [scrolled, setScrolled] = useState(false);
@@ -51,6 +52,12 @@ const Header = () => {
 
         </div>
       </Container>
+      {/* Categories Bar (Phong cách Thế Giới Skinfood) */}
+      <div className="border-t border-gray-100 hidden md:block">
+        <Container>
+          <CategoriesSection />
+        </Container>
+      </div>
     </header>
   );
 };

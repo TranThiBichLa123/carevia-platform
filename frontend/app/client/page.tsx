@@ -68,7 +68,7 @@ export default async function Home() {
         {/* py-7 = padding trên + dưới là 1.75rem (28px)
 pt-X = chỉ padding trên
 Tăng số (vd: py-10, pt-8) = khoảng cách lớn hơn */}
-        <CategoriesSection />
+        {/* <CategoriesSection /> */}
         <div className="flex-1">
           <Banner />
           <ProductsList />

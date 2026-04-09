@@ -1,3 +1,5 @@
+import { ChevronDown, Menu } from "lucide-react";
+
 interface Category {
   id: string;
   name: string;
@@ -47,198 +49,70 @@ const CategoriesSection = () => {
     { id: 's4', name: 'Liên hệ', emoji: '📞', color: '#EC407A', path: '/contact' },
   ];
 
-  return (
-    <div className="hidden md:flex flex-col bg-white h-full rounded-xl shadow-sm overflow-hidden">
-      <div className="flex-1 overflow-y-auto">
-        {/* Featured Categories Section */}
-        <div className="p-5 pb-3">
-          <p className="font-semibold mb-3 text-foreground">Featured</p>
-          <div className="space-y-1.5">
-            {featuredCategories.map((item) => (
-              <a
-                href={item.path}
-                key={item.id}
-                className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-[#ecf8f9] transition-all duration-200 group"
-              >
-                <span className="text-xl flex-shrink-0">{item.emoji}</span>
-                <span className="text-sm text-foreground group-hover:text-[#20afb2] transition-colors">
-                  {item.name}
-                </span>
-              </a>
-            ))}
-          </div>
-        </div>
+  // Skin Types
+  const skinTypes = [
+    { id: 'st1', name: 'Da dầu', emoji: '💧', color: '#4FC3F7', path: '/skin-type/oily' },
+    { id: 'st2', name: 'Da khô', emoji: '🏜️', color: '#FFAB91', path: '/skin-type/dry' },
+    { id: 'st3', name: 'Da hỗn hợp', emoji: '⚖️', color: '#FFD54F', path: '/skin-type/combination' },
+    { id: 'st4', name: 'Da nhạy cảm', emoji: '🌸', color: '#F06292', path: '/skin-type/sensitive' },
+  ];
 
-        {/* Hot Categories Section */}
-        <div className="px-5 py-3">
-          <p className="font-semibold mb-3 text-foreground">Hot Categories</p>
-          <div className="space-y-1.5">
-            {hotCategories.map((item) => (
-              <a
-                href={item.path}
-                key={item.id}
-                className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-[#ecf8f9] transition-all duration-200 group"
-              >
-                <span className="text-xl flex-shrink-0">{item.emoji}</span>
-                <span className="text-sm text-foreground group-hover:text-[#20afb2] transition-colors">
-                  {item.name}
-                </span>
-              </a>
-            ))}
-          </div>
-        </div>
+  // Helper component cho từng Menu Item có Dropdown
+  const NavItem = ({ title, items, path }: { title: string, items?: any[], path?: string }) => (
+    <div className="relative group h-full flex items-center">
+      <a
+        href={path || "#"}
+        className="flex items-center gap-1 px-4 h-full text-[13px] font-bold uppercase text-gray-800 hover:text-[#20afb2] transition-colors whitespace-nowrap"
+      >
+        {title}
+        {items && <ChevronDown size={14} className="group-hover:rotate-180 transition-transform" />}
+      </a>
 
-        {/* Quick Links Section */}
-        <div className="px-5 py-3 relative">
-          <div
-            className="absolute top-0 left-0 right-0 h-[1.5px]" // Tăng độ dày lên 1.5px để sắc nét hơn
-            style={{
-              background: "linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.15) 50%, transparent 100%)"
-              // Đã tăng từ 0.1 lên 0.15 để màu xám đậm và rõ hơn
-            }}
-          />
-          <p className="font-semibold mb-3 text-foreground">Quick Links</p>
-          <div className="space-y-1.5">
-            {quickLinks.map((item) => (
-              <a
-                href={item.path}
-                key={item.id}
-                className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-[#ecf8f9] transition-all duration-200 group"
-              >
-                <span className="text-xl flex-shrink-0">{item.emoji}</span>
-                <span className="text-sm text-foreground group-hover:text-[#20afb2] transition-colors">
-                  {item.name}
-                </span>
-              </a>
-            ))}
-          </div>
+      {/* Dropdown Menu */}
+      {items && (
+        <div className="absolute top-full left-0 w-64 bg-white border border-gray-100 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[60] py-2 rounded-b-md">
+          {items.map((sub, index) => (
+            <a
+              key={index}
+              href={sub.path}
+              className="flex items-center gap-3 px-4 py-2.5 text-[14px] text-gray-600 hover:bg-[#f5fbfc] hover:text-[#20afb2] transition-colors"
+            >
+              {sub.emoji && <span>{sub.emoji}</span>}
+              {sub.name}
+            </a>
+          ))}
         </div>
-
-        {/* Customer Support Section */}
-        <div className="px-5 py-3 relative">
-          <div
-            className="absolute top-0 left-0 right-0 h-[1.5px]" // Tăng độ dày lên 1.5px để sắc nét hơn
-            style={{
-              background: "linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.17) 50%, transparent 100%)"
-              // Đã tăng từ 0.1 lên 0.17 để màu xám đậm và rõ hơn
-            }}
-          />          <p className="font-semibold mb-3 text-foreground">Customer Support</p>
-          <div className="space-y-1.5">
-            {supportLinks.map((item) => (
-              <a
-                href={item.path}
-                key={item.id}
-                className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-[#ecf8f9] transition-all duration-200 group"
-              >
-                <span className="text-xl flex-shrink-0">{item.emoji}</span>
-                <span className="text-sm text-foreground group-hover:text-[#20afb2] transition-colors">
-                  {item.name}
-                </span>
-              </a>
-            ))}
-          </div>
-        </div>
-
-        {/* Booking Section */}
-        <div className="px-5 py-3 relative">
-          <div
-            className="absolute top-0 left-0 right-0 h-[1.5px]" // Tăng độ dày lên 1.5px để sắc nét hơn
-            style={{
-              background: "linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.15) 50%, transparent 100%)"
-              // Đã tăng từ 0.1 lên 0.15 để màu xám đậm và rõ hơn
-            }}
-          />          <p className="font-semibold mb-3 text-foreground">Đặt lịch trải nghiệm</p>
-          <div className="space-y-1.5">
-            <a
-              href="/booking"
-              className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-[#ecf8f9] transition-all duration-200 group"
-            >
-              <span className="text-xl flex-shrink-0">📅</span>
-              <span className="text-sm text-foreground group-hover:text-[#20afb2] transition-colors">
-                Đặt lịch ngay
-              </span>
-            </a>
-            <a
-              href="/my-bookings"
-              className="flex items-center gap-3 p-2.5 rounded-lg hover:bg-[#ecf8f9] transition-all duration-200 group"
-            >
-              <span className="text-xl flex-shrink-0">⏰</span>
-              <span className="text-sm text-foreground group-hover:text-[#20afb2] transition-colors">
-                Lịch của tôi
-              </span>
-            </a>
-          </div>
-        </div>
-
-        {/* Special Offer Banner */}
-        <div className="px-5 py-3 relative">
-          <div
-            className="absolute top-0 left-0 right-0 h-[1.5px]" // Tăng độ dày lên 1.5px để sắc nét hơn
-            style={{
-              background: "linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.15) 50%, transparent 100%)"
-              // Đã tăng từ 0.1 lên 0.15 để màu xám đậm và rõ hơn
-            }}
-          />             <p className="font-semibold mb-3 text-foreground">Ưu đãi đặc biệt</p>
-          <div className="bg-gradient-to-br from-[#ecf8f9] via-[#ecf8f9] to-[#f6fcfc] p-4 rounded-xl border border-transparent">
-            <div className="flex items-start gap-3">
-              <span className="text-2xl">🎉</span>
-              <div className="flex-1">
-                <p className="font-semibold text-sm text-foreground mb-1">Miễn phí vận chuyển</p>
-                <p className="text-xs text-muted-foreground mb-2">Cho đơn hàng trên 1 triệu</p>
-                <a href="/devices" className="text-xs text-[#20afb2] font-medium hover:underline">
-                  Mua sắm ngay →
-                </a>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Skin Type Section */}
-        <div className="px-5 py-3 relative">
-          <div
-            className="absolute top-0 left-0 right-0 h-[1.5px]" // Tăng độ dày lên 1.5px để sắc nét hơn
-            style={{
-              background: "linear-gradient(90deg, transparent 0%, rgba(0,0,0,0.15) 50%, transparent 100%)"
-              // Đã tăng từ 0.1 lên 0.15 để màu xám đậm và rõ hơn
-            }}
-          />          <p className="font-semibold mb-3 text-foreground">Shop by Skin Type</p>
-          <div className="grid grid-cols-2 gap-2">
-            <a
-              href="/devices?skinType=dry"
-              className="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-[#ecf8f9] transition-all duration-200 group"
-            >
-              <span className="text-2xl">🌸</span>
-              <span className="text-xs text-foreground text-center group-hover:text-[#20afb2] transition-colors duration-200">
-                Da khô</span>
-            </a>
-            <a
-              href="/devices?skinType=oily"
-              className="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-[#ecf8f9] transition-all duration-200 group"
-            >
-              <span className="text-2xl">☀️</span>
-              <span className="text-xs text-foreground text-center group-hover:text-[#20afb2] transition-colors duration-200">
-                Da dầu</span>
-            </a>
-            <a
-              href="/devices?skinType=sensitive"
-              className="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-[#ecf8f9] transition-all duration-200 group"
-            >
-              <span className="text-2xl">💗</span>
-              <span className="text-xs text-foreground text-center group-hover:text-[#20afb2] transition-colors duration-200">
-                Da nhạy cảm</span>
-            </a>
-            <a
-              href="/devices?skinType=combination"
-              className="flex flex-col items-center gap-2 p-3 rounded-lg hover:bg-[#ecf8f9] transition-all duration-200 group"
-            >
-              <span className="text-2xl">✨</span>
-              <span className="text-xs text-foreground text-center group-hover:text-[#20afb2] transition-colors duration-200">
-                Da hỗn hợp</span>
-            </a>
-          </div>
-        </div>
-      </div>
+      )}
     </div>
+  );
+   return (
+    <nav className="hidden md:flex items-center bg-white h-12 border-t border-gray-100">
+      {/* 1. DANH MỤC SẢN PHẨM */}
+      <div className="flex items-center gap-2 px-4 py-3 cursor-pointer hover:text-[#20afb2] transition-colors border-r border-gray-100">
+        <Menu size={18} />
+        <span className="text-[13px] font-bold uppercase whitespace-nowrap">
+          Danh mục sản phẩm
+        </span>
+      </div>
+
+      {/* 2. HOT CATEGORIES */}
+      <NavItem title="Hot Categories" items={hotCategories} />
+
+      {/* 3. FEATURED */}
+      <NavItem title="Featured" items={featuredCategories} />
+
+      {/* 4. QUICK LINKS */}
+      <NavItem title="Quick Links" items={[
+        { name: 'Tất cả sản phẩm', emoji: '🛍️', path: '/devices' },
+        { name: 'Sản phẩm mới', emoji: '🆕', path: '/new-arrivals' },
+      ]} />
+
+      {/* 5. ĐẶT LỊCH TRẢI NGHIỆM (Link đơn) */}
+      <NavItem title="Đặt lịch trải nghiệm" path="/booking" />
+
+      {/* 6. SHOP BY SKIN TYPE */}
+      <NavItem title="Shop by Skin Type" items={skinTypes} />
+    </nav>
   );
 };
 
