@@ -50,7 +50,7 @@ export default function ProductDescription({ product }: ProductDescriptionProps)
   return (
     <div className="w-full">
       {/* Tab Navigation */}
-      <div className="flex gap-1 border-b-2 border-border bg-card overflow-x-auto scrollbar-hide">
+      <div className="flex gap-1 border-b-2 border-border bg-card overflow-x-auto scrollbar-hide ">
         {tabs.map((tab) => (
           <button
             key={tab.id}

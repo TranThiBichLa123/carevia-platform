@@ -63,9 +63,9 @@ const ProductDetails = async ({
     : mockProducts.filter((item) => item._id !== product._id).slice(0, 5);
 
   return (
-    <div className="min-h-screen bg-muted py-8 px-4">
+    <div className=" bg-muted py-8 ">
       <Container>
-        <div className="max-w-6xl mx-auto bg-card rounded-2xl shadow-xl overflow-hidden border border-border">
+        <div className=" mx-auto bg-card rounded-2xl shadow-xl overflow-hidden border border-border">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 md:p-8">
 
             {/* Left: Image Section */}
@@ -184,11 +184,11 @@ const ProductDetails = async ({
         </div>
 
         {/* Description Section */}
-        <div className="max-w-6xl mx-auto bg-card shadow-xl rounded-2xl p-6 md:p-8 mt-6 border border-border">
+        <div className="mt-6 bg-card shadow-xl rounded-2xl p-6 md:p-8 border border-border">
           <ProductDescription product={product} />
         </div>
         {/* --- PHẦN MỚI: CÓ THỂ BẠN CŨNG THÍCH --- */}
-        <div className="max-w-6xl mx-auto mt-10">
+        <div className=" mx-auto mt-10">
           <div className="flex items-center justify-between mb-6 px-2">
             <h2 className="text-xl md:text-2xl font-bold text-foreground flex items-center gap-2">
               <span className="w-1.5 h-7 bg-primary rounded-full"></span>
