@@ -1,4 +1,4 @@
-import { fetchData } from "@/lib/api";
+import { fetchData, hasExplicitApiEndpoint } from "@/lib/api";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
@@ -28,11 +28,14 @@ const mockBanners: Banners[] = [
 
 const Banner = async () => {
   let banners: Banners[] = [];
-  try {
-    const data = await fetchData<Banners[]>("/banners");
-    banners = data;
-  } catch (error) {
-    console.log("error", error);
+
+  if (hasExplicitApiEndpoint()) {
+    try {
+      const data = await fetchData<Banners[]>("/banners");
+      banners = data;
+    } catch {
+      banners = [];
+    }
   }
 
   // Sử dụng mock data nếu API không trả về dữ liệu
@@ -52,7 +55,7 @@ const Banner = async () => {
           width={800}
           height={500}
           priority
-          className="w-full h-72 md:min-h-[400px] object-cover group-hover:scale-110 hoverEffect"
+          className="w-full h-72 md:min-h-100 object-cover group-hover:scale-110 hoverEffect"
         />
         <div className="absolute top-0 left-0 w-full h-full flex flex-col gap-3 items-center justify-center">
           <p className="text-amber-400 font-semibold text-sm italic">{imageOne?.name}</p>
@@ -73,7 +76,7 @@ const Banner = async () => {
           alt="bannerImage"
           width={400}
           height={500}
-          className="w-full h-72 md:min-h-[400px] object-cover group-hover:scale-110 hoverEffect"
+          className="w-full h-72 md:min-h-100 object-cover group-hover:scale-110 hoverEffect"
         />
         <div className="absolute top-8 left-0 w-full h-full flex flex-col gap-2 items-center justify-start text-white">
           <p className="font-semibold text-sm">{imageTwo?.name}</p>

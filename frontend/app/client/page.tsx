@@ -11,43 +11,57 @@ import { Brand } from "@/type";
 
 export default async function Home() {
   // TODO: Replace with fetchData<Brand[]>("/brands") when backend is ready
- const brands: Brand[] = [
-  { 
-    _id: "1", 
-    name: "Foreo", 
-    image: "https://images.unsplash.com/photo-1531299204812-e6d44d9a185c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" 
-  },
-  { 
-    _id: "2", 
-    name: "Halio", 
-    image: "https://images.unsplash.com/photo-1761718209794-e0588aafbcc4?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" 
-  },
-  { 
-    _id: "3", 
-    name: "LumiSkin", 
-    image: "https://images.unsplash.com/photo-1596755389378-c31d21fd1273?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" 
-  },
-  { 
-    _id: "4", 
-    name: "DermaGlow", 
-    image: "https://images.unsplash.com/photo-1608248597279-f99d160bfcbc?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" 
-  },
-  { 
-    _id: "5", 
-    name: "SkinPulse", 
-    image: "https://images.unsplash.com/photo-1588776814546-1ffcf47267a5?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" 
-  },
-  { 
-    _id: "6", 
-    name: "AquaSonic", 
-    image: "https://images.unsplash.com/photo-1612817288484-6f916006741a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" 
-  },
-  { 
-    _id: "7", 
-    name: "RejuvaTech", 
-    image: "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&q=80&w=1080" 
-  },
-];
+  const brands: Brand[] = [
+    {
+      _id: "1",
+      name: "Foreo",
+      slug: "foreo",
+      image: "/assets/images/logo1.png",
+      isFeatured: true,
+    },
+    {
+      _id: "2",
+      name: "Halio",
+      slug: "halio",
+      image: "/assets/images/logo2.png",
+      isFeatured: true,
+    },
+    {
+      _id: "3",
+      name: "LumiSkin",
+      slug: "lumiskin",
+      image: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=900&q=80",
+      isFeatured: false,
+    },
+    {
+      _id: "4",
+      name: "DermaGlow",
+      slug: "dermaglow",
+      image: "https://images.unsplash.com/photo-1498843053639-170ff2122f35?auto=format&fit=crop&w=900&q=80",
+      isFeatured: false,
+    },
+    {
+      _id: "5",
+      name: "SkinPulse",
+      slug: "skinpulse",
+      image: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=900&q=80",
+      isFeatured: false,
+    },
+    {
+      _id: "6",
+      name: "AquaSonic",
+      slug: "aquasonic",
+      image: "https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=900&q=80",
+      isFeatured: false,
+    },
+    {
+      _id: "7",
+      name: "RejuvaTech",
+      slug: "rejuvatech",
+      image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=900&q=80",
+      isFeatured: false,
+    },
+  ];
   return (
     <div className="bg-white min-h-screen">
       <Container className="min-h-screen flex py-3 gap-3">

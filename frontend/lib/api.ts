@@ -7,6 +7,7 @@ export const fetchData = fetchWithConfig;
 export {
   fetchWithConfig,
   getApiConfig,
+  hasExplicitApiEndpoint,
   getAuthHeaders,
   buildQueryString,
   API_ENDPOINTS,

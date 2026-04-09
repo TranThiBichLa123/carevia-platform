@@ -13,7 +13,11 @@ const nextConfig: NextConfig = {
       {
         protocol:"https",
         hostname:"images.unsplash.com"
-      }
+      },
+       {
+        protocol: "https",
+        hostname: "picsum.photos", // Thêm dòng này để sửa lỗi bạn đang gặp
+      },
     ]
   }
 };

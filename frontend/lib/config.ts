@@ -35,6 +35,14 @@ export const getApiConfig = (): ApiConfig => {
   };
 };
 
+export const hasExplicitApiEndpoint = (): boolean => {
+  const isClient = typeof window !== "undefined";
+
+  return isClient
+    ? Boolean(process.env.NEXT_PUBLIC_API_URL)
+    : Boolean(process.env.API_ENDPOINT);
+};
+
 /**
  * Enhanced fetch function with better error handling
  */

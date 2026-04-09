@@ -48,15 +48,17 @@ const HomeBrand = ({ brands }: Props) => {
             <Link
               key={`${brand?._id}-${index}`}
               href={`/shop?brand=${brand?._id}`}
-              className={`${color} rounded-[2rem] overflow-hidden relative h-52 group hover:scale-[1.03] transition-all duration-500 shadow-xl`}
+              className={`${color} rounded-4xl overflow-hidden relative h-52 group hover:scale-[1.03] transition-all duration-500 shadow-xl`}
             >
               {/* Background Image Overlay */}
               {brand?.image && (
                 <Image
                   src={brand.image}
-                  alt={brand.name}
+                  alt={brand.name || "Brand Image"}
                   fill
+                  sizes="(max-width: 768px) 100vw, 25vw" // Thêm sizes để tối ưu hiệu năng
                   className="object-cover opacity-10 group-hover:opacity-20 transition-opacity"
+                // unoptimized // Bật cái này nếu bạn không muốn cấu hình remotePatterns trong next.config.js
                 />
               )}
 
@@ -64,13 +66,13 @@ const HomeBrand = ({ brands }: Props) => {
                 {/* gap là khoảng cách của tên brand và hình của brand */}
                 <div className="flex items-center gap-4">
                   {/* <!-- Bỏ p-2 và đổi thành object-cover --> */}
-                  <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center overflow-hidden flex-shrink-0 shadow-2xl transform group-hover:rotate-3 transition-transform">
+                  <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center overflow-hidden shrink-0 shadow-2xl transform group-hover:rotate-3 transition-transform">
                     <Image
                       src={brand?.image || ""}
                       alt={brand?.name || ""}
-                      width={200}
-                      height={200}
-                      className="w-full h-full object-cover"
+                      width={80}
+                      height={80}
+                       className="w-full h-full object-contain p-2"
                     />
                   </div>
                   <span className="text-white font-bold text-lg">{brand?.name}</span>
@@ -95,8 +97,8 @@ const HomeBrand = ({ brands }: Props) => {
             key={i}
             onClick={() => setCurrentIndex(i)}
             className={`transition-all duration-500 rounded-full ${i === currentIndex
-                ? "w-10 h-2.5 bg-sky-500 shadow-[0_0_15px_rgba(14,165,233,0.5)]"
-                : "w-2.5 h-2.5 bg-gray-200 hover:bg-gray-400"
+              ? "w-10 h-2.5 bg-sky-500 shadow-[0_0_15px_rgba(14,165,233,0.5)]"
+              : "w-2.5 h-2.5 bg-gray-200 hover:bg-gray-400"
               }`}
           />
         ))}

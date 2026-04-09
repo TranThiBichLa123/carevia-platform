@@ -1,4 +1,4 @@
-import { fetchData } from "../../../lib/api";
+import { fetchData, hasExplicitApiEndpoint } from "../../../lib/api";
 import { Product } from "@/type";
 import React from "react";
 import ProductCard from "./ProductCard";
@@ -13,11 +13,13 @@ interface ProductsResponse {
 const ProductsList = async () => {
   let products: Product[] = [];
 
-  try {
-    const data = await fetchData<ProductsResponse>("/products?perPage=10");
-    products = data.products;
-  } catch (error) {
-    console.log("Product fetching Error:", error);
+  if (hasExplicitApiEndpoint()) {
+    try {
+      const data = await fetchData<ProductsResponse>("/products?perPage=10");
+      products = data.products;
+    } catch {
+      products = [];
+    }
   }
 
   if (products?.length === 0) {
@@ -35,11 +37,11 @@ const ProductsList = async () => {
           </h2>
 
           {/* Thanh gạch chân màu xanh đặc trưng như trong hình */}
-          <div className="absolute -bottom-[9px] left-0 w-full h-[3px] bg-sky-500 rounded-full z-10" />
+          <div className="absolute -bottom-2.25 left-0 w-full h-0.75 bg-sky-500 rounded-full z-10" />
         </div>
 
         <Link
-          href="/products"
+          href="/client/product"
           className="flex items-center gap-1 text-sm font-medium text-gray-500 hover:text-sky-600 transition-colors"
         >
           Xem tất cả <ChevronRight className="w-4 h-4" />
