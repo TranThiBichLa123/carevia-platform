@@ -9,44 +9,58 @@ import WishlistButton from "./WishlistButton";
 
 const ProductCard = ({ product }: { product: Product }) => {
   return (
-    <div className="border rounded-md group overflow-hidden w-full relative">
+    /* 1. Đổi hover:border thành primary-light (hoặc primary nếu muốn đậm hơn) */
+    <div className="border border-gray-100 rounded-xl group overflow-hidden w-full relative bg-white hover:border-primary hover:shadow-lg transition-all duration-300">
       <Link
-        href={`/product/${product?._id}`}
-        className="p-2 overflow-hidden relative block"
+        href={`/client/product/${product?._id}`}
+        className="overflow-hidden relative block"
       >
         <Image
           src={product?.image}
           width={500}
           height={500}
-          alt="productIamge"
-          className="w-full h-32 object-cover group-hover:scale-110 hoverEffect"
+          alt="productImage"
+          className="w-full h-40 object-cover group-hover:scale-110 transition-transform duration-500"
         />
-        <DiscountBadge
-          discountPercentage={product?.discountPercentage}
-          className="absolute top-4 left-2"
-        />
+
+        {product?.discountPercentage > 0 && (
+          <DiscountBadge discountPercentage={product.discountPercentage} />
+        )}
       </Link>
 
-
-
-      {/* Wishlist Button */}
-      <div className="absolute top-2 right-2 z-10">
-        <WishlistButton product={product} className="bg-white shadow-sm" />
+      <div className="absolute top-2 left-2 z-20">
+        <WishlistButton
+          product={product}
+          /* 2. WishlistButton hover có thể dùng primary-light cho nhẹ nhàng */
+          className="bg-white/90 backdrop-blur-sm shadow-sm border border-gray-100 hover:bg-primary-light hover:text-primary transition-colors"
+        />
       </div>
-      <hr />
-      <div className="px-4 py-2 space-y-1">
-        <p className="uppercase text-xs font-medium text-gray-500">
+
+      <hr className="border-gray-50" />
+
+      <div className="px-4 py-3 space-y-1">
+        <p className="uppercase text-[10px] tracking-wider font-semibold text-gray-400">
           {product?.category?.name}
         </p>
-        <p className="line-clamp-2 text-sm h-10">{product?.name}</p>
-        <PriceContainer
-          price={product?.price}
-          discountPercentage={product?.discountPercentage}
-        />
-        <AddToCartButton product={product} />
+        
+        {/* 3. Tên sản phẩm khi hover sẽ đổi sang màu primary-hover */}
+        <p className="line-clamp-2 text-sm h-10 font-medium text-gray-800 group-hover:text-primary-hover transition-colors">
+          {product?.name}
+        </p>
+
+        <hr className="border-gray-100 my-1" />
+
+        <div className="pt-1">
+          <PriceContainer
+            price={product?.price}
+            discountPercentage={product?.discountPercentage}
+          />
+        </div>
+
+        <div className="pt-2">
+          <AddToCartButton product={product} />
+        </div>
       </div>
-
-
     </div>
   );
 };

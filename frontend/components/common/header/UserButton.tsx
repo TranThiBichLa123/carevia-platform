@@ -8,20 +8,15 @@ import { useUserStore } from "../../../lib/store";
 const UserButton = () => {
   const { isAuthenticated, authUser } = useUserStore();
 
-  // console.log(
-  //   "UserButton: isAuthenticated:",
-  //   isAuthenticated,
-  //   "authUser:",
-  //   authUser
-  // );
-
   return (
     <Link
       href={isAuthenticated && authUser ? "/user/profile" : "/auth/signin"}
-      className="flex items-center gap-2 group hover:text-babyshopSky hoverEffect"
+      /* 1. Thêm hover:text-primary-hover ở thẻ cha để đổi màu toàn bộ text & icon bên trong */
+      className="flex items-center gap-2 group hover:text-primary-hover hoverEffect"
     >
       {isAuthenticated && authUser ? (
-        <span className="w-10 h-10 border rounded-full p-1 group-hover:border-babyshopSky hoverEffect">
+        /* 2. Đổi border sang primary-hover khi group được hover */
+        <span className="w-10 h-10 border rounded-full p-1 group-hover:border-primary-hover hoverEffect">
           {authUser.avatar ? (
             <img
               src={authUser.avatar}
@@ -35,6 +30,7 @@ const UserButton = () => {
           )}
         </span>
       ) : (
+        /* Icon Lucide tự động nhận màu từ text-primary-hover của group cha */
         <User size={30} />
       )}
       <span>

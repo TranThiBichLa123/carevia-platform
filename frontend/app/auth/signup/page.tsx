@@ -1,8 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
-import { motion } from "framer-motion";
+import { motion, easeOut, easeInOut } from "framer-motion";
 
 export default function SignupPage() {
   const [name, setName] = useState("");
@@ -71,66 +70,73 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-pink-400 via-purple-400 to-blue-400 p-4 overflow-hidden">
+    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-cyan-50 via-teal-50 to-blue-50 p-4 overflow-hidden">
       {/* Background blob shapes - absolute positioned within the container */}
       <motion.div
-        className="fixed top-[15%] left-[10%] w-64 h-64 rounded-full bg-pink-200 opacity-70"
+        className="fixed top-[15%] left-[10%] w-64 h-64 rounded-full opacity-70"
+        style={{
+          background: "linear-gradient(135deg, #ecf284 0%, #eff299 50%, #f2f2a5 100%)",
+          animation: "blobMove 25s ease-in-out infinite",
+        }}
         variants={blobVariants}
         initial="hidden"
         animate="visible"
         custom={0}
-        style={{
-          animation: "blobMove 25s ease-in-out infinite",
-        }}
       ></motion.div>
 
       <motion.div
-        className="fixed bottom-[20%] left-[20%] w-96 h-96 rounded-full bg-purple-200 opacity-60"
+        className="fixed bottom-[20%] left-[20%] w-96 h-96 rounded-full opacity-60"
+        style={{
+          background: "linear-gradient(135deg, rgba(32, 175, 178, 0.2) 0%, rgba(16, 174, 178, 0.3) 100%)",
+          animation: "blobFloatLarge 30s ease-in-out infinite alternate",
+        }}
         variants={blobVariants}
         initial="hidden"
         animate="visible"
         custom={1}
-        style={{
-          animation: "blobFloatLarge 30s ease-in-out infinite alternate",
-        }}
       ></motion.div>
 
       <motion.div
-        className="fixed top-[30%] right-[15%] w-72 h-72 rounded-full bg-pink-100 opacity-50"
+        className="fixed top-[30%] right-[15%] w-72 h-72 rounded-full opacity-50"
+        style={{
+          background: "linear-gradient(135deg, #ecf284 0%, #eff299 50%, #f2f2a5 100%)",
+          animation: "blobPulse 18s ease-in-out infinite",
+        }}
         variants={blobVariants}
         initial="hidden"
         animate="visible"
         custom={2}
-        style={{
-          animation: "blobPulse 18s ease-in-out infinite",
-        }}
       ></motion.div>
 
       <motion.div
         className="fixed top-[70%] right-[25%] w-40 h-40 rounded-full bg-white opacity-30"
+        style={{
+          animation: "blobSpin 22s linear infinite",
+        }}
         variants={blobVariants}
         initial="hidden"
         animate="visible"
         custom={3}
-        style={{
-          animation: "blobSpin 22s linear infinite",
-        }}
       ></motion.div>
 
       <motion.div
-        className="fixed top-[10%] right-[30%] w-24 h-24 rounded-full bg-purple-300 opacity-70"
+        className="fixed top-[10%] right-[30%] w-24 h-24 rounded-full opacity-70"
+        style={{
+          background: "linear-gradient(135deg, rgba(32, 175, 178, 0.3) 0%, rgba(16, 174, 178, 0.4) 100%)",
+          animation: "blobBounce 12s ease-in-out infinite",
+        }}
         variants={blobVariants}
         initial="hidden"
         animate="visible"
         custom={4}
-        style={{
-          animation: "blobBounce 12s ease-in-out infinite",
-        }}
       ></motion.div>
 
       {/* Form container */}
       <motion.div
-        className="relative w-full max-w-xl bg-white rounded-3xl overflow-hidden shadow-xl"
+        className="relative w-full max-w-xl bg-white rounded-3xl overflow-hidden shadow-2xl"
+        style={{
+          boxShadow: "0 20px 60px rgba(32, 175, 178, 0.15), 0 8px 20px rgba(0, 0, 0, 0.1)"
+        }}
         variants={containerVariants}
         initial="hidden"
         animate="visible"
@@ -138,7 +144,7 @@ export default function SignupPage() {
         <motion.div className="p-10">
           <motion.div className="mb-8" variants={itemVariants}>
             <motion.h2
-              className="text-4xl text-gray-800 font-bold mb-2"
+              className="text-4xl text-gray-700 font-medium mb-2"
             >
               Create Account
             </motion.h2>
@@ -162,7 +168,10 @@ export default function SignupPage() {
                   type="text"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-300"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#20afb2] focus:border-transparent transition-all duration-300"
+                  style={{
+                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)"
+                  }}
                   placeholder="Jane Doe"
                   required
                 />
@@ -183,7 +192,10 @@ export default function SignupPage() {
                   type="email"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-300"
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#20afb2] focus:border-transparent transition-all duration-300"
+                  style={{
+                    boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)"
+                  }}
                   placeholder="your@email.com"
                   required
                 />
@@ -205,7 +217,10 @@ export default function SignupPage() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-300"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#20afb2] focus:border-transparent transition-all duration-300"
+                    style={{
+                      boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)"
+                    }}
                     placeholder="••••••••"
                     required
                   />
@@ -226,7 +241,10 @@ export default function SignupPage() {
                     type="password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-300"
+                    className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#20afb2] focus:border-transparent transition-all duration-300"
+                    style={{
+                      boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)"
+                    }}
                     placeholder="••••••••"
                     required
                   />
@@ -240,26 +258,31 @@ export default function SignupPage() {
                   id="terms"
                   name="terms"
                   type="checkbox"
-                  className="h-4 w-4 mt-1 text-pink-600 focus:ring-pink-500 border-gray-300 rounded cursor-pointer"
+                  className="h-4 w-4 mt-1 rounded cursor-pointer border-gray-200 bg-gray-50 text-[#20afb2] focus:ring-[#20afb2] focus:ring-2 focus:ring-offset-0 transition-all"
+                  style={{
+                    accentColor: "#20afb2"
+                  }}
                   required
                   whileTap={{ scale: 0.9 }}
                 />
                 <motion.label
                   htmlFor="terms"
-                  className="ml-2 block text-sm text-gray-600"
-                  whileHover={{ color: "#ec4899" }}
+                  className="ml-2 block text-sm text-gray-600 cursor-pointer"
+                  whileHover={{ color: "#20afb2" }}
                 >
                   I agree to the{" "}
                   <a
                     href="#"
-                    className="text-pink-600 hover:text-pink-700 underline transition-colors"
+                    className="transition-colors duration-200"
+                    style={{ color: "#20afb2" }}
                   >
                     Terms of Service
                   </a>{" "}
                   and{" "}
                   <a
                     href="#"
-                    className="text-pink-600 hover:text-pink-700 underline transition-colors"
+                    className="transition-colors duration-200"
+                    style={{ color: "#20afb2" }}
                   >
                     Privacy Policy
                   </a>
@@ -270,7 +293,11 @@ export default function SignupPage() {
             <motion.div variants={itemVariants} className="pt-2">
               <motion.button
                 type="submit"
-                className="w-full flex items-center justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-base font-medium text-white bg-gradient-to-r from-pink-600 to-purple-600 hover:from-pink-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-pink-500 transition-all duration-200"
+                className="w-full flex items-center justify-center py-3 px-4 border border-transparent rounded-lg shadow-lg text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#20afb2] transition-all duration-200"
+                style={{
+                  background: "linear-gradient(135deg, #20afb2 0%, #18adb0 50%, #10aeb2 100%)",
+                  boxShadow: "0 8px 20px rgba(32, 175, 178, 0.3), 0 2px 8px rgba(0, 0, 0, 0.1)"
+                }}
                 variants={buttonHoverVariants}
                 initial="rest"
                 whileHover="hover"
@@ -304,12 +331,13 @@ export default function SignupPage() {
             >
               <p className="text-gray-600">
                 Already have an account?{" "}
-                <Link
+                <a
                   href="/auth/signin"
-                  className="text-pink-600 hover:text-pink-700 font-medium transition-colors duration-200"
+                  className="font-medium transition-colors duration-200"
+                  style={{ color: "#ff4162" }}
                 >
                   Sign in
-                </Link>
+                </a>
               </p>
             </motion.div>
           </form>

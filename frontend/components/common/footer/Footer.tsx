@@ -44,7 +44,7 @@ const Footer = () => {
               <Link
                 href={item?.href}
                 key={item?.title}
-                className="text-black hover:text-sky-500 hoverEffect"
+                className="text-black hover:text-[#20afb2] hoverEffect"
               >
                 {item?.title}
               </Link>
@@ -58,7 +58,7 @@ const Footer = () => {
               <Link
                 href={item?.href}
                 key={item?.title}
-                className="text-black hover:text-sky-500 hoverEffect"
+                className="text-black hover:text-[#20afb2] hoverEffect"
               >
                 {item?.title}
               </Link>
@@ -72,7 +72,7 @@ const Footer = () => {
               <Link
                 href={item?.href}
                 key={item?.title}
-                className="text-black hover:text-sky-500 hoverEffect"
+                className="text-black hover:text-[#20afb2] hoverEffect"
               >
                 {item?.title}
               </Link>
@@ -85,9 +85,9 @@ const Footer = () => {
             <input
               type="email"
               placeholder="Enter your email"
-              className="border rounded-full pl-3 pr-16 h-14 placeholder:text-black/50 font-medium"
+              className="border border-gray-300 focus:border-2 focus:border-gray-300 outline-none rounded-full pl-3 pr-16 h-14 placeholder:text-black/50 font-medium transition-all"
             />
-            <button className="bg-sky-500 text-white w-14 h-14 rounded-full flex items-center justify-center absolute top-0 right-0">
+            <button className="bg-[#20afb2] text-white w-14 h-14 rounded-full flex items-center justify-center absolute top-0 right-0">
               <ArrowRight />
             </button>
           </div>

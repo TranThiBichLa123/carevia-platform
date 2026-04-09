@@ -9,7 +9,7 @@ const TopFooter = () => {
       {footerTopData?.map((item) => (
         <div
           key={item?.title}
-          className="flex items-center gap-5 lg:border-r last:border-r-0"
+          className="flex items-center gap-5 lg:border-r lg:border-gray-300 last:border-r-0"
         >
           <Image src={item?.image} alt="footerOneImage" />
           <div>

@@ -18,29 +18,29 @@ const FeaturedServicesSection = () => {
   const services = [
     {
       icon: <Shield className="w-8 h-8" />,
-      title: "High Quality Selection",
-      description: "Total product quality control for peace of mind",
+      title: "Thiết bị chính hãng",
+      description: "100% hàng chính hãng có nguồn gốc rõ ràng",
       color: "text-green-600",
       bgColor: "bg-green-50",
     },
     {
       icon: <DollarSign className="w-8 h-8" />,
-      title: "Affordable Prices",
-      description: "Factory direct prices for maximum savings",
+      title: "Giá tốt nhất",
+      description: "Cam kết giá cạnh tranh nhất thị trường",
       color: "text-blue-600",
       bgColor: "bg-blue-50",
     },
     {
       icon: <Truck className="w-8 h-8" />,
-      title: "Express Shipping",
-      description: "Fast, reliable delivery from global warehouse",
+      title: "Giao hàng nhanh",
+      description: "Giao hàng toàn quốc trong 24-48h",
       color: "text-purple-600",
       bgColor: "bg-purple-50",
     },
     {
       icon: <HeartHandshake className="w-8 h-8" />,
-      title: "Worry Free",
-      description: "Instant access to professional support",
+      title: "Hỗ trợ 24/7",
+      description: "Tư vấn và hỗ trợ mọi lúc mọi nơi",
       color: "text-pink-600",
       bgColor: "bg-pink-50",
     },
@@ -50,40 +50,40 @@ const FeaturedServicesSection = () => {
     {
       icon: <Users className="w-6 h-6" />,
       number: "50K+",
-      label: "Happy Customers",
+      label: "Khách hàng hài lòng",
     },
     {
       icon: <Award className="w-6 h-6" />,
       number: "99.9%",
-      label: "Satisfaction Rate",
+      label: "Đánh giá trung bình",
     },
     {
       icon: <Clock className="w-6 h-6" />,
       number: "24/7",
-      label: "Customer Support",
+      label: "Hỗ trợ khách hàng",
+
     },
     {
       icon: <Star className="w-6 h-6" />,
       number: "4.9",
-      label: "Average Rating",
+      label:"Tỷ lệ hài lòng",
     },
   ];
 
   return (
-    <div className="py-12 bg-babyshopWhite p-5 mt-5 rounded-md border">
+    <div className="py-12 bg-background p-5 mt-5 rounded-md border border-gray-200">
       <div className="text-center mb-8">
         <Badge
           variant="outline"
-          className="text-babyshopSky border-babyshopSky mb-4"
+          className="text-primary border-primary mb-4"
         >
-          Why Choose Us
+          Tại sao chọn Carevia
         </Badge>
-        <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-2">
-          What Makes Us Special
+        <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
+          Điều đặc biệt từ Carevia
         </h2>
-        <p className="text-gray-600 max-w-2xl mx-auto">
-          We&apos;re committed to providing the best experience for you and your
-          baby
+        <p className="text-muted-foreground max-w-2xl mx-auto">
+          Chúng tôi cam kết mang đến trải nghiệm mua sắm và chăm sóc da tốt nhất
         </p>
       </div>
 
@@ -92,7 +92,7 @@ const FeaturedServicesSection = () => {
         {services.map((service, index) => (
           <Card
             key={index}
-            className="group hover:shadow-lg transition-all duration-300 border-2 hover:border-babyshopSky"
+            className="group hover:shadow-lg transition-all duration-300 border border-gray-200 hover:border-primary"
           >
             <CardContent className="p-6 text-center">
               <div
@@ -101,14 +101,14 @@ const FeaturedServicesSection = () => {
                 <div className={service.color}>{service.icon}</div>
               </div>
               <h3 className="font-semibold text-lg mb-2">{service.title}</h3>
-              <p className="text-gray-600 text-sm">{service.description}</p>
+              <p className="text-muted-foreground text-sm">{service.description}</p>
             </CardContent>
           </Card>
         ))}
       </div>
 
       {/* Stats Section */}
-      <div className="bg-gradient-to-r from-babyshopSky to-blue-600 rounded-2xl p-8 mb-8">
+      <div className="bg-gradient-to-r from-primary to-primary-hover rounded-2xl p-8 mb-8">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-white">
           {stats.map((stat, index) => (
             <div key={index} className="text-center">
@@ -120,7 +120,7 @@ const FeaturedServicesSection = () => {
               <div className="text-2xl md:text-3xl font-bold mb-1">
                 {stat.number}
               </div>
-              <div className="text-blue-100 text-sm">{stat.label}</div>
+              <div className="text-white/80 text-sm">{stat.label}</div>
             </div>
           ))}
         </div>
@@ -128,29 +128,28 @@ const FeaturedServicesSection = () => {
 
       {/* CTA Section */}
       <div className="text-center">
-        <h3 className="text-xl font-semibold text-gray-900 mb-4">
-          Ready to Start Shopping?
+        <h3 className="text-xl font-semibold text-foreground mb-4">
+          Sẵn sàng chăm sóc làn da của bạn?
         </h3>
-        <p className="text-gray-600 mb-6">
-          Join thousands of happy parents who trust us with their baby&apos;s
-          needs
+        <p className="text-muted-foreground mb-6">
+          Tham gia cùng hàng ngàn khách hàng tin dùng Carevia
         </p>
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link href="/shop">
             <Button
               size="lg"
-              className="bg-babyshopSky hover:bg-babyshopSky/90 text-white"
+              className="bg-primary hover:bg-primary-hover text-white"
             >
-              Start Shopping
+              Khám phá thiết bị
             </Button>
           </Link>
           <Link href="/about">
             <Button
               size="lg"
               variant="outline"
-              className="hover:bg-babyshopSky hover:text-white hover:border-babyshopSky transition-colors"
+              className="border-gray-200 hover:bg-primary hover:text-white hover:border-primary transition-colors"
             >
-              Learn More
+              Đặt lịch trải nghiệm
             </Button>
           </Link>
         </div>

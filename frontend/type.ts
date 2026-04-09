@@ -11,6 +11,7 @@ export interface Brand {
   image?: string;
 }
 
+
 export interface Product {
   _id: string;
   name: string;
@@ -22,8 +23,18 @@ export interface Product {
   image: string;
   category: Category;
   brand: Brand;
-  ratings: [];
-  quantity?: number;
+  ratings: any[]; // Bạn nên định nghĩa rõ interface cho Rating nếu có thể
+  
+  // --- CÁC TRƯỜNG BỔ SUNG ---
+  sold?: number;              // Số lượng đã bán (để hiện: Đã bán 1.2k)
+  reviewCount?: number;       // Tổng số lượt đánh giá
+  isBookingAvailable?: boolean; // Cho phép đặt lịch trải nghiệm sản phẩm hay không
+  images?: string[];          // Danh sách ảnh phụ (để làm slider ảnh nhỏ bên dưới ảnh chính)
+  specifications?: {          // Thông số kỹ thuật chi tiết (hiện trong tab Description)
+    label: string;
+    value: string;
+  }[];
+  quantity?: number;          // Dùng cho logic Giỏ hàng (Cart)
 }
 
 export interface Address {

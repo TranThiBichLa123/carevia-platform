@@ -15,7 +15,7 @@ interface ProductsResponse {
   total: number;
 }
 
-const ComfyApparelSection = () => {
+const SkinConcernSection = () => {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -63,28 +63,28 @@ const ComfyApparelSection = () => {
   }
 
   return (
-    <div className="py-12 bg-babyshopWhite p-5 mt-5 rounded-md border">
+    <div className="py-12 bg-background p-5 mt-5 rounded-md border border-border">
       <div className="flex items-center justify-between mb-8">
         <div className="space-y-2">
           <div className="flex items-center gap-2">
-            <Shirt className="w-5 h-5 text-pink-500" />
-            <Badge variant="outline" className="text-pink-500 border-pink-500">
-              Trendy & Comfortable
+            <Shirt className="w-5 h-5 text-primary" />
+            <Badge variant="outline" className="text-primary border-primary">
+              Giải pháp chuyên biệt
             </Badge>
           </div>
-          <h2 className="text-2xl md:text-3xl font-bold text-gray-900">
-            Comfy & Cute Apparel
+          <h2 className="text-2xl md:text-3xl font-bold text-foreground">
+            Giải pháp cho từng vấn đề da
           </h2>
-          <p className="text-gray-600">
-            Adorable outfits that keep your little one comfortable all day
+          <p className="text-muted-foreground">
+            Tìm thiết bị phù hợp với tình trạng làn da của bạn
           </p>
         </div>
         <Link href="/shop?category=apparel">
           <Button
             variant="outline"
-            className="hidden md:flex items-center gap-2 hover:bg-pink-500 hover:text-white hover:border-pink-500 transition-colors"
+            className="hidden md:flex items-center gap-2 text-primary-hover hover:bg-primary hover:text-white hover:border-primary transition-colors"
           >
-            Shop All Items
+            Xem tất cả
             <ArrowRight className="w-4 h-4" />
           </Button>
         </Link>
@@ -98,69 +98,69 @@ const ComfyApparelSection = () => {
         ) : (
           <>
             {/* Placeholder products when no apparel products found */}
-            <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer">
+            <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200">
               <CardContent className="p-6">
-                <div className="bg-pink-50 rounded-lg p-4 mb-4">
-                  <Shirt className="w-8 h-8 text-pink-600 mx-auto" />
+                <div className="bg-primary-light rounded-lg p-4 mb-4">
+                  <Shirt className="w-8 h-8 text-primary mx-auto" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Baby Onesies</h3>
-                <p className="text-gray-600 text-sm mb-4">
-                  Soft and comfortable onesies for everyday wear
+                <h3 className="font-semibold text-lg mb-2">Da khô thiếu ẩm</h3>
+                <p className="text-muted-foreground text-sm mb-4">
+                  Thiết bị dưỡng ẩm chuyên sâu
                 </p>
                 <Link href="/shop?search=onesie">
-                  <Button className="w-full bg-pink-500 hover:bg-pink-600">
-                    Shop Now
+                  <Button className="w-full text-white bg-primary hover:bg-primary-hover">
+                    Mua ngay
                   </Button>
                 </Link>
               </CardContent>
             </Card>
 
-            <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer">
+            <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200">
               <CardContent className="p-6">
-                <div className="bg-purple-50 rounded-lg p-4 mb-4">
-                  <Star className="w-8 h-8 text-purple-600 mx-auto" />
+                <div className="bg-primary-light rounded-lg p-4 mb-4">
+                  <Star className="w-8 h-8 text-primary mx-auto" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Cute Dresses</h3>
-                <p className="text-gray-600 text-sm mb-4">
-                  Adorable dresses for special occasions
+                <h3 className="font-semibold text-lg mb-2">Chống lão hóa</h3>
+                <p className="text-muted-foreground text-sm mb-4">
+                  Công nghệ nâng cơ xóa nhăn
                 </p>
                 <Link href="/shop?search=dress">
-                  <Button className="w-full bg-pink-500 hover:bg-pink-600">
-                    Shop Now
+                  <Button className="w-full text-white bg-primary hover:bg-primary-hover">
+                    Mua ngay
                   </Button>
                 </Link>
               </CardContent>
             </Card>
 
-            <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer">
+            <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200">
               <CardContent className="p-6">
-                <div className="bg-blue-50 rounded-lg p-4 mb-4">
-                  <Sparkles className="w-8 h-8 text-blue-600 mx-auto" />
+                <div className="bg-primary-light rounded-lg p-4 mb-4">
+                  <Sparkles className="w-8 h-8 text-primary mx-auto" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Baby Rompers</h3>
-                <p className="text-gray-600 text-sm mb-4">
-                  Stylish rompers for active little ones
+                <h3 className="font-semibold text-lg mb-2">Trị mụn, thâm</h3>
+                <p className="text-muted-foreground text-sm mb-4">
+                  Ánh sáng blue light & LED
                 </p>
                 <Link href="/shop?search=romper">
-                  <Button className="w-full bg-pink-500 hover:bg-pink-600">
-                    Shop Now
+                  <Button className="w-full text-white bg-primary hover:bg-primary-hover">
+                    Mua ngay
                   </Button>
                 </Link>
               </CardContent>
             </Card>
 
-            <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer">
+            <Card className="group hover:shadow-lg transition-all duration-300 cursor-pointer border border-gray-200">
               <CardContent className="p-6">
-                <div className="bg-green-50 rounded-lg p-4 mb-4">
-                  <Shirt className="w-8 h-8 text-green-600 mx-auto" />
+                <div className="bg-primary-light rounded-lg p-4 mb-4">
+                  <Shirt className="w-8 h-8 text-primary mx-auto" />
                 </div>
-                <h3 className="font-semibold text-lg mb-2">Baby Pants</h3>
-                <p className="text-gray-600 text-sm mb-4">
-                  Comfortable pants for crawling and playing
+                <h3 className="font-semibold text-lg mb-2">Sáng da đều màu</h3>
+                <p className="text-muted-foreground text-sm mb-4">
+                  Thiết bị làm sáng da hiệu quả
                 </p>
                 <Link href="/shop?search=pants">
-                  <Button className="w-full bg-pink-500 hover:bg-pink-600">
-                    Shop Now
+                  <Button className="w-full text-white bg-primary hover:bg-primary-hover">
+                    Mua ngay
                   </Button>
                 </Link>
               </CardContent>
@@ -171,18 +171,18 @@ const ComfyApparelSection = () => {
 
       {/* Promotional Banners */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div className="bg-gradient-to-r from-pink-400 to-rose-400 rounded-2xl p-6 text-white relative overflow-hidden">
+        <div className="bg-gradient-to-r from-primary to-primary-hover rounded-2xl p-6 text-white relative overflow-hidden">
           <div className="relative z-10">
-            <h3 className="text-xl font-bold mb-2">Baby Sleep Essentials</h3>
-            <p className="text-pink-100 mb-4">
-              Cozy pajamas and sleepwear for peaceful nights
+            <h3 className="text-xl font-bold mb-2">Routine chăm sóc ban đêm</h3>
+            <p className="text-white/80 mb-4">
+              Thiết bị phục hồi da ban đêm
             </p>
             <Link href="/shop?search=sleepwear">
               <Button
                 variant="outline"
-                className="bg-white text-pink-500 border-white hover:bg-pink-50"
+                className="bg-white text-primary border-white hover:bg-primary-light"
               >
-                Shop Sleepwear
+                Khám phá ngay
               </Button>
             </Link>
           </div>
@@ -190,18 +190,18 @@ const ComfyApparelSection = () => {
           <div className="absolute -right-8 -bottom-8 w-32 h-32 bg-white/10 rounded-full"></div>
         </div>
 
-        <div className="bg-gradient-to-r from-orange-400 to-yellow-400 rounded-2xl p-6 text-white relative overflow-hidden">
+        <div className="bg-gradient-to-r from-secondary to-secondary/80 rounded-2xl p-6 text-white relative overflow-hidden">
           <div className="relative z-10">
-            <h3 className="text-xl font-bold mb-2">Summer Collection</h3>
-            <p className="text-orange-100 mb-4">
-              Light and breathable outfits for warm weather
+            <h3 className="text-xl font-bold mb-2">Chăm sóc da ban ngày</h3>
+            <p className="text-white/80 mb-4">
+              Bảo vệ da khỏi tác nhân bên ngoài
             </p>
             <Link href="/shop?search=summer">
               <Button
                 variant="outline"
-                className="bg-white text-orange-500 border-white hover:bg-orange-50"
+                className="bg-white text-secondary border-white hover:bg-yellow-50"
               >
-                Shop Summer
+                Khám phá ngay
               </Button>
             </Link>
           </div>
@@ -212,7 +212,7 @@ const ComfyApparelSection = () => {
 
       <div className="mt-8 text-center md:hidden">
         <Link href="/shop?category=apparel">
-          <Button className="w-full bg-pink-500 hover:bg-pink-600">
+          <Button className="w-full bg-primary hover:bg-primary-hover">
             Shop All Apparel
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>
@@ -222,4 +222,4 @@ const ComfyApparelSection = () => {
   );
 };
 
-export default ComfyApparelSection;
+export default SkinConcernSection;

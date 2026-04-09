@@ -10,9 +10,9 @@ import { Banners } from "@/type";
 const mockBanners: Banners[] = [
   {
     _id: "1",
-    name: "New Collection",
-    title: "Baby Essentials For Every Moment",
-    image: "https://images.unsplash.com/photo-1519689680058-324335c77eba?w=800&h=500&fit=crop",
+    name: "Thử ngay",
+    title: "Trải nghiệm miễn phí tại showroom",
+    image: "https://images.unsplash.com/photo-1635752499637-91f2d64a41a3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHx3b21hbiUyMHVzaW5nJTIwc2tpbmNhcmUlMjBkZXZpY2V8ZW58MXx8fHwxNzc1NjY3MTEyfDA&ixlib=rb-4.1.0&q=80&w=1080&utm_source=figma&utm_medium=referral",
     startFrom: new Date().getTime(),
     bannerType: "featured",
   },
@@ -63,7 +63,7 @@ const Banner = async () => {
             href={"/shop"}
             className="bg-white rounded-full font-medium text-gray-900 px-6 py-2.5 text-base hover:bg-transparent hover:text-white hover:border-white border border-gray-200 hoverEffect"
           >
-            Shop Now
+            Book Now
           </Link>
         </div>
       </div>

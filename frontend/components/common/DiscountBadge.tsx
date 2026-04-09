@@ -6,15 +6,19 @@ interface Props {
 }
 
 const DiscountBadge = ({ discountPercentage, className }: Props) => {
+  // Kiểm tra nếu không có discount thì không hiển thị
+  if (!discountPercentage || discountPercentage <= 0) return null;
+
   return (
-    <span
+    <div
       className={cn(
-        "block bg-red-600 text-white text-xs px-3 py-1 rounded-full font-semibold",
+        "absolute -top-0 -right-0 bg-[red] text-white font-bold px-3 py-2.5 rounded-bl-2xl z-10 flex flex-col items-center leading-none",
         className
       )}
     >
-      -{discountPercentage}%
-    </span>
+      <span className="text-lg">{discountPercentage}%</span>
+      <span className="text-xs mt-0.5">OFF</span>
+    </div>
   );
 };
 

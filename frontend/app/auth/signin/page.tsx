@@ -352,7 +352,7 @@ export default function LoginPage() {
 
               <div className="text-sm">
                 <motion.a
-                  href="#"
+                  href="/auth/forgotpassword"
                   className="transition-colors duration-200"
                   style={{ color: "#ff4162" }}
                   whileHover={{ x: 2, color: "#e63855" }}
@@ -405,7 +405,7 @@ export default function LoginPage() {
             <p className="text-gray-600">
               Don't have an account?{" "}
               <a
-                href="#"
+                href="/auth/signup"
                 className="font-medium transition-colors duration-200"
                 style={{ color: "#ff4162" }}
               >
