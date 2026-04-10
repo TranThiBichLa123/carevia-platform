@@ -1,5 +1,5 @@
 import { fetchData, hasExplicitApiEndpoint } from "../../../lib/api";
-import { Product } from "@/type";
+import { Product } from "@/types_enum/devices";
 import React from "react";
 import ProductCard from "./ProductCard";
 import Link from "next/link";

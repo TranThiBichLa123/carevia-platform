@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { fetchData } from "@/lib/api";
-import { Product } from "@/type";
+import { Product } from "@/types_enum/devices";
 import ProductCard from "@/components/common/products/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
@@ -81,7 +81,7 @@ const BookingServiceSection = () => {
             Dùng thử trước khi quyết định mua - Hoàn toàn miễn phí
           </p>
         </div>
-        <Link href="/shop?category=travel">
+        <Link href="/client/booking">
           <Button
             variant="outline"
             className="hidden md:flex items-center gap-2 hover:bg-primary text-primary hover:text-white hover:border-primary transition-colors"
@@ -114,7 +114,7 @@ const BookingServiceSection = () => {
                   Đặt lịch để trải nghiệm thiết bị trước khi mua
                 </p>
                 <div className="mt-auto">
-                  <Link href="/shop?search=stroller">
+                  <Link href="/client/booking">
                     <Button className="w-full text-white bg-primary hover:bg-primary-hover">
                       Đặt lịch ngay
                     </Button>
@@ -138,7 +138,7 @@ const BookingServiceSection = () => {
                   Chuyên viên da liễu hỗ trợ tư vấn miễn phí
                 </p>
                 <div className="mt-auto">
-                  <Link href="/shop?search=consultation">
+                  <Link href="/client/booking">
                     <Button className="w-full text-white bg-primary hover:bg-primary-hover">
                       Đặt lịch ngay
                     </Button>
@@ -162,7 +162,7 @@ const BookingServiceSection = () => {
                   Công nghệ AI phân tích tình trạng làn da của bạn
                 </p>
                 <div className="mt-auto">
-                  <Link href="/shop?search=analysis">
+                  <Link href="/client/booking">
                     <Button className="w-full text-white bg-primary hover:bg-primary-hover">
                       Đặt lịch ngay
                     </Button>
@@ -186,7 +186,7 @@ const BookingServiceSection = () => {
                   Giảm 20% cho lần đặt lịch đầu tiên của khách hàng mới
                 </p>
                 <div className="mt-auto">
-                  <Link href="/shop?search=promotion">
+                  <Link href="/client/booking">
                     <Button className="w-full text-white bg-primary hover:bg-primary-hover">
                       Đặt lịch ngay
                     </Button>
@@ -224,7 +224,7 @@ const BookingServiceSection = () => {
               </p>
             </div>
 
-            <Link href="/shop?category=travel">
+            <Link href="/client/booking">
               <Button
                 size="lg"
                 variant="outline"
@@ -240,7 +240,7 @@ const BookingServiceSection = () => {
 
 
       <div className="mt-8 text-center md:hidden">
-        <Link href="/shop?category=travel">
+        <Link href="/client/booking">
           <Button className="w-full text-white bg-primary hover:bg-primary-hover">
             Đặt lịch ngay
             <ArrowRight className="w-4 h-4 ml-2" />

@@ -1,6 +1,6 @@
 "use client";
 
-import { Product } from "@/type";
+import { Product } from "@/types_enum/devices";
 import ProductCard from "./ProductCard";
 
 interface Props {

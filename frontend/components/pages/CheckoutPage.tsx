@@ -18,7 +18,7 @@ import {
 } from "@/lib/stripe";
 import { useUserStore, useCartStore } from "@/lib/store";
 import { toast } from "sonner";
-import { Address } from "@/type";
+import { Address } from "@/types_enum/devices";
 
 const CheckoutPageContent = () => {
   const [order, setOrder] = useState<Order | null>(null);

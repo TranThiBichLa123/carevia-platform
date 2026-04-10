@@ -1,6 +1,6 @@
 import ShopPage from "@/components/pages/shop/ShopPageClient";
 import { fetchData } from "@/lib/api";
-import { Brand, Category } from "@/type";
+import { Brand, Category } from "@/types_enum/devices";
 import React from "react";
 
 interface CategoriesResponse {

@@ -13,30 +13,31 @@ import {
   Clock,
   MapPin,
   Baby,
+  Sparkles,
 } from "lucide-react";
 
 const NotFoundPage = () => {
   const quickLinks = [
-    { icon: ShoppingBag, label: "Shop All Products", href: "/shop" },
-    { icon: Heart, label: "Wishlist", href: "/user/wishlist" },
-    { icon: Search, label: "Search Products", href: "/search" },
-    { icon: Phone, label: "Contact Support", href: "/help/contact" },
+    { icon: ShoppingBag, label: "Tất cả thiết bị", href: "/shop" },
+    { icon: Heart, label: "Dịch vụ yêu thích", href: "/user/wishlist" },
+    { icon: Search, label: "Tìm kiếm dịch vụ", href: "/search" },
+    { icon: Phone, label: "Tư vấn chuyên gia", href: "/help/contact" },
   ];
 
   const popularCategories = [
-    { name: "Baby Clothes", href: "/shop?category=clothes" },
-    { name: "Toys & Games", href: "/shop?category=toys" },
-    { name: "Feeding Essentials", href: "/shop?category=feeding" },
-    { name: "Safety Products", href: "/shop?category=safety" },
-    { name: "Nursery Decor", href: "/shop?category=nursery" },
-    { name: "Accessories", href: "/shop?category=accessories" },
+    { name: "Máy nâng cơ & Trẻ hóa", href: "/shop?category=lifting" },
+    { name: "Trị liệu Laser & Sắc tố", href: "/shop?category=laser" },
+    { name: "Thiết bị chăm sóc cơ bản", href: "/shop?category=basic-care" },
+    { name: "Công nghệ giảm béo", href: "/shop?category=slimming" },
+    { name: "Phân tích & Soi da", href: "/shop?category=analysis" },
+    { name: "Dược mỹ phẩm Clinic", href: "/shop?category=cosmeceuticals" },
   ];
 
   const helpLinks = [
-    { label: "Track Your Order", href: "/track-order" },
-    { label: "Returns & Exchanges", href: "/returns" },
-    { label: "Shipping Information", href: "/help/shipping" },
-    { label: "Customer Reviews", href: "/testimonials" },
+    { label: "Kiểm tra lịch hẹn", href: "/track-order" },
+    { label: "Chính sách bảo hành máy", href: "/returns" },
+    { label: "Hướng dẫn thanh toán", href: "/help/shipping" },
+    { label: "Phản hồi khách hàng", href: "/testimonials" },
   ];
 
   return (
@@ -44,15 +45,16 @@ const NotFoundPage = () => {
       <div className="max-w-4xl w-full bg-white rounded-xl shadow-lg overflow-hidden">
         {/* Header with gradient */}
         <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white text-center py-12 px-6 relative">
-          {/* Baby icon with question mark */}
+          {/* Skin Glow icon with question mark */}
           <div className="relative inline-block mb-4">
-            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center">
-              <Baby className="w-12 h-12 text-gray-800" />
+            <div className="w-20 h-20 bg-white rounded-full flex items-center justify-center shadow-sm">
+              <Sparkles className="w-10 h-10 text-[#00b2bd]" /> {/* Dùng màu xanh Clinic của bạn */}
             </div>
-            <div className="absolute -top-1 -right-1 w-7 h-7 bg-yellow-400 rounded-full flex items-center justify-center">
-              <span className="text-gray-800 font-bold text-sm">?</span>
+            <div className="absolute -top-1 -right-1 w-7 h-7 bg-[#00b2bd] rounded-full flex items-center justify-center border-2 border-white">
+              <span className="text-white font-bold text-sm">?</span>
             </div>
           </div>
+
 
           <h1 className="text-3xl md:text-4xl font-bold mb-3">
             Oops! Page Not Found
@@ -81,7 +83,7 @@ const NotFoundPage = () => {
               </Link>
             </motion.div>
             <p className="text-gray-500 mt-4">
-              Or explore our amazing collection of baby products below
+              Or explore our amazing collection of skincare devices below
             </p>
           </div>
 
@@ -162,12 +164,11 @@ const NotFoundPage = () => {
           {/* Welcome section */}
           <div className="bg-gray-50 rounded-lg p-6 text-center">
             <h3 className="font-bold text-lg mb-2">
-              Welcome to Babyshop - Your Trusted Baby Store
+              Welcome to Carvia - Your Trusted Skincare Device Store
             </h3>
             <p className="text-gray-600 text-sm mb-4 max-w-2xl mx-auto">
               We&apos;re your one-stop destination for everything your little one
-              needs. From clothes and toys to safety gear and nursery essentials,
-              we make shopping for your baby safe, easy, and enjoyable.
+              needs. From advanced skincare technologies to professional clinic essentials, we make your beauty journey safe, effective, and truly transformative.
             </p>
             <div className="flex flex-wrap justify-center gap-6 text-sm text-gray-600">
               <Link href="/help/contact" className="flex items-center gap-2 hover:text-blue-500 transition-colors">

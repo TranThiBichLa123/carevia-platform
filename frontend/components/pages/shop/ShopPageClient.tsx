@@ -2,7 +2,7 @@
 
 import PremiumFeature from "@/components/common/PremiumFeature";
 import { Store } from "lucide-react";
-import { Brand, Category } from "@/type";
+import { Brand, Category } from "@/types_enum/devices";
 
 interface Props {
   categories: Category[];

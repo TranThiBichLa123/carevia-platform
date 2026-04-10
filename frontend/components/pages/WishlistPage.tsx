@@ -12,7 +12,7 @@ import {
   removeFromWishlist,
   clearWishlist,
 } from "@/lib/wishlistApi";
-import { Product } from "@/type";
+import { Product } from "@/types_enum/devices";
 import Image from "next/image";
 import Link from "next/link";
 import PriceFormatter from "@/components/common/PriceFormatter";

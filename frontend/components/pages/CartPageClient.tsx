@@ -697,7 +697,7 @@ const CartPageClient = () => {
       {/* Clear Cart Confirmation Modal */}
       <AlertDialog
         open={showClearDialog}
-        onOpenChange={(open) => {
+        onOpenChange={(open: any) => {
           if (!open) {
             setShowClearDialog(false);
           }

@@ -1,6 +1,6 @@
 import React from "react";
 import ProductCard from "@/components/common/products/ProductCard";
-import { Product } from "@/type";
+import { Product } from "@/types_enum/devices";
 import Link from "next/dist/client/link";
 import Container from "@/components/common/Container";
 
@@ -44,6 +44,8 @@ const createMockProduct = (
     sold: overrides.sold ?? 100 + index * 25,
     reviewCount: overrides.reviewCount ?? 20 + index * 5,
     isBookingAvailable: overrides.isBookingAvailable ?? false,
+    bookingPrice: overrides.bookingPrice ?? 0,
+    sessionIds: overrides.sessionIds ?? [],
     tags: overrides.tags ?? ["Best Seller"],
     videoUrl: overrides.videoUrl,
     quantity: overrides.quantity ?? 1,

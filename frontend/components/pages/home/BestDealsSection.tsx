@@ -1,7 +1,7 @@
 "use client";
 import { useState, useEffect } from "react";
 import { fetchData } from "@/lib/api";
-import { Product } from "@/type";
+import { Product } from "@/types_enum/devices";
 import ProductCard from "@/components/common/products/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";

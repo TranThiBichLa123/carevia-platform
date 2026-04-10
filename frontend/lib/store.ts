@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { persist, createJSONStorage } from "zustand/middleware";
 import Cookies from "js-cookie";
 import authApi from "./authApi";
-import { Product } from "@/type";
+import { Product } from "@/types_enum/devices";
 import { Order } from "./orderApi";
 
 // Helper function to map server cart item to local format

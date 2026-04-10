@@ -2,7 +2,7 @@ import { fetchData, hasExplicitApiEndpoint } from "@/lib/api";
 import Image from "next/image";
 import Link from "next/link";
 import React from "react";
-import { Banners } from "@/type";
+import { Banners } from "@/types_enum/devices";
 
 // Mock data cho banner khi API không trả về dữ liệu
 const mockBanners: Banners[] = [

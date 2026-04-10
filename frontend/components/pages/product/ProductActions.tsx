@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Minus, Plus, Star, Loader2, ShoppingCart, CalendarCheck } from "lucide-react";
-import { Product } from "@/type";
+import { Product } from "@/types_enum/devices";
 import WishlistButton from "@/components/common/products/WishlistButton";
 import { toast } from "sonner";
 import { useCartStore, useUserStore } from "@/lib/store";

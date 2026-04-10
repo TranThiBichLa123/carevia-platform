@@ -1,4 +1,4 @@
-import { Product } from "@/type";
+import { Product } from "@/types_enum/devices";
 import Image from "next/image";
 import React, { memo } from "react";
 import PriceContainer from "../PriceContainer";

@@ -4,7 +4,7 @@ import { Heart } from "lucide-react";
 import { toast } from "sonner";
 import { useUserStore, useWishlistStore } from "../../../lib/store";
 import { addToWishlist, removeFromWishlist } from "../../../lib/wishlistApi";
-import { Product } from "@/type";
+import { Product } from "@/types_enum/devices";
 import { useIsHydrated } from "../../../hooks";
 
 interface WishlistButtonProps {

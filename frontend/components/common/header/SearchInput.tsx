@@ -1,6 +1,6 @@
 "use client";
 
-import { Product } from "@/type";
+import { Product } from "@/types_enum/devices";
 import { mockProducts } from "../../../constants/data";
 import { Input } from "../../../components/ui/input";
 import { fetchData, hasExplicitApiEndpoint } from "../../../lib/api";

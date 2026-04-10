@@ -103,7 +103,7 @@ const CategoriesSection = () => {
 
       {/* 4. TRUY CẬP NHANH */}
       <NavItem title="Truy cập nhanh" items={[
-        { name: 'Tất cả sản phẩm', emoji: '🛍️', path: '/devices' },
+        { name: 'Tất cả sản phẩm', emoji: '🛍️', path: '/client/devices' },
         { name: 'Sản phẩm mới', emoji: '🆕', path: '/new-arrivals' },
         { name: 'Dưới 1 triệu', emoji: '💰', path: '/under-1m' },
         { name: 'Đơn hàng của tôi', emoji: '📦', path: '/my-orders' }
@@ -113,8 +113,8 @@ const CategoriesSection = () => {
       <NavItem
         title="Đặt lịch trải nghiệm"
         items={[
-          { name: 'Đặt lịch ngay', emoji: '📅', path: '/booking' },
-          { name: 'Lịch của tôi', emoji: '📋', path: '/my-bookings' }
+          { name: 'Đặt lịch ngay', emoji: '📅', path: '/client/booking' },
+          { name: 'Lịch của tôi', emoji: '📋', path: '/client/my-bookings' }
         ]}
       />
       {/* 6. MUA THEO LOẠI DA */}

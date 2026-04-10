@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "../../../components/ui/button";
 import { ShoppingCart, Plus, Minus, Loader2 } from "lucide-react";
 import { useCartStore, useUserStore } from "../../../lib/store";
-import { Product } from "@/type";
+import { Product } from "@/types_enum/devices";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 

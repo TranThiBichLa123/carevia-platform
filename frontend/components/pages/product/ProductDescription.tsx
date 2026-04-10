@@ -1,7 +1,7 @@
 "use client";
 import { Star, MessageSquare, Store, ChevronRight, Package, MapPin, Award } from 'lucide-react';
 import { useState } from 'react';
-import { Product } from '@/type';
+import { Product } from '@/types_enum/devices';
 
 interface ProductDescriptionProps {
   product?: Product;

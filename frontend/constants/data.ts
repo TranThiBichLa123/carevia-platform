@@ -1,5 +1,6 @@
 import { footerFour, footerOne, footerThree, footerTwo } from "@/assets/image";
-import { Product } from "@/type";
+import { Product } from "@/types_enum/devices";
+import { Booking, BookingStatus, ExperienceSession, SessionStatus } from "@/types_enum/booking";
 
 const topHelpCenter = [
   { title: "Help Center", href: "/help" },
@@ -30,7 +31,7 @@ const footerTopData = [
   },
 ];
 
-export { topHelpCenter, footerTopData, mockProducts };
+export { topHelpCenter, footerTopData, mockProducts, mockSessions, mockBookings };
 
 const createMockProduct = (
   index: number,
@@ -74,6 +75,8 @@ const createMockProduct = (
   sold: overrides.sold ?? 0,
   reviewCount: overrides.reviewCount ?? 0,
   isBookingAvailable: overrides.isBookingAvailable ?? false,
+  bookingPrice: overrides.bookingPrice ?? 0,
+  sessionIds: overrides.sessionIds ?? [],
   tags: overrides.tags ?? ["Best Seller"],
   videoUrl: overrides.videoUrl,
   quantity: overrides.quantity,
@@ -94,7 +97,9 @@ const mockProducts: Product[] = [
     averageRating: 4.5,
     sold: 1200,
     reviewCount: 248,
-    isBookingAvailable: false,
+    isBookingAvailable: true,
+    bookingPrice: 15,
+    sessionIds: ["sess-01", "sess-02"],
     image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=900&q=80",
     images: [
       "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=900&q=80",
@@ -172,6 +177,8 @@ const mockProducts: Product[] = [
     sold: 450,
     reviewCount: 96,
     isBookingAvailable: true,
+    bookingPrice: 12,
+    sessionIds: ["sess-03", "sess-04"],
     image: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=900&q=80",
     images: [
       "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=900&q=80",
@@ -210,6 +217,8 @@ const mockProducts: Product[] = [
     sold: 3200,
     reviewCount: 410,
     isBookingAvailable: true,
+    bookingPrice: 18,
+    sessionIds: ["sess-05", "sess-06"],
     image: "https://images.unsplash.com/photo-1498843053639-170ff2122f35?auto=format&fit=crop&w=900&q=80",
     images: [
       "https://images.unsplash.com/photo-1498843053639-170ff2122f35?auto=format&fit=crop&w=900&q=80",
@@ -248,6 +257,8 @@ const mockProducts: Product[] = [
     sold: 95,
     reviewCount: 58,
     isBookingAvailable: true,
+    bookingPrice: 35,
+    sessionIds: ["sess-07", "sess-08"],
     image: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=900&q=80",
     images: [
       "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=900&q=80",
@@ -273,4 +284,137 @@ const mockProducts: Product[] = [
     ],
     tags: ["Premium", "Anti Aging"],
   }),
+];
+
+const mockSessions: ExperienceSession[] = [
+  {
+    id: "sess-01",
+    serviceId: "1",
+    branchName: "CareVia Quan 1",
+    locationDetail: "Phong Trai Nghiem Tang 2",
+    startTime: "2026-04-15T09:00:00Z",
+    endTime: "2026-04-15T10:30:00Z",
+    maxSlots: 10,
+    availableSlots: 4,
+    status: SessionStatus.OPEN,
+  },
+  {
+    id: "sess-02",
+    serviceId: "1",
+    branchName: "CareVia Quan 1",
+    locationDetail: "Phong Trai Nghiem Tang 2",
+    startTime: "2026-04-15T14:00:00Z",
+    endTime: "2026-04-15T15:30:00Z",
+    maxSlots: 10,
+    availableSlots: 10,
+    status: SessionStatus.OPEN,
+  },
+  {
+    id: "sess-03",
+    serviceId: "3",
+    branchName: "CareVia Phu Nhuan",
+    locationDetail: "Studio Skin Lab Room 03",
+    startTime: "2026-04-16T10:00:00Z",
+    endTime: "2026-04-16T11:00:00Z",
+    maxSlots: 8,
+    availableSlots: 3,
+    status: SessionStatus.OPEN,
+  },
+  {
+    id: "sess-04",
+    serviceId: "3",
+    branchName: "CareVia Phu Nhuan",
+    locationDetail: "Studio Skin Lab Room 03",
+    startTime: "2026-04-16T15:00:00Z",
+    endTime: "2026-04-16T16:00:00Z",
+    maxSlots: 8,
+    availableSlots: 0,
+    status: SessionStatus.CLOSED,
+  },
+  {
+    id: "sess-05",
+    serviceId: "4",
+    branchName: "CareVia Thu Duc",
+    locationDetail: "Beauty Corner Tang 1",
+    startTime: "2026-04-17T09:30:00Z",
+    endTime: "2026-04-17T10:30:00Z",
+    maxSlots: 12,
+    availableSlots: 6,
+    status: SessionStatus.OPEN,
+  },
+  {
+    id: "sess-06",
+    serviceId: "4",
+    branchName: "CareVia Thu Duc",
+    locationDetail: "Beauty Corner Tang 1",
+    startTime: "2026-04-17T13:30:00Z",
+    endTime: "2026-04-17T14:30:00Z",
+    maxSlots: 12,
+    availableSlots: 9,
+    status: SessionStatus.OPEN,
+  },
+  {
+    id: "sess-07",
+    serviceId: "5",
+    branchName: "CareVia Quan 7",
+    locationDetail: "Premium Experience Lounge",
+    startTime: "2026-04-18T11:00:00Z",
+    endTime: "2026-04-18T12:30:00Z",
+    maxSlots: 6,
+    availableSlots: 2,
+    status: SessionStatus.OPEN,
+  },
+  {
+    id: "sess-08",
+    serviceId: "5",
+    branchName: "CareVia Quan 7",
+    locationDetail: "Premium Experience Lounge",
+    startTime: "2026-04-18T16:00:00Z",
+    endTime: "2026-04-18T17:30:00Z",
+    maxSlots: 6,
+    availableSlots: 6,
+    status: SessionStatus.OPEN,
+  },
+];
+
+const mockBookings: Booking[] = [
+  {
+    id: "bk-888",
+    bookingCode: "CV150426",
+    accountId: "user-123",
+    sessionId: "sess-01",
+    appointmentDate: "2026-04-15",
+    startTime: "09:00",
+    endTime: "10:30",
+    status: BookingStatus.CONFIRMED,
+    totalPrice: 15,
+    customerNote: "Toi muon trai nghiem thu dau co silicon.",
+    createdAt: "2026-04-10T08:00:00Z",
+  },
+  {
+    id: "bk-889",
+    bookingCode: "CV160426",
+    accountId: "user-123",
+    sessionId: "sess-03",
+    appointmentDate: "2026-04-16",
+    startTime: "10:00",
+    endTime: "11:00",
+    status: BookingStatus.PENDING,
+    totalPrice: 12,
+    customerNote: "Can tu van them ve cong nghe ion am.",
+    createdAt: "2026-04-10T09:30:00Z",
+  },
+  {
+    id: "bk-890",
+    bookingCode: "CV180426",
+    accountId: "user-123",
+    sessionId: "sess-07",
+    appointmentDate: "2026-04-18",
+    startTime: "11:00",
+    endTime: "12:30",
+    status: BookingStatus.CANCELLED,
+    totalPrice: 35,
+    customerNote: "Se dat lai vao cuoi tuan neu con slot.",
+    createdAt: "2026-04-10T10:45:00Z",
+  },
 ];

@@ -15,7 +15,7 @@ import { Label } from "../../components/ui/label";
 import { RadioGroup, RadioGroupItem } from "../../components/ui/radio-group";
 import { Plus, MapPin, Edit, Trash2 } from "lucide-react";
 import { toast } from "sonner";
-import { Address, AddressInput } from "@/type";
+import { Address, AddressInput } from "@/types_enum/devices";
 import { addAddress, updateAddress, deleteAddress } from "../../lib/addressApi";
 import { useUserStore } from "../../lib/store";
 

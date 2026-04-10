@@ -6,7 +6,7 @@ import ProductDescription from "@/components/pages/product/ProductDescription";
 import ProductActions from "@/components/pages/product/ProductActions";
 import { fetchData } from "@/lib/api";
 import { mockProducts } from "@/constants/data";
-import { Product } from "@/type";
+import { Product } from "@/types_enum/devices";
 import { Share2, Star, Truck, Heart, ShieldCheck, ChevronRight } from "lucide-react";
 import Image from "next/image";
 import React from "react";

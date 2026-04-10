@@ -1,7 +1,7 @@
 "use client"; // Bắt buộc vì có dùng hooks
 
 import SectionView from "@/components/common/SectionView";
-import { Brand } from "@/type";
+import { Brand } from "@/types_enum/devices";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";

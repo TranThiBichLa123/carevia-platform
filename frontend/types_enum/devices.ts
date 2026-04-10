@@ -50,6 +50,8 @@ export interface Product {
   sold: number;               
   reviewCount: number;       
   isBookingAvailable: boolean; 
+  bookingPrice: number;       // Gia trai nghiem/booking neu khac gia mua san pham
+  sessionIds: string[];       // Danh sach cac phien trai nghiem lien ket voi san pham
   tags: string[];             // VD: ["Best Seller", "New Arrival", "Trending"]
   videoUrl?: string;          // Link Youtube/Video review hướng dẫn sử dụng
   

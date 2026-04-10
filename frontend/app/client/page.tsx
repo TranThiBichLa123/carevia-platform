@@ -7,7 +7,7 @@ import HomeBrand from "@/components/pages/home/HomeBrand";
 import BookingExperienceSection from "@/components/pages/home/BookingServiceSection";
 import ComfyApparelSection from "@/components/pages/home/SkinConcernSection";
 import FeaturedServicesSection from "@/components/pages/home/FeaturedServicesSection";
-import { Brand } from "@/type";
+import { Brand } from "@/types_enum/devices";
 
 export default async function Home() {
   // TODO: Replace with fetchData<Brand[]>("/brands") when backend is ready

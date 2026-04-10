@@ -2,7 +2,7 @@
 import { Button } from "../../../components/ui/button";
 import { useCartStore, useUserStore } from "../../../lib/store";
 import { cn } from "../../../lib/utils";
-import { Product } from "../../../type";
+import { Product } from "../../../types_enum/devices";
 import React, { useState } from "react";
 import { toast } from "sonner";
 import { Loader2, ShoppingCart } from "lucide-react";
