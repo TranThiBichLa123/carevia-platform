@@ -4,14 +4,32 @@ server:
 spring:
   application:
     name: carevia-backend
-
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/carevia}
     username: ${SPRING_DATASOURCE_USERNAME:carevia}
     password: ${SPRING_DATASOURCE_PASSWORD:carevia}
-    driver-class-name: org.postgresql.Driver
-
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
+
+# Cấu hình MinIO
+minio:
+  endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
+  access-key: ${MINIO_ACCESS_KEY:admin}
+  secret-key: ${MINIO_SECRET_KEY:carevia_minio_secret}
+  bucket: ${MINIO_BUCKET_NAME:carevia-products}
+
+# Cấu hình ZaloPay (Dành cho ZaloPayConfig.java của bạn)
+zalopay:
+  app-id: ${ZALOPAY_APP_ID}
+  key1: ${ZALOPAY_KEY1}
+  key2: ${ZALOPAY_KEY2}
+  endpoint: ${ZALOPAY_ENDPOINT}
+
+# Cấu hình Notification 
+app:
+  websocket:
+    endpoint: "/ws-notification"
+    topic: "/topic/messages"
+

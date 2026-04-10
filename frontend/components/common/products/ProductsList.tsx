@@ -31,7 +31,7 @@ const ProductsList = async () => {
       {/* 1. Header Section */}
       <div className="flex items-center justify-between mb-8 border-b border-gray-100 pb-2">
         <div className="relative">
-          <h2 className="text-xl md:text-2xl font-bold text-gray-800 flex items-center gap-2">
+          <h2 className="text-base md:text-2xl font-bold text-gray-800 flex items-center gap-2">
             {/* Chuyển class màu xanh (primary) vào chữ Thiết bị */}
             <span className="text-primary">Thiết bị</span> phổ biến
           </h2>

@@ -71,7 +71,7 @@ export default function ForgotPasswordPage() {
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-cyan-50 via-teal-50 to-blue-50 p-4 overflow-hidden">
       {/* Animated Background Blobs */}
-      <motion.div
+      {/* <motion.div
         className="fixed top-[10%] left-[15%] w-72 h-72 rounded-full opacity-60"
         style={{
           background: "linear-gradient(135deg, #ecf284 0%, #eff299 50%, #f2f2a5 100%)",
@@ -80,9 +80,9 @@ export default function ForgotPasswordPage() {
         variants={blobVariants}
         initial="hidden"
         animate="visible"
-      ></motion.div>
+      ></motion.div> */}
 
-      <motion.div
+      {/* <motion.div
         className="fixed bottom-[15%] right-[10%] w-96 h-96 rounded-full opacity-50"
         style={{
           background: "linear-gradient(135deg, rgba(32, 175, 178, 0.2) 0%, rgba(16, 174, 178, 0.3) 100%)",
@@ -91,9 +91,9 @@ export default function ForgotPasswordPage() {
         variants={blobVariants}
         initial="hidden"
         animate="visible"
-      ></motion.div>
+      ></motion.div> */}
 
-      <motion.div
+      {/* <motion.div
         className="fixed top-[50%] right-[20%] w-48 h-48 rounded-full opacity-40"
         style={{
           background: "linear-gradient(135deg, #ecf284 0%, #eff299 50%, #f2f2a5 100%)",
@@ -102,7 +102,7 @@ export default function ForgotPasswordPage() {
         variants={blobVariants}
         initial="hidden"
         animate="visible"
-      ></motion.div>
+      ></motion.div> */}
 
       {/* Main Container */}
       <motion.div

@@ -150,19 +150,19 @@ const AllProductsPage = () => {
     return (
         <Container className="bg-[#f4f4f4] min-h-screen pb-20 font-sans">
             {/* Breadcrumb - Style Watsons tối giản */}
-            <div className="bg-white border-b border-gray-200">
+            <div className="">
                 <div className="container mx-auto px-4 py-3">
-                    <nav className="text-[11px] uppercase tracking-wider text-gray-400 flex items-center gap-2">
+                    <nav className="text-[13px]  tracking-wider text-gray-500 flex items-center gap-2">
                         <Link href="/client" className="hover:text-primary transition-colors">
                             Trang chủ
                         </Link>
                         <span className="text-gray-300">/</span>
-                        <span className="text-gray-900 font-bold">Tất cả sản phẩm</span>
+                        <span className="text-gray-900 ">Tất cả sản phẩm</span>
                     </nav>
                 </div>
             </div>
 
-            <div className="container mx-auto  mt-4">
+            <div className="container mx-auto ">
                 {/* Tiêu đề trang */}
                 {/* <h1 className="text-2xl font-black text-gray-900 mb-6 uppercase italic">
                     Tất cả sản phẩm
@@ -173,7 +173,7 @@ const AllProductsPage = () => {
                     <aside className="w-full lg:w-72 shrink-0">
                         <div className="bg-white rounded-sm border border-gray-200 sticky top-24">
                             <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                                <h3 className="font-bold text-sm uppercase tracking-tight">Bộ lọc tìm kiếm</h3>
+                                <h3 className="font-bold text-[13px] uppercase tracking-tight">Bộ lọc tìm kiếm</h3>
                                 <button className="text-[11px] text-primary underline font-bold">Xóa tất cả</button>
                             </div>
 
@@ -245,7 +245,7 @@ const AllProductsPage = () => {
                     </aside>
 
                     {/* MAIN CONTENT */}
-                    <main className="flex-1">
+                    <main className="flex-1 bg-white p-6">
                         {/* Toolbar tối giản kiểu Watsons */}
                         <div className="flex flex-wrap justify-between items-end mb-6 pb-4 border-b border-gray-200 gap-4">
                             <div>
@@ -254,20 +254,42 @@ const AllProductsPage = () => {
                                 </p>
                             </div>
 
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-3">
                                 <span className="text-[13px] font-bold text-gray-900 uppercase tracking-tighter">Sắp xếp:</span>
-                                <div className="relative">
-                                    <select className="appearance-none bg-transparent border-none text-[13px] font-medium pr-8 focus:ring-0 cursor-pointer text-primary">
-                                        <option>Mới nhất</option>
-                                        <option>Giá: Thấp đến Cao</option>
-                                        <option>Giá: Cao đến Thấp</option>
-                                        <option>Bán chạy nhất</option>
-                                    </select>
-                                    <div className="absolute right-0 top-1/2 -translate-y-1/2 pointer-events-none">
-                                        <svg className="w-4 h-4 text-primary" fill="currentColor" viewBox="0 0 20 20"><path d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" /></svg>
+
+                                {/* Khối Dropdown chính */}
+                                <div className="relative group min-w-[140px]">
+                                    {/* Nút hiển thị giá trị đang chọn */}
+                                    <div className="flex items-center justify-between px-3 py-2 bg-white border border-gray-200 rounded-md cursor-pointer hover:border-gray-300 transition-all">
+                                        <span className="text-[13px] font-medium text-gray-700"> Mới nhất </span>
+                                        <svg className="w-4 h-4 text-gray-400 group-hover:rotate-180 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    </div>
+
+                                    {/* List danh sách khi mở ra - Giống y hệt hình */}
+                                    <div className="absolute top-full left-0 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                                        <div className="flex flex-col">
+                                            {/* Item 1 */}
+                                            
+                                            {/* Item 2 */}
+                                            <div className="px-3 py-2.5 text-[13px] text-gray-700 hover:bg-gray-50 cursor-pointer border-b border-gray-100 transition-colors">
+                                                Giá: Thấp đến Cao
+                                            </div>
+                                            {/* Item 3 */}
+                                            <div className="px-3 py-2.5 text-[13px] text-gray-700 hover:bg-gray-50 cursor-pointer last:border-b-0 transition-colors">
+                                                Giá: Cao đến Thấp
+                                            </div>
+                                            {/* Item 4 */}
+                                            <div className="px-3 py-2.5 text-[13px] text-gray-700 hover:bg-gray-50 cursor-pointer last:border-b-0 transition-colors">
+                                                Bán chạy nhất
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
+
+
                         </div>
 
                         {/* Product Grid */}
@@ -278,7 +300,7 @@ const AllProductsPage = () => {
                         </div>
 
                         {/* Nút Xem Thêm thay vì Phân trang */}
-                        <div className="mt-16 flex flex-col items-center">
+                        {/* <div className="mt-16 flex flex-col items-center">
                             <div className="w-64 h-1 bg-gray-200 rounded-full mb-4">
                                 <div className="w-1/3 h-full bg-primary rounded-full"></div>
                             </div>
@@ -286,7 +308,7 @@ const AllProductsPage = () => {
                             <button className="px-12 py-3 border-2 border-gray-900 text-gray-900 font-black text-sm uppercase hover:bg-gray-900 hover:text-white transition-all tracking-widest">
                                 Xem thêm sản phẩm
                             </button>
-                        </div>
+                        </div> */}
                     </main>
                 </div>
             </div>

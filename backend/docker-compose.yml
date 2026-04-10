@@ -1,33 +1,66 @@
 version: "3.9"
-
+# Các biến dạng ${DB_NAME} trong file docker-compose.yml thực chất là các "ô trống", và bạn cần điền giá trị thật vào file .env để Docker tự lấp đầy các ô trống đó.
 services:
   postgres:
     image: postgres:15
     container_name: carevia-postgres
     environment:
-      POSTGRES_DB: carevia
-      POSTGRES_USER: carevia
-      POSTGRES_PASSWORD: carevia
+      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: ${DB_USER}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
     ports:
-      - "5432:5432"
+      - "${DB_PORT}:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+
+  # --- THÊM PGADMIN Ở ĐÂY ---
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: carevia-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com  # Dùng email này để đăng nhập web
+      PGADMIN_DEFAULT_PASSWORD: admin         # Dùng pass này để đăng nhập web
+    ports:
+      - "5050:80"                             # Truy cập qua http://localhost:5050
+    depends_on:
+      - postgres
+    restart: unless-stopped
+
+  minio:
+    image: minio/minio
+    container_name: carevia-minio
+    environment:
+      MINIO_ROOT_USER: ${MINIO_ROOT_USER}
+      MINIO_ROOT_PASSWORD: ${MINIO_ROOT_PASSWORD}
+    ports:
+      - "${MINIO_PORT}:9005"
+      - "${MINIO_UI_PORT}:9001"
+    command: server /data --console-address ":9001"
+    volumes:
+      - minio_data:/data
 
   backend:
     build: .
     container_name: carevia-backend
     ports:
-      - "8080:8080"
+      - "${APP_PORT}:8080"
     depends_on:
       - postgres
+      - minio
     environment:
-      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/carevia
-      SPRING_DATASOURCE_USERNAME: carevia
-      SPRING_DATASOURCE_PASSWORD: carevia
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
+      SPRING_DATASOURCE_USERNAME: ${DB_USER}
+      SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+      MINIO_ENDPOINT: http://minio:9000
+      MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
+      MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
+      MINIO_BUCKET: ${MINIO_BUCKET_NAME}
+      ZALOPAY_APP_ID: ${ZALOPAY_APP_ID}
+      ZALOPAY_KEY1: ${ZALOPAY_KEY1}
+      ZALOPAY_KEY2: ${ZALOPAY_KEY2}
+      ZALOPAY_ENDPOINT: ${ZALOPAY_ENDPOINT}
     restart: unless-stopped
 
 volumes:
   pgdata:
-
-
-
+  minio_data:

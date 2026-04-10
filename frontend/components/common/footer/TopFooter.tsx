@@ -9,14 +9,23 @@ const TopFooter = () => {
       {footerTopData?.map((item) => (
         <div
           key={item?.title}
-          className="flex items-center gap-5 lg:border-r lg:border-gray-300 last:border-r-0"
+          className="flex items-center gap-4 lg:border-r lg:border-gray-300 last:border-r-0"
         >
-          <Image src={item?.image} alt="footerOneImage" />
+          {/* Giảm nhẹ kích thước icon nếu cần bằng cách thêm width/height */}
+          <Image 
+            src={item?.image} 
+            alt="footerOneImage" 
+            width={40} 
+            height={40} 
+            className="object-contain"
+          />
           <div>
-            <h3 className="text-lg font-semibold capitalize mb-1.5">
+            {/* Chuyển text-lg thành text-base (16px) */}
+            <h3 className="text-base font-semibold capitalize mb-0.5">
               {item?.title}
             </h3>
-            <p className="font-medium text-babyshopBlack/60 leading-5">
+            {/* Giảm subtitle xuống một chút (13px) để phân cấp với tiêu đề 16px */}
+            <p className="text-[13px] font-medium text-babyshopBlack/60 leading-tight">
               {item?.subTitle}
             </p>
           </div>

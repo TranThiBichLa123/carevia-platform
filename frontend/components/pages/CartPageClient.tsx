@@ -297,42 +297,47 @@ const CartPageClient = () => {
               </Button>
             </Link>
 
-            {/* Features Section */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mt-16 max-w-4xl w-full">
+              {/* Item 1 */}
               <div className="text-center">
                 <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <ShoppingCart className="w-8 h-8 text-blue-600" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">
+                <h3 className="font-semibold text-sm text-gray-900 mb-2"> {/* Giảm xuống text-sm */}
                   High Quality Selection
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-[13px] text-gray-600"> {/* Giảm mô tả xuống 13px để phân cấp rõ rệt */}
                   Total product quality control for peace of mind
                 </p>
               </div>
+
+              {/* Item 2 */}
               <div className="text-center">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <ArrowLeft className="w-8 h-8 text-green-600" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">
+                <h3 className="font-semibold text-sm text-gray-900 mb-2"> {/* Thêm text-sm */}
                   Affordable Prices
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-[13px] text-gray-600">
                   Factory direct prices for maximum savings
                 </p>
               </div>
+
+              {/* Item 3 */}
               <div className="text-center">
                 <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <Plus className="w-8 h-8 text-purple-600" />
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">
+                <h3 className="font-semibold text-sm text-gray-900 mb-2"> {/* Thêm text-sm */}
                   Express Shipping
                 </h3>
-                <p className="text-sm text-gray-600">
+                <p className="text-[13px] text-gray-600">
                   Fast, reliable delivery from global warehouse
                 </p>
               </div>
             </div>
+
           </div>
         </div>
       </Container>
@@ -348,9 +353,8 @@ const CartPageClient = () => {
         showSocialShare={true}
         shareData={{
           title: "My Shopping Cart",
-          text: `Check out my cart with ${cartItemsWithQuantities.length} item${
-            cartItemsWithQuantities.length !== 1 ? "s" : ""
-          } from Babyshop`,
+          text: `Check out my cart with ${cartItemsWithQuantities.length} item${cartItemsWithQuantities.length !== 1 ? "s" : ""
+            } from Babyshop`,
           url: typeof window !== "undefined" ? window.location.href : "",
         }}
       />

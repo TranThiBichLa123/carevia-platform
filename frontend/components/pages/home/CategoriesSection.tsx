@@ -90,7 +90,7 @@ const CategoriesSection = () => {
       {/* 1. DANH MỤC SẢN PHẨM */}
       <div className="flex items-center gap-2 px-4 py-3 cursor-pointer hover:text-[#20afb2] transition-colors border-r border-gray-100">
         <Menu size={18} />
-        <span className="text-[13px] font-bold uppercase whitespace-nowrap">
+        <span className="text-[13px] font-semibold uppercase whitespace-nowrap">
           Danh mục sản phẩm
         </span>
       </div>
