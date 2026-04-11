@@ -3,6 +3,8 @@ import React, { useEffect, useState } from 'react';
 import { Calendar, MapPin, Clock, ChevronRight, CheckCircle2, XCircle, AlertCircle } from 'lucide-react';
 import Link from 'next/link';
 import Container from '@/components/common/Container';
+import { motion } from 'framer-motion';
+
 
 const MyBookings = () => {
     const STORAGE_KEY = 'carevia_bookings';
@@ -63,43 +65,79 @@ const MyBookings = () => {
         }
     };
 
-    if (loading) return <div className="text-center py-20 uppercase font-black tracking-widest text-gray-300">Đang tải lịch hẹn...</div>;
+    if (loading) return <div className="text-center py-20 font-black text-gray-300">Đang tải lịch hẹn...</div>;
 
 
     return (
         <Container className="min-h-screen bg-[#f8f9fa] pb-20">
             {/* Header */}
-            <div className="bg-white border-b border-gray-200 sticky top-0 z-10">
-                {/* Breadcrumb - Style Watsons tối giản */}
-                <div className="bg-white border-b border-gray-200">
-                    <div className="container mx-auto px-4 py-3">
-                        <nav className="text-[11px] uppercase tracking-wider text-gray-400 flex items-center gap-2">
-                            <Link href="/client" className="hover:text-primary transition-colors">
+            <div className=" sticky top-0 z-10">
+                {/* Breadcrumb - Hiển thị đúng chữ TRANG CHỦ thay vì Icon */}
+                <div className="">
+                    <div className="container px-4 py-3">
+                        <nav className="flex items-center text-[13px] gap-2">
+                            {/* Giữ nguyên chữ Trang Chủ */}
+                            <Link
+                                href="/client"
+                                className="text-[13px]  tracking-wider text-gray-500 hover:text-black transition-colors font-medium"
+                            >
                                 Trang chủ
                             </Link>
-                            <span className="text-gray-300">/</span>
-                            <span className="text-gray-900 font-bold">Lịch hẹn của tôi</span>
+
+                            {/* Dấu gạch chéo mờ */}
+                            <span className="text-gray-300 font-light mx-1 text-[13px]">/</span>
+
+                            {/* Phần trang hiện tại: Viết hoa, Đậm, Màu đen */}
+                            <span className="text-[13px]  tracking-wider text-gray-900">
+                                Lịch hẹn của tôi
+                            </span>
                         </nav>
                     </div>
                 </div>
 
-                {/* Filter Tabs */}
-                <div className="max-w-4xl mx-auto px-4 flex gap-8">
-                    {['all', 'upcoming', 'completed', 'cancelled'].map((tab) => (
-                        <button
-                            key={tab}
-                            onClick={() => setFilter(tab)}
-                            className={`py-3 text-[11px] font-black uppercase tracking-widest border-b-2 transition-all ${filter === tab ? 'border-[#00b2bd] text-[#00b2bd]' : 'border-transparent text-gray-400'
-                                }`}
-                        >
-                            {tab === 'all' ? 'Tất cả' : tab === 'upcoming' ? 'Sắp tới' : tab === 'completed' ? 'Đã xong' : 'Đã hủy'}
-                        </button>
-                    ))}
-                </div>
+
             </div>
 
             {/* Booking List */}
-            <div className=" px-4 mt-8 space-y-4">
+            <div className=" px-3 space-y-4">
+                {/* tab phân loại */}
+                <div className="flex px-4 border-b border-gray-200 bg-white">
+                    {['all', 'upcoming', 'completed', 'cancelled'].map((tab) => {
+                        const isActive = filter === tab;
+                        return (
+                            <button
+                                key={tab}
+                                onClick={() => setFilter(tab)}
+                                className={`relative px-6 py-4 text-[11px] font-black uppercase tracking-widest transition-colors duration-300 min-w-[100px] ${isActive ? 'text-[#00b2bd]' : 'text-gray-400 hover:text-gray-600'
+                                    }`}
+                            >
+                                {/* Nội dung Tab: Icon (nếu có) và Chữ */}
+                                <div className="relative z-10 flex flex-col items-center gap-1">
+                                    {/* Bạn có thể thêm Icon ở đây nếu muốn giống hình mẫu */}
+                                    <span>
+                                        {tab === 'all' ? 'Tất cả' : tab === 'upcoming' ? 'Sắp tới' : tab === 'completed' ? 'Đã xong' : 'Đã hủy'}
+                                    </span>
+                                </div>
+
+                                {/* Khối bọc quanh trượt (Active Indicator) */}
+                                {/* Hiệu ứng "Cuộn giấy" bao quanh khi Active */}
+                {isActive && (
+                    <motion.div
+                        layoutId="activeTabWrapper"
+                        className="absolute inset-0 z-0"
+                        transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    >
+                        {/* Khối nền nhô cao hơn (dùng shadow nhẹ và bo góc trên) */}
+                        <div className="absolute inset-x-1 -top-2 bottom-0 bg-[#f0f9fa] rounded-t-2xl shadow-[0_-4px_10px_rgba(0,0,0,0.03)] border-x border-t border-gray-100/50" />
+                        
+                        {/* Thanh Bar đậm dưới chân - đặc trưng như hình mẫu */}
+                        <div className="absolute bottom-0 left-0 right-0 h-[4px] bg-[#00b2bd] rounded-t-full" />
+                    </motion.div>
+                )}
+                            </button>
+                        );
+                    })}
+                </div>
                 {bookings
                     .filter(b => filter === 'all' || b.status === filter)
                     .map((booking) => {

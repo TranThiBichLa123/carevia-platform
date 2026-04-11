@@ -7,9 +7,9 @@
   /* Brand Colors */
   --primary: #159fd8;
   /* Nếu bạn muốn hover khác màu thì đổi mã ở đây, hiện tại đang để giống nhau theo ý bạn */
-  --primary-hover: #159fd8; 
+  --primary-hover: #159fd8;
   --primary-light: #e8f4fb;
-  
+
   --secondary: #fbbf24;
   --accent: #ef4444;
 
@@ -24,14 +24,14 @@
   --color-primary: var(--primary);
   --color-primary-hover: var(--primary-hover);
   --color-primary-light: var(--primary-light);
-  
+
   --color-secondary: var(--secondary);
   --color-accent: var(--accent);
-  
+
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);
   --color-border: var(--border);
-  
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
 
@@ -58,9 +58,42 @@ body {
   --animate-spin-slow: spin 15s linear infinite;
 
   @keyframes blob {
-    0% { transform: translate(0px, 0px) scale(1); }
-    33% { transform: translate(30px, -50px) scale(1.1); }
-    66% { transform: translate(-20px, 20px) scale(0.9); }
-    100% { transform: translate(0px, 0px) scale(1); }
+    0% {
+      transform: translate(0px, 0px) scale(1);
+    }
+
+    33% {
+      transform: translate(30px, -50px) scale(1.1);
+    }
+
+    66% {
+      transform: translate(-20px, 20px) scale(0.9);
+    }
+
+    100% {
+      transform: translate(0px, 0px) scale(1);
+    }
   }
+}
+
+@keyframes scroll {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll {
+  display: flex;
+  width: max-content;
+  animation: scroll 30s linear infinite;
+  /* Điều chỉnh 30s để nhanh/chậm tùy ý */
+}
+
+.animate-scroll:hover {
+  animation-play-state: paused;
+  /* Dừng lại khi di chuột vào */
 }
