@@ -38,8 +38,8 @@ const Footer = () => {
       {/* FooterMiddle - Giảm py-10 xuống py-8 để gọn hơn */}
       <Container className="py-4 hidden md:grid grid-cols-2 lg:grid-cols-4 gap-5">
         <div>
-          {/* Title text-base = 16px khớp với TopFooter */}
-          <Title className="text-base font-semibold mb-3">Information</Title>
+          {/* Title text-[15px] khớp với TopFooter */}
+          <Title className="text-[15px] font-semibold mb-3">Information</Title>
           <div className="flex flex-col gap-2">
             {informationTab?.map((item) => (
               <Link
@@ -53,7 +53,7 @@ const Footer = () => {
           </div>
         </div>
         <div>
-          <Title className="text-base font-semibold mb-3">Customer Care</Title>
+          <Title className="text-[15px] font-semibold mb-3">Customer Care</Title>
           <div className="flex flex-col gap-2">
             {CustomerTab?.map((item) => (
               <Link
@@ -67,7 +67,7 @@ const Footer = () => {
           </div>
         </div>{" "}
         <div>
-          <Title className="text-base font-semibold mb-3">Other Business</Title>
+          <Title className="text-[15px] font-semibold mb-3">Other Business</Title>
           <div className="flex flex-col gap-2">
             {OthersTab?.map((item) => (
               <Link
@@ -81,7 +81,7 @@ const Footer = () => {
           </div>
         </div>
         <div>
-          <Title className="text-base font-semibold mb-3">Newsletter</Title>
+          <Title className="text-[15px] font-semibold mb-3">Newsletter</Title>
           <div className="flex flex-col gap-2 relative">
             {/* Thu nhỏ chiều cao input từ h-14 xuống h-12 cho cân đối */}
             <input

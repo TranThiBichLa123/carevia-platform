@@ -16,11 +16,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="vi">
       <body className={`antialiased`}>
         <AuthInitializer />
         <Header />
-        <div className="bg-gray-100 min-h-screen pb-20">{children}</div>
+        <div className="bg-white min-h-screen pb-20">{children}</div>
         <Footer />
         <Toaster
           position="bottom-right"

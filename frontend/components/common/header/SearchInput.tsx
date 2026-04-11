@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDebounce } from "use-debounce";
 import { motion, AnimatePresence } from "framer-motion";
 import AddToCartButton from "../products/AddToCartButton";
+import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
 interface ProductsResponse {
   products: Product[];
@@ -17,10 +18,8 @@ interface ProductsResponse {
 }
 
 const placeholders = [
-  "Hàng mới về",
   "DEAL HOT hôm nay",
   "Sản phẩm bán chạy",
-  "Sản phẩm được yêu thích",
   "Tìm kiếm tại đây",
 ];
 
@@ -106,12 +105,16 @@ const SearchInput = () => {
   );
 
   useEffect(() => {
-    const timer = setInterval(() => {
-      setPlaceholderIndex((prevIndex) => (prevIndex + 1) % placeholders.length);
-    }, 3000);
+    // Xác định thời gian chờ: nếu là bước cuối (Lottie) thì 5s, còn lại 3s
+    const delay = placeholderIndex === placeholders.length ? 5000 : 3000;
 
-    return () => clearInterval(timer);
-  }, []);
+    const timer = setTimeout(() => {
+      setPlaceholderIndex((prevIndex) => (prevIndex + 1) % (placeholders.length + 1));
+    }, delay);
+
+    return () => clearTimeout(timer); // Xóa timer cũ khi index thay đổi
+  }, [placeholderIndex]); // Chạy lại mỗi khi placeholderIndex thay đổi
+
 
   useEffect(() => {
     fetchFeaturedProducts();
@@ -155,6 +158,25 @@ const SearchInput = () => {
     setSearch("");
   };
 
+  const [charFrame, setCharFrame] = useState(0);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCharFrame((prev) => (prev === 0 ? 1 : 0));
+    }, 600);
+    return () => clearInterval(timer);
+  }, []);
+
+  const [welcomeAnimData, setWelcomeAnimData] = useState<any>(null);
+
+  useEffect(() => {
+    // Tải file từ thư mục public
+    fetch("/assets/animation/welcome.json")
+      .then((res) => res.json())
+      .then((data) => setWelcomeAnimData(data))
+      .catch((err) => console.error("Lỗi tải animation:", err));
+  }, []);
+
   return (
     <div ref={searchRef} className="relative lg:w-full">
       <button onClick={toggleMobileSearch} className="lg:hidden mt-1.5">
@@ -181,21 +203,45 @@ const SearchInput = () => {
           />
 
           {search === "" && (
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none overflow-hidden h-5 flex items-center">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 pointer-events-none overflow-hidden h-12 flex items-center z-20">
               <AnimatePresence mode="wait">
-                <motion.span
-                  key={placeholderIndex}
-                  initial={{ y: 20, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  exit={{ y: -20, opacity: 0 }}
-                  transition={{ duration: 0.5, ease: "easeInOut" }}
-                  className="text-gray-400 font-medium text-sm block"
-                >
-                  {placeholders[placeholderIndex]}
-                </motion.span>
+                {placeholderIndex < placeholders.length ? (
+                  <motion.span
+                    key={placeholderIndex}
+                    initial={{ y: 20, opacity: 0 }}
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -20, opacity: 0 }}
+                    transition={{ duration: 0.5, ease: "easeInOut" }}
+                    className="text-gray-400 font-medium text-sm block"
+                  >
+                    {placeholders[placeholderIndex]}
+                  </motion.span>
+                ) : (
+                  /* Thay thế nhân vật bằng Lottie Welcome */
+                  <motion.div
+                    key="welcome-lottie"
+                    initial={{ y: 10, opacity: 0 }} // Giảm độ nảy (y) xuống cho mượt
+                    animate={{ y: 0, opacity: 1 }}
+                    exit={{ y: -10, opacity: 0 }}
+                    transition={{ duration: 0.8 }} // Tăng thời gian hiệu ứng xuất hiện (0.5 -> 0.8)
+                    className="flex items-center"
+                  >
+                    {/* Giảm w-24 xuống w-16 hoặc w-20 để nhỏ lại */}
+                    <div className="w-16 md:w-20 h-auto overflow-hidden">
+                      <DotLottieReact
+                        src="https://lottie.host/a36bed6a-641b-45d6-a0b3-64ed1909782d/xzsU5YqqxW.lottie"
+                        loop
+                        autoplay
+                        // Thêm style để đảm bảo nó nằm gọn trong khung
+                        style={{ width: '100%', height: '100%', transform: 'scale(1.2)' }}
+                      />
+                    </div>
+                  </motion.div>
+                )}
               </AnimatePresence>
             </div>
           )}
+
 
           <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-3">
             <button
