@@ -34,7 +34,7 @@ import com.carevia.shared.mapper.AccountMapper;
 import com.carevia.shared.mapper.LogMapper;
 import com.carevia.shared.mapper.StaffMapper;
 import com.carevia.shared.mapper.ClientMapper;
-import com.carevia.shared.util.export.CloudinaryUtils;
+import com.carevia.shared.util.CloudinaryUtils;
 import com.carevia.shared.util.SecurityUtils;
 
 import java.util.List;

@@ -1,4 +1,4 @@
-package com.carevia.shared.util.export;
+package com.carevia.shared.util;
 
 
 import com.cloudinary.Cloudinary;
