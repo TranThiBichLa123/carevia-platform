@@ -16,7 +16,8 @@ java {
 
 repositories {
     mavenCentral()
-}
+ maven { url = uri("https://jitpack.io") }
+ }
 dependencies {
     // 1. Web & Swagger (Sửa lỗi 'org.springframework.boot.webmvc')
     implementation("org.springframework.boot:spring-boot-starter-web")
@@ -47,6 +48,10 @@ dependencies {
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+
+   
+implementation("com.turkraft.springfilter:jpa:3.1.9")
+
 }
 
 
