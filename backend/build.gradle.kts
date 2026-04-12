@@ -17,25 +17,38 @@ java {
 repositories {
     mavenCentral()
 }
-
 dependencies {
-    // 1. Web Starter (BẮT BUỘC - Sửa từ webmvc thành web)
+    // 1. Web & Swagger (Sửa lỗi 'org.springframework.boot.webmvc')
     implementation("org.springframework.boot:spring-boot-starter-web")
-    
-    // 2. Swagger UI (Dùng bản 2.5.0 cực kỳ ổn định với Spring Boot 3.3.5)
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
 
-    // 3. Các thư viện khác
-    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
+    // 2. Security & OAuth2 (Sửa lỗi 'org.springframework.security.oauth2')
     implementation("org.springframework.boot:spring-boot-starter-security")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
+    implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
+
+    // 3. Mail & Thymeleaf (Sửa lỗi 'jakarta.mail', 'org.springframework.mail', 'org.thymeleaf')
+    implementation("org.springframework.boot:spring-boot-starter-mail")
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+
+    // 4. Cloudinary (Sửa lỗi 'com.cloudinary')
+    implementation("com.cloudinary:cloudinary-http44:1.36.0")
+
+    // 5. Lombok (Sửa lỗi 'import lombok')
+    compileOnly("org.projectlombok:lombok")
+    annotationProcessor("org.projectlombok:lombok")
+
+    // 6. Database & Validation
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     runtimeOnly("org.postgresql:postgresql")
     
-    // 4. Test (Chỉ cần 2 dòng này là đủ cho các loại test)
+    // 7. Test
     testImplementation("org.springframework.boot:spring-boot-starter-test")
     testImplementation("org.springframework.security:spring-security-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 }
+
 
 tasks.withType<Test> {
     useJUnitPlatform()
