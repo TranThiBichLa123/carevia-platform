@@ -19,7 +19,7 @@ export const useLogin = () => {
       // Lưu thông tin User (chuyển Object thành String) để hiển thị tên/avatar ở Header
       localStorage.setItem('user_info', JSON.stringify(res.user));
 
-      console.log("Đăng nhập thành công! Chào mừng", res.user.username);
+      // console.log("Đăng nhập thành công! Chào mừng", res.user.username);
     },
 
     // 3. Xử lý khi có lỗi (Sai mật khẩu, không tìm thấy user...)

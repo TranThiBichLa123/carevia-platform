@@ -72,6 +72,15 @@ const addressSchema = z.object({
 
 type FormData = z.infer<typeof updateSchema>;
 type AddressFormData = z.infer<typeof addressSchema>;
+type ProfileAddress = AddressFormData & { _id: string };
+type ProfileUser = {
+  _id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  role: string;
+  addresses?: ProfileAddress[];
+};
 
 const ProfilePage = () => {
   const [isLoading, setIsLoading] = useState(false);
@@ -88,6 +97,17 @@ const ProfilePage = () => {
   const router = useRouter();
   const { authUser, updateUser, logoutUser } = useUserStore();
   const { cartItems } = useCartStore();
+
+  const syncProfileUser = (user: ProfileUser) => {
+    updateUser({
+      _id: user._id,
+      name: user.name,
+      email: user.email,
+      avatar: user.avatar,
+      role: user.role,
+      addresses: user.addresses || [],
+    });
+  };
 
   const updateForm = useForm<FormData>({
     resolver: zodResolver(updateSchema),
@@ -169,16 +189,12 @@ const ProfilePage = () => {
     }
 
     try {
-      const response = await authApi.put(`/users/${authUser._id}`, updateData);
+      const response = await authApi.put<ProfileUser>(
+        `/users/${authUser._id}`,
+        updateData
+      );
       if (response.success && response.data) {
-        updateUser({
-          _id: response.data._id,
-          name: response.data.name,
-          email: response.data.email,
-          avatar: response.data.avatar,
-          role: response.data.role,
-          addresses: response.data.addresses || [],
-        });
+        syncProfileUser(response.data);
         toast.success("Profile updated", {
           description: "Your profile has been updated successfully.",
           className: "bg-green-50 text-gray-800 border-green-200",
@@ -227,18 +243,14 @@ const ProfilePage = () => {
     }
 
     try {
-      const response = await authApi.put(`/users/${authUser._id}`, {
-        addresses: newAddresses,
-      });
+      const response = await authApi.put<ProfileUser>(
+        `/users/${authUser._id}`,
+        {
+          addresses: newAddresses,
+        }
+      );
       if (response.success && response.data) {
-        updateUser({
-          _id: response.data._id,
-          name: response.data.name,
-          email: response.data.email,
-          avatar: response.data.avatar,
-          role: response.data.role,
-          addresses: response.data.addresses || [],
-        });
+        syncProfileUser(response.data);
         toast.success("Address saved", {
           description: editingAddress
             ? "Address updated successfully."
@@ -280,18 +292,14 @@ const ProfilePage = () => {
       (_, i) => i !== parseInt(selectedAddressId)
     );
     try {
-      const response = await authApi.put(`/api/users/${authUser._id}`, {
-        addresses: newAddresses,
-      });
+      const response = await authApi.put<ProfileUser>(
+        `/users/${authUser._id}`,
+        {
+          addresses: newAddresses,
+        }
+      );
       if (response.success && response.data) {
-        updateUser({
-          _id: response.data._id,
-          name: response.data.name,
-          email: response.data.email,
-          avatar: response.data.avatar,
-          role: response.data.role,
-          addresses: response.data.addresses || [],
-        });
+        syncProfileUser(response.data);
         toast.success("Address deleted", {
           description: "Address removed successfully.",
           className: "bg-green-50 text-gray-800 border-green-200",
@@ -319,7 +327,7 @@ const ProfilePage = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-200 py-12 px-4 sm:px-6 lg:px-8"
+      className="min-h-screen bg-linear-to-br from-gray-50 to-gray-200 py-12 px-4 sm:px-6 lg:px-8"
     >
       <div className="max-w-4xl mx-auto space-y-8">
         {/* User Information */}
@@ -608,7 +616,7 @@ const ProfilePage = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Link href={"/user/orders"}>
+            <Link href={"/client/user/orders"}>
               <Button variant={"outline"}>View all orders</Button>
             </Link>
           </CardContent>
@@ -616,7 +624,7 @@ const ProfilePage = () => {
 
         {/* Address Dialog */}
         <Dialog open={isAddressModalOpen} onOpenChange={setIsAddressModalOpen}>
-          <DialogContent className="sm:max-w-[550px] bg-white rounded-xl shadow-2xl p-6">
+          <DialogContent className="sm:max-w-137.5 bg-white rounded-xl shadow-2xl p-6">
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold text-gray-900">
                 {editingAddress ? "Edit Address" : "Add Address"}
@@ -776,7 +784,7 @@ const ProfilePage = () => {
 
         {/* Delete Address Dialog */}
         <Dialog open={isDeleteModalOpen} onOpenChange={setIsDeleteModalOpen}>
-          <DialogContent className="sm:max-w-[425px] bg-white rounded-xl shadow-2xl p-6">
+          <DialogContent className="sm:max-w-106.25 bg-white rounded-xl shadow-2xl p-6">
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold text-gray-900">
                 Delete Address
@@ -836,7 +844,7 @@ const ProfilePage = () => {
 
         {/* Logout Confirmation Dialog */}
         <Dialog open={isLogoutModalOpen} onOpenChange={setIsLogoutModalOpen}>
-          <DialogContent className="sm:max-w-[425px] bg-white rounded-xl shadow-2xl p-6">
+          <DialogContent className="sm:max-w-106.25 bg-white rounded-xl shadow-2xl p-6">
             <DialogHeader>
               <DialogTitle className="text-2xl font-bold text-gray-900">
                 Confirm Logout

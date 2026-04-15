@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import ReactQueryProvider from "@/components/providers/ReactQueryProvider"
+import ReactQueryProvider from "@/components/providers/ReactQueryProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,9 +17,8 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Carevia - Platform",
   description: "Nền tảng bán thiết bị chăm sóc da và đặt lịch trải nghiệm thực tế",
-  // 1. Thêm logo ở đây (đảm bảo file logo nằm trong thư mục public)
   icons: {
-    icon: "/icon.ico", // Hoặc "/logo.png"
+    icon: "/icon.ico",
   },
 };
 
@@ -31,10 +31,18 @@ export default function RootLayout({
     <html lang="vi" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        suppressHydrationWarning
       >
-        {/* 2. Bọc ReactQueryProvider ở đây */}
         <ReactQueryProvider>
           {children}
+
+          {/* TOASTER DUY NHẤT TOÀN APP: Đặt ở đây để tránh lặp thông báo */}
+          <Toaster
+            richColors
+            position="top-right"
+            closeButton
+            expand={false}
+          />
         </ReactQueryProvider>
       </body>
     </html>

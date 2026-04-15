@@ -7,7 +7,8 @@ import { ShoppingCart, ShoppingBag, Package } from "lucide-react";
 import { toast } from "sonner";
 import { ENV } from "@/config/env";
 import { authService } from "@/services/auth/auth.service";
-
+import { useUserStore } from "@/lib/store";
+import { AuthResponse } from "@/services/auth/auth.types";
 const logoImage = "/assets/images/logo_final.png";
 const leftImage = "/assets/images/leftsignin.png";
 
@@ -16,7 +17,7 @@ export default function LoginPage() {
   const [login, setLogin] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-
+  const { setAuthToken, updateUser } = useUserStore();
   const animationSpeed = 0.8;
 
   const getRedirectPath = (role: string) => {
@@ -45,20 +46,27 @@ export default function LoginPage() {
         login: login.trim(),
         password,
       });
+      // ✅ BƯỚC 1: Cập nhật Token (Hàm này của bạn sẽ tự lưu vào Cookie)
+      setAuthToken(response.accessToken);
 
+      updateUser({
+        ...response.user,
+        _id: response.user.id.toString(), // Store cần _id (string)
+        name: response.user.fullName || response.user.username, // Store cần name
+      } as any);
+      // Lưu thêm các token khác vào localStorage nếu cần cho logic cũ
       localStorage.setItem(ENV.TOKEN_KEY, response.accessToken);
       localStorage.setItem(ENV.REFRESH_TOKEN_KEY, response.refreshToken);
-      localStorage.setItem("user_info", JSON.stringify(response.user));
+     toast.success("Đăng nhập thành công! Chào mừng " + response.user.username);
 
-      toast.success("Dang nhap thanh cong", {
-        description: `Xin chao ${response.user.fullName || response.user.username}`,
-      });
 
       router.push(getRedirectPath(response.user.role));
-      router.refresh();
+      // router.push("/");
+
+      // router.refresh();
     } catch (error) {
-      toast.error("Dang nhap that bai", {
-        description: error instanceof Error ? error.message : "Vui long thu lai",
+      toast.error("Đăng nhập thất bại", {
+        description: error instanceof Error ? error.message : "Vui lòng thử lại",
       });
     } finally {
       setIsSubmitting(false);

@@ -1,22 +1,30 @@
+"use client"; // Thêm dòng này nếu bạn dùng các Component phía dưới
 
-import type { Metadata } from "next";
 import Header from "@/components/common/header/Header";
 import Footer from "@/components/common/footer/Footer";
-import { Toaster } from "sonner";
 import AuthInitializer from "@/components/pages/auth/AuthInitializer";
 
-export const metadata: Metadata = {
-  title: "SkinDeviceShop | Online shopping places",
-  description: "SkinDeviceShop for online shopping",
-};
-
-export default function RootLayout({
+export default function ClientLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="vi">
+    <>
+      {/* 1. Giữ lại logic khởi tạo và giao diện đặc thù cho trang Client */}
+      <AuthInitializer />
+      <Header />
+
+      <div className="bg-white min-h-screen pb-20">
+        {children}
+      </div>
+
+      <Footer />
+
+      {/* ❌ ĐÃ XÓA: <html>, <body> và <Toaster /> 
+          Những cái này phải để ở src/app/layout.tsx (file gốc) 
+
+          <html lang="vi">
       <body className={`antialiased`}>
         <AuthInitializer />
         <Header />
@@ -31,5 +39,7 @@ export default function RootLayout({
         />
       </body>
     </html>
+      */}
+    </>
   );
 }
