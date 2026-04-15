@@ -16,6 +16,10 @@ const geistMono = Geist_Mono({
 export const metadata: Metadata = {
   title: "Carevia - Platform",
   description: "Nền tảng bán thiết bị chăm sóc da và đặt lịch trải nghiệm thực tế",
+  // 1. Thêm logo ở đây (đảm bảo file logo nằm trong thư mục public)
+  icons: {
+    icon: "/icon.ico", // Hoặc "/logo.png"
+  },
 };
 
 export default function RootLayout({
@@ -24,11 +28,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="vi" suppressHydrationWarning>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-         {/* 2. Bọc ReactQueryProvider ở đây */}
+        {/* 2. Bọc ReactQueryProvider ở đây */}
         <ReactQueryProvider>
           {children}
         </ReactQueryProvider>
