@@ -1,35 +1,57 @@
 server:
   port: 8080
 
+jwt:
+  secret: ${JWT_SECRET:carevia-local-jwt-secret-carevia-2026-key}
+  access-token:
+    expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:3600}
+  refresh-token:
+    expiration: ${JWT_REFRESH_TOKEN_EXPIRATION:2592000}
+
 spring:
   application:
     name: carevia-backend
   datasource:
-    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/carevia}
-    username: ${SPRING_DATASOURCE_USERNAME:carevia}
-    password: ${SPRING_DATASOURCE_PASSWORD:carevia}
+    # Kết nối đến service 'postgres' trong docker-compose
+    # url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/carevia}
+    # Thêm tham số serverTimezone hoặc bỏ qua việc set timezone từ client
+    url: jdbc:postgresql://localhost:5432/carevia?options=-c%20timezone=UTC
+    username: ${SPRING_DATASOURCE_USERNAME:carevia_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:admin}
   jpa:
+    # Dòng này cực kỳ quan trọng để sửa lỗi "Unable to determine Dialect"
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
       ddl-auto: update
     show-sql: true
 
 # Cấu hình MinIO
 minio:
-  endpoint: ${MINIO_ENDPOINT:http://localhost:9000}
+  endpoint: ${MINIO_ENDPOINT:http://minio:9000}
   access-key: ${MINIO_ACCESS_KEY:admin}
   secret-key: ${MINIO_SECRET_KEY:carevia_minio_secret}
   bucket: ${MINIO_BUCKET_NAME:carevia-products}
 
-# Cấu hình ZaloPay (Dành cho ZaloPayConfig.java của bạn)
+# Cấu hình ZaloPay
 zalopay:
-  app-id: ${ZALOPAY_APP_ID}
-  key1: ${ZALOPAY_KEY1}
-  key2: ${ZALOPAY_KEY2}
-  endpoint: ${ZALOPAY_ENDPOINT}
+  app-id: ${ZALOPAY_APP_ID:2553}
+  key1: ${ZALOPAY_KEY1:9ph31jnse3ke2urj1u939as6p02m5ba8}
+  key2: ${ZALOPAY_KEY2:Iyz2habByrTH08sS79ESt7nnEnu9u788}
+  endpoint: ${ZALOPAY_ENDPOINT:https://zalopay.vn}
 
-# Cấu hình Notification 
+# Cấu hình App (Avatar & Websocket)
 app:
+  avatar:
+    # FIX LỖI "app.avatar.folder" VÀ "app.avatar.max-size-bytes"
+    folder: ${APP_AVATAR_FOLDER:avatars}
+    max-size-bytes: ${APP_AVATAR_MAX_SIZE:5242880} # Mặc định 5MB
+    default-url: "${APP_DEFAULT_AVATAR_URL:https://ui-avatars.com}"
   websocket:
     endpoint: "/ws-notification"
     topic: "/topic/messages"
 
+# Cấu hình Cloudinary
+cloudinary:
+  cloud_name: ${CLOUDINARY_CLOUD_NAME:dcisx0vss}
+  api_key: ${CLOUDINARY_API_KEY:853988661563551}
+  api_secret: ${CLOUDINARY_API_SECRET:enx1WB_Hsff4ebdfUnnYBAwOawI}

@@ -47,18 +47,26 @@ services:
     depends_on:
       - postgres
       - minio
+     # THÊM DÒNG NÀY ĐỂ ĐỌC FILE .ENV
+    env_file:
+      - .env
     environment:
       SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/${DB_NAME}
       SPRING_DATASOURCE_USERNAME: ${DB_USER}
       SPRING_DATASOURCE_PASSWORD: ${DB_PASSWORD}
+
       MINIO_ENDPOINT: http://minio:9000
       MINIO_ACCESS_KEY: ${MINIO_ROOT_USER}
       MINIO_SECRET_KEY: ${MINIO_ROOT_PASSWORD}
       MINIO_BUCKET: ${MINIO_BUCKET_NAME}
+      
       ZALOPAY_APP_ID: ${ZALOPAY_APP_ID}
       ZALOPAY_KEY1: ${ZALOPAY_KEY1}
       ZALOPAY_KEY2: ${ZALOPAY_KEY2}
       ZALOPAY_ENDPOINT: ${ZALOPAY_ENDPOINT}
+      CLOUDINARY_CLOUD_NAME: ${CLOUDINARY_CLOUD_NAME}
+      CLOUDINARY_API_KEY: ${CLOUDINARY_API_KEY}
+      CLOUDINARY_API_SECRET: ${CLOUDINARY_API_SECRET}
     restart: unless-stopped
 
 volumes:

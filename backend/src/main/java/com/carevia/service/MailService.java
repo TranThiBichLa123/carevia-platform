@@ -6,6 +6,7 @@ import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.MessageSource;
 import org.springframework.mail.MailException;
 import org.springframework.mail.javamail.JavaMailSender;
@@ -38,16 +39,16 @@ public class MailService {
 
     private static final String API_VERSION = "apiVersion";
 
-    @Value("${spring.mail.username")
+    @Value("${spring.mail.username:noreply@carevia.local}")
     private String sender;
 
-    @Value("${app.base-url}")
+    @Value("${app.base-url:http://localhost:8080}")
     private String baseUrl;
 
-    @Value("${app.frontend-url}")
+    @Value("${app.frontend-url:http://localhost:3000}")
     private String frontendUrl;
 
-    @Value("${app.api-version}")
+    @Value("${app.api-version:v1}")
     private String apiVersion;
 
     private final JavaMailSender javaMailSender;
@@ -58,12 +59,12 @@ public class MailService {
 
 
     public MailService(
-            JavaMailSender javaMailSender,
+            ObjectProvider<JavaMailSender> javaMailSenderProvider,
             MessageSource messageSource,
             SpringTemplateEngine templateEngine
 
     ) {
-        this.javaMailSender = javaMailSender;
+        this.javaMailSender = javaMailSenderProvider.getIfAvailable();
         this.messageSource = messageSource;
         this.templateEngine = templateEngine;
 
@@ -130,6 +131,11 @@ public class MailService {
     }
 
     private void sendEmailSync(String to, String subject, String content, boolean isMultipart, boolean isHtml) {
+        if (javaMailSender == null) {
+            LOG.warn("Mail sender is not configured. Skipping email to '{}' with subject '{}'", to, subject);
+            return;
+        }
+
         LOG.debug(
                 "Send email[multipart '{}' and html '{}'] to '{}' with subject '{}' and content={}",
                 isMultipart,

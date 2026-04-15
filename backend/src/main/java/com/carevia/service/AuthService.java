@@ -3,6 +3,7 @@ package com.carevia.service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -25,6 +26,7 @@ import com.carevia.shared.mapper.AccountMapper;
 import com.carevia.shared.util.SecurityUtils;
 import com.carevia.shared.util.TokenHashUtil;
 import com.carevia.shared.annotation.EnableSoftDeleteFilter;
+import org.springframework.context.annotation.Lazy;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -32,8 +34,10 @@ import java.time.temporal.ChronoUnit;
 /**
  * AuthService - Thin orchestrator following Rich Domain Model pattern
  * <p>
- * This service coordinates authentication workflows and delegates business logic to domain entities.
- * Domain entities (Account, EmailVerification, Teacher, Student) encapsulate their own behavior.
+ * This service coordinates authentication workflows and delegates business
+ * logic to domain entities.
+ * Domain entities (Account, EmailVerification, Teacher, Student) encapsulate
+ * their own behavior.
  * </p>
  */
 @Service
@@ -41,7 +45,7 @@ public class AuthService {
 
     private final AccountRepository accountRepository;
     private final MailService emailService;
-    private final AuthenticationManagerBuilder authenticationManagerBuilder;
+    private final AuthenticationManager authenticationManager; // Thêm dòng này
     private final SecurityUtils securityUtils;
     private final ClientRepository clientRepository;
     private final StaffRepository staffRepository;
@@ -53,25 +57,24 @@ public class AuthService {
 
     private static final Logger log = LoggerFactory.getLogger(AuthService.class);
 
-
     /**
      * Constructs an {@code AuthService} with all required dependencies.
      */
     public AuthService(AccountRepository accountRepository,
-                       MailService emailService,
-                       AuthenticationManagerBuilder authenticationManagerBuilder,
-                       SecurityUtils securityUtils,
-                       ClientRepository clientRepository,
-                       StaffRepository staffRepository,
-                       PasswordEncoder passwordEncoder,
-                       ApplicationEventPublisher eventPublisher,
-                       RefreshTokenService refreshTokenService,
-                       EmailVerificationService emailVerificationService,
-                       EmailVerificationRepository emailVerificationRepository) {
+            MailService emailService,
+           @Lazy  AuthenticationManager authenticationManager,
+            SecurityUtils securityUtils,
+            ClientRepository clientRepository,
+            StaffRepository staffRepository,
+            PasswordEncoder passwordEncoder,
+            ApplicationEventPublisher eventPublisher,
+            RefreshTokenService refreshTokenService,
+            EmailVerificationService emailVerificationService,
+            EmailVerificationRepository emailVerificationRepository) {
         this.emailVerificationRepository = emailVerificationRepository;
         this.accountRepository = accountRepository;
         this.emailService = emailService;
-        this.authenticationManagerBuilder = authenticationManagerBuilder;
+        this.authenticationManager = authenticationManager;
         this.securityUtils = securityUtils;
         this.clientRepository = clientRepository;
         this.staffRepository = staffRepository;
@@ -84,14 +87,15 @@ public class AuthService {
     /**
      * Registers a new account and sends an email verification link.
      * <p>
-     * Service orchestrates: duplicate check, deletion, save, token creation, email event
+     * Service orchestrates: duplicate check, deletion, save, token creation, email
+     * event
      * Business logic is in the Account entity
      * </p>
      *
      * @param account the account entity to register
      * @return the saved {@link Account} entity
      * @throws UsernameAlreadyUsedException if the username is already used
-     * @throws EmailAlreadyUsedException if the email is already used
+     * @throws EmailAlreadyUsedException    if the email is already used
      */
     @Transactional
     @EnableSoftDeleteFilter
@@ -120,7 +124,8 @@ public class AuthService {
         // Save account (entity manages its own status)
         Account saved = accountRepository.save(account);
 
-        EmailVerification emailVerification = emailVerificationService.generateVerificationToken(saved, TokenType.VERIFY_EMAIL);
+        EmailVerification emailVerification = emailVerificationService.generateVerificationToken(saved,
+                TokenType.VERIFY_EMAIL);
         String rawToken = emailVerification.getPlainToken();
 
         // Publish event for email sending
@@ -132,7 +137,8 @@ public class AuthService {
     /**
      * Authenticates a user and generates access and refresh tokens.
      * <p>
-     * Service orchestrates: authentication, token generation, DB updates, event publishing
+     * Service orchestrates: authentication, token generation, DB updates, event
+     * publishing
      * Business logic for status management is in Account entity
      * </p>
      *
@@ -144,60 +150,62 @@ public class AuthService {
     @EnableSoftDeleteFilter
     public ResLoginDTO login(ReqLoginDTO reqLoginDTO) {
 
-        // Authenticate credentials
-        UsernamePasswordAuthenticationToken authenticationToken =
-                new UsernamePasswordAuthenticationToken(reqLoginDTO.getLogin(), reqLoginDTO.getPassword());
+        // 1. Khởi tạo đối tượng xác thực
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                reqLoginDTO.getLogin(), reqLoginDTO.getPassword());
 
-        Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
+        // 2. SỬA TẠI ĐÂY: Sử dụng trực tiếp authenticationManager thay vì builder
+        Authentication authentication = authenticationManager.authenticate(authenticationToken);
         SecurityContextHolder.getContext().setAuthentication(authentication);
 
-        // Fetch account
+        // 3. Lấy thông tin account (Sử dụng email làm định danh)
         String email = authentication.getName();
         Account accountDB = accountRepository.findOneByEmailIgnoreCase(email)
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
 
-        // Map account to response DTO depending on role
+        // 4. Kiểm tra trạng thái tài khoản (Nghiệp vụ quan trọng)
+        if (accountDB.isPendingEmailVerification()) {
+            throw new UserNotActivatedException("Account email is not verified");
+        }
+
+        // 5. Map account ra DTO tùy theo Role
         ResLoginDTO resLoginDTO;
         switch (accountDB.getRole()) {
             case CLIENT -> {
                 Client client = clientRepository.findByAccount(accountDB)
-                        .orElseThrow(() -> new UserNotActivatedException("Account not activated"));
+                        .orElseThrow(() -> new UserNotActivatedException("Client profile not found"));
                 resLoginDTO = AccountMapper.clientToResLoginDTO(client);
             }
-
             case STAFF -> {
                 Staff staff = staffRepository.findByAccount(accountDB)
-                        .orElseThrow(() -> new UserNotActivatedException("Account not activated"));
+                        .orElseThrow(() -> new UserNotActivatedException("Staff profile not found"));
                 resLoginDTO = AccountMapper.staffToResLoginDTO(staff);
             }
-
             case ADMIN -> {
                 resLoginDTO = AccountMapper.adminToResLoginDTO(accountDB);
             }
-
             default -> throw new IllegalStateException("Unexpected role: " + accountDB.getRole());
         }
 
-        // Generate access token
+        // 6. Tạo Access Token
         String accessToken = securityUtils.createAccessToken(authentication.getName(), resLoginDTO);
         resLoginDTO.setAccessToken(accessToken);
         Instant now = Instant.now();
         resLoginDTO.setAccessTokenExpiresAt(now.plus(securityUtils.getAccessTokenExpiration(), ChronoUnit.SECONDS));
 
-        // Generate and save refresh token
+        // 7. Tạo và lưu Refresh Token
         String rawRefreshToken = securityUtils.createRefreshToken(accountDB.getEmail());
 
         RefreshToken refreshToken = refreshTokenService.issueRefreshToken(
-                            accountDB,
-                            rawRefreshToken,
-                            reqLoginDTO.getDeviceInfo(),
-                            reqLoginDTO.getIpAddress()
-                   );
+                accountDB,
+                rawRefreshToken,
+                reqLoginDTO.getDeviceInfo(),
+                reqLoginDTO.getIpAddress());
 
         resLoginDTO.setRefreshToken(rawRefreshToken);
         resLoginDTO.setRefreshTokenExpiresAt(refreshToken.getExpiresAt());
 
-        // Update last login (using domain behavior)
+        // 8. Cập nhật lần đăng nhập cuối
         accountDB.recordLogin();
         accountRepository.save(accountDB);
 
@@ -214,7 +222,8 @@ public class AuthService {
                 });
 
         // Create password reset token
-        EmailVerification verification = emailVerificationService.generateVerificationToken(accountDB, TokenType.RESET_PASSWORD);
+        EmailVerification verification = emailVerificationService.generateVerificationToken(accountDB,
+                TokenType.RESET_PASSWORD);
         String rawToken = verification.getPlainToken();
 
         // Publish event for email sending
@@ -319,8 +328,7 @@ public class AuthService {
         account.changePassword(
                 changePasswordDTO.getOldPassword(),
                 changePasswordDTO.getNewPassword(),
-                passwordEncoder
-        );
+                passwordEncoder);
 
         accountRepository.save(account);
     }
@@ -345,8 +353,7 @@ public class AuthService {
         long recentAttempts = emailVerificationRepository.countByAccountAndCreatedAtAfterAndTokenType(
                 accountDB,
                 oneHourAgo,
-                TokenType.VERIFY_EMAIL
-        );
+                TokenType.VERIFY_EMAIL);
 
         if (recentAttempts >= 3) {
             log.warn("Too many resend attempts for email: {}", email);
@@ -356,15 +363,12 @@ public class AuthService {
         // Generate new verification token using domain behavior
         EmailVerification verification = emailVerificationService.generateVerificationToken(
                 accountDB,
-                TokenType.VERIFY_EMAIL
-        );
+                TokenType.VERIFY_EMAIL);
 
         // Publish event for email sending with plain token
         eventPublisher.publishEvent(new AccountActiveEvent(accountDB, verification.getPlainToken()));
 
         log.info("Verification email resent to: {}", email);
     }
-
-
 
 }

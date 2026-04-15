@@ -1,4 +1,4 @@
-import { footerFour, footerOne, footerThree, footerTwo } from "@/assets/image";
+import { footerTwo, footerFour, footerOne, footerThree } from "@/assets/image";
 import { Product } from "@/types_enum/devices";
 import { Booking, BookingStatus, ExperienceSession, SessionStatus } from "@/types_enum/booking";
 

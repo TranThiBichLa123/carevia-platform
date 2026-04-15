@@ -7,6 +7,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 public class CareviaBackendApplication {
 
 	public static void main(String[] args) {
+		// Thêm dòng này vào TRƯỚC SpringApplication.run
+		System.setProperty("user.timezone", "UTC");
+
 		SpringApplication.run(CareviaBackendApplication.class, args);
 	}
 

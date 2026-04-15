@@ -56,14 +56,14 @@ public class AuthController {
     }
 
     /**
-     * Register a new account (Student/Teacher) and trigger verification email.
+     * Register a new account (Client/Staff) and trigger verification email.
      *
      * @param accountRequest registration payload containing email, username, and password
      * @return newly created account information
      */
     @Operation(
             summary = "Register a new account",
-            description = "Register a new student or teacher account. An email verification link will be sent to the provided email address."
+            description = "Register a new client or staff account. An email verification link will be sent to the provided email address."
     )
     @PostMapping("/register")
     @ApiMessage("Register new account")
@@ -91,7 +91,7 @@ public class AuthController {
      */
     @Operation(
             summary = "Verify email address",
-            description = "Verify user's email using the token received via email. This activates student accounts or sets teacher accounts to pending approval."
+            description = "Verify user's email using the token received via email. This activates client accounts or sets staff accounts to pending approval."
     )
     @GetMapping("/verify-email")
     @ApiMessage("Verify user email")

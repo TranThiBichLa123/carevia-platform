@@ -49,6 +49,14 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
+// 8. TỰ ĐỘNG RESTART KHI SỬA CODE (Rất quan trọng để code nhanh)
+    developmentOnly("org.springframework.boot:spring-boot-devtools")
+
+    // 9. JWT (Để hỗ trợ xử lý token trong Security)
+    implementation("io.jsonwebtoken:jjwt-api:0.11.5")
+    runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
+    runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
+
    
 implementation("com.turkraft.springfilter:jpa:3.1.9")
 
