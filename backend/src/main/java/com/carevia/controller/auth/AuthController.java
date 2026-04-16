@@ -6,6 +6,9 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+
+import java.net.URI;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -94,7 +97,11 @@ public class AuthController {
                 log.debug("Verifying email token: {}", token);
                 this.emailVerificationService.verifyToken(token);
                 log.info("Email verification succeeded for token: {}", token);
-                return ResponseEntity.ok(null);
+                // return ResponseEntity.ok(null);
+                // Chuyển hướng về trang login của frontend kèm thông báo thành công
+                return ResponseEntity.status(HttpStatus.FOUND)
+                                .location(URI.create("http://localhost:3000/auth/signin?verified=true"))
+                                .build();
         }
 
         /**

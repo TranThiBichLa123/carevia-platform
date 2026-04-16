@@ -131,9 +131,9 @@ const mapCartItemToProduct = (
 
 interface User {
     _id: string;
-    name: string;
+    username: string;
     email: string;
-    avatar?: string;
+    avatar_url?: string;
     role: string;
     addresses?: Array<{
         _id: string;

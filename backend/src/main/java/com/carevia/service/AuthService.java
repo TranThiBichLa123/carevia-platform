@@ -27,6 +27,7 @@ import com.carevia.shared.util.SecurityUtils;
 import com.carevia.shared.util.TokenHashUtil;
 import com.carevia.shared.annotation.EnableSoftDeleteFilter;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -56,13 +57,15 @@ public class AuthService {
     private final EmailVerificationRepository emailVerificationRepository;
 
     private static final Logger log = LoggerFactory.getLogger(AuthService.class);
+    @Value("${app.avatar.default-url}")
+    private String defaultAvatarUrl;
 
     /**
      * Constructs an {@code AuthService} with all required dependencies.
      */
     public AuthService(AccountRepository accountRepository,
             MailService emailService,
-           @Lazy  AuthenticationManager authenticationManager,
+            @Lazy AuthenticationManager authenticationManager,
             SecurityUtils securityUtils,
             ClientRepository clientRepository,
             StaffRepository staffRepository,
@@ -97,42 +100,51 @@ public class AuthService {
      * @throws UsernameAlreadyUsedException if the username is already used
      * @throws EmailAlreadyUsedException    if the email is already used
      */
-    @Transactional
-    @EnableSoftDeleteFilter
-    public Account registerAccount(Account account) {
+   @Transactional
+@EnableSoftDeleteFilter
+public Account registerAccount(Account account) {
 
-        // Check for duplicate username
-        accountRepository.findOneByUsername(account.getUsername())
-                .ifPresent(existingAccount -> {
-                    if (!existingAccount.isPendingEmailVerification()) {
-                        throw new UsernameAlreadyUsedException();
-                    }
-                    accountRepository.delete(existingAccount);
-                    accountRepository.flush();
-                });
+    // 1. Kiểm tra trùng Username
+    accountRepository.findOneByUsername(account.getUsername())
+            .ifPresent(existingAccount -> {
+                if (!existingAccount.isPendingEmailVerification()) {
+                    throw new UsernameAlreadyUsedException();
+                }
+                accountRepository.delete(existingAccount);
+                accountRepository.flush();
+            });
 
-        // Check for duplicate email
-        accountRepository.findOneByEmailIgnoreCase(account.getEmail())
-                .ifPresent(existingAccount -> {
-                    if (!existingAccount.isPendingEmailVerification()) {
-                        throw new EmailAlreadyUsedException();
-                    }
-                    accountRepository.delete(existingAccount);
-                    accountRepository.flush();
-                });
+    // 2. Kiểm tra trùng Email
+    accountRepository.findOneByEmailIgnoreCase(account.getEmail())
+            .ifPresent(existingAccount -> {
+                if (!existingAccount.isPendingEmailVerification()) {
+                    throw new EmailAlreadyUsedException();
+                }
+                accountRepository.delete(existingAccount);
+                accountRepository.flush();
+            });
 
-        // Save account (entity manages its own status)
-        Account saved = accountRepository.save(account);
-
-        EmailVerification emailVerification = emailVerificationService.generateVerificationToken(saved,
-                TokenType.VERIFY_EMAIL);
-        String rawToken = emailVerification.getPlainToken();
-
-        // Publish event for email sending
-        eventPublisher.publishEvent(new AccountActiveEvent(saved, rawToken));
-
-        return saved;
+    // 3. TỰ ĐỘNG GÁN AVATAR MẶC ĐỊNH (Sửa tại đây)
+    // Tạo link dạng: https://ui-avatars.com
+    if (account.getAvatarUrl() == null || account.getAvatarUrl().isEmpty()) {
+        String finalAvatar = defaultAvatarUrl + "?name=" + account.getUsername() + "&background=random&color=fff";
+        account.setAvatarUrl(finalAvatar);
     }
+
+    // 4. Lưu tài khoản
+    Account saved = accountRepository.save(account);
+
+    // 5. Tạo Token xác thực
+    EmailVerification emailVerification = emailVerificationService.generateVerificationToken(saved,
+            TokenType.VERIFY_EMAIL);
+    String rawToken = emailVerification.getPlainToken();
+
+    // 6. Bắn Event gửi Email
+    eventPublisher.publishEvent(new AccountActiveEvent(saved, rawToken));
+
+    return saved;
+}
+
 
     /**
      * Authenticates a user and generates access and refresh tokens.

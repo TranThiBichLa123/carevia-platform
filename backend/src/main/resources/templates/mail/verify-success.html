@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head>
+    <title>Xác thực thành công</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; background-color: #f4f7f6; }
+        .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); text-align: center; max-width: 400px; }
+        .icon { font-size: 60px; color: #4CAF50; margin-bottom: 20px; }
+        h1 { color: #2D3142; margin-bottom: 10px; }
+        p { color: #666; margin-bottom: 30px; }
+        .btn { background: #ef8354; color: white; padding: 12px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; transition: 0.3s; }
+        .btn:hover { background: #d6744a; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="icon">✔</div>
+        <h1>Xác thực thành công!</h1>
+        <p>Tài khoản Carevia của bạn đã sẵn sàng. Chào mừng bạn đến với cộng đồng làm đẹp của chúng tôi.</p>
+        <a href="http://localhost:3000/auth/signin" class="btn">Đăng nhập ngay</a>
+    </div>
+</body>
+</html>

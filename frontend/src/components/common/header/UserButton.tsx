@@ -59,8 +59,13 @@ const UserButton = () => {
 
   if (!isClient) return null; // Không render gì cho đến khi Client sẵn sàng
 
+  // const displayName =
+  //   authUser?.name?.trim() || authUser?.email?.split("@")[0] || "My Profile";
   const displayName =
-    authUser?.name?.trim() || authUser?.email?.split("@")[0] || "My Profile";
+    authUser?.username?.trim() || 
+    authUser?.email?.split("@")[0] || 
+    "My Profile";
+
   const avatarInitial = displayName.charAt(0).toUpperCase() || "?";
 
   const handleLogout = () => {
@@ -91,9 +96,9 @@ const UserButton = () => {
         className="flex items-center gap-2 text-slate-700 hover:text-cyan-600 transition-colors duration-200"
       >
         <span className="flex h-9 w-9 items-center justify-center rounded-full border border-cyan-500/50 p-0.5 transition-colors duration-200 group-hover:border-cyan-600">
-          {authUser.avatar ? (
+          {authUser.avatar_url ? (
             <img
-              src={authUser.avatar}
+              src={authUser.avatar_url}
               alt={displayName}
               className="h-full w-full rounded-full object-cover"
             />
@@ -118,9 +123,9 @@ const UserButton = () => {
           {/* Header của Dropdown */}
           <div className="flex items-center gap-3 px-4 py-4 bg-slate-50/50">
             <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white shadow-sm ring-1 ring-cyan-100 p-0.5">
-              {authUser.avatar ? (
+              {authUser.avatar_url ? (
                 <img
-                  src={authUser.avatar}
+                  src={authUser.avatar_url}
                   alt={displayName}
                   className="h-full w-full rounded-full object-cover"
                 />
