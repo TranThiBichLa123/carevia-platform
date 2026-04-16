@@ -17,7 +17,7 @@ const CartIcon = () => {
   if (!mounted) {
     return (
       <Link
-        href={"/user/cart"}
+        href={"/client/user/cart"}
         /* Thêm group để kiểm soát hover và set màu primary cố định */
         // nó không hover được là vì không gọi api được nên lỗi á
         className="relative group text-primary hover:text-primary-hover hoverEffect"
@@ -45,7 +45,7 @@ const CartIcon = () => {
 
   return (
     <Link
-      href={"/user/cart"}
+      href={"/client/user/cart"}
       className="relative hover:text-babyshopSky hoverEffect"
     >
       <ShoppingBag />

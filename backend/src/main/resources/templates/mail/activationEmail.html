@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html xmlns:th="http://thymeleaf.org">
+<head>
+    <title>Xác thực tài khoản</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+    <p>Chào bạn <span th:text="${user.username}">User</span>,</p>
+    <p>Cảm ơn bạn đã đăng ký tài khoản tại Carevia.</p>
+    <p>Vui lòng nhấn vào link bên dưới để xác thực tài khoản của bạn:</p>
+    <p>
+        <a th:href="@{|${baseUrl}/api/v1/auth/verify-email?token=${token}|}">Xác thực ngay</a>
+    </p>
+    <p>Link có hiệu lực trong 30 phút.</p>
+    <p>Trân trọng,<br/>Carevia Team.</p>
+</body>
+</html>

@@ -18,11 +18,25 @@ spring:
     url: jdbc:postgresql://localhost:5432/carevia?options=-c%20timezone=UTC
     username: ${SPRING_DATASOURCE_USERNAME:carevia_user}
     password: ${SPRING_DATASOURCE_PASSWORD:admin}
+    # DI CHUYỂN KHỐI MAIL VÀO ĐÂY (Ngang hàng với datasource)
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: ${MAIL_USERNAME:bichla12005@gmail.com}
+    password: ${MAIL_PASSWORD:jxkrprzuruyccsri}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
   jpa:
     # Dòng này cực kỳ quan trọng để sửa lỗi "Unable to determine Dialect"
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     hibernate:
-      ddl-auto: update
+      # ddl-auto: update
+      ddl-auto: create # Chữ create sẽ xóa sạch và tạo lại từ đầu
     show-sql: true
 
 # Cấu hình MinIO

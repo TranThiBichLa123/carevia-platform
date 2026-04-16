@@ -16,26 +16,28 @@ java {
 
 repositories {
     mavenCentral()
- maven { url = uri("https://jitpack.io") }
- }
+    maven { url = uri("https://jitpack.io") } 
+}
+
+
 dependencies {
-    // 1. Web & Swagger (Sửa lỗi 'org.springframework.boot.webmvc')
+    // 1. Web & Swagger
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0")
 
-    // 2. Security & OAuth2 (Sửa lỗi 'org.springframework.security.oauth2')
+    // 2. Security & OAuth2
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-resource-server")
 
-    // 3. Mail & Thymeleaf (Sửa lỗi 'jakarta.mail', 'org.springframework.mail', 'org.thymeleaf')
+    // 3. Mail & Thymeleaf
     implementation("org.springframework.boot:spring-boot-starter-mail")
     implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
 
-    // 4. Cloudinary (Sửa lỗi 'com.cloudinary')
+    // 4. Cloudinary
     implementation("com.cloudinary:cloudinary-http44:1.36.0")
 
-    // 5. Lombok (Sửa lỗi 'import lombok')
+    // 5. Lombok
     compileOnly("org.projectlombok:lombok")
     annotationProcessor("org.projectlombok:lombok")
 
@@ -49,20 +51,30 @@ dependencies {
     testImplementation("org.springframework.security:spring-security-test")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
 
-// 8. TỰ ĐỘNG RESTART KHI SỬA CODE (Rất quan trọng để code nhanh)
+    // 8. DevTools & JWT
     developmentOnly("org.springframework.boot:spring-boot-devtools")
-
-    // 9. JWT (Để hỗ trợ xử lý token trong Security)
     implementation("io.jsonwebtoken:jjwt-api:0.11.5")
     runtimeOnly("io.jsonwebtoken:jjwt-impl:0.11.5")
     runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.5")
-
-   
-implementation("com.turkraft.springfilter:jpa:3.1.9")
-
+    
+    // 9. Spring Filter
+    implementation("com.turkraft.springfilter:jpa:3.1.9")
 }
 
+// Cấu hình để nhận diện đúng thư mục resources và template
+sourceSets {
+    main {
+        resources {
+            srcDirs("src/main/resources")
+        }
+    }
+}
 
 tasks.withType<Test> {
     useJUnitPlatform()
+}
+
+// Xử lý lỗi trùng lặp file cấu hình
+tasks.withType<ProcessResources> {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }

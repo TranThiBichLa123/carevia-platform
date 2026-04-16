@@ -106,13 +106,13 @@ const CheckoutPageContent = () => {
             setOrder(orderData);
           } else {
             toast.error("Order not found");
-            router.push("/user/cart");
+            router.push("/client/user/cart");
           }
         } else {
           // If no orderId, check if we have cart items
           if (cartItemsWithQuantities.length === 0) {
             toast.error("Your cart is empty");
-            router.push("/user/cart");
+            router.push("/client/user/cart");
             return;
           }
 
@@ -146,7 +146,7 @@ const CheckoutPageContent = () => {
       } catch (error) {
         console.error("Error initializing checkout:", error);
         toast.error("Failed to load checkout details");
-        router.push("/user/cart");
+        router.push("/client/user/cart");
       } finally {
         setLoading(false);
       }

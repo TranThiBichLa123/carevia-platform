@@ -9,7 +9,8 @@ import com.carevia.shared.exception.UnauthorizedException;
 import java.time.Instant;
 
 /**
- * Staff entity with Rich Domain Model - encapsulates staff-specific business logic
+ * Staff entity with Rich Domain Model - encapsulates staff-specific business
+ * logic
  */
 @Entity
 @Table(name = "staffs")
@@ -18,7 +19,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Staff extends PersonBase implements BaseProfile{
+public class Staff extends PersonBase implements BaseProfile {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -49,7 +50,6 @@ public class Staff extends PersonBase implements BaseProfile{
 
     @Column(columnDefinition = "TEXT")
     private String rejectReason;
-
 
     /**
      * Validate staff is approved for actions
@@ -97,6 +97,39 @@ public class Staff extends PersonBase implements BaseProfile{
      */
     public boolean isPendingApproval() {
         return !this.approved && !hasBeenReviewed();
+    }
+
+    // --- THÊM CÁC TRƯỜNG PHỤC VỤ BOOKING & QUẢN LÝ ---
+
+    @Column(name = "is_available")
+    @Builder.Default
+    private boolean isAvailable = true; // Nhân viên có sẵn sàng để khách đặt lịch hay không
+
+    @Column(columnDefinition = "TEXT")
+    private String bio; // Giới thiệu ngắn để khách hàng tin tưởng khi đặt lịch
+
+    @Column(name = "rating")
+    @Builder.Default
+    private Double rating = 5.0; // Điểm đánh giá từ khách hàng
+
+    @Column(name = "total_reviews")
+    @Builder.Default
+    private Integer totalReviews = 0; // Tổng số lượt đánh giá
+
+    /**
+     * Cập nhật điểm rating dựa trên đánh giá mới của khách hàng
+     */
+    public void updateRating(double newRating) {
+        double currentTotalScore = this.rating * this.totalReviews;
+        this.totalReviews++;
+        this.rating = (currentTotalScore + newRating) / this.totalReviews;
+    }
+
+    /**
+     * Chuyển đổi trạng thái sẵn sàng làm việc (ví dụ khi nhân viên xin nghỉ phép)
+     */
+    public void toggleAvailability() {
+        this.isAvailable = !this.isAvailable;
     }
 
 }

@@ -172,7 +172,7 @@ const LeftSideBar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     <span>My Wishlist</span>
                   </Link>
                   <Link
-                    href="/user/cart"
+                    href="/client/user/cart"
                     className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors"
                     onClick={onClose}
                   >

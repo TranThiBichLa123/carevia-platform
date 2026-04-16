@@ -73,7 +73,7 @@ const NotFoundPageClient = () => {
                 Shop Products
               </Link>
               <Link
-                href="/user/cart"
+                href="/client/user/cart"
                 className="text-indigo-600 hover:text-indigo-800 hover:underline text-sm transition-all duration-200"
               >
                 View Cart

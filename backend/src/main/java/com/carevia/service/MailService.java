@@ -1,6 +1,5 @@
 package com.carevia.service;
 
-
 import jakarta.mail.MessagingException;
 import jakarta.mail.internet.MimeMessage;
 import org.slf4j.Logger;
@@ -16,7 +15,7 @@ import org.springframework.stereotype.Service;
 import org.thymeleaf.context.Context;
 import org.thymeleaf.spring6.SpringTemplateEngine;
 import com.carevia.core.domain.Account;
-import  com.carevia.shared.constant.AccountActionType;
+import com.carevia.shared.constant.AccountActionType;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Locale;
@@ -57,17 +56,14 @@ public class MailService {
 
     private final SpringTemplateEngine templateEngine;
 
-
+    // Sửa đoạn này trong MailService.java
     public MailService(
-            ObjectProvider<JavaMailSender> javaMailSenderProvider,
+            JavaMailSender javaMailSender, // Tiêm trực tiếp, không dùng ObjectProvider
             MessageSource messageSource,
-            SpringTemplateEngine templateEngine
-
-    ) {
-        this.javaMailSender = javaMailSenderProvider.getIfAvailable();
+            SpringTemplateEngine templateEngine) {
+        this.javaMailSender = javaMailSender;
         this.messageSource = messageSource;
         this.templateEngine = templateEngine;
-
     }
 
     @Async
@@ -142,8 +138,7 @@ public class MailService {
                 isHtml,
                 to,
                 subject,
-                content
-        );
+                content);
 
         // Prepare message using a Spring helper
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();
@@ -170,16 +165,32 @@ public class MailService {
             LOG.debug("Email doesn't exist for user '{}'", account.getUsername());
             return;
         }
-        Locale locale = Locale.forLanguageTag(account.getLangKey());
+
+        // KHẮC PHỤC TẠI ĐÂY: Nếu langKey null thì mặc định dùng "vi" hoặc "en"
+        String langKey = (account.getLangKey() != null) ? account.getLangKey() : "vi";
+        Locale locale = Locale.forLanguageTag(langKey);
+
         Context context = new Context(locale);
         context.setVariable(USER, account);
         context.setVariable(BASE_URL, baseUrl);
         context.setVariable(FRONTEND_URL, frontendUrl);
         context.setVariable(API_VERSION, apiVersion);
         context.setVariable("token", token);
-        String content = templateEngine.process(templateName, context);
-        String subject = messageSource.getMessage(titleKey, null, locale);
-        sendEmailSync(account.getEmail(), subject, content, false, true);
+
+        try {
+            String content = templateEngine.process(templateName, context);
+            // Kiểm tra titleKey có tồn tại trong messages.properties không
+            String subject;
+            try {
+                subject = messageSource.getMessage(titleKey, null, locale);
+            } catch (Exception e) {
+                subject = "Carevia Notification"; // Giá trị mặc định nếu thiếu key
+            }
+
+            sendEmailSync(account.getEmail(), subject, content, false, true);
+        } catch (Exception e) {
+            LOG.error("Lỗi khi xử lý template: {}", e.getMessage());
+        }
     }
 
     @Async
@@ -206,8 +217,9 @@ public class MailService {
         sendEmailFromTemplateSync(user, "mail/passwordResetEmail", "email.reset.title", token);
     }
 
-
-//     📩 sendBookingConfirmationEmail: Xác nhận khách đã đặt lịch trải nghiệm sản phẩm thành công.
-// 📩 sendOrderSuccessEmail: Xác nhận khách đã đặt mua thiết bị chăm sóc da thành công.
+    // 📩 sendBookingConfirmationEmail: Xác nhận khách đã đặt lịch trải nghiệm sản
+    // phẩm thành công.
+    // 📩 sendOrderSuccessEmail: Xác nhận khách đã đặt mua thiết bị chăm sóc da
+    // thành công.
 
 }
