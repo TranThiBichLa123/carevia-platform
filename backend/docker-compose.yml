@@ -8,6 +8,8 @@ services:
       POSTGRES_DB: ${DB_NAME}
       POSTGRES_USER: ${DB_USER}
       POSTGRES_PASSWORD: ${DB_PASSWORD}
+       # THÊM DÒNG NÀY: Nó sẽ giúp bạn đăng nhập được bằng cả user 'postgres' với cùng pass
+      POSTGRES_ROOT_PASSWORD: ${DB_PASSWORD} 
     ports:
       - "${DB_PORT}:5432"
     volumes:

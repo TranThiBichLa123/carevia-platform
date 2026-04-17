@@ -1,5 +1,4 @@
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:8080/api";
+import apiClient from "@/services/apiClient";
 
 export interface WishlistResponse {
   success: boolean;
@@ -9,142 +8,92 @@ export interface WishlistResponse {
 
 export interface WishlistProductsResponse {
   success: boolean;
-  products: [];
+  products: any[];
   message?: string;
 }
 
-// Add product to wishlist
+const getToken = (): string | undefined => {
+  if (typeof document === "undefined") return undefined;
+  const cookies = document.cookie.split(";").reduce((acc, cookie) => {
+    const [name, value] = cookie.trim().split("=");
+    acc[name] = value;
+    return acc;
+  }, {} as Record<string, string>);
+  return cookies.auth_token;
+};
+
+const authHeaders = () => {
+  const token = getToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
 export const addToWishlist = async (
   productId: string,
-  token: string
+  _token: string
 ): Promise<WishlistResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/wishlist/add`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ productId }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to add to wishlist");
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error adding to wishlist:", error);
-    throw error;
+    await apiClient.post(`/wishlist/${productId}`, null, { headers: authHeaders() });
+    const updated = await getUserWishlist(_token);
+    return updated;
+  } catch (error: any) {
+    throw new Error(error?.response?.data?.message || "Failed to add to wishlist");
   }
 };
 
-// Remove product from wishlist
 export const removeFromWishlist = async (
   productId: string,
-  token: string
+  _token: string
 ): Promise<WishlistResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/wishlist/remove`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ productId }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to remove from wishlist");
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error removing from wishlist:", error);
-    throw error;
+    await apiClient.delete(`/wishlist/${productId}`, { headers: authHeaders() });
+    const updated = await getUserWishlist(_token);
+    return updated;
+  } catch (error: any) {
+    throw new Error(error?.response?.data?.message || "Failed to remove from wishlist");
   }
 };
 
-// Get user's wishlist (returns array of product IDs)
 export const getUserWishlist = async (
-  token: string
+  _token: string
 ): Promise<WishlistResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/wishlist`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to get wishlist");
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error getting wishlist:", error);
-    throw error;
+    const res = await apiClient.get("/wishlist/ids", { headers: authHeaders() });
+    const ids: number[] = res.data || [];
+    return {
+      success: true,
+      wishlist: ids.map(String),
+    };
+  } catch (error: any) {
+    throw new Error(error?.response?.data?.message || "Failed to get wishlist");
   }
 };
 
-// Get wishlist products by IDs
 export const getWishlistProducts = async (
-  productIds: string[],
-  token: string
+  _productIds: string[],
+  _token: string
 ): Promise<WishlistProductsResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/wishlist/products`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({ productIds }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to get wishlist products");
-    }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error getting wishlist products:", error);
-    throw error;
+    const res = await apiClient.get("/wishlist", { headers: authHeaders() });
+    return {
+      success: true,
+      products: res.data || [],
+    };
+  } catch (error: any) {
+    throw new Error(error?.response?.data?.message || "Failed to get wishlist products");
   }
 };
 
-// Clear entire wishlist
 export const clearWishlist = async (
-  token: string
+  _token: string
 ): Promise<WishlistResponse> => {
+  // Java backend doesn't have a clear-all endpoint, remove individually
   try {
-    const response = await fetch(`${API_BASE_URL}/wishlist/clear`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to clear wishlist");
+    const current = await getUserWishlist(_token);
+    for (const id of current.wishlist) {
+      await apiClient.delete(`/wishlist/${id}`, { headers: authHeaders() });
     }
-
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Error clearing wishlist:", error);
-    throw error;
+    return { success: true, wishlist: [] };
+  } catch (error: any) {
+    throw new Error(error?.response?.data?.message || "Failed to clear wishlist");
   }
 };

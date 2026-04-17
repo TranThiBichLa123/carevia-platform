@@ -17,12 +17,12 @@ import { useUserStore } from "../../../lib/store";
 
 const accountMenuItems = [
   {
-    href: "/client/user/profile",
+    href: "/client/account?tab=profile",
     label: "My Profile",
     icon: UserCircle2,
   },
   {
-    href: "/client/user/orders",
+    href: "/client/account?tab=orders",
     label: "Orders",
     icon: Package,
   },
@@ -32,7 +32,7 @@ const accountMenuItems = [
     icon: Heart,
   },
   {
-    href: "/client/user/profile#notifications",
+    href: "/client/account?tab=notifications",
     label: "Notifications",
     icon: Bell,
   },
@@ -42,7 +42,7 @@ const accountMenuItems = [
     icon: ShoppingBag,
   },
   {
-    href: "/client/user/profile#settings",
+    href: "/client/account?tab=settings",
     label: "Settings",
     icon: Settings,
   },
@@ -92,7 +92,7 @@ const UserButton = () => {
     <div className="relative group">
       {/* Nút bấm trên Header */}
       <Link
-        href="/client/user/profile"
+        href="/client/account"
         className="flex items-center gap-2 text-slate-700 hover:text-cyan-600 transition-colors duration-200"
       >
         <span className="flex h-9 w-9 items-center justify-center rounded-full border border-cyan-500/50 p-0.5 transition-colors duration-200 group-hover:border-cyan-600">

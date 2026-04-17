@@ -21,8 +21,8 @@ import { getOrderById, type Order } from "@/lib/orderApi";
 import { toast } from "sonner";
 import { useUserStore } from "@/lib/store";
 
-// Set to false to enable premium feature lock
-const ENABLE_FREE_ACCESS = false;
+// Set to true to enable access
+const ENABLE_FREE_ACCESS = true;
 
 const OrderDetailsPage = () => {
   const [order, setOrder] = useState<Order | null>(null);
@@ -174,7 +174,7 @@ const OrderDetailsPage = () => {
 
   const calculateSubtotal = () => {
     return order.items.reduce(
-      (total, item) => total + item.price * item.quantity,
+      (total, item) => total + (item.subtotal || item.unitPrice * item.quantity),
       0
     );
   };
@@ -252,11 +252,11 @@ const OrderDetailsPage = () => {
                 <PriceFormatter amount={order.total} />
               </p>
             </div>
-            {order.paidAt && (
+            {order.updatedAt && order.paymentStatus === "paid" && (
               <div>
                 <p className="text-gray-500">Payment Date</p>
                 <p className="font-medium">
-                  {new Date(order.paidAt).toLocaleDateString()}
+                  {new Date(order.updatedAt).toLocaleDateString()}
                 </p>
               </div>
             )}
@@ -281,27 +281,27 @@ const OrderDetailsPage = () => {
             {order.items.map((item, index) => (
               <div key={index} className="flex items-center space-x-4">
                 <div className="relative h-16 w-16 bg-gray-100 rounded-lg overflow-hidden">
-                  {item.image && (
+                  {item.deviceImage && (
                     <Image
-                      src={item.image}
-                      alt={item.name}
+                      src={item.deviceImage}
+                      alt={item.deviceName}
                       fill
                       className="object-cover"
                     />
                   )}
                 </div>
                 <div className="flex-1">
-                  <h3 className="font-medium text-gray-900">{item.name}</h3>
+                  <h3 className="font-medium text-gray-900">{item.deviceName}</h3>
                   <p className="text-sm text-gray-500">
                     Quantity: {item.quantity}
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="font-medium text-gray-900">
-                    <PriceFormatter amount={item.price * item.quantity} />
+                    <PriceFormatter amount={item.subtotal || item.unitPrice * item.quantity} />
                   </p>
                   <p className="text-sm text-gray-500">
-                    <PriceFormatter amount={item.price} /> each
+                    <PriceFormatter amount={item.unitPrice} /> each
                   </p>
                 </div>
               </div>

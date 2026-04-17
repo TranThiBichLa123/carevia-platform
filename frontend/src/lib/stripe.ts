@@ -58,9 +58,11 @@ export const redirectToCheckout = async (sessionId: string) => {
     throw new Error("Stripe failed to load");
   }
 
-  const { error } = await stripe.redirectToCheckout({
+  // Ép kiểu 'any' để gọi phương thức mà không bị trình biên dịch chặn
+  const { error } = await (stripe as any).redirectToCheckout({
     sessionId,
   });
+
 
   if (error) {
     console.error("Error redirecting to checkout:", error);

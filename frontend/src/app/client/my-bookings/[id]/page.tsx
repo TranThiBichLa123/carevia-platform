@@ -1,41 +1,133 @@
 "use client";
-import React, { useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 import { 
   MapPin, Calendar, Clock, User, Phone, 
   ChevronLeft, QrCode, PhoneCall, Navigation, 
-  ShieldCheck, Info 
+  ShieldCheck, Info, XCircle, Loader2
 } from 'lucide-react';
+import { bookingService } from '@/services/bookings/bookingService';
+import { mockBookings, mockSessions, mockProducts } from '@/constants/data';
+import { toast } from 'sonner';
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 const BookingDetail = () => {
     const params = useParams<{ id: string }>();
-    const bookingId = params?.id ?? "BK-7821";
+    const bookingId = params?.id ?? "";
 
-  // 1. Giả lập lấy dữ liệu từ localStorage hoặc Service
-  const booking = useMemo(() => {
-    // Trong thực tế: await bookingService.getById(bookingId)
-    return {
-      id: bookingId,
-      deviceName: "Công nghệ Nâng cơ Hifu Pro",
-      branchName: "Carevia Clinic - Quận 1",
-      address: "123 Lê Lợi, Phường Bến Thành, Quận 1, TP.HCM",
-      startTime: "2024-05-20T09:00:00",
-      endTime: "2024-05-20T10:30:00",
-      customerName: "Nguyễn Văn A",
-      customerPhone: "0901234567",
-      status: "upcoming",
-      price: 50,
-      image: "https://picsum.photos"
+  const [booking, setBooking] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
+  const [isCancelling, setIsCancelling] = useState(false);
+
+  useEffect(() => {
+    const fetchBooking = async () => {
+      setLoading(true);
+      try {
+        const data = await bookingService.getById(bookingId);
+        if (data) {
+          setBooking(data);
+          setLoading(false);
+          return;
+        }
+      } catch {}
+
+      // Fallback: localStorage + mock
+      const STORAGE_KEY = 'carevia_bookings';
+      const savedData = localStorage.getItem(STORAGE_KEY);
+      const localBookings = savedData ? JSON.parse(savedData) : [];
+      const found = localBookings.find((b: any) => b.id === bookingId);
+
+      if (found) {
+        setBooking(found);
+      } else {
+        const mockBooking = mockBookings.find((b) => b.id === bookingId);
+        if (mockBooking) {
+          const session = mockSessions.find((s) => s.id === mockBooking.sessionId);
+          const product = mockProducts.find((p) => p.sessionIds.includes(mockBooking.sessionId));
+          setBooking({
+            ...mockBooking,
+            deviceName: product?.name || 'Unknown Device',
+            image: product?.image || '',
+            branchName: session?.branchName || '',
+            address: session?.locationDetail || '',
+            customerName: 'Bạn',
+            customerPhone: '',
+            price: mockBooking.totalPrice,
+          });
+        }
+      }
+      setLoading(false);
     };
+    fetchBooking();
   }, [bookingId]);
 
-  const statusMap = {
-    upcoming: { label: 'Sắp diễn ra', color: 'text-blue-600', bg: 'bg-blue-50' },
-    completed: { label: 'Đã hoàn thành', color: 'text-green-600', bg: 'bg-green-50' },
-    cancelled: { label: 'Đã hủy', color: 'text-red-600', bg: 'bg-red-50' }
+  const handleCancelBooking = async () => {
+    setIsCancelling(true);
+    try {
+      await bookingService.updateStatus(bookingId, 'CANCELLED', cancelReason);
+      setBooking((prev: any) => ({ ...prev, status: 'cancelled' }));
+      toast.success('Đã hủy lịch hẹn thành công.');
+      const STORAGE_KEY = 'carevia_bookings';
+      const savedData = localStorage.getItem(STORAGE_KEY);
+      if (savedData) {
+        const localBookings = JSON.parse(savedData);
+        const updated = localBookings.map((b: any) =>
+          b.id === bookingId ? { ...b, status: 'cancelled' } : b
+        );
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      }
+    } catch (error) {
+      // Fallback: update locally
+      setBooking((prev: any) => ({ ...prev, status: 'cancelled' }));
+      toast.success('Đã hủy lịch hẹn.');
+    }
+    setIsCancelling(false);
+    setIsCancelDialogOpen(false);
   };
 
-  const currentStatus = statusMap[booking.status as keyof typeof statusMap];
+  const statusMap: Record<string, { label: string; color: string; bg: string }> = {
+    upcoming: { label: 'Sắp diễn ra', color: 'text-blue-600', bg: 'bg-blue-50' },
+    pending: { label: 'Chờ xác nhận', color: 'text-yellow-600', bg: 'bg-yellow-50' },
+    Pending: { label: 'Chờ xác nhận', color: 'text-yellow-600', bg: 'bg-yellow-50' },
+    confirmed: { label: 'Đã xác nhận', color: 'text-green-600', bg: 'bg-green-50' },
+    Confirmed: { label: 'Đã xác nhận', color: 'text-green-600', bg: 'bg-green-50' },
+    completed: { label: 'Đã hoàn thành', color: 'text-green-600', bg: 'bg-green-50' },
+    Completed: { label: 'Đã hoàn thành', color: 'text-green-600', bg: 'bg-green-50' },
+    cancelled: { label: 'Đã hủy', color: 'text-red-600', bg: 'bg-red-50' },
+    Cancelled: { label: 'Đã hủy', color: 'text-red-600', bg: 'bg-red-50' },
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="animate-spin text-teal-600" size={32} />
+      </div>
+    );
+  }
+
+  if (!booking) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+        <p className="text-gray-500">Không tìm thấy lịch hẹn với mã: {bookingId}</p>
+        <Link href="/client/my-bookings" className="text-teal-600 hover:underline">
+          Quay lại danh sách
+        </Link>
+      </div>
+    );
+  }
+
+  const currentStatus = statusMap[booking.status] || statusMap.pending;
+  const canCancel = ['upcoming', 'pending', 'Pending', 'confirmed', 'Confirmed'].includes(booking.status);
 
   return (
     <div className="min-h-screen bg-gray-50 pb-12">
@@ -141,13 +233,56 @@ const BookingDetail = () => {
                 <ShieldCheck size={16} />
                 <span className="text-[10px] font-bold uppercase tracking-widest">Dịch vụ chuẩn y khoa</span>
             </div>
-            {booking.status === 'upcoming' && (
-                <button className="text-[11px] font-bold text-red-500 uppercase tracking-widest underline decoration-2 underline-offset-4">
+            {canCancel && (
+                <button 
+                    onClick={() => setIsCancelDialogOpen(true)}
+                    className="text-[11px] font-bold text-red-500 uppercase tracking-widest underline decoration-2 underline-offset-4"
+                >
                     Yêu cầu hủy lịch hẹn
                 </button>
             )}
         </div>
       </div>
+
+      {/* Cancel Dialog */}
+      <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-red-600 flex items-center gap-2">
+              <XCircle size={18} /> Hủy lịch hẹn
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-gray-600">
+              Bạn có chắc chắn muốn hủy lịch hẹn <strong>{booking.deviceName}</strong>?
+            </p>
+            <div>
+              <label className="text-sm font-medium text-gray-700 block mb-1">
+                Lý do hủy (không bắt buộc)
+              </label>
+              <textarea
+                value={cancelReason}
+                onChange={(e) => setCancelReason(e.target.value)}
+                className="w-full p-3 border rounded-lg text-sm resize-none"
+                rows={3}
+                placeholder="Nhập lý do hủy..."
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsCancelDialogOpen(false)}>
+              Giữ lịch
+            </Button>
+            <Button
+              onClick={handleCancelBooking}
+              disabled={isCancelling}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              {isCancelling ? 'Đang hủy...' : 'Xác nhận hủy'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

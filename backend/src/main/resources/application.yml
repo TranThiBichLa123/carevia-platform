@@ -11,14 +11,27 @@ jwt:
 spring:
   application:
     name: carevia-backend
+    
   datasource:
-    # Kết nối đến service 'postgres' trong docker-compose
-    # url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://postgres:5432/carevia}
-    # Thêm tham số serverTimezone hoặc bỏ qua việc set timezone từ client
-    url: jdbc:postgresql://localhost:5432/carevia?options=-c%20timezone=UTC
+    # Nếu chạy Docker, hãy đổi 'localhost' thành 'postgres'
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/carevia?options=-c%20timezone=UTC}
     username: ${SPRING_DATASOURCE_USERNAME:carevia_user}
     password: ${SPRING_DATASOURCE_PASSWORD:admin}
-    # DI CHUYỂN KHỐI MAIL VÀO ĐÂY (Ngang hàng với datasource)
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+   # Khi dùng Docker, ta nên ép Dialect luôn để tránh Hibernate mất công tìm kiếm metadata khi kết nối chưa ổn định
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    # Để Hibernate tự động nhận diện Dialect (tránh cảnh báo thừa)
+    hibernate:
+      ddl-auto: update # Tự động cập nhật bảng mà không xóa dữ liệu
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        jdbc:
+          time_zone: UTC
+
   mail:
     host: smtp.gmail.com
     port: 587
@@ -31,13 +44,11 @@ spring:
           starttls:
             enable: true
 
-  jpa:
-    # Dòng này cực kỳ quan trọng để sửa lỗi "Unable to determine Dialect"
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
-    hibernate:
-      # ddl-auto: update
-      ddl-auto: create # Chữ create sẽ xóa sạch và tạo lại từ đầu
-    show-sql: true
+  # Cấu hình để không bị lỗi khi upload ảnh avatar dung lượng lớn
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
 # Cấu hình MinIO
 minio:
@@ -56,9 +67,8 @@ zalopay:
 # Cấu hình App (Avatar & Websocket)
 app:
   avatar:
-    # FIX LỖI "app.avatar.folder" VÀ "app.avatar.max-size-bytes"
     folder: ${APP_AVATAR_FOLDER:avatars}
-    max-size-bytes: ${APP_AVATAR_MAX_SIZE:5242880} # Mặc định 5MB
+    max-size-bytes: ${APP_AVATAR_MAX_SIZE:5242880} # 5MB
     default-url: "${APP_DEFAULT_AVATAR_URL:https://ui-avatars.com}"
   websocket:
     endpoint: "/ws-notification"
@@ -69,3 +79,8 @@ cloudinary:
   cloud_name: ${CLOUDINARY_CLOUD_NAME:dcisx0vss}
   api_key: ${CLOUDINARY_API_KEY:853988661563551}
   api_secret: ${CLOUDINARY_API_SECRET:enx1WB_Hsff4ebdfUnnYBAwOawI}
+
+# Ẩn các log cảnh báo không cần thiết về thư viện cũ
+logging:
+  level:
+    org.apache.commons.logging: ERROR

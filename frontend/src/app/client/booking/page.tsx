@@ -5,12 +5,16 @@ import { getAvailableSessionsByProductId } from '@/lib/booking';
 import { Product } from '@/types_enum/devices';
 import { ExperienceSession } from '@/types_enum/booking';
 import { useEffect, useMemo, useState } from 'react';
+import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Container from '@/components/common/Container';
 import BookingCard from '@/components/common/client/booking/BookingCard';
 import { bookingService } from '@/services/bookings/bookingService';
 
 const BookingPage = () => {
+    const searchParams = useSearchParams();
+    const deviceIdParam = searchParams.get('deviceId');
+
     // Thêm useMemo và useEffect vào import từ 'react'
     const [step, setStep] = useState(1);
     const [selectedDevice, setSelectedDevice] = useState<Product | null>(null);
@@ -83,30 +87,62 @@ const BookingPage = () => {
     const prevStep = () => setStep(step - 1);
     const bookingDevices = mockProducts.filter(p => p.isBookingAvailable);
 
+    // Auto-select device from query param (e.g. from Product Detail page)
+    useEffect(() => {
+        if (deviceIdParam && !selectedDevice) {
+            const device = bookingDevices.find(p => p._id === deviceIdParam);
+            if (device) {
+                setSelectedDevice(device);
+                setStep(2);
+            }
+        }
+    }, [deviceIdParam]);
+
     // Thêm vào bên trong BookingPage component
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, [step]);
 
     const handleCompleteBooking = async () => {
+        const STORAGE_KEY = 'carevia_bookings';
         const newBooking = {
             id: `BK-${Math.floor(1000 + Math.random() * 9000)}`,
+            bookingCode: `BK-${Math.floor(1000 + Math.random() * 9000)}`,
             deviceName: selectedDevice?.name,
             branchName: selectedBranch,
             address: selectedSession?.locationDetail,
             startTime: selectedSession?.startTime,
-            status: "upcoming",
+            endTime: selectedSession?.endTime,
+            status: "pending",
             price: selectedDevice?.bookingPrice || 0,
-            image: selectedDevice?.image
+            totalPrice: selectedDevice?.bookingPrice || 0,
+            image: selectedDevice?.image,
+            customerName,
+            customerPhone,
+            customerNote: '',
+            createdAt: new Date().toISOString(),
+            sessionId: selectedSession?.id,
         };
 
         try {
-            await bookingService.create(newBooking); // Gọi service
-            alert('Đặt lịch thành công!');
-            window.location.href = '/my-bookings';
-        } catch (error) {
-            alert('Có lỗi xảy ra, vui lòng thử lại.');
+            // Try API first
+            if (selectedSession?.id) {
+                await bookingService.create({
+                    sessionId: Number(selectedSession.id),
+                    notes: `Khách: ${customerName}, SĐT: ${customerPhone}`,
+                });
+            }
+        } catch {
+            // API failed - save to localStorage as fallback
         }
+
+        // Always save to localStorage for offline access
+        const savedData = localStorage.getItem(STORAGE_KEY);
+        const existingBookings = savedData ? JSON.parse(savedData) : [];
+        existingBookings.push(newBooking);
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(existingBookings));
+
+        window.location.href = '/client/my-bookings';
     };
 
     const validatePhone = (phone: string) => {

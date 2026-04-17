@@ -124,11 +124,21 @@ public Account registerAccount(Account account) {
                 accountRepository.flush();
             });
 
-    // 3. TỰ ĐỘNG GÁN AVATAR MẶC ĐỊNH (Sửa tại đây)
-    // Tạo link dạng: https://ui-avatars.com
+    // 3. TỰ ĐỘNG GÁN AVATAR TỪ GRAVATAR (dựa trên email)
     if (account.getAvatarUrl() == null || account.getAvatarUrl().isEmpty()) {
-        String finalAvatar = defaultAvatarUrl + "?name=" + account.getUsername() + "&background=random&color=fff";
-        account.setAvatarUrl(finalAvatar);
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");
+            byte[] digest = md.digest(account.getEmail().trim().toLowerCase().getBytes());
+            StringBuilder sb = new StringBuilder();
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b));
+            }
+            String gravatarUrl = "https://www.gravatar.com/avatar/" + sb.toString() + "?d=identicon&s=200";
+            account.setAvatarUrl(gravatarUrl);
+        } catch (java.security.NoSuchAlgorithmException e) {
+            String fallback = defaultAvatarUrl + "?name=" + account.getUsername() + "&background=random&color=fff";
+            account.setAvatarUrl(fallback);
+        }
     }
 
     // 4. Lưu tài khoản

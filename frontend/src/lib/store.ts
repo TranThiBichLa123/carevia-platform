@@ -4,6 +4,7 @@ import Cookies from "js-cookie";
 import { Product } from "@/types_enum/devices";
 import { Order } from "./orderApi";
 import authApi from "./authApi";
+import type { CartItemInfo } from "./cartApi";
 
 // Helper function to map server cart item to local format
 interface CartServerItem {
@@ -129,6 +130,42 @@ const mapCartItemToProduct = (
     quantity: item.quantity,
 });
 
+const mapCartInfoToProduct = (
+    item: CartItemInfo
+): CartProductWithQuantity => ({
+    product: {
+        _id: String(item.deviceId),
+        name: item.deviceName,
+        slug: toSlug(item.deviceName),
+        description: "",
+        content: "",
+        price: item.devicePrice,
+        originalPrice: item.originalPrice || item.devicePrice,
+        discountPercentage: item.discountPercentage || 0,
+        stock: item.stock || 0,
+        averageRating: 0,
+        image: item.deviceImage || "",
+        images: item.deviceImage ? [item.deviceImage] : [],
+        category: { _id: "", name: "", image: "", categoryType: "", slug: "" },
+        brand: { _id: "", name: "", slug: "" },
+        ratings: [],
+        sku: String(item.deviceId),
+        warranty: { period: 0, policy: "" },
+        origin: "",
+        condition: "new",
+        specifications: [],
+        sold: 0,
+        reviewCount: 0,
+        isBookingAvailable: false,
+        bookingPrice: 0,
+        sessionIds: [],
+        tags: [],
+        videoUrl: undefined,
+        createdAt: new Date().toISOString(),
+    },
+    quantity: item.quantity,
+});
+
 interface User {
     _id: string;
     username: string;
@@ -143,6 +180,15 @@ interface User {
         postalCode: string;
         isDefault: boolean;
     }>;
+    full_name?: string;
+    phone?: string;
+    address?: string;
+    birth_date?: string;
+    skin_type?: string;
+    loyalty_points?: number;
+    client_code?: string;
+    membership_level?: string;
+    auth_provider?: string;
 }
 
 interface UserState {
@@ -395,7 +441,7 @@ export const useCartStore = create<CartState>()(
 
                     if (response.success) {
                         const cartItemsWithQuantities =
-                            response.cart.map(mapCartItemToProduct);
+                            response.cart.map(mapCartInfoToProduct);
 
                         set({
                             cartItemsWithQuantities,
@@ -423,7 +469,7 @@ export const useCartStore = create<CartState>()(
 
                     if (response.success) {
                         const cartItemsWithQuantities =
-                            response.cart.map(mapCartItemToProduct);
+                            response.cart.map(mapCartInfoToProduct);
 
                         set({
                             cartItemsWithQuantities,
@@ -455,7 +501,7 @@ export const useCartStore = create<CartState>()(
 
                     if (response.success) {
                         const cartItemsWithQuantities =
-                            response.cart.map(mapCartItemToProduct);
+                            response.cart.map(mapCartInfoToProduct);
 
                         set({
                             cartItemsWithQuantities,
@@ -529,7 +575,7 @@ export const useCartStore = create<CartState>()(
 
                     if (response.success) {
                         const cartItemsWithQuantities =
-                            response.cart.map(mapCartItemToProduct);
+                            response.cart.map(mapCartInfoToProduct);
 
                         set({
                             cartItemsWithQuantities,

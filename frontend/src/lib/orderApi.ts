@@ -1,12 +1,45 @@
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8080/api";
+import apiClient from "@/services/apiClient";
 
-export interface OrderItem {
-  productId: string;
-  name: string;
-  price: number;
+export interface OrderItemInfo {
+  id: number;
+  deviceId: number;
+  deviceName: string;
+  deviceImage: string;
   quantity: number;
-  image?: string;
+  unitPrice: number;
+  subtotal: number;
+}
+
+export interface Order {
+  id: number;
+  _id: string; // alias for compatibility
+  orderCode: string;
+  accountId: number;
+  items: OrderItemInfo[];
+  subtotal: number;
+  discountAmount: number;
+  shippingFee: number;
+  taxAmount: number;
+  totalAmount: number;
+  total: number; // alias
+  status: string;
+  paymentStatus: string;
+  paymentMethod: string;
+  paymentTransactionId: string;
+  voucherCode: string;
+  shippingAddress: string;
+  shippingCity: string;
+  shippingCountry: string;
+  shippingPostalCode: string;
+  customerNote: string;
+  createdAt: string;
+  updatedAt?: string;
+}
+
+export interface CreateOrderResponse {
+  success: boolean;
+  order: Order;
+  message?: string;
 }
 
 export interface ShippingAddress {
@@ -14,26 +47,6 @@ export interface ShippingAddress {
   city: string;
   country: string;
   postalCode: string;
-}
-
-export interface Order {
-  _id: string;
-  userId: string;
-  items: OrderItem[];
-  total: number;
-  status: "pending" | "paid" | "completed" | "cancelled";
-  shippingAddress: ShippingAddress;
-  paymentIntentId?: string;
-  stripeSessionId?: string;
-  paidAt?: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
-export interface CreateOrderResponse {
-  success: boolean;
-  order: Order;
-  message?: string;
 }
 
 export interface CartItem {
@@ -44,164 +57,86 @@ export interface CartItem {
   image?: string;
 }
 
-// Create order from cart
+const getToken = (): string | undefined => {
+  if (typeof document === "undefined") return undefined;
+  const cookies = document.cookie.split(";").reduce((acc, cookie) => {
+    const [name, value] = cookie.trim().split("=");
+    acc[name] = value;
+    return acc;
+  }, {} as Record<string, string>);
+  return cookies.auth_token;
+};
+
+const authHeaders = () => {
+  const token = getToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
+
+const normalizeOrder = (o: any): Order => ({
+  ...o,
+  _id: String(o.id),
+  total: o.totalAmount,
+});
+
 export const createOrderFromCart = async (
-  token: string,
+  _token: string,
   cartItems: CartItem[],
   shippingAddress: ShippingAddress
 ): Promise<CreateOrderResponse> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/orders`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        items: cartItems,
-        shippingAddress,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to create order");
-    }
-
-    const orderData = await response.json();
-    console.log("Order created successfully:", orderData);
-
-    return {
-      success: true,
-      order: orderData.order || orderData,
-    };
-  } catch (error) {
-    console.error("Error creating order:", error);
-    return {
-      success: false,
-      order: {} as Order,
-      message:
-        error instanceof Error ? error.message : "Failed to create order",
-    };
+    const res = await apiClient.post("/orders/from-cart", {
+      items: cartItems.map(item => ({ deviceId: Number(item._id), quantity: item.quantity })),
+      shippingAddress: shippingAddress.street,
+      shippingCity: shippingAddress.city,
+      shippingCountry: shippingAddress.country,
+      shippingPostalCode: shippingAddress.postalCode,
+    }, { headers: authHeaders() });
+    return { success: true, order: normalizeOrder(res.data) };
+  } catch (error: any) {
+    return { success: false, order: {} as Order, message: error?.response?.data?.message || "Failed to create order" };
   }
 };
 
-// Get user orders
-export const getUserOrders = async (token: string): Promise<Order[]> => {
+export const getUserOrders = async (_token: string): Promise<Order[]> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/orders`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch orders");
-    }
-
-    return await response.json();
+    const res = await apiClient.get("/orders/my", { headers: authHeaders() });
+    const data = res.data;
+    const items = data.items || data.content || data || [];
+    return Array.isArray(items) ? items.map(normalizeOrder) : [];
   } catch (error) {
     console.error("Error fetching orders:", error);
     return [];
   }
 };
 
-// Get order by ID
-export const getOrderById = async (
-  orderId: string,
-  token: string
-): Promise<Order | null> => {
+export const getOrderById = async (orderId: string, _token: string): Promise<Order | null> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      throw new Error("Failed to fetch order");
-    }
-
-    return await response.json();
+    const res = await apiClient.get(`/orders/${orderId}`, { headers: authHeaders() });
+    return normalizeOrder(res.data);
   } catch (error) {
     console.error("Error fetching order:", error);
     return null;
   }
 };
 
-// Delete order
-export const deleteOrder = async (
-  orderId: string,
-  token: string
-): Promise<{ success: boolean; message?: string }> => {
+export const deleteOrder = async (orderId: string, _token: string): Promise<{ success: boolean; message?: string }> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
-      method: "DELETE",
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to delete order");
-    }
-
-    return {
-      success: true,
-      message: "Order deleted successfully",
-    };
-  } catch (error) {
-    console.error("Error deleting order:", error);
-    return {
-      success: false,
-      message:
-        error instanceof Error ? error.message : "Failed to delete order",
-    };
+    await apiClient.delete(`/orders/${orderId}`, { headers: authHeaders() });
+    return { success: true, message: "Order deleted successfully" };
+  } catch (error: any) {
+    return { success: false, message: error?.response?.data?.message || "Failed to delete order" };
   }
 };
 
-// Update order status
 export const updateOrderStatus = async (
   orderId: string,
-  status: "pending" | "paid" | "completed" | "cancelled",
-  token: string,
-  paymentIntentId?: string,
-  stripeSessionId?: string
+  status: string,
+  _token: string
 ): Promise<{ success: boolean; order?: Order; message?: string }> => {
   try {
-    const response = await fetch(`${API_BASE_URL}/orders/${orderId}/status`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify({
-        status,
-        paymentIntentId,
-        stripeSessionId,
-      }),
-    });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Failed to update order status");
-    }
-
-    const data = await response.json();
-    return {
-      success: true,
-      order: data.order,
-      message: data.message,
-    };
-  } catch (error) {
-    console.error("Error updating order status:", error);
-    return {
-      success: false,
-      message:
-        error instanceof Error
-          ? error.message
-          : "Failed to update order status",
-    };
+    const res = await apiClient.put(`/orders/${orderId}/status?status=${status}`, null, { headers: authHeaders() });
+    return { success: true, order: normalizeOrder(res.data) };
+  } catch (error: any) {
+    return { success: false, message: error?.response?.data?.message || "Failed to update order status" };
   }
 };
