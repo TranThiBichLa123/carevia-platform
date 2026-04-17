@@ -35,9 +35,9 @@ public class BookingService {
     private static final int MAX_BOOKINGS_PER_DAY = 3;
 
     public BookingService(BookingRepository bookingRepository, ExperienceSessionRepository sessionRepository,
-                          DeviceRepository deviceRepository, AccountRepository accountRepository,
-                          VoucherRepository voucherRepository, UserBehaviorRepository userBehaviorRepository,
-                          NotificationService notificationService) {
+            DeviceRepository deviceRepository, AccountRepository accountRepository,
+            VoucherRepository voucherRepository, UserBehaviorRepository userBehaviorRepository,
+            NotificationService notificationService) {
         this.bookingRepository = bookingRepository;
         this.sessionRepository = sessionRepository;
         this.deviceRepository = deviceRepository;
@@ -75,8 +75,8 @@ public class BookingService {
         session.bookSlot();
 
         // Calculate price
-        BigDecimal totalPrice = session.getPricePerSlot() != null ? session.getPricePerSlot() :
-                (device.getBookingPrice() != null ? device.getBookingPrice() : BigDecimal.ZERO);
+        BigDecimal totalPrice = session.getPricePerSlot() != null ? session.getPricePerSlot()
+                : (device.getBookingPrice() != null ? device.getBookingPrice() : BigDecimal.ZERO);
         BigDecimal discountAmount = BigDecimal.ZERO;
 
         // Apply voucher
@@ -110,7 +110,11 @@ public class BookingService {
 
         // Track behavior
         userBehaviorRepository.save(UserBehavior.builder()
-                .account(account).device(device).behaviorType(BehaviorType.BOOKING).build());
+                .account(account)
+                .actionType("BOOKING") // Thay behaviorType bằng actionType
+                .targetType("DEVICE") // Khai báo loại đối tượng tác động
+                .targetId(device.getId()) // Lưu ID của thiết bị vào targetId
+                .build());
 
         // Send notification
         notificationService.createBookingNotification(account, booking, "BOOKING_CREATED");
@@ -152,7 +156,8 @@ public class BookingService {
         booking.cancel(reason, "USER");
         booking = bookingRepository.save(booking);
         sessionRepository.save(booking.getSession());
-        if (booking.getVoucher() != null) voucherRepository.save(booking.getVoucher());
+        if (booking.getVoucher() != null)
+            voucherRepository.save(booking.getVoucher());
 
         notificationService.createBookingNotification(booking.getAccount(), booking, "BOOKING_CANCELLED");
         return toResponse(booking);
@@ -178,7 +183,8 @@ public class BookingService {
         booking.cancel(reason, "STAFF");
         booking = bookingRepository.save(booking);
         sessionRepository.save(booking.getSession());
-        if (booking.getVoucher() != null) voucherRepository.save(booking.getVoucher());
+        if (booking.getVoucher() != null)
+            voucherRepository.save(booking.getVoucher());
 
         notificationService.createBookingNotification(booking.getAccount(), booking, "BOOKING_CANCELLED");
         return toResponse(booking);

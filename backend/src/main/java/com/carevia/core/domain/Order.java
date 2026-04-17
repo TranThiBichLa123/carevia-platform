@@ -76,6 +76,12 @@ public class Order extends BaseEntity {
     @Column(name = "shipping_address", length = 500)
     private String shippingAddress;
 
+    @Column(name = "receiver_name", length = 255)
+    private String receiverName;
+
+    @Column(name = "receiver_phone", length = 20)
+    private String receiverPhone;
+
     @Column(name = "shipping_city", length = 100)
     private String shippingCity;
 
@@ -84,6 +90,9 @@ public class Order extends BaseEntity {
 
     @Column(name = "shipping_postal_code", length = 20)
     private String shippingPostalCode;
+
+    @Column(columnDefinition = "TEXT")
+    private String note;
 
     @Column(name = "customer_note", length = 500)
     private String customerNote;
@@ -112,9 +121,16 @@ public class Order extends BaseEntity {
         this.status = OrderStatus.PROCESSING;
     }
 
-    public void complete() {
+    public void startShipping() {
         if (this.status != OrderStatus.PROCESSING) {
-            throw new InvalidStatusException("Can only complete PROCESSING orders");
+            throw new InvalidStatusException("Can only ship PROCESSING orders");
+        }
+        this.status = OrderStatus.SHIPPING;
+    }
+
+    public void complete() {
+        if (this.status != OrderStatus.SHIPPING && this.status != OrderStatus.PROCESSING) {
+            throw new InvalidStatusException("Can only complete SHIPPING or PROCESSING orders");
         }
         this.status = OrderStatus.COMPLETED;
     }

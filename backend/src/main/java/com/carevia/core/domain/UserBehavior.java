@@ -2,7 +2,6 @@ package com.carevia.core.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
-import com.carevia.shared.constant.BehaviorType;
 import com.carevia.shared.entity.BaseEntity;
 
 @Entity
@@ -22,14 +21,15 @@ public class UserBehavior extends BaseEntity {
     @JoinColumn(name = "account_id", nullable = false)
     private Account account;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "device_id", nullable = false)
-    private Device device;
+    @Column(name = "action_type", nullable = false, length = 100)
+    private String actionType;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "behavior_type", length = 20, nullable = false)
-    private BehaviorType behaviorType;
+    @Column(name = "target_type", nullable = false, length = 100)
+    private String targetType;
 
-    @Column(length = 500)
+    @Column(name = "target_id", nullable = false)
+    private Long targetId;
+
+    @Column(columnDefinition = "JSON")
     private String metadata;
 }

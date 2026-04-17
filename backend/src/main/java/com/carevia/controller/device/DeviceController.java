@@ -33,10 +33,10 @@ public class DeviceController {
     @GetMapping
     @Operation(summary = "Get all devices with pagination and search")
     public ResponseEntity<?> getAllDevices(
-            @RequestParam(required = false) String search,
-            @RequestParam(required = false) Long categoryId,
-            @RequestParam(required = false) Long brandId,
-            @RequestParam(required = false) String skinType,
+            @RequestParam(value = "search", required = false) String search,
+            @RequestParam(value = "categoryId", required = false) Long categoryId,
+            @RequestParam(value = "brandId", required = false) Long brandId,
+            @RequestParam(value = "skinType", required = false) String skinType,
             Pageable pageable) {
         if (search != null && !search.isBlank()) {
             return ResponseEntity.ok(deviceService.searchDevices(search, pageable));
@@ -50,29 +50,30 @@ public class DeviceController {
 
     @GetMapping("/{id}")
     @Operation(summary = "Get device by ID")
-    public ResponseEntity<DeviceResponse> getDeviceById(@PathVariable Long id) {
+    public ResponseEntity<DeviceResponse> getDeviceById(@PathVariable("id") Long id) {
         DeviceResponse device = deviceService.getDeviceById(id);
         // Track view behavior
-        SecurityUtils.getCurrentUserId().ifPresent(userId ->
-                userBehaviorService.trackBehavior(userId, id, BehaviorType.VIEW, null));
+        SecurityUtils.getCurrentUserId()
+                .ifPresent(userId -> userBehaviorService.trackBehavior(userId, id, BehaviorType.VIEW, null));
         return ResponseEntity.ok(device);
     }
 
     @GetMapping("/slug/{slug}")
     @Operation(summary = "Get device by slug")
-    public ResponseEntity<DeviceResponse> getDeviceBySlug(@PathVariable String slug) {
+    public ResponseEntity<DeviceResponse> getDeviceBySlug(@PathVariable("slug") String slug) {
         return ResponseEntity.ok(deviceService.getDeviceBySlug(slug));
     }
 
     @GetMapping("/popular")
     @Operation(summary = "Get popular devices")
-    public ResponseEntity<?> getPopularDevices(@RequestParam(defaultValue = "8") int limit) {
+    public ResponseEntity<?> getPopularDevices(@RequestParam(value = "limit", defaultValue = "8") int limit) {
         return ResponseEntity.ok(deviceService.getPopularDevices(limit));
     }
 
     @GetMapping("/{id}/similar")
     @Operation(summary = "Get similar devices")
-    public ResponseEntity<?> getSimilarDevices(@PathVariable Long id, @RequestParam(defaultValue = "4") int limit) {
+    public ResponseEntity<?> getSimilarDevices(@PathVariable("id") Long id, 
+        @RequestParam(value = "limit", defaultValue = "4") int limit) {
         return ResponseEntity.ok(deviceService.getSimilarDevices(id, limit));
     }
 
@@ -105,14 +106,15 @@ public class DeviceController {
     @PutMapping("/{id}")
     @AdminOnly
     @Operation(summary = "Update a device (Admin)")
-    public ResponseEntity<DeviceResponse> updateDevice(@PathVariable Long id, @Valid @RequestBody UpdateDeviceRequest request) {
+    public ResponseEntity<DeviceResponse> updateDevice( @PathVariable("id") Long id, 
+        @Valid @RequestBody UpdateDeviceRequest request) {
         return ResponseEntity.ok(deviceService.updateDevice(id, request));
     }
 
     @DeleteMapping("/{id}")
     @AdminOnly
     @Operation(summary = "Delete a device (Admin)")
-    public ResponseEntity<Void> deleteDevice(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteDevice(@PathVariable("id") Long id) {
         deviceService.deleteDevice(id);
         return ResponseEntity.noContent().build();
     }

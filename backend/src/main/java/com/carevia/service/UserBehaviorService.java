@@ -17,7 +17,7 @@ public class UserBehaviorService {
     private final AccountRepository accountRepository;
 
     public UserBehaviorService(UserBehaviorRepository userBehaviorRepository,
-                               DeviceRepository deviceRepository, AccountRepository accountRepository) {
+            DeviceRepository deviceRepository, AccountRepository accountRepository) {
         this.userBehaviorRepository = userBehaviorRepository;
         this.deviceRepository = deviceRepository;
         this.accountRepository = accountRepository;
@@ -27,14 +27,23 @@ public class UserBehaviorService {
     public void trackBehavior(Long accountId, Long deviceId, BehaviorType type, String metadata) {
         Account account = accountRepository.findById(accountId).orElse(null);
         Device device = deviceRepository.findById(deviceId).orElse(null);
-        if (account == null || device == null) return;
+
+        if (account == null || device == null)
+            return;
 
         UserBehavior behavior = UserBehavior.builder()
                 .account(account)
-                .device(device)
-                .behaviorType(type)
+                // 1. Thay .device(device) bằng targetType và targetId
+                .targetType("DEVICE")
+                .targetId(device.getId())
+
+                // 2. Thay .behaviorType(type) bằng .actionType(type.name())
+                // (Vì trong Entity của bạn trường này tên là actionType)
+                .actionType(type.name())
+
                 .metadata(metadata)
                 .build();
+
         userBehaviorRepository.save(behavior);
     }
 

@@ -66,6 +66,13 @@ public class Booking extends BaseEntity {
     @Column(name = "customer_note", length = 500)
     private String customerNote;
 
+    @Column(name = "admin_note", columnDefinition = "TEXT")
+    private String adminNote;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "handled_by_admin_id")
+    private Account handledByAdmin;
+
     @Column(name = "staff_note", length = 500)
     private String staffNote;
 
@@ -111,5 +118,16 @@ public class Booking extends BaseEntity {
         if (this.voucher != null) {
             this.voucher.returnVoucher();
         }
+    }
+
+    public void markNoShow() {
+        if (this.status != BookingStatus.CONFIRMED) {
+            throw new InvalidStatusException("Can only mark no-show for CONFIRMED bookings");
+        }
+        this.status = BookingStatus.NO_SHOW;
+    }
+
+    public void assignAdmin(Account admin) {
+        this.handledByAdmin = admin;
     }
 }

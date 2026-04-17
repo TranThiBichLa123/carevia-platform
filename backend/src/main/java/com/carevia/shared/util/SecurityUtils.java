@@ -45,7 +45,6 @@ public final class SecurityUtils {
         this.jwtEncoder = jwtEncoder;
     }
 
-
     public String createAccessToken(String email, ResLoginDTO dto) {
 
         ResLoginDTO.UserInsideToken userInsideToken = ResLoginDTO.UserInsideToken.builder()
@@ -126,19 +125,23 @@ public final class SecurityUtils {
                 .map(authentication -> (String) authentication.getCredentials());
     }
 
-    /**
-     * Get the Id of the current user.
-     *
-     * @return the Id of the current user.
-     */
-    public static Optional<Long> getCurrentUserId() {
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-        return Optional.ofNullable(securityContext.getAuthentication())
-                .filter(authentication -> authentication.getPrincipal() instanceof ClaimAccessor)
-                .map(authentication -> (ClaimAccessor) authentication.getPrincipal())
-                .map(principal -> principal.getClaim(USER_ID_CLAIM));
+public static Optional<Long> getCurrentUserId() {
+    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+    if (authentication == null || !authentication.isAuthenticated() || 
+        "anonymousUser".equals(authentication.getPrincipal().toString())) {
+        return Optional.empty();
     }
 
+    Object principal = authentication.getPrincipal();
+
+    // Kiểm tra và ép kiểu
+    if (principal instanceof CustomUserDetails userDetails) {
+        return Optional.of(userDetails.getId());
+    }
+
+    return Optional.empty();
+}
     /**
      * Check if a user is authenticated.
      *

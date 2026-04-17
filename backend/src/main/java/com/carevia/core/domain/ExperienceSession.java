@@ -23,10 +23,14 @@ public class ExperienceSession extends BaseEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "device_id", nullable = false)
+    @JoinColumn(name = "service_id", nullable = false)
+    private Service service;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "device_id")
     private Device device;
 
-    @Column(name = "branch_name", length = 255)
+    @Column(name = "branch_name", nullable = false, length = 255)
     private String branchName;
 
     @Column(name = "location_detail", length = 500)
@@ -45,6 +49,10 @@ public class ExperienceSession extends BaseEntity {
     @Builder.Default
     private Integer maxSlots = 10;
 
+    @Column(name = "available_slots", nullable = false)
+    @Builder.Default
+    private Integer availableSlots = 10;
+
     @Column(name = "booked_slots")
     @Builder.Default
     private Integer bookedSlots = 0;
@@ -58,6 +66,10 @@ public class ExperienceSession extends BaseEntity {
     private java.math.BigDecimal pricePerSlot;
 
     @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_admin_id", nullable = false)
+    private Account createdByAdmin;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "staff_id")
     private Staff assignedStaff;
 
@@ -69,11 +81,16 @@ public class ExperienceSession extends BaseEntity {
         return getAvailableSlots() > 0 && status == SessionStatus.OPEN;
     }
 
+    public boolean isFull() {
+        return getAvailableSlots() <= 0;
+    }
+
     public void bookSlot() {
         if (!hasAvailableSlots()) {
             throw new InvalidStatusException("No available slots in this session");
         }
         this.bookedSlots++;
+        this.availableSlots = maxSlots - bookedSlots;
         if (this.bookedSlots >= this.maxSlots) {
             this.status = SessionStatus.FULL;
         }
@@ -82,6 +99,7 @@ public class ExperienceSession extends BaseEntity {
     public void releaseSlot() {
         if (this.bookedSlots > 0) {
             this.bookedSlots--;
+            this.availableSlots = maxSlots - bookedSlots;
             if (this.status == SessionStatus.FULL) {
                 this.status = SessionStatus.OPEN;
             }

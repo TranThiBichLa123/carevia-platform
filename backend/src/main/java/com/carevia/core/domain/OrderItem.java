@@ -24,8 +24,12 @@ public class OrderItem extends BaseEntity {
     private Order order;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "device_id", nullable = false)
+    @JoinColumn(name = "device_id")
     private Device device;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "service_id")
+    private Service service;
 
     @Column(nullable = false)
     private Integer quantity;
@@ -33,12 +37,22 @@ public class OrderItem extends BaseEntity {
     @Column(name = "unit_price", nullable = false, precision = 12, scale = 2)
     private BigDecimal unitPrice;
 
-    @Column(precision = 12, scale = 2)
-    private BigDecimal subtotal;
+    @Column(name = "discount_price", precision = 12, scale = 2)
+    private BigDecimal discountPrice;
+
+    @Column(name = "total_price", precision = 12, scale = 2)
+    private BigDecimal totalPrice;
 
     @PrePersist
     @PreUpdate
-    private void calculateSubtotal() {
-        this.subtotal = this.unitPrice.multiply(BigDecimal.valueOf(this.quantity));
+    private void calculateTotal() {
+        BigDecimal effectivePrice = this.discountPrice != null ? this.discountPrice : this.unitPrice;
+        this.totalPrice = effectivePrice.multiply(BigDecimal.valueOf(this.quantity));
+    }
+
+    public BigDecimal getSubtotal() {
+        if (this.totalPrice != null) return this.totalPrice;
+        BigDecimal effectivePrice = this.discountPrice != null ? this.discountPrice : this.unitPrice;
+        return effectivePrice.multiply(BigDecimal.valueOf(this.quantity));
     }
 }

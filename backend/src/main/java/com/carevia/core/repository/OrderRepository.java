@@ -19,15 +19,21 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
 
     Optional<Order> findByOrderCode(String orderCode);
 
+    // THÊM: Lấy danh sách đơn hàng cho Client (không phân trang, sắp xếp mới nhất lên đầu)
+    List<Order> findByAccountIdOrderByCreatedAtDesc(Long accountId);
+
+    // Giữ lại các hàm phân trang cho Admin/Staff
     Page<Order> findByAccountId(Long accountId, Pageable pageable);
 
     Page<Order> findByAccountIdAndStatus(Long accountId, OrderStatus status, Pageable pageable);
 
     List<Order> findByStatus(OrderStatus status);
 
-    @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.status = 'COMPLETED' AND o.createdAt BETWEEN :start AND :end")
+    // SỬA QUERY: Đảm bảo sử dụng tên trường trong Entity (totalAmount, status, createdAt)
+    // Lưu ý: Trong HQL, Enum phải được viết đầy đủ hoặc dùng tên Enum
+    @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.status = com.carevia.shared.constant.OrderStatus.COMPLETED AND o.createdAt BETWEEN :start AND :end")
     java.math.BigDecimal calculateRevenue(@Param("start") Instant start, @Param("end") Instant end);
 
-    @Query("SELECT COUNT(o) FROM Order o WHERE o.status = 'COMPLETED' AND o.createdAt BETWEEN :start AND :end")
+    @Query("SELECT COUNT(o) FROM Order o WHERE o.status = com.carevia.shared.constant.OrderStatus.COMPLETED AND o.createdAt BETWEEN :start AND :end")
     long countCompletedOrders(@Param("start") Instant start, @Param("end") Instant end);
 }

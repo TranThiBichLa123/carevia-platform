@@ -20,7 +20,7 @@ public class WishlistService {
     private final UserBehaviorRepository userBehaviorRepository;
 
     public WishlistService(WishlistRepository wishlistRepository, DeviceRepository deviceRepository,
-                           AccountRepository accountRepository, UserBehaviorRepository userBehaviorRepository) {
+            AccountRepository accountRepository, UserBehaviorRepository userBehaviorRepository) {
         this.wishlistRepository = wishlistRepository;
         this.deviceRepository = deviceRepository;
         this.accountRepository = accountRepository;
@@ -49,14 +49,21 @@ public class WishlistService {
         Device device = deviceRepository.findById(deviceId)
                 .orElseThrow(() -> new ResourceNotFoundException("Device not found"));
 
+        // 1. Lưu vào bảng Wishlist (Bảng này có quan hệ trực tiếp .device() nên giữ
+        // nguyên)
         WishlistItem item = WishlistItem.builder()
                 .account(account)
                 .device(device)
                 .build();
         wishlistRepository.save(item);
 
+        // 2. Lưu vào bảng UserBehavior để làm thống kê (Sửa lại Builder cho đúng field)
         userBehaviorRepository.save(UserBehavior.builder()
-                .account(account).device(device).behaviorType(BehaviorType.WISHLIST).build());
+                .account(account)
+                .targetType("DEVICE") // Phải có targetType
+                .targetId(device.getId()) // Map deviceId vào targetId
+                .actionType("WISHLIST") // Dùng actionType thay vì behaviorType
+                .build());
     }
 
     @Transactional

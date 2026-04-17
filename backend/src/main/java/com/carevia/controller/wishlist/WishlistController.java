@@ -31,11 +31,12 @@ public class WishlistController {
 
     @GetMapping("/ids")
     @Authenticated
-    @Operation(summary = "Get wishlist device IDs")
     public ResponseEntity<?> getWishlistIds() {
-        Long accountId = SecurityUtils.getCurrentUserId()
-                .orElseThrow(() -> new UnauthorizedException("Authentication required"));
-        return ResponseEntity.ok(wishlistService.getWishlistDeviceIds(accountId));
+        // Sử dụng return ResponseEntity trực tiếp để tránh ném RuntimeException làm sập
+        // App
+        return SecurityUtils.getCurrentUserId()
+                .map(accountId -> ResponseEntity.ok(wishlistService.getWishlistDeviceIds(accountId)))
+                .orElse(ResponseEntity.status(401).build());
     }
 
     @PostMapping("/{deviceId}")

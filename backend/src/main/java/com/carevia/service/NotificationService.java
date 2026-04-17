@@ -6,12 +6,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.carevia.core.domain.*;
 import com.carevia.core.repository.NotificationRepository;
-import com.carevia.shared.constant.NotificationStatus;
-import com.carevia.shared.constant.NotificationType;
 import com.carevia.shared.dto.PageResponse;
 import com.carevia.shared.dto.response.notification.NotificationResponse;
 import com.carevia.shared.exception.ResourceNotFoundException;
-
+import com.carevia.shared.constant.NotificationStatus;
+import com.carevia.shared.constant.NotificationType;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,7 +30,8 @@ public class NotificationService {
         switch (eventType) {
             case "BOOKING_CREATED" -> {
                 title = "Booking Created";
-                message = "Your booking " + booking.getBookingCode() + " has been created successfully. Waiting for confirmation.";
+                message = "Your booking " + booking.getBookingCode()
+                        + " has been created successfully. Waiting for confirmation.";
                 type = NotificationType.BOOKING_CREATED;
             }
             case "BOOKING_CONFIRMED" -> {
@@ -57,13 +57,12 @@ public class NotificationService {
         }
 
         Notification notification = Notification.builder()
-                .account(account)
                 .title(title)
-                .message(message)
-                .notificationType(type)
+                .content(message)
+                .type(type.name())
                 .referenceId(booking.getId())
                 .referenceType("BOOKING")
-                .actionUrl("/client/my-bookings")
+                .targetUrl("/client/my-bookings")
                 .build();
 
         notificationRepository.save(notification);
@@ -108,13 +107,12 @@ public class NotificationService {
         }
 
         Notification notification = Notification.builder()
-                .account(account)
                 .title(title)
-                .message(message)
-                .notificationType(type)
+                .content(message)
+                .type(type.name())
                 .referenceId(order.getId())
                 .referenceType("ORDER")
-                .actionUrl("/client/user/orders")
+                .targetUrl("/client/user/orders")
                 .build();
 
         notificationRepository.save(notification);
@@ -122,10 +120,9 @@ public class NotificationService {
 
     public void createSystemNotification(Account account, String title, String message) {
         Notification notification = Notification.builder()
-                .account(account)
                 .title(title)
-                .message(message)
-                .notificationType(NotificationType.SYSTEM)
+                .content(message)
+                .type("SYSTEM")
                 .build();
         notificationRepository.save(notification);
     }
@@ -136,8 +133,13 @@ public class NotificationService {
     }
 
     public PageResponse<NotificationResponse> getUnreadNotifications(Long accountId, Pageable pageable) {
+        // 1. Gọi đúng tên hàm trong Repository có chứa Status
+        // 2. Truyền tham số: accountId, NotificationStatus.UNREAD, và pageable
         Page<Notification> page = notificationRepository.findByAccountIdAndStatusOrderByCreatedAtDesc(
-                accountId, NotificationStatus.UNREAD, pageable);
+                accountId,
+                NotificationStatus.UNREAD,
+                pageable);
+
         return toPageResponse(page);
     }
 
@@ -149,8 +151,8 @@ public class NotificationService {
     public NotificationResponse markAsRead(Long notificationId) {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new ResourceNotFoundException("Notification not found"));
-        notification.markAsRead();
-        return toResponse(notificationRepository.save(notification));
+        notification.setStatus(NotificationStatus.READ);
+        return toResponse(notification);
     }
 
     @Transactional
@@ -162,12 +164,16 @@ public class NotificationService {
         return NotificationResponse.builder()
                 .id(n.getId())
                 .title(n.getTitle())
-                .message(n.getMessage())
-                .notificationType(n.getNotificationType())
+                .message(n.getContent())
+                // Nếu getType() trả về String -> Dùng valueOf là đúng
+                .notificationType(NotificationType.valueOf(n.getType()))
+
+                // SỬA TẠI ĐÂY: n.getStatus() đã là Enum rồi, nên truyền thẳng vào luôn
                 .status(n.getStatus())
+
                 .referenceId(n.getReferenceId())
                 .referenceType(n.getReferenceType())
-                .actionUrl(n.getActionUrl())
+                .actionUrl(n.getTargetUrl())
                 .createdAt(n.getCreatedAt())
                 .build();
     }
