@@ -1,21 +1,22 @@
 "use client";
 import { Calendar, MapPin, CheckCircle } from 'lucide-react';
-import { mockProducts, mockSessions } from '@/constants/data';
 import { getAvailableSessionsByProductId } from '@/lib/booking';
 import { Product } from '@/types_enum/devices';
 import { ExperienceSession } from '@/types_enum/booking';
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Container from '@/components/common/Container';
 import BookingCard from '@/components/common/client/booking/BookingCard';
 import { bookingService } from '@/services/bookings/bookingService';
+import { deviceApi } from '@/lib/deviceApi';
+import { mapDeviceToProduct, mapApiSession } from '@/lib/mappers';
 
 const BookingPage = () => {
     const searchParams = useSearchParams();
     const deviceIdParam = searchParams.get('deviceId');
+    const selectParam = searchParams.get('select');
 
-    // Thêm useMemo và useEffect vào import từ 'react'
     const [step, setStep] = useState(1);
     const [selectedDevice, setSelectedDevice] = useState<Product | null>(null);
     const [selectedDate, setSelectedDate] = useState('');
@@ -24,46 +25,88 @@ const BookingPage = () => {
     const [customerPhone, setCustomerPhone] = useState('');
     const [customerName, setCustomerName] = useState('');
     const [selectedBranch, setSelectedBranch] = useState<string | null>(null);
-    // Lấy danh sách chi nhánh duy nhất từ mockSessions của thiết bị đó
+
+    // API data states
+    const [bookingDevices, setBookingDevices] = useState<Product[]>([]);
+    const [apiSessions, setApiSessions] = useState<ExperienceSession[]>([]);
+    const [loadingDevices, setLoadingDevices] = useState(true);
+    const [loadingSessions, setLoadingSessions] = useState(false);
+    const [submitting, setSubmitting] = useState(false);
+
+    // Fetch booking-available devices from API
+    useEffect(() => {
+        const fetchDevices = async () => {
+            setLoadingDevices(true);
+            try {
+                const data = await deviceApi.getAll({ size: 50 });
+                const mapped = data.items
+                    .map(mapDeviceToProduct)
+                    .filter(p => p.isBookingAvailable);
+                setBookingDevices(mapped);
+            } catch (error) {
+                console.error("Failed to fetch booking devices:", error);
+            } finally {
+                setLoadingDevices(false);
+            }
+        };
+        fetchDevices();
+    }, []);
+
+    // Fetch available sessions when a device is selected
+    const fetchSessions = useCallback(async (deviceId: string) => {
+        setLoadingSessions(true);
+        try {
+            const today = new Date().toISOString().split('T')[0];
+            const sessions = await bookingService.getAvailableSessions(Number(deviceId), today);
+            const mapped = Array.isArray(sessions) ? sessions.map(mapApiSession) : [];
+            setApiSessions(mapped);
+        } catch (error) {
+            console.error("Failed to fetch sessions:", error);
+            setApiSessions([]);
+        } finally {
+            setLoadingSessions(false);
+        }
+    }, []);
+
+    // When device is selected, fetch its sessions
+    useEffect(() => {
+        if (selectedDevice) {
+            fetchSessions(selectedDevice.id);
+        }
+    }, [selectedDevice, fetchSessions]);
+
+    // Get unique branches from sessions
     const availableBranches = useMemo(() => {
         if (!selectedDevice) return [];
-        const branches = mockSessions
-            .filter(s => s.serviceId === selectedDevice._id)
+        const branches = apiSessions
+            .filter(s => s.serviceId === selectedDevice.id)
             .map(s => s.branchName);
         return Array.from(new Set(branches));
-    }, [selectedDevice]);
+    }, [selectedDevice, apiSessions]);
 
-    // 1. Lấy danh sách các NGÀY duy nhất thực sự có lịch (Unique Dates)
+    // Get unique dates from sessions
     const availableDates = useMemo(() => {
         if (!selectedDevice) return [];
-
-        // Lọc session theo serviceId (khớp với interface của bạn)
-        const deviceSessions = mockSessions.filter(s => s.serviceId === selectedDevice._id);
-
-        // Lấy phần YYYY-MM-DD từ chuỗi ISO startTime
+        const deviceSessions = apiSessions.filter(s => s.serviceId === selectedDevice.id);
         const dates = deviceSessions.map(s => s.startTime.split('T')[0]);
-
-        // Loại bỏ trùng lặp và sắp xếp ngày tăng dần
         return Array.from(new Set(dates)).sort();
-    }, [selectedDevice]);
+    }, [selectedDevice, apiSessions]);
 
-    // 2. Tự động chọn ngày đầu tiên có lịch khi đổi thiết bị
+    // Auto-select first date
     useEffect(() => {
         if (availableDates.length > 0) {
-            setSelectedDate(availableDates[0]); // Chọn ngày đầu tiên trong mảng
+            setSelectedDate(availableDates[0]);
         } else {
             setSelectedDate('');
         }
         setSelectedSession(null);
     }, [availableDates]);
 
-    // 3. Lấy danh sách các phiên (GIỜ) dựa trên Ngày đã chọn
+    // Get sessions for selected date
     const availableSessions = useMemo(() => {
         if (!selectedDevice || !selectedDate) return [];
-
-        // Sử dụng hàm helper, đảm bảo hàm này bên trong dùng s.serviceId để lọc
-        return getAvailableSessionsByProductId(mockSessions, selectedDevice._id, selectedDate);
-    }, [selectedDevice, selectedDate]);
+        return getAvailableSessionsByProductId(apiSessions, selectedDevice.id, selectedDate);
+    }, [selectedDevice, selectedDate, apiSessions]);
 
     // --- CÁC HÀM HELPER ĐỊNH DẠNG ---
 
@@ -85,18 +128,20 @@ const BookingPage = () => {
 
     const nextStep = () => setStep(step + 1);
     const prevStep = () => setStep(step - 1);
-    const bookingDevices = mockProducts.filter(p => p.isBookingAvailable);
 
-    // Auto-select device from query param (e.g. from Product Detail page)
+    // Auto-select device from query param
     useEffect(() => {
-        if (deviceIdParam && !selectedDevice) {
-            const device = bookingDevices.find(p => p._id === deviceIdParam);
-            if (device) {
-                setSelectedDevice(device);
-                setStep(2);
+        if (!loadingDevices && bookingDevices.length > 0) {
+            const paramId = deviceIdParam || selectParam;
+            if (paramId && !selectedDevice) {
+                const device = bookingDevices.find(p => p.id === paramId);
+                if (device) {
+                    setSelectedDevice(device);
+                    setStep(2);
+                }
             }
         }
-    }, [deviceIdParam]);
+    }, [deviceIdParam, selectParam, loadingDevices, bookingDevices]);
 
     // Thêm vào bên trong BookingPage component
     useEffect(() => {
@@ -104,45 +149,23 @@ const BookingPage = () => {
     }, [step]);
 
     const handleCompleteBooking = async () => {
-        const STORAGE_KEY = 'carevia_bookings';
-        const newBooking = {
-            id: `BK-${Math.floor(1000 + Math.random() * 9000)}`,
-            bookingCode: `BK-${Math.floor(1000 + Math.random() * 9000)}`,
-            deviceName: selectedDevice?.name,
-            branchName: selectedBranch,
-            address: selectedSession?.locationDetail,
-            startTime: selectedSession?.startTime,
-            endTime: selectedSession?.endTime,
-            status: "pending",
-            price: selectedDevice?.bookingPrice || 0,
-            totalPrice: selectedDevice?.bookingPrice || 0,
-            image: selectedDevice?.image,
-            customerName,
-            customerPhone,
-            customerNote: '',
-            createdAt: new Date().toISOString(),
-            sessionId: selectedSession?.id,
-        };
+        if (submitting) return;
+        setSubmitting(true);
 
         try {
-            // Try API first
             if (selectedSession?.id) {
                 await bookingService.create({
                     sessionId: Number(selectedSession.id),
                     notes: `Khách: ${customerName}, SĐT: ${customerPhone}`,
                 });
             }
-        } catch {
-            // API failed - save to localStorage as fallback
+            window.location.href = '/client/my-bookings';
+        } catch (error) {
+            console.error("Booking failed:", error);
+            alert("Đặt lịch thất bại. Vui lòng thử lại.");
+        } finally {
+            setSubmitting(false);
         }
-
-        // Always save to localStorage for offline access
-        const savedData = localStorage.getItem(STORAGE_KEY);
-        const existingBookings = savedData ? JSON.parse(savedData) : [];
-        existingBookings.push(newBooking);
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(existingBookings));
-
-        window.location.href = '/client/my-bookings';
     };
 
     const validatePhone = (phone: string) => {
@@ -322,23 +345,38 @@ const BookingPage = () => {
                                 </div>
 
                                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                                    {bookingDevices.map((device) => (
-                                        <BookingCard
-                                            key={device._id}
-                                            device={device}
-                                            onSelect={(selected) => {
-                                                setSelectedDevice(selected);
-                                                nextStep();
-                                            }}
-                                        />
-                                    ))}
+                                    {loadingDevices ? (
+                                        Array.from({ length: 6 }).map((_, i) => (
+                                            <div key={i} className="animate-pulse border border-gray-100 rounded-xl overflow-hidden">
+                                                <div className="bg-gray-200 aspect-video" />
+                                                <div className="p-4 space-y-3">
+                                                    <div className="h-3 bg-gray-200 rounded w-1/3" />
+                                                    <div className="h-4 bg-gray-200 rounded w-3/4" />
+                                                    <div className="h-3 bg-gray-200 rounded w-full" />
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <>
+                                            {bookingDevices.map((device) => (
+                                                <BookingCard
+                                                    key={device.id}
+                                                    device={device}
+                                                    onSelect={(selected) => {
+                                                        setSelectedDevice(selected);
+                                                        nextStep();
+                                                    }}
+                                                />
+                                            ))}
 
-                                    {bookingDevices.length === 0 && (
-                                        <div className="col-span-full py-20 text-center border-2 border-dashed border-gray-100 rounded-xl">
-                                            <p className="text-gray-400 text-sm uppercase tracking-widest italic">
-                                                Không tìm thấy thiết bị phù hợp.
-                                            </p>
-                                        </div>
+                                            {bookingDevices.length === 0 && (
+                                                <div className="col-span-full py-20 text-center border-2 border-dashed border-gray-100 rounded-xl">
+                                                    <p className="text-gray-400 text-sm uppercase tracking-widest italic">
+                                                        Không tìm thấy thiết bị phù hợp.
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </>
                                     )}
                                 </div>
                             </>
@@ -549,10 +587,11 @@ const BookingPage = () => {
                                                         Thay đổi lịch
                                                     </button>
                                                     <button
-                                                        onClick={() => alert('Đã gửi yêu cầu đặt lịch đến Carevia Clinic!')}
-                                                        className="flex-2 bg-black text-white py-4 text-[11px] font-bold uppercase tracking-widest hover:bg-gray-800 transition-shadow shadow-lg shadow-black/10"
+                                                        onClick={handleCompleteBooking}
+                                                        disabled={submitting}
+                                                        className="flex-2 bg-black text-white py-4 text-[11px] font-bold uppercase tracking-widest hover:bg-gray-800 transition-shadow shadow-lg shadow-black/10 disabled:opacity-50"
                                                     >
-                                                        Xác nhận hoàn tất
+                                                        {submitting ? 'Đang xử lý...' : 'Xác nhận hoàn tất'}
                                                     </button>
                                                 </div>
                                             </div>

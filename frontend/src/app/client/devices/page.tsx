@@ -1,151 +1,110 @@
-import React from "react";
+"use client";
+
+import React, { useCallback, useEffect, useState } from "react";
 import ProductCard from "@/components/common/products/ProductCard";
 import { Product } from "@/types_enum/devices";
-import Link from "next/dist/client/link";
+import Link from "next/link";
 import Container from "@/components/common/Container";
+import { deviceApi, DevicePageResponse, BrandData } from "@/lib/deviceApi";
+import { mapDeviceToProduct } from "@/lib/mappers";
 
-const createMockProduct = (
-    index: number,
-    overrides: Partial<Product> & {
-        _id: string;
-        name: string;
-        price: number;
-        image: string;
-        category: Product["category"];
-        brand: Product["brand"];
-    }
-): Product => ({
-    _id: overrides._id,
-    name: overrides.name,
-    slug: overrides.slug ?? `san-pham-${overrides._id}`,
-    description: overrides.description ?? "Mô tả sản phẩm",
-    content: overrides.content ?? "Nội dung chi tiết sản phẩm đang được cập nhật.",
-    price: overrides.price,
-    originalPrice: overrides.originalPrice ?? overrides.price,
-    discountPercentage: overrides.discountPercentage ?? 0,
-    stock: overrides.stock ?? 10,
-    averageRating: overrides.averageRating ?? 5,
-    image: overrides.image,
-    images: overrides.images ?? [overrides.image],
-    category: overrides.category,
-    brand: overrides.brand,
-    ratings: overrides.ratings ?? [],
-    sku: overrides.sku ?? `SKU-${overrides._id}`,
-    warranty: overrides.warranty ?? {
-        period: 12,
-        policy: "Bảo hành 12 tháng",
-    },
-    origin: overrides.origin ?? "Hàn Quốc",
-    condition: overrides.condition ?? "new",
-    specifications: overrides.specifications ?? [
-        { label: "Dung tích", value: "Chuẩn hãng" },
-        { label: "Loại da", value: "Phù hợp nhiều loại da" },
-    ],
-    sold: overrides.sold ?? 100 + index * 25,
-    reviewCount: overrides.reviewCount ?? 20 + index * 5,
-    isBookingAvailable: overrides.isBookingAvailable ?? false,
-    bookingPrice: overrides.bookingPrice ?? 0,
-    sessionIds: overrides.sessionIds ?? [],
-    tags: overrides.tags ?? ["Best Seller"],
-    videoUrl: overrides.videoUrl,
-    quantity: overrides.quantity ?? 1,
-    createdAt: overrides.createdAt ?? "2026-04-01T00:00:00.000Z",
-});
-
-const MOCK_PRODUCTS: Product[] = [
-    createMockProduct(1, {
-        _id: "1",
-        name: "Nước Tẩy Trang La Roche-Posay Làm Sạch Sâu Cho Da Dầu 400ml",
-        slug: "nuoc-tay-trang-la-roche-posay-400ml",
-        image: "https://picsum.photos/seed/product-1/600/600",
-        price: 355000,
-        originalPrice: 445000,
-        discountPercentage: 20,
-        category: {
-            _id: "cat1",
-            name: "CHĂM SÓC DA",
-            slug: "cham-soc-da",
-            image: "https://picsum.photos/seed/category-1/300/300",
-            categoryType: "featured",
-        },
-        brand: {
-            _id: "brand1",
-            name: "La Roche-Posay",
-            slug: "la-roche-posay",
-            image: "https://picsum.photos/seed/brand-1/300/300",
-        },
-    }),
-    createMockProduct(2, {
-        _id: "2",
-        name: "Sữa Rửa Mặt Cerave Foaming Facial Cleanser Cho Da Dầu",
-        slug: "cerave-foaming-facial-cleanser",
-        image: "https://picsum.photos/seed/product-2/600/600",
-        price: 420000,
-        originalPrice: 470000,
-        discountPercentage: 10,
-        category: {
-            _id: "cat1",
-            name: "CHĂM SÓC DA",
-            slug: "cham-soc-da",
-            image: "https://picsum.photos/seed/category-1/300/300",
-            categoryType: "featured",
-        },
-        brand: {
-            _id: "brand2",
-            name: "CeraVe",
-            slug: "cerave",
-            image: "https://picsum.photos/seed/brand-2/300/300",
-        },
-    }),
-    createMockProduct(3, {
-        _id: "3",
-        name: "Son Kem Lì Black Rouge Air Fit Velvet Tint",
-        slug: "black-rouge-air-fit-velvet-tint",
-        image: "https://picsum.photos/seed/product-3/600/600",
-        price: 150000,
-        originalPrice: 150000,
-        discountPercentage: 0,
-        category: {
-            _id: "cat2",
-            name: "TRANG ĐIỂM",
-            slug: "trang-diem",
-            image: "https://picsum.photos/seed/category-2/300/300",
-            categoryType: "featured",
-        },
-        brand: {
-            _id: "brand3",
-            name: "Black Rouge",
-            slug: "black-rouge",
-            image: "https://picsum.photos/seed/brand-3/300/300",
-        },
-    }),
-    createMockProduct(4, {
-        _id: "4",
-        name: "Kem Chống Nắng Anessa Perfect UV Sunscreen Skincare Milk",
-        slug: "anessa-perfect-uv-sunscreen-skincare-milk",
-        image: "https://picsum.photos/seed/product-4/600/600",
-        price: 685000,
-        originalPrice: 805000,
-        discountPercentage: 15,
-        category: {
-            _id: "cat1",
-            name: "CHĂM SÓC DA",
-            slug: "cham-soc-da",
-            image: "https://picsum.photos/seed/category-1/300/300",
-            categoryType: "featured",
-        },
-        brand: {
-            _id: "brand4",
-            name: "Anessa",
-            slug: "anessa",
-            image: "https://picsum.photos/seed/brand-4/300/300",
-        },
-    }),
-];
+type SortOption = "newest" | "price_asc" | "price_desc" | "best_selling";
 
 const AllProductsPage = () => {
-    // 2. Tạm thời dùng Mock Data thay vì gọi fetch
-    const products: Product[] = MOCK_PRODUCTS;
+    const [products, setProducts] = useState<Product[]>([]);
+    const [loading, setLoading] = useState(true);
+    const [page, setPage] = useState(0);
+    const [totalItems, setTotalItems] = useState(0);
+    const [hasNext, setHasNext] = useState(false);
+    const [loadingMore, setLoadingMore] = useState(false);
+
+    // Filters
+    const [selectedBrandIds, setSelectedBrandIds] = useState<number[]>([]);
+    const [priceRange, setPriceRange] = useState<string | null>(null);
+    const [sortBy, setSortBy] = useState<SortOption>("newest");
+
+    // Filter options from API
+    const [brands, setBrands] = useState<BrandData[]>([]);
+
+    useEffect(() => {
+        deviceApi.getBrands().then(setBrands).catch(console.error);
+    }, []);
+
+    const getSortParam = (sort: SortOption): string => {
+        switch (sort) {
+            case "newest": return "createdAt,desc";
+            case "price_asc": return "price,asc";
+            case "price_desc": return "price,desc";
+            case "best_selling": return "sold,desc";
+            default: return "createdAt,desc";
+        }
+    };
+
+    const fetchProducts = useCallback(async (pageNum: number, append = false) => {
+        if (!append) setLoading(true);
+        else setLoadingMore(true);
+
+        try {
+            const params: Record<string, any> = {
+                page: pageNum,
+                size: 12,
+                sort: getSortParam(sortBy),
+            };
+            if (selectedBrandIds.length === 1) params.brandId = selectedBrandIds[0];
+
+            const data: DevicePageResponse = await deviceApi.getAll(params);
+            const mapped = data.items.map(mapDeviceToProduct);
+
+            if (append) {
+                setProducts(prev => [...prev, ...mapped]);
+            } else {
+                setProducts(mapped);
+            }
+            setTotalItems(data.totalItems);
+            setHasNext(data.hasNext);
+            setPage(pageNum);
+        } catch (error) {
+            console.error("Failed to fetch products:", error);
+        } finally {
+            setLoading(false);
+            setLoadingMore(false);
+        }
+    }, [sortBy, selectedBrandIds]);
+
+    useEffect(() => {
+        fetchProducts(0);
+    }, [fetchProducts]);
+
+    const handleLoadMore = () => {
+        if (hasNext && !loadingMore) {
+            fetchProducts(page + 1, true);
+        }
+    };
+
+    const handleBrandToggle = (brandId: number) => {
+        setSelectedBrandIds(prev =>
+            prev.includes(brandId)
+                ? prev.filter(id => id !== brandId)
+                : [...prev, brandId]
+        );
+    };
+
+    const handleSortChange = (sort: SortOption) => {
+        setSortBy(sort);
+    };
+
+    const handleClearFilters = () => {
+        setSelectedBrandIds([]);
+        setPriceRange(null);
+        setSortBy("newest");
+    };
+
+    const sortLabel: Record<SortOption, string> = {
+        newest: "Mới nhất",
+        price_asc: "Giá: Thấp đến Cao",
+        price_desc: "Giá: Cao đến Thấp",
+        best_selling: "Bán chạy nhất",
+    };
 
     return (
         <Container className="bg-[#f4f4f4] min-h-screen pb-20 font-sans">
@@ -174,7 +133,7 @@ const AllProductsPage = () => {
                         <div className="bg-white rounded-sm border border-gray-200 sticky top-24">
                             <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
                                 <h3 className="font-bold text-[13px] uppercase tracking-tight">Bộ lọc tìm kiếm</h3>
-                                <button className="text-[11px] text-primary underline font-bold">Xóa tất cả</button>
+                                <button onClick={handleClearFilters} className="text-[11px] text-primary underline font-bold">Xóa tất cả</button>
                             </div>
 
                             <div className="p-4 space-y-8">
@@ -204,17 +163,25 @@ const AllProductsPage = () => {
                                         THƯƠNG HIỆU <span className="text-gray-400">+</span>
                                     </h4>
                                     <div className="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
-                                        {["La Roche-Posay", "L'Oreal", "Vichy", "Cocoon", "Innisfree"].map((brand) => (
-                                            <label key={brand} className="flex items-center group cursor-pointer">
+                                        {brands.map((brand) => (
+                                            <label key={brand.id} className="flex items-center group cursor-pointer">
                                                 <div className="relative flex items-center">
-                                                    <input type="checkbox" className="peer appearance-none w-5 h-5 border-2 border-gray-300 checked:bg-primary checked:border-primary transition-all mr-3" />
+                                                    <input
+                                                        type="checkbox"
+                                                        checked={selectedBrandIds.includes(brand.id)}
+                                                        onChange={() => handleBrandToggle(brand.id)}
+                                                        className="peer appearance-none w-5 h-5 border-2 border-gray-300 checked:bg-primary checked:border-primary transition-all mr-3"
+                                                    />
                                                     <svg className="absolute w-3 h-3 text-white left-1 opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4">
                                                         <path d="M5 13l4 4L19 7" />
                                                     </svg>
                                                 </div>
-                                                <span className="text-[13px] text-gray-700 group-hover:text-primary">{brand}</span>
+                                                <span className="text-[13px] text-gray-700 group-hover:text-primary">{brand.name}</span>
                                             </label>
                                         ))}
+                                        {brands.length === 0 && (
+                                            <p className="text-xs text-gray-400 italic">Đang tải...</p>
+                                        )}
                                     </div>
                                 </div>
 
@@ -237,7 +204,10 @@ const AllProductsPage = () => {
                             </div>
 
                             <div className="p-4 border-t border-gray-100">
-                                <button className="w-full py-3 bg-[#00b2bd] text-white text-xs font-black uppercase tracking-widest hover:bg-[#008e96] transition-all">
+                                <button
+                                    onClick={() => fetchProducts(0)}
+                                    className="w-full py-3 bg-[#00b2bd] text-white text-xs font-black uppercase tracking-widest hover:bg-[#008e96] transition-all"
+                                >
                                     Áp dụng bộ lọc
                                 </button>
                             </div>
@@ -250,7 +220,7 @@ const AllProductsPage = () => {
                         <div className="flex flex-wrap justify-between items-end mb-6 pb-4 border-b border-gray-200 gap-4">
                             <div>
                                 <p className="text-[13px] text-gray-500 font-medium">
-                                    Tìm thấy <span className="text-gray-900 font-bold">{products.length}</span> sản phẩm
+                                    Tìm thấy <span className="text-gray-900 font-bold">{totalItems}</span> sản phẩm
                                 </p>
                             </div>
 
@@ -259,31 +229,24 @@ const AllProductsPage = () => {
 
                                 {/* Khối Dropdown chính */}
                                 <div className="relative group min-w-[140px]">
-                                    {/* Nút hiển thị giá trị đang chọn */}
                                     <div className="flex items-center justify-between px-3 py-2 bg-white border border-gray-200 rounded-md cursor-pointer hover:border-gray-300 transition-all">
-                                        <span className="text-[13px] font-medium text-gray-700"> Mới nhất </span>
+                                        <span className="text-[13px] font-medium text-gray-700">{sortLabel[sortBy]}</span>
                                         <svg className="w-4 h-4 text-gray-400 group-hover:rotate-180 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                                         </svg>
                                     </div>
 
-                                    {/* List danh sách khi mở ra - Giống y hệt hình */}
                                     <div className="absolute top-full left-0 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                                         <div className="flex flex-col">
-                                            {/* Item 1 */}
-                                            
-                                            {/* Item 2 */}
-                                            <div className="px-3 py-2.5 text-[13px] text-gray-700 hover:bg-gray-50 cursor-pointer border-b border-gray-100 transition-colors">
-                                                Giá: Thấp đến Cao
-                                            </div>
-                                            {/* Item 3 */}
-                                            <div className="px-3 py-2.5 text-[13px] text-gray-700 hover:bg-gray-50 cursor-pointer last:border-b-0 transition-colors">
-                                                Giá: Cao đến Thấp
-                                            </div>
-                                            {/* Item 4 */}
-                                            <div className="px-3 py-2.5 text-[13px] text-gray-700 hover:bg-gray-50 cursor-pointer last:border-b-0 transition-colors">
-                                                Bán chạy nhất
-                                            </div>
+                                            {(Object.keys(sortLabel) as SortOption[]).map((key) => (
+                                                <div
+                                                    key={key}
+                                                    onClick={() => handleSortChange(key)}
+                                                    className={`px-3 py-2.5 text-[13px] cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors ${sortBy === key ? 'text-primary font-bold bg-gray-50' : 'text-gray-700 hover:bg-gray-50'}`}
+                                                >
+                                                    {sortLabel[key]}
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 </div>
@@ -293,22 +256,56 @@ const AllProductsPage = () => {
                         </div>
 
                         {/* Product Grid */}
-                        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-8">
-                            {products.map((item: Product) => (
-                                <ProductCard key={item._id} product={item} />
-                            ))}
-                        </div>
-
-                        {/* Nút Xem Thêm thay vì Phân trang */}
-                        {/* <div className="mt-16 flex flex-col items-center">
-                            <div className="w-64 h-1 bg-gray-200 rounded-full mb-4">
-                                <div className="w-1/3 h-full bg-primary rounded-full"></div>
+                        {loading ? (
+                            <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-8">
+                                {Array.from({ length: 8 }).map((_, i) => (
+                                    <div key={i} className="animate-pulse">
+                                        <div className="bg-gray-200 aspect-square rounded-lg mb-3" />
+                                        <div className="h-3 bg-gray-200 rounded w-3/4 mb-2" />
+                                        <div className="h-3 bg-gray-200 rounded w-1/2" />
+                                    </div>
+                                ))}
                             </div>
-                            <p className="text-xs text-gray-500 mb-6">Bạn đang xem 12 trên {products.length} sản phẩm</p>
-                            <button className="px-12 py-3 border-2 border-gray-900 text-gray-900 font-black text-sm uppercase hover:bg-gray-900 hover:text-white transition-all tracking-widest">
-                                Xem thêm sản phẩm
-                            </button>
-                        </div> */}
+                        ) : products.length === 0 ? (
+                            <div className="py-20 text-center border-2 border-dashed border-gray-100 rounded-xl">
+                                <p className="text-gray-400 text-sm uppercase tracking-widest italic">
+                                    Không tìm thấy sản phẩm phù hợp.
+                                </p>
+                                <button onClick={handleClearFilters} className="mt-4 text-primary underline text-sm font-bold">
+                                    Xóa bộ lọc
+                                </button>
+                            </div>
+                        ) : (
+                            <>
+                                <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-8">
+                                    {products.map((item: Product) => (
+                                        <ProductCard key={item.id} product={item} />
+                                    ))}
+                                </div>
+
+                                {/* Load More */}
+                                {hasNext && (
+                                    <div className="mt-16 flex flex-col items-center">
+                                        <div className="w-64 h-1 bg-gray-200 rounded-full mb-4">
+                                            <div
+                                                className="h-full bg-primary rounded-full transition-all"
+                                                style={{ width: `${Math.min((products.length / totalItems) * 100, 100)}%` }}
+                                            />
+                                        </div>
+                                        <p className="text-xs text-gray-500 mb-6">
+                                            Bạn đang xem {products.length} trên {totalItems} sản phẩm
+                                        </p>
+                                        <button
+                                            onClick={handleLoadMore}
+                                            disabled={loadingMore}
+                                            className="px-12 py-3 border-2 border-gray-900 text-gray-900 font-black text-sm uppercase hover:bg-gray-900 hover:text-white transition-all tracking-widest disabled:opacity-50"
+                                        >
+                                            {loadingMore ? "Đang tải..." : "Xem thêm sản phẩm"}
+                                        </button>
+                                    </div>
+                                )}
+                            </>
+                        )}
                     </main>
                 </div>
             </div>

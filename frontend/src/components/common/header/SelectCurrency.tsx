@@ -9,38 +9,19 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../../components/ui/select";
-import React, { useState } from "react";
-
-/*
-  SelectCurrency.tsx
-
-  Mục đích:
-  - Hiển thị bộ chọn tiền tệ nhỏ ở khu vực header/top bar.
-  - Cho phép người dùng chọn tiền tệ hiển thị (ví dụ: USD, EUR).
-  - Sử dụng thành phần `Select` của ứng dụng (dựa trên Radix) để có
-    hành vi dropdown truy cập được và styling nhất quán.
-
-  Ghi chú hành vi:
-  - Lưu tiền tệ đang được chọn trong state cục bộ của component.
-  - `SelectTrigger` được style trong suốt (không viền / không nền)
-    để hòa vào giao diện header.
-  - Danh sách tiền tệ được render trong `SelectContent`.
-  - Có thể mở rộng component này để lưu lựa chọn vào localStorage
-    hoặc store toàn cục và cập nhật giá / locale khi thay đổi tiền tệ.
-
-  Cách sử dụng:
-  - Import và render trong header/top-banner để người dùng chuyển
-    đổi tiền tệ nhanh chóng.
-*/
+import React, { useState, useEffect } from "react"; // Added useEffect
 
 const SelectCurrency = () => {
-  // State cục bộ lưu tiền tệ đang chọn.
-  // Nếu các phần khác của app cần phản ứng khi đổi tiền tệ, có thể
-  // nâng state này lên store toàn cục.
   const [selectedCurrency, setSelectedCurrency] = useState("USD");
+  
+  // 1. Add a mounted state to handle hydration
+  const [mounted, setMounted] = useState(false);
 
-  // Danh sách tiền tệ mẫu. Bạn có thể mở rộng hoặc tải từ API/store.
-  // Trường `rate` có thể dùng để chuyển đổi giá nếu cần.
+  // 2. Set mounted to true after initial render
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const currencies = [
     { code: "USD", name: "US Dollar", symbol: "$", rate: 1.0 },
     { code: "EUR", name: "Euro", symbol: "€", rate: 0.85 },
@@ -51,19 +32,22 @@ const SelectCurrency = () => {
     { code: "CHF", name: "Swiss Franc", symbol: "CHF", rate: 0.92 },
   ];
 
+  // 3. Return a placeholder or null during SSR (Server Side Rendering)
+  // This prevents the ID mismatch error (radix-_R_...)
+  if (!mounted) {
+    return (
+      <div className="flex items-center px-2 py-1 h-6 w-[60px] text-white/50 text-sm">
+        USD
+      </div>
+    );
+  }
+
   return (
     <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
-      {/**
-        Trigger được style không viền và trong suốt để hòa vào header.
-        Thành phần vẫn giữ được giá trị đã chọn và tính năng truy cập
-        bàn phím từ Radix Select bên dưới.
-      */}
       <SelectTrigger className="border-none bg-transparent text-white focus:ring-0 focus:outline-none shadow-none flex items-center justify-between px-2 py-1 data-[size=default]:h-6 dark:bg-transparent dark:hover:transparent ">
-        {/* Hiển thị chỉ mã tiền tệ (ví dụ: USD) khi đã chọn */}
         <SelectValue>{selectedCurrency}</SelectValue>
       </SelectTrigger>
 
-      {/* Nội dung dropdown: nhóm + các mục. Thêm/bớt tiền tệ ở đây. */}
       <SelectContent>
         <SelectGroup>
           <SelectLabel>Currencies</SelectLabel>

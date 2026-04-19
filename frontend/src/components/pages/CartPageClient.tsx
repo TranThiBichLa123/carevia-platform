@@ -387,14 +387,14 @@ const CartPageClient = () => {
             <div className="space-y-4">
               {cartItemsWithQuantities.map((cartItem) => (
                 <div
-                  key={cartItem.product._id}
+                  key={cartItem.product.id}
                   className="border border-gray-100 rounded-lg p-4 lg:p-0 lg:border-0 lg:rounded-none"
                 >
                   {/* Mobile Layout */}
                   <div className="block lg:hidden">
                     <div className="flex items-start gap-4">
                       {/* Product Image */}
-                      <Link href={`/product/${cartItem.product._id}`}>
+                      <Link href={`/product/${cartItem.product.id}`}>
                         <div className="relative w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 hover:scale-105 transition-transform duration-200 cursor-pointer">
                           {cartItem.product.image ? (
                             <Image
@@ -413,7 +413,7 @@ const CartPageClient = () => {
 
                       {/* Product Details */}
                       <div className="flex-1 min-w-0">
-                        <Link href={`/product/${cartItem.product._id}`}>
+                        <Link href={`/product/${cartItem.product.id}`}>
                           <h3 className="font-medium text-gray-900 mb-2 text-sm leading-5 hover:text-blue-600 transition-colors cursor-pointer">
                             {cartItem.product.name}
                           </h3>
@@ -438,7 +438,7 @@ const CartPageClient = () => {
                               size="sm"
                               onClick={() =>
                                 handleQuantityChange(
-                                  cartItem.product._id,
+                                  cartItem.product.id,
                                   cartItem.quantity - 1
                                 )
                               }
@@ -454,7 +454,7 @@ const CartPageClient = () => {
                               size="sm"
                               onClick={() =>
                                 handleQuantityChange(
-                                  cartItem.product._id,
+                                  cartItem.product.id,
                                   cartItem.quantity + 1
                                 )
                               }
@@ -483,7 +483,7 @@ const CartPageClient = () => {
                             variant="ghost"
                             size="sm"
                             onClick={() =>
-                              handleRemoveItem(cartItem.product._id)
+                              handleRemoveItem(cartItem.product.id)
                             }
                             className="text-red-500 hover:text-red-600 hover:bg-red-50 px-2 py-1 h-auto text-xs"
                           >
@@ -499,7 +499,7 @@ const CartPageClient = () => {
                   <div className="hidden lg:grid lg:grid-cols-12 gap-4 items-center py-6 border-b border-gray-100">
                     {/* Product Info */}
                     <div className="lg:col-span-6 flex items-center gap-4">
-                      <Link href={`/product/${cartItem.product._id}`}>
+                      <Link href={`/product/${cartItem.product.id}`}>
                         <div className="relative w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 hover:scale-105 transition-transform duration-200 cursor-pointer">
                           {cartItem.product.image ? (
                             <Image
@@ -516,7 +516,7 @@ const CartPageClient = () => {
                         </div>
                       </Link>
                       <div className="flex-1 min-w-0">
-                        <Link href={`/product/${cartItem.product._id}`}>
+                        <Link href={`/product/${cartItem.product.id}`}>
                           <h3 className="font-medium text-gray-900 mb-1 line-clamp-2 hover:text-blue-600 transition-colors cursor-pointer">
                             {cartItem.product.name}
                           </h3>
@@ -526,7 +526,7 @@ const CartPageClient = () => {
                             variant="ghost"
                             size="sm"
                             onClick={() =>
-                              handleRemoveItem(cartItem.product._id)
+                              handleRemoveItem(cartItem.product.id)
                             }
                             className="text-red-500 hover:text-red-600 hover:bg-red-50 p-0 h-auto text-xs"
                           >
@@ -553,7 +553,7 @@ const CartPageClient = () => {
                           size="sm"
                           onClick={() =>
                             handleQuantityChange(
-                              cartItem.product._id,
+                              cartItem.product.id,
                               cartItem.quantity - 1
                             )
                           }
@@ -569,7 +569,7 @@ const CartPageClient = () => {
                           size="sm"
                           onClick={() =>
                             handleQuantityChange(
-                              cartItem.product._id,
+                              cartItem.product.id,
                               cartItem.quantity + 1
                             )
                           }

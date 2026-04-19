@@ -9,7 +9,7 @@ import type { CartItemInfo } from "./cartApi";
 // Helper function to map server cart item to local format
 interface CartServerItem {
     productId: {
-        _id: string;
+        id: string;
         name: string;
         slug?: string;
         description: string;
@@ -24,7 +24,7 @@ interface CartServerItem {
         category:
         | string
         | {
-            _id: string;
+            id: string;
             name: string;
             image: string;
             categoryType: string;
@@ -33,7 +33,7 @@ interface CartServerItem {
         brand:
         | string
         | {
-            _id: string;
+            id: string;
             name: string;
             slug?: string;
             image?: string;
@@ -75,9 +75,9 @@ const mapCartItemToProduct = (
     item: CartServerItem
 ): CartProductWithQuantity => ({
     product: {
-        _id: item.productId._id,
+        id: item.productId.id,
         name: item.productId.name,
-        slug: item.productId.slug || toSlug(item.productId.name || item.productId._id),
+        slug: item.productId.slug || toSlug(item.productId.name || item.productId.id),
         description: item.productId.description,
         content: item.productId.content || item.productId.description,
         price: item.productId.price,
@@ -95,7 +95,7 @@ const mapCartItemToProduct = (
         category:
             typeof item.productId.category === "string"
                 ? {
-                    _id: item.productId.category,
+                    id: item.productId.category,
                     name: "",
                     image: "",
                     categoryType: "",
@@ -107,10 +107,10 @@ const mapCartItemToProduct = (
                 },
         brand:
             typeof item.productId.brand === "string"
-                ? { _id: item.productId.brand, name: "", slug: "" }
+                ? { id: item.productId.brand, name: "", slug: "" }
                 : { ...item.productId.brand, slug: item.productId.brand.slug || "" },
         ratings: item.productId.ratings || [],
-        sku: item.productId.sku || item.productId._id,
+        sku: item.productId.sku || item.productId.id,
         warranty: {
             period: item.productId.warranty?.period || 0,
             policy: item.productId.warranty?.policy || "",
@@ -134,7 +134,7 @@ const mapCartInfoToProduct = (
     item: CartItemInfo
 ): CartProductWithQuantity => ({
     product: {
-        _id: String(item.deviceId),
+        id: String(item.deviceId),
         name: item.deviceName,
         slug: toSlug(item.deviceName),
         description: "",
@@ -146,8 +146,8 @@ const mapCartInfoToProduct = (
         averageRating: 0,
         image: item.deviceImage || "",
         images: item.deviceImage ? [item.deviceImage] : [],
-        category: { _id: "", name: "", image: "", categoryType: "", slug: "" },
-        brand: { _id: "", name: "", slug: "" },
+        category: { id: "", name: "", image: "", categoryType: "", slug: "" },
+        brand: { id: "", name: "", slug: "" },
         ratings: [],
         sku: String(item.deviceId),
         warranty: { period: 0, policy: "" },
@@ -437,7 +437,7 @@ export const useCartStore = create<CartState>()(
                 set({ isLoading: true });
                 try {
                     const { addToCart } = await import("./cartApi");
-                    const response = await addToCart(auth_token, product._id, quantity);
+                    const response = await addToCart(auth_token, product.id, quantity);
 
                     if (response.success) {
                         const cartItemsWithQuantities =
@@ -551,14 +551,14 @@ export const useCartStore = create<CartState>()(
             getCartItemQuantity: (productId) => {
                 const state = get();
                 const item = state.cartItemsWithQuantities.find(
-                    (item) => item.product._id === productId
+                    (item) => item.product.id === productId
                 );
                 return item ? item.quantity : 0;
             },
 
             isInCart: (productId) => {
                 const state = get();
-                return state.cartItems.some((item) => item._id === productId);
+                return state.cartItems.some((item) => item.id === productId);
             },
 
             syncCartFromServer: async () => {
@@ -635,10 +635,10 @@ export const useWishlistStore = create<WishlistState>()(
             wishlistIds: [],
             addToWishlist: (product) =>
                 set((state) => {
-                    if (!state.wishlistIds.includes(product._id)) {
+                    if (!state.wishlistIds.includes(product.id)) {
                         return {
                             wishlistItems: [...state.wishlistItems, product],
-                            wishlistIds: [...state.wishlistIds, product._id],
+                            wishlistIds: [...state.wishlistIds, product.id],
                         };
                     }
                     return state;
@@ -646,27 +646,32 @@ export const useWishlistStore = create<WishlistState>()(
             removeFromWishlist: (productId) =>
                 set((state) => ({
                     wishlistItems: state.wishlistItems.filter(
-                        (item) => item._id !== productId
+                        (item) => item.id !== productId
                     ),
                     wishlistIds: state.wishlistIds.filter((id) => id !== productId),
                 })),
             setWishlistItems: (products) =>
                 set({
                     wishlistItems: products,
-                    wishlistIds: products.map((product) => product._id),
+                    wishlistIds: products.map((product) => product.id),
                 }),
             setWishlistIds: (ids) =>
                 set((state) => ({
                     wishlistIds: ids,
                     wishlistItems: state.wishlistItems.filter((item) =>
-                        ids.includes(item._id)
+                        ids.includes(item.id)
                     ),
                 })),
             clearWishlist: () => set({ wishlistItems: [], wishlistIds: [] }),
             isInWishlist: (productId) => {
                 const state = get();
-                return state.wishlistIds.includes(productId);
+                // Nếu không có productId thì mặc định là false để tránh đỏ hàng loạt
+                if (!productId) return false;
+
+                // Ép cả danh sách và productId về String để so sánh chính xác tuyệt đối
+                return state.wishlistIds.some(id => String(id) === String(productId));
             },
+
         }),
         {
             name: "wishlist-storage",

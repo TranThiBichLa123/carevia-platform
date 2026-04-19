@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Target, Star, ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
-
+import { API_ENDPOINTS, fetchWithConfig } from "@/lib/api";
 interface ProductsResponse {
   products: Product[];
   total: number;
@@ -22,18 +22,34 @@ const SkinConcernSection = () => {
   useEffect(() => {
     const loadProducts = async () => {
       try {
-        const response: ProductsResponse = await fetchData<ProductsResponse>(
-          "/products"
-        );
-        // Get the last 8 products
-        const lastProducts = response.products.slice(-8).reverse(); // Get last 8 and reverse to show newest first
-        setProducts(lastProducts);
+        setLoading(true);
+
+        // 1. Gọi API
+        const response = await fetchWithConfig<any>(API_ENDPOINTS.PRODUCTS);
+
+        // 2. Trích xuất mảng một cách nghiêm ngặt
+        // Kiểm tra xem response.content có phải là mảng không, nếu không thì kiểm tra chính response
+        const deviceArray = response && Array.isArray(response.content)
+          ? response.content
+          : (Array.isArray(response) ? response : []);
+
+        // 3. Xử lý logic hiển thị (chỉ chạy nếu deviceArray có dữ liệu)
+        if (deviceArray.length > 0) {
+          // Dùng [...deviceArray] để tạo bản sao trước khi reverse để an toàn
+          const lastProducts = [...deviceArray].slice(-8).reverse();
+          setProducts(lastProducts);
+        } else {
+          setProducts([]); // Trả về mảng rỗng nếu không có dữ liệu
+        }
+
       } catch (error) {
-        console.error("Error loading products:", error);
+        console.error("Error loading products in SkinConcernSection:", error);
+        setProducts([]); // Reset về mảng rỗng khi gặp lỗi để UI không sập
       } finally {
         setLoading(false);
       }
     };
+
 
     loadProducts();
   }, []);
@@ -93,7 +109,7 @@ const SkinConcernSection = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
         {products.length > 0 ? (
           products.map((product) => (
-            <ProductCard key={product._id} product={product} />
+            <ProductCard key={product.id} product={product} />
           ))
         ) : (
           <>

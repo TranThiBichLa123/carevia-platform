@@ -33,7 +33,7 @@ export default function CartButton({
   const [localLoading, setLocalLoading] = useState(false);
   const router = useRouter();
 
-  const currentQuantity = getCartItemQuantity(product._id);
+  const currentQuantity = getCartItemQuantity(product.id);
   const isInCart = currentQuantity > 0;
 
   const handleAddToCart = async () => {
@@ -64,10 +64,10 @@ export default function CartButton({
     setLocalLoading(true);
     try {
       if (newQuantity === 0) {
-        await removeFromCart(product._id);
+        await removeFromCart(product.id);
         toast.success("Item removed from cart");
       } else {
-        await updateCartItemQuantity(product._id, newQuantity);
+        await updateCartItemQuantity(product.id, newQuantity);
         toast.success("Cart updated");
       }
     } catch (error) {

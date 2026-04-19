@@ -1,34 +1,28 @@
-import { fetchData, hasExplicitApiEndpoint } from "../../../lib/api";
 import { Product } from "@/types_enum/devices";
 import React from "react";
 import ProductCard from "./ProductCard";
 import Link from "next/link";
 import { ChevronRight } from "lucide-react";
-import { mockProducts } from "@/constants/data";
-
-interface ProductsResponse {
-  products: Product[];
-}
+import { deviceApi } from "@/lib/deviceApi";
+import { mapDeviceToProduct } from "@/lib/mappers";
 
 const ProductsList = async () => {
   let products: Product[] = [];
 
-  if (hasExplicitApiEndpoint()) {
+  try {
+    const data = await deviceApi.getPopular(10);
+    products = data.map(mapDeviceToProduct);
+  } catch {
     try {
-      const data = await fetchData<ProductsResponse>("/products?perPage=10");
-      products = data.products;
+      const pageData = await deviceApi.getAll({ size: 10, sort: "sold,desc" });
+      products = pageData.items.map(mapDeviceToProduct);
     } catch {
       products = [];
     }
   }
 
-  if (products?.length === 0) {
-    products = mockProducts;
-  }
-
   return (
-    <div className="w-full py-10 bg-white">
-      {/* 1. Header Section */}
+    <div className="w-full max-w-7xl mx-auto px-4 py-10">
       <div className="flex items-center justify-between mb-8 border-b border-gray-100 pb-2">
         <div className="relative">
           <h2 className="text-base md:text-2xl font-bold text-gray-800 flex items-center gap-2">
@@ -50,8 +44,8 @@ const ProductsList = async () => {
 
       {/* 2. Products Grid */}
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-6">
-        {products?.map((product) => (
-          <div key={product?._id} className="h-full">
+        {products?.map((product, index) => (
+          <div key={product?.id || index} className="h-full">
             <ProductCard product={product} />
           </div>
         ))}

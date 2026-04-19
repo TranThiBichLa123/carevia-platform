@@ -4,49 +4,75 @@ import { Calendar, MapPin, Clock, ChevronRight, CheckCircle2, XCircle, AlertCirc
 import Link from 'next/link';
 import Container from '@/components/common/Container';
 import { motion } from 'framer-motion';
+import { bookingService } from '@/services/bookings/bookingService';
 
+function mapBookingStatus(status: string): string {
+    switch (status?.toUpperCase()) {
+        case 'PENDING_CONFIRM':
+        case 'PENDING':
+            return 'pending';
+        case 'CONFIRMED':
+            return 'upcoming';
+        case 'COMPLETED':
+            return 'completed';
+        case 'CANCELLED':
+        case 'NO_SHOW':
+        case 'EXPIRED':
+            return 'cancelled';
+        default:
+            return 'pending';
+    }
+}
 
 const MyBookings = () => {
-    const STORAGE_KEY = 'carevia_bookings';
-    const [bookings, setBookings] = useState<any[]>([]); // Khởi tạo mảng rỗng
+    const [bookings, setBookings] = useState<any[]>([]);
     const [filter, setFilter] = useState('all');
     const [loading, setLoading] = useState(true);
 
-    // 1. Hàm nạp dữ liệu (Sau này chỉ cần thay code bên trong bằng fetch/axios)
     const fetchBookings = async () => {
         setLoading(true);
-        // Giả lập độ trễ mạng để chuẩn bị cho API thật
-        setTimeout(() => {
-            const savedData = localStorage.getItem(STORAGE_KEY);
-            const localBookings = savedData ? JSON.parse(savedData) : [];
-
-            // Trộn dữ liệu mẫu với dữ liệu người dùng đã đặt cho phong phú
-            const mockData = [
-                { id: "BK-SAMPLE", deviceName: "Nâng cơ Hifu (Mẫu)", status: "completed" }
-            ];
-
-            setBookings([...localBookings, ...mockData]);
+        try {
+            const data = await bookingService.getAll();
+            const normalized = (Array.isArray(data) ? data : []).map((b: any) => ({
+                id: b.id || b.bookingCode,
+                bookingCode: b.bookingCode,
+                deviceName: b.device?.name || b.deviceName || '',
+                branchName: b.session?.branchName || b.branchName || '',
+                address: b.session?.locationDetail || b.address || '',
+                startTime: b.session?.startTime
+                    ? (b.appointmentDate ? `${b.appointmentDate}T${b.session.startTime}` : b.session.startTime)
+                    : b.startTime || b.createdAt,
+                endTime: b.session?.endTime
+                    ? (b.appointmentDate ? `${b.appointmentDate}T${b.session.endTime}` : b.session.endTime)
+                    : b.endTime || '',
+                status: mapBookingStatus(b.status),
+                price: b.totalPrice || b.price || 0,
+                image: b.device?.image || b.image || '',
+                customerNote: b.customerNote || '',
+                createdAt: b.createdAt,
+            }));
+            setBookings(normalized);
+        } catch (error) {
+            console.error("Failed to fetch bookings:", error);
+        } finally {
             setLoading(false);
-        }, 500);
+        }
     };
 
     useEffect(() => {
         fetchBookings();
     }, []);
 
-    // 2. Hàm xử lý hủy lịch (Chuẩn bị để gọi API PATCH/PUT)
     const handleCancelBooking = async (id: string) => {
         if (window.confirm("Bạn có chắc chắn muốn hủy lịch hẹn này?")) {
-            // Cập nhật State để UI thay đổi ngay lập tức
-            const updatedBookings = bookings.map(booking =>
-                booking.id === id ? { ...booking, status: 'cancelled' } : booking
-            );
-            setBookings(updatedBookings);
-
-            // Cập nhật vào LocalStorage (Tương lai là: await api.update(id, {status: 'cancelled'}))
-            // Chỉ lưu những booking thực tế của người dùng (không lưu mẫu)
-            const userBookings = updatedBookings.filter(b => b.id !== "BK-SAMPLE");
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(userBookings));
+            try {
+                await bookingService.updateStatus(id, 'CANCELLED');
+                // Refresh list from API
+                await fetchBookings();
+            } catch (error) {
+                console.error("Failed to cancel booking:", error);
+                alert("Hủy lịch thất bại. Vui lòng thử lại.");
+            }
         }
     };
 
@@ -66,8 +92,6 @@ const MyBookings = () => {
     };
 
     if (loading) return <div className="text-center py-20 font-black text-gray-300">Đang tải lịch hẹn...</div>;
-
-
     return (
         <Container className="min-h-screen bg-[#f8f9fa] pb-20">
             {/* Header */}

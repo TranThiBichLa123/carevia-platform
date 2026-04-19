@@ -648,7 +648,7 @@ const ProfilePage = () => {
               ) : (
                 <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                   {cartItems.map((item) => (
-                    <div key={item?._id} className="flex gap-4 p-3 rounded-xl border border-gray-50 hover:bg-gray-50 transition-colors">
+                    <div key={item?.id} className="flex gap-4 p-3 rounded-xl border border-gray-50 hover:bg-gray-50 transition-colors">
                       <div className="h-16 w-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
                         {item.image ? (
                           <img src={item.image} alt={item.name} className="h-full w-full object-cover" />

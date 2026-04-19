@@ -46,7 +46,7 @@ const createMockProduct = (
     brand: Product["brand"];
   }
 ): Product => ({
-  _id: overrides._id,
+  id: overrides._id,
   name: overrides.name,
   slug: overrides.slug,
   description: overrides.description ?? "Thiết bị chăm sóc da chính hãng với hiệu quả ổn định và dễ sử dụng tại nhà.",
@@ -106,14 +106,14 @@ const mockProducts: Product[] = [
       "https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=900&q=80",
     ],
     category: {
-      _id: "1",
+      id: "1",
       name: "Thiet Bi Lam Sach",
       slug: "thiet-bi-lam-sach",
       image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=600&q=80",
       categoryType: "Featured",
     },
     brand: {
-      _id: "1",
+      id: "1",
       name: "SkinPro",
       slug: "skinpro",
       image: "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=300&q=80",
@@ -144,14 +144,14 @@ const mockProducts: Product[] = [
       "https://images.unsplash.com/photo-1498843053639-170ff2122f35?auto=format&fit=crop&w=900&q=80",
     ],
     category: {
-      _id: "2",
+      id: "2",
       name: "Massage va Nang Co",
       slug: "massage-va-nang-co",
       image: "https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=600&q=80",
       categoryType: "Hot Categories",
     },
     brand: {
-      _id: "2",
+      id: "2",
       name: "GlowLift",
       slug: "glowlift",
       image: "https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=300&q=80",
@@ -185,14 +185,14 @@ const mockProducts: Product[] = [
       "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=900&q=80",
     ],
     category: {
-      _id: "3",
+      id: "3",
       name: "Thiet Bi Dac Tri",
       slug: "thiet-bi-dac-tri",
       image: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=600&q=80",
       categoryType: "Featured",
     },
     brand: {
-      _id: "3",
+      id: "3",
       name: "PureSkin",
       slug: "pureskin",
       image: "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=300&q=80",
@@ -225,14 +225,14 @@ const mockProducts: Product[] = [
       "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?auto=format&fit=crop&w=900&q=80",
     ],
     category: {
-      _id: "4",
+      id: "4",
       name: "Cap Am va Xong Mat",
       slug: "cap-am-va-xong-mat",
       image: "https://images.unsplash.com/photo-1498843053639-170ff2122f35?auto=format&fit=crop&w=600&q=80",
       categoryType: "Hot Categories",
     },
     brand: {
-      _id: "4",
+      id: "4",
       name: "AquaSteam",
       slug: "aquasteam",
       image: "https://images.unsplash.com/photo-1498843053639-170ff2122f35?auto=format&fit=crop&w=300&q=80",
@@ -265,14 +265,14 @@ const mockProducts: Product[] = [
       "https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=900&q=80",
     ],
     category: {
-      _id: "5",
+      id: "5",
       name: "Thiet Bi Cao Cap",
       slug: "thiet-bi-cao-cap",
       image: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=600&q=80",
       categoryType: "Featured",
     },
     brand: {
-      _id: "5",
+      id: "5",
       name: "LumiBeauty",
       slug: "lumibeauty",
       image: "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?auto=format&fit=crop&w=300&q=80",

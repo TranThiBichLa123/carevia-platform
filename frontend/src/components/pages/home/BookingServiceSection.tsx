@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect } from "react";
-import { fetchData } from "@/lib/api";
+import { API_ENDPOINTS, fetchData, fetchWithConfig } from "@/lib/api";
 import { Product } from "@/types_enum/devices";
 import ProductCard from "@/components/common/products/ProductCard";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -20,21 +20,50 @@ const BookingServiceSection = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // Dùng flag để tránh cập nhật state khi component đã unmount
+    let isMounted = true;
+
     const loadProducts = async () => {
       try {
-        const response: ProductsResponse = await fetchData<ProductsResponse>(
-          "/products"
-        );
-        setProducts(response.products.slice(0, 8));
+        setLoading(true);
+
+        // Lấy token nếu API yêu cầu bảo mật
+        // const token = localStorage.getItem("token"); 
+
+        // Thêm logic lấy token (ví dụ từ cookie hoặc localStorage)
+        const token = document.cookie.split('; ').find(row => row.startsWith('auth_token='))?.split('=')[1];
+
+        const response = await fetchWithConfig<any>(API_ENDPOINTS.PRODUCTS, {
+          headers: {
+            'Authorization': `Bearer ${token}`
+          }
+        });
+
+        if (!isMounted) return;
+
+        // Trích xuất mảng an toàn
+        const deviceArray = response?.content && Array.isArray(response.content)
+          ? response.content
+          : (Array.isArray(response) ? response : []);
+
+        setProducts(deviceArray.slice(0, 8));
       } catch (error) {
-        console.error("Error loading products:", error);
+        if (isMounted) {
+          console.error("❌ Failed to load products:", error);
+          setProducts([]);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     loadProducts();
+
+    return () => { isMounted = false; }; // Cleanup function
   }, []);
+
+  // ... rest of component
+
 
   if (loading) {
     return (

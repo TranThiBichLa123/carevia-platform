@@ -1,7 +1,7 @@
 const baseURL =
 	process.env.NEXT_PUBLIC_API_BASE_URL ||
 	process.env.NEXT_PUBLIC_API_URL ||
-	"http://localhost:8080/api/v1";
+	"http://localhost:8081/api/v1";
 
 type ApiError = {
 	message: string;
@@ -71,7 +71,7 @@ const normalizeBody = (url: string, body: unknown) => {
 		};
 	}
 
-	if (normalizedUrl === "/auth/login") {
+	if (normalizedUrl === "/auth/signin") {
 		return {
 			login:
 				payload.login || payload.email || payload.username || payload.identifier,
@@ -99,7 +99,7 @@ const normalizeResponseData = (url: string, payload: unknown) => {
 	const normalizedUrl = normalizeUrl(url);
 
 	if (
-		normalizedUrl === "/auth/login" &&
+		normalizedUrl === "/auth/signin" &&
 		payload &&
 		typeof payload === "object"
 	) {

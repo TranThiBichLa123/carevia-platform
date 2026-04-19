@@ -116,7 +116,7 @@ const OrdersPageContent = () => {
   useEffect(() => {
     if (orders.length === 0) return;
 
-    const hasPendingOrders = orders.some((order) => order.status === "pending");
+    const hasPendingOrders = orders.some((order) => order.status === "PENDING_PAYMENT");
     if (!hasPendingOrders) return;
 
     // Show a one-time notification about pending orders
@@ -450,7 +450,7 @@ const OrdersPageContent = () => {
                           </Button>
                         </Link>
 
-                        {order.status === "pending" && (
+                        {order.status === "PENDING_PAYMENT" && (
                           <>
                             <Button
                               size="sm"
@@ -560,7 +560,7 @@ const OrdersPageContent = () => {
                     </Button>
                   </Link>
 
-                  {order.status === "pending" && (
+                  {order.status === "PENDING_PAYMENT" && (
                     <>
                       <Button
                         size="sm"

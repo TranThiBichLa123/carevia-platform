@@ -24,12 +24,23 @@ const WishlistButton: React.FC<WishlistButtonProps> = ({
   } = useWishlistStore();
   const [isLoading, setIsLoading] = useState(false);
   const isHydrated = useIsHydrated();
+  // --- BƯỚC 1: LẤY ID CHUẨN ---
+  // Đảm bảo productId là một chuỗi có giá trị, hoặc null
+  const productId = (product.id || (product as any).value?.id || (product as any)._id)?.toString() || null;
 
-  const isInWishlistState = isHydrated ? isInWishlist(product._id) : false;
+  // --- BƯỚC 2: CHECK TRẠNG THÁI ---
+  // Chỉ check khi productId tồn tại, nếu không có ID thì không bao giờ đỏ
+  const isInWishlistState = (isHydrated && productId) ? isInWishlist(productId) : false;
 
   const handleWishlistToggle = async (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent navigation if inside a Link
+    e.preventDefault();
     e.stopPropagation();
+
+    if (!productId) {
+      console.error("Product data is missing ID:", product);
+      toast.error("Missing product ID");
+      return;
+    }
 
     if (!isAuthenticated || !auth_token) {
       toast.error("Please sign in to add items to wishlist");
@@ -37,28 +48,29 @@ const WishlistButton: React.FC<WishlistButtonProps> = ({
     }
 
     setIsLoading(true);
-
     try {
       if (isInWishlistState) {
-        // Remove from wishlist
-        await removeFromWishlist(product._id, auth_token);
-        removeFromWishlistStore(product._id);
+        await removeFromWishlist(productId, auth_token);
+        removeFromWishlistStore(productId);
         toast.success("Removed from wishlist");
       } else {
-        // Add to wishlist
-        await addToWishlist(product._id, auth_token);
-        addToWishlistStore(product);
+        await addToWishlist(productId, auth_token);
+
+        // Đảm bảo object lưu vào store có trường .id khớp với productId đã tìm
+        const productToStore = { ...product, id: productId };
+        addToWishlistStore(productToStore);
+
         toast.success("Added to wishlist");
       }
     } catch (error) {
-      console.error("Error toggling wishlist:", error);
       toast.error("Failed to update wishlist");
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (!isAuthenticated || !isHydrated) {
+  // --- BƯỚC 3: RENDER ---
+  if (!isAuthenticated || !isHydrated || !productId) {
     return null;
   }
 
@@ -66,9 +78,8 @@ const WishlistButton: React.FC<WishlistButtonProps> = ({
     <button
       onClick={handleWishlistToggle}
       disabled={isLoading}
-      className={`p-2 rounded-full transition-colors hover:bg-gray-100 ${
-        isInWishlistState ? "text-red-500" : "text-gray-400"
-      } ${isLoading ? "opacity-50 cursor-not-allowed" : ""} ${className}`}
+      className={`p-2 rounded-full transition-colors hover:bg-gray-100 ${isInWishlistState ? "text-red-500" : "text-gray-400"
+        } ${isLoading ? "opacity-50 cursor-not-allowed" : ""} ${className}`}
       title={isInWishlistState ? "Remove from wishlist" : "Add to wishlist"}
     >
       <Heart

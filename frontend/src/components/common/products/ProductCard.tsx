@@ -12,7 +12,7 @@ const ProductCard = ({ product }: { product: Product }) => {
     /* 1. Đổi hover:border thành primary-light (hoặc primary nếu muốn đậm hơn) */
     <div className="border border-gray-100 rounded-xl group overflow-hidden w-full relative bg-white hover:border-primary hover:shadow-lg transition-all duration-300">
       <Link
-        href={`/client/devices/${product?._id}`}
+        href={`/client/devices/${product?.id}`}
         className="overflow-hidden relative block"
       >
         <Image

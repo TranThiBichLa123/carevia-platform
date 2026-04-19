@@ -84,7 +84,7 @@ export const authService = {
   // Hàm đăng nhập (Thêm kiểu trả về là AuthResponse)
   login: async (credentials: LoginRequest): Promise<AuthResponse> => {
     try {
-      const response = await apiClient.post('/auth/login', credentials);
+      const response = await apiClient.post('/auth/signin', credentials);
       return unwrapResponse<AuthResponse>(response.data);
     } catch (error) {
       throw new Error(extractErrorMessage(error) || "Đăng nhập thất bại");

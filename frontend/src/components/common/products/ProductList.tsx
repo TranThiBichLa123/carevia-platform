@@ -10,8 +10,8 @@ interface Props {
 const ProductList = ({ products }: Props) => {
   return (
     <div className="w-full p-5 grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-5 gap-3">
-      {products?.map((product) => (
-        <ProductCard key={product?._id} product={product} />
+      {products?.map((product, index) => (
+        <ProductCard key={product?.id || index} product={product} />
       ))}
     </div>
   );

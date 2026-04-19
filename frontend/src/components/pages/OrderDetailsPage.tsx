@@ -67,7 +67,7 @@ const OrderDetailsPage = () => {
         const orderData = await getOrderById(orderId, auth_token);
         if (orderData) {
           setOrder(orderData);
-          if (success === "true" && orderData.status === "paid") {
+          if (success === "true" && orderData.status === "PAID") {
             toast.success("Payment successful! Your order has been confirmed.");
           }
         } else {
@@ -87,7 +87,7 @@ const OrderDetailsPage = () => {
 
   const getStatusIcon = (status: string) => {
     switch (status) {
-      case "paid":
+      case "PAID":
         return <CheckCircle className="h-5 w-5 text-green-600" />;
       case "pending":
         return <Clock className="h-5 w-5 text-yellow-600" />;
@@ -198,7 +198,7 @@ const OrderDetailsPage = () => {
 
       <div className="max-w-4xl mx-auto">
         {/* Success Message */}
-        {success === "true" && order?.status === "paid" && (
+        {success === "true" && order?.status === "PAID" && (
           <div className="bg-green-50 border border-green-200 rounded-lg p-6 mb-6">
             <div className="flex items-center">
               <CheckCircle className="h-8 w-8 text-green-600 mr-3" />
@@ -252,7 +252,7 @@ const OrderDetailsPage = () => {
                 <PriceFormatter amount={order.total} />
               </p>
             </div>
-            {order.updatedAt && order.paymentStatus === "paid" && (
+            {order.updatedAt && order.paymentStatus === "SUCCESS" && (
               <div>
                 <p className="text-gray-500">Payment Date</p>
                 <p className="font-medium">
@@ -260,7 +260,7 @@ const OrderDetailsPage = () => {
                 </p>
               </div>
             )}
-            {order.status === "paid" && (
+            {order.status === "PAID" && (
               <div>
                 <p className="text-gray-500">Payment Method</p>
                 <div className="flex items-center gap-1">

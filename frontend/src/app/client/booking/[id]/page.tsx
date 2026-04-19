@@ -1,42 +1,53 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
+import { useParams } from "next/navigation";
 import { 
   ChevronLeft, ShieldCheck, Zap, Sparkles, 
   Clock, MapPin, CheckCircle2, MessageSquare 
 } from "lucide-react";
+import { deviceApi } from "@/lib/deviceApi";
+import { mapDeviceToProduct } from "@/lib/mappers";
+import { Product } from "@/types_enum/devices";
 
-// Component này giả định bạn sẽ fetch dữ liệu device từ ID trên URL
-const ServiceDetailPage = ({ params }: { params: { id: string } }) => {
-  // Trong thực tế: const device = await getDeviceById(params.id)
-  // Ở đây dùng mock data khớp với interface Product của bạn
-  const device = {
-    _id: params.id,
-    name: "Máy Rửa Mặt Công Nghệ Sóng Siêu Âm SkinPro Gen 2",
-    description: "Công nghệ sóng rung siêu âm giúp làm sạch sâu lỗ chân lông và loại bỏ bã nhờn hiệu quả vượt trội so với các phương pháp thông thường.",
-    content: `
-      <p>SkinPro Gen 2 là bước đột phá trong công nghệ làm sạch da y khoa. Với tần số rung 12,000 lần/phút, thiết bị giúp:</p>
-      <ul>
-        <li>Loại bỏ 99.5% bụi bẩn và dầu thừa.</li>
-        <li>Tẩy tế bào chết nhẹ nhàng mà không gây kích ứng.</li>
-        <li>Tăng cường khả năng thẩm thấu của các sản phẩm dưỡng da sau đó.</li>
-      </ul>
-      <p>Sản phẩm được các chuyên gia da liễu khuyên dùng cho mọi loại da, kể cả da nhạy cảm nhất.</p>
-    `,
-    bookingPrice: 15,
-    image: "https://picsum.photos",
-    category: { name: "Thiết bị làm sạch" },
-    brand: { name: "SkinTech Global" },
-    origin: "Thụy Sĩ",
-    specifications: [
-      { label: "Tần số rung", value: "12,000 BPM" },
-      { label: "Chất liệu", value: "Silicone y tế kháng khuẩn" },
-      { label: "Chống nước", value: "IPX7" },
-      { label: "Thời gian sạc", value: "2 giờ" },
-    ],
-  };
+const ServiceDetailPage = () => {
+  const params = useParams();
+  const id = params.id as string;
+  const [device, setDevice] = useState<Product | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchDevice = async () => {
+      try {
+        const data = await deviceApi.getById(id);
+        setDevice(mapDeviceToProduct(data));
+      } catch (error) {
+        console.error("Failed to fetch device:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDevice();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="text-gray-400 font-bold text-sm uppercase tracking-widest animate-pulse">Đang tải...</div>
+      </div>
+    );
+  }
+
+  if (!device) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center gap-4">
+        <p className="text-gray-500 font-bold text-sm uppercase">Không tìm thấy dịch vụ</p>
+        <Link href="/client/booking" className="text-primary underline text-sm">Quay lại danh sách</Link>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white pb-20">
@@ -93,7 +104,7 @@ const ServiceDetailPage = ({ params }: { params: { id: string } }) => {
           <div className="flex flex-col">
             <div className="mb-6">
                 <span className="text-[11px] font-black text-[#00b2bd] uppercase tracking-[0.2em]">
-                    {device.category.name} • {device.brand.name}
+                    {device.category?.name || ''} • {device.brand?.name || ''}
                 </span>
                 <h1 className="text-2xl md:text-3xl font-black text-gray-900 uppercase mt-2 leading-tight">
                     {device.name}
@@ -108,7 +119,7 @@ const ServiceDetailPage = ({ params }: { params: { id: string } }) => {
                     <div className="h-10 w-[1px] bg-gray-200"></div>
                     <div className="flex flex-col">
                         <span className="text-[10px] font-bold text-gray-400 uppercase">Xuất xứ</span>
-                        <span className="text-sm font-bold uppercase">{device.origin}</span>
+                        <span className="text-sm font-bold uppercase">{device.origin || 'N/A'}</span>
                     </div>
                 </div>
             </div>
@@ -139,7 +150,7 @@ const ServiceDetailPage = ({ params }: { params: { id: string } }) => {
                 {/* Nút Call to Action chính */}
                 <div className="pt-6">
                     <Link 
-                        href={`/client/booking?select=${device._id}`}
+                        href={`/client/booking?deviceId=${device.id}`}
                         className="w-full bg-black text-white py-5 rounded-sm text-[13px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-[#00b2bd] transition-all shadow-xl shadow-black/10 active:scale-[0.98]"
                     >
                         Đặt lịch trải nghiệm ngay

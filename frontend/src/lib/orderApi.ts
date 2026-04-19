@@ -1,31 +1,48 @@
 import apiClient from "@/services/apiClient";
 
+
+
+// Định nghĩa lại các Status khớp với ràng buộc CHECK của Database
+export type OrderStatus = 'PENDING_PAYMENT' | 'PAID' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'CANCELLED';
+export type PaymentStatus = 'INITIATED' | 'SUCCESS' | 'FAILED' | 'TIMEOUT' | 'CANCELLED';
+
+// 1. Cập nhật interface OrderItemInfo để chứa cả hai cách đặt tên (alias)
 export interface OrderItemInfo {
   id: number;
   deviceId: number;
+  productId: string; // Thêm alias này
   deviceName: string;
+  name: string;      // Thêm alias này
   deviceImage: string;
+  image: string;     // Thêm alias này
   quantity: number;
   unitPrice: number;
+  price: number;     // Thêm alias này
   subtotal: number;
 }
 
 export interface Order {
   id: number;
-  _id: string; // alias for compatibility
+  _id: string;
   orderCode: string;
   accountId: number;
+  userId: number;
   items: OrderItemInfo[];
   subtotal: number;
   discountAmount: number;
   shippingFee: number;
   taxAmount: number;
   totalAmount: number;
-  total: number; // alias
-  status: string;
-  paymentStatus: string;
+  total: number;
+  status: OrderStatus; // Dùng kiểu Enum vừa định nghĩa
+  paymentStatus: PaymentStatus;
   paymentMethod: string;
-  paymentTransactionId: string;
+  paymentTransactionId: string; // Đây là trường quan trọng từ DB của bạn
+  // Các trường ảo (Alias) để không bị lỗi UI cũ
+  paidAt?: string; 
+  paymentIntentId?: string;
+  stripeSessionId?: string;
+  
   voucherCode: string;
   shippingAddress: string;
   shippingCity: string;
@@ -33,7 +50,7 @@ export interface Order {
   shippingPostalCode: string;
   customerNote: string;
   createdAt: string;
-  updatedAt?: string;
+  updatedAt: string;
 }
 
 export interface CreateOrderResponse {
@@ -75,8 +92,30 @@ const authHeaders = () => {
 const normalizeOrder = (o: any): Order => ({
   ...o,
   _id: String(o.id),
+  userId: Number(o.accountId),
   total: o.totalAmount,
+  // Đảm bảo status luôn đúng định dạng (vì DB của bạn lưu CHỮ HOA)
+  status: o.status as OrderStatus,
+  paymentStatus: o.paymentStatus as PaymentStatus,
+  
+  // Ánh xạ các trường từ DB vào các biến mà UI đang gọi để hết lỗi đỏ
+  paymentIntentId: o.paymentTransactionId, // UI gọi paymentIntentId -> trả về Transaction ID
+  stripeSessionId: o.paymentTransactionId, // Dự phòng cho UI
+  paidAt: o.status === 'PAID' || o.paymentStatus === 'SUCCESS' ? o.updatedAt : undefined,
+
+  createdAt: o.createdAt || new Date().toISOString(),
+  updatedAt: o.updatedAt || o.createdAt || new Date().toISOString(),
+  items: (o.items || []).map((item: any) => ({
+    ...item,
+    productId: String(item.deviceId),
+    name: item.deviceName,
+    price: item.unitPrice,
+    image: item.deviceImage || ""
+  })),
 });
+
+
+
 
 export const createOrderFromCart = async (
   _token: string,

@@ -42,26 +42,27 @@ const BrandDetailPage = () => {
           setLoading(false);
           return;
         }
-      } catch {}
+      } catch { }
 
       // Fallback: use mock data
       const mockBrandProducts = mockProducts.filter(
-        (p) => p.brand._id === brandId || p.brand.slug === brandId
+        (p) => p.brand.id === brandId || p.brand.slug === brandId
       );
       setProducts(mockBrandProducts);
 
       if (mockBrandProducts.length > 0) {
         const b = mockBrandProducts[0].brand;
         setBrand({
-          id: Number(b._id) || 0,
-          name: b.name,
-          slug: b.slug,
-          image: b.image,
+          id: Number(b.id) || 0,
+          name: b.name || "", // Đảm bảo không undefined
+          slug: b.slug || "",
+          image: b.image ?? "", // SỬA Ở ĐÂY: Nếu undefined thì gán chuỗi rỗng
           description: "",
-          isFeatured: b.isFeatured || false,
+          isFeatured: !!b.isFeatured, // Ép kiểu về boolean
           isActive: true,
         });
       }
+
       setLoading(false);
     };
 
@@ -245,7 +246,7 @@ const BrandDetailPage = () => {
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
               {getSortedProducts().map((product) => (
-                <ProductCard key={product._id} product={product} />
+                <ProductCard key={product.id} product={product} />
               ))}
             </div>
           )}

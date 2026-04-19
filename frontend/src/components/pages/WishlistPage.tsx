@@ -185,10 +185,10 @@ const WishlistPage = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {wishlistItems.map((product: Product) => (
               <div
-                key={product._id}
+                key={product.id}
                 className="border rounded-lg overflow-hidden group"
               >
-                <Link href={`/product/${product._id}`} className="block">
+                <Link href={`/product/${product.id}`} className="block">
                   <div className="relative">
                     <Image
                       src={product.image}
@@ -210,7 +210,7 @@ const WishlistPage = () => {
                     <p className="text-xs text-gray-500 uppercase font-medium">
                       {product.category?.name}
                     </p>
-                    <Link href={`/product/${product._id}`}>
+                    <Link href={`/product/${product.id}`}>
                       <h3 className="font-semibold line-clamp-2 hover:text-babyshopSky transition-colors h-12">
                         {product.name}
                       </h3>
@@ -242,13 +242,13 @@ const WishlistPage = () => {
 
                   <div className="flex gap-2">
                     <Button
-                      onClick={() => handleRemoveItem(product._id)}
-                      disabled={removing === product._id}
+                      onClick={() => handleRemoveItem(product.id)}
+                      disabled={removing === product.id}
                       variant="outline"
                       size="sm"
                       className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
                     >
-                      {removing === product._id ? (
+                      {removing === product.id ? (
                         <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
                       ) : (
                         <Trash2 size={14} />

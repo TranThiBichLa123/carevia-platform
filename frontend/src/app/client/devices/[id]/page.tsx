@@ -4,8 +4,8 @@ import PriceFormatter from "@/components/common/PriceFormatter";
 import ProductCard from "@/components/common/products/ProductCard";
 import ProductDescription from "@/components/pages/product/ProductDescription";
 import ProductActions from "@/components/pages/product/ProductActions";
-import { fetchData } from "@/lib/api";
-import { mockProducts } from "@/constants/data";
+import { deviceApi } from "@/lib/deviceApi";
+import { mapDeviceToProduct } from "@/lib/mappers";
 import { Product } from "@/types_enum/devices";
 import { Share2, Star, Truck, Heart, ShieldCheck, ChevronRight } from "lucide-react";
 import Image from "next/image";
@@ -20,13 +20,10 @@ const ProductDetails = async ({
   let product: Product | undefined;
 
   try {
-    product = await fetchData(`/devices/${id}`);
+    const deviceData = await deviceApi.getById(id);
+    product = mapDeviceToProduct(deviceData);
   } catch (error) {
-    console.log("Chưa có API, đang dùng mock data cho ID:", id);
-  }
-
-  if (!product) {
-    product = mockProducts.find((p) => p._id === id);
+    console.log("Failed to fetch device:", id, error);
   }
 
   if (!product) {
@@ -43,24 +40,15 @@ const ProductDetails = async ({
 
   const discountedPrice = product.price * (1 - product.discountPercentage / 100);
 
-  const getCategoryId = (category: Product["category"] | string | undefined) => {
-    if (!category) {
-      return undefined;
-    }
+  let relatedProducts: Product[] = [];
+  try {
+    const similarData = await deviceApi.getSimilar(id, 5);
+    relatedProducts = similarData.map(mapDeviceToProduct);
+  } catch (error) {
+    console.log("Failed to fetch similar products:", error);
+  }
 
-    return typeof category === "object" ? category._id : category;
-  };
-
-  const relatedProducts = mockProducts.filter((p) => {
-    const pCatId = getCategoryId(p.category);
-    const currentCatId = getCategoryId(product.category);
-
-    return pCatId === currentCatId && p._id !== product._id;
-  });
-
-  const displayProducts = relatedProducts.length > 0
-    ? relatedProducts
-    : mockProducts.filter((item) => item._id !== product._id).slice(0, 5);
+  const displayProducts = relatedProducts;
 
   return (
     <div className=" bg-muted py-8 ">
@@ -201,7 +189,7 @@ const ProductDetails = async ({
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
             {displayProducts.map((item) => (
-              <div key={item._id} className="h-full">
+              <div key={item.id} className="h-full">
                 <ProductCard product={item} />
               </div>
             ))}

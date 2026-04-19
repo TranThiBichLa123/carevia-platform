@@ -23,6 +23,19 @@ const nextConfig: NextConfig = {
         hostname: 'www.wearebodybeautiful.com',
         pathname: '**',
       },
+       {
+        protocol: 'https',
+        hostname: 'picsum.photos0', // Nếu bạn thực sự dùng domain có số 0 này
+      },
+       {
+        protocol: 'https',
+        hostname: 'encrypted-tbn1.gstatic.com', // Thêm dòng này
+      },
+       {
+        protocol: 'https',
+        hostname: 'encrypted-tbn3.gstatic.com', // Thêm dòng này
+      },
+
     ]
   }
 };

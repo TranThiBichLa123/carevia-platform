@@ -1,5 +1,5 @@
 const baseURL =
-  process.env.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8080/api";
+  process.env.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8081/api";
 
 export interface Address {
   _id: string;

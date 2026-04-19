@@ -1,5 +1,5 @@
 export interface Category {
-  _id: string;
+  id: string;
   name: string;
   slug: string; // Thêm để làm URL: /category/may-rua-mat
   image: string;
@@ -7,7 +7,7 @@ export interface Category {
 }
 
 export interface Brand {
-  _id: string;
+  id: string;
   name: string;
   slug: string; // Thêm để làm URL: /brand/halio
   image?: string;
@@ -15,7 +15,7 @@ export interface Brand {
 }
 
 export interface Product {
-  _id: string;
+  id: string;
   name: string;
   slug: string;               // CỰC KỲ QUAN TRỌNG: Để làm link /product/may-day-tinh-chat-rf
   description: string;        // Mô tả ngắn (hiển thị ở card hoặc dưới tên SP)

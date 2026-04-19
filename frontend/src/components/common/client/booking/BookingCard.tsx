@@ -10,7 +10,7 @@ interface Props {
 
 const BookingCard = ({ device, onSelect }: Props) => {
   return (
-    <Link href={`/client/booking/${device?._id}`} className="border border-gray-100 rounded-xl group overflow-hidden w-full relative bg-white hover:border-primary hover:shadow-lg transition-all duration-300 flex flex-col h-full">
+    <Link href={`/client/booking/${device?.id}`} className="border border-gray-100 rounded-xl group overflow-hidden w-full relative bg-white hover:border-primary hover:shadow-lg transition-all duration-300 flex flex-col h-full">
       {/* Phần hình ảnh tương tự ProductCard */}
       <div className="overflow-hidden relative block aspect-video">
         <Image
