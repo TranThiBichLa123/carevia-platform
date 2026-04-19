@@ -19,7 +19,7 @@ import {
 const NotFoundPage = () => {
   const quickLinks = [
     { icon: ShoppingBag, label: "Tất cả thiết bị", href: "/shop" },
-    { icon: Heart, label: "Dịch vụ yêu thích", href: "/user/wishlist" },
+    { icon: Heart, label: "Dịch vụ yêu thích", href: "/client/user/wishlist" },
     { icon: Search, label: "Tìm kiếm dịch vụ", href: "/search" },
     { icon: Phone, label: "Tư vấn chuyên gia", href: "/help/contact" },
   ];

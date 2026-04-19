@@ -317,12 +317,12 @@ const SearchInput = () => {
                       </div>
                       {products.map((product) => (
                         <div
-                          key={product._id}
+                          key={product.id}
                           onClick={closeSearch}
                           className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50 px-4 py-3 cursor-pointer"
                         >
                           <Link
-                            href={`/client/devices/${product._id}`}
+                            href={`/client/devices/${product.id}`}
                             className="flex items-center gap-3"
                           >
                             {product.image && (
@@ -372,7 +372,7 @@ const SearchInput = () => {
                       <div>
                         {featuredProducts.map((item) => (
                           <div
-                            key={item._id}
+                            key={item.id}
                             className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50"
                           >
                             <button
@@ -418,7 +418,7 @@ const SearchInput = () => {
               </div>
               {products.map((product) => (
                 <div
-                  key={product._id}
+                  key={product.id}
                   className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50 px-4 py-3 flex items-center gap-5 justify-between"
                 >
                   <div
@@ -429,7 +429,7 @@ const SearchInput = () => {
                     }}
                   >
                     <Link
-                      href={`/client/devices/${product._id}`}
+                      href={`/client/devices/${product.id}`}
                       className="flex items-center gap-3"
                     >
                       {product.image && (
@@ -483,7 +483,7 @@ const SearchInput = () => {
               <div>
                 {featuredProducts.map((item) => (
                   <div
-                    key={item._id}
+                    key={item.id}
                     className="border-b border-gray-100 last:border-b-0 hover:bg-gray-50"
                   >
                     <button

@@ -16,10 +16,10 @@ const informationTab = [
   { title: "Testimonials", href: "/testimonials" },
 ];
 const CustomerTab = [
-  { title: "My Account", href: "/user/profile" },
-  { title: "Track Order", href: "/user/orders" },
+  { title: "My Account", href: "/client/user/profile" },
+  { title: "Track Order", href: "/client/user/orders" },
   { title: "Shop", href: "/shop" },
-  { title: "Wishlist", href: "/user/wishlist" },
+  { title: "Wishlist", href: "/client/user/wishlist" },
   { title: "Returns/Exchange", href: "/returns" },
 ];
 const OthersTab = [

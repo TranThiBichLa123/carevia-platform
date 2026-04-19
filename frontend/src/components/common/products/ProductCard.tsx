@@ -42,7 +42,7 @@ const ProductCard = ({ product }: { product: Product }) => {
         <p className="uppercase text-[10px] tracking-wider font-semibold text-gray-400">
           {product?.category?.name}
         </p>
-        
+
         {/* 3. Tên sản phẩm khi hover sẽ đổi sang màu primary-hover */}
         <p className="line-clamp-2 text-sm h-10 font-medium text-gray-800 group-hover:text-primary-hover transition-colors">
           {product?.name}
@@ -53,7 +53,7 @@ const ProductCard = ({ product }: { product: Product }) => {
         <div className="pt-1">
           <PriceContainer
             price={product?.price}
-            discountPercentage={product?.discountPercentage}
+            originalPrice={product?.originalPrice}
           />
         </div>
 

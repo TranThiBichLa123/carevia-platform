@@ -17,7 +17,7 @@ const WishlistIcon = () => {
 
   return (
     <Link
-      href="/user/wishlist"
+      href="/client/user/wishlist"
       className="relative hover:text-babyshopSky hoverEffect"
       title="My Wishlist"
     >

@@ -4,8 +4,8 @@ import { Booking, BookingStatus, ExperienceSession, SessionStatus } from "@/type
 
 const topHelpCenter = [
   { title: "Help Center", href: "/help" },
-  { title: "Wishlist", href: "/user/wishlist" },
-  { title: "Order Tracking", href: "/user/orders" },
+  { title: "Wishlist", href: "/client/user/wishlist" },
+  { title: "Order Tracking", href: "/client/user/orders" },
 ];
 
 const footerTopData = [

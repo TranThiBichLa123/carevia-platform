@@ -2,19 +2,26 @@ import React from "react";
 import PriceFormatter from "./PriceFormatter";
 
 interface Props {
-  price: number;
-  discountPercentage: number;
+  price: number;         // Giá hiện tại (35.00)
+  originalPrice: number;  // Giá gốc (50.00)
 }
 
-const PriceContainer = ({ price, discountPercentage }: Props) => {
-  const discountedPrice = price * (1 - discountPercentage / 100);
+const PriceContainer = ({ price, originalPrice }: Props) => {
+  // Chỉ hiện giá gốc gạch ngang nếu nó thực sự lớn hơn giá bán
+  const isDiscounted = originalPrice > price;
+
   return (
-    <div className="flex items-center gap-2 text-sm">
+    <div className="flex items-center gap-2">
+      {isDiscounted && (
+        <PriceFormatter
+          amount={originalPrice}
+          className="text-gray-400 line-through text-sm font-normal"
+        />
+      )}
       <PriceFormatter
         amount={price}
-        className="text-gray-500 line-through font-medium"
+        className="text-red-600 font-bold text-base"
       />
-      <PriceFormatter amount={discountedPrice} className="text-red-600" />
     </div>
   );
 };

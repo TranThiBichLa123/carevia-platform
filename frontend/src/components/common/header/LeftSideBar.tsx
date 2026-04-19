@@ -141,14 +141,14 @@ const LeftSideBar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
               <div className="space-y-4 mb-6">
                 <div className="pb-4 border-b">
                   <p className="text-sm text-gray-600">Welcome back,</p>
-                  <p className="font-semibold text-lg">{authUser.name}</p>
+                  <p className="font-semibold text-lg">{authUser.username}</p>
                 </div>
                 <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
                   My Account
                 </h3>
                 <div className="space-y-2">
                   <Link
-                    href="/user/profile"
+                    href="/client/user/profile"
                     className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors"
                     onClick={onClose}
                   >
@@ -156,7 +156,7 @@ const LeftSideBar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     <span>My Profile</span>
                   </Link>
                   <Link
-                    href="/user/orders"
+                    href="/client/user/orders"
                     className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors"
                     onClick={onClose}
                   >
@@ -164,7 +164,7 @@ const LeftSideBar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     <span>My Orders</span>
                   </Link>
                   <Link
-                    href="/user/wishlist"
+                    href="/client/user/wishlist"
                     className="flex items-center gap-3 py-2 px-3 rounded-lg hover:bg-gray-50 transition-colors"
                     onClick={onClose}
                   >
