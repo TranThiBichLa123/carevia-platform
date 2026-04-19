@@ -385,16 +385,20 @@ const CartPageClient = () => {
 
             {/* Cart Items */}
             <div className="space-y-4">
-              {cartItemsWithQuantities.map((cartItem) => (
+              {cartItemsWithQuantities.map((cartItem, index) => (
                 <div
-                  key={cartItem.product.id}
+
+                  key={cartItem.product?.id ||
+                    (cartItem.product as any)?._id ||
+                    (cartItem.product as any)?.deviceId ||
+                    `temp-key-${index}`}
                   className="border border-gray-100 rounded-lg p-4 lg:p-0 lg:border-0 lg:rounded-none"
                 >
                   {/* Mobile Layout */}
                   <div className="block lg:hidden">
                     <div className="flex items-start gap-4">
                       {/* Product Image */}
-                      <Link href={`/product/${cartItem.product.id}`}>
+                      <Link href={`/product/${cartItem.product?.id || (cartItem.product as any)?._id}`}>
                         <div className="relative w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 hover:scale-105 transition-transform duration-200 cursor-pointer">
                           {cartItem.product.image ? (
                             <Image
@@ -452,12 +456,11 @@ const CartPageClient = () => {
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() =>
-                                handleQuantityChange(
-                                  cartItem.product.id,
-                                  cartItem.quantity + 1
-                                )
-                              }
+                              onClick={() => handleQuantityChange(
+                                cartItem.product?.id || (cartItem.product as any)?._id,
+                                cartItem.quantity - 1
+                              )}
+
                               className="h-8 w-8 p-0 hover:bg-gray-50 border-0 rounded-none"
                             >
                               <Plus className="w-3 h-3" />
@@ -482,9 +485,11 @@ const CartPageClient = () => {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() =>
-                              handleRemoveItem(cartItem.product.id)
-                            }
+                            onClick={() => handleRemoveItem(cartItem.product?.id ||
+                              (cartItem.product as any)?._id ||
+                              (cartItem.product as any)?.deviceId ||
+                              `temp-key-${index}`)}
+
                             className="text-red-500 hover:text-red-600 hover:bg-red-50 px-2 py-1 h-auto text-xs"
                           >
                             <Trash2 className="w-3 h-3 mr-1" />
@@ -553,7 +558,10 @@ const CartPageClient = () => {
                           size="sm"
                           onClick={() =>
                             handleQuantityChange(
-                              cartItem.product.id,
+                              cartItem.product?.id ||
+                              (cartItem.product as any)?._id ||
+                              (cartItem.product as any)?.deviceId ||
+                              `temp-key-${index}`,
                               cartItem.quantity - 1
                             )
                           }
@@ -589,6 +597,7 @@ const CartPageClient = () => {
                     </div>
                   </div>
                 </div>
+
               ))}
             </div>
 

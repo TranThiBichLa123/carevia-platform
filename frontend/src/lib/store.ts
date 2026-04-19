@@ -130,41 +130,47 @@ const mapCartItemToProduct = (
     quantity: item.quantity,
 });
 
-const mapCartInfoToProduct = (
-    item: CartItemInfo
-): CartProductWithQuantity => ({
+const mapCartInfoToProduct = (item: any): CartProductWithQuantity => {
+  // Lấy ID từ mọi trường hợp có thể xảy ra (deviceId, device_id, hoặc id)
+  const rawId = item.deviceId || item.device_id || item.id;
+  
+  return {
     product: {
-        id: String(item.device_id),
-        name: item.deviceName,
-        slug: toSlug(item.deviceName),
-        description: "",
-        content: "",
-        price: item.devicePrice,
-        originalPrice: item.originalPrice || item.devicePrice,
-        discountPercentage: item.discountPercentage || 0,
-        stock: item.stock || 0,
-        averageRating: 0,
-        image: item.deviceImage || "",
-        images: item.deviceImage ? [item.deviceImage] : [],
-        category: { id: "", name: "", image: "", categoryType: "", slug: "" },
-        brand: { id: "", name: "", slug: "" },
-        ratings: [],
-        sku: String(item.device_id),
-        warranty: { period: 0, policy: "" },
-        origin: "",
-        condition: "new",
-        specifications: [],
-        sold: 0,
-        reviewCount: 0,
-        isBookingAvailable: false,
-        bookingPrice: 0,
-        sessionIds: [],
-        tags: [],
-        videoUrl: undefined,
-        createdAt: new Date().toISOString(),
+      // 🟢 Chuyển sang String một cách an toàn, tránh ra chữ "undefined"
+      id: rawId ? String(rawId) : Math.random().toString(36).substr(2, 9), 
+      
+      name: item.deviceName || "Sản phẩm không tên",
+      slug: toSlug(item.deviceName || "san-pham"),
+      description: "",
+      content: "",
+      price: item.devicePrice || 0,
+      originalPrice: item.originalPrice || item.devicePrice || 0,
+      discountPercentage: item.discountPercentage || 0,
+      stock: item.stock || 0,
+      averageRating: 0,
+      image: item.deviceImage || "",
+      images: item.deviceImage ? [item.deviceImage] : [],
+      category: { id: "", name: "", image: "", categoryType: "", slug: "" },
+      brand: { id: "", name: "", slug: "" },
+      ratings: [],
+      sku: rawId ? String(rawId) : "N/A",
+      warranty: { period: 0, policy: "" },
+      origin: "",
+      condition: "new",
+      specifications: [],
+      sold: 0,
+      reviewCount: 0,
+      isBookingAvailable: false,
+      bookingPrice: 0,
+      sessionIds: [],
+      tags: [],
+      videoUrl: undefined,
+      createdAt: new Date().toISOString(),
     },
-    quantity: item.quantity,
-});
+    quantity: item.quantity || 1,
+  };
+};
+
 
 interface User {
     _id: string;
