@@ -57,9 +57,13 @@ const ProductCard = ({ product }: { product: Product }) => {
           />
         </div>
 
-        <div className="pt-2">
-          <AddToCartButton product={product} />
-        </div>
+        <AddToCartButton
+          product={{
+            ...product,
+            // Kiểm tra mọi khả năng tên trường ID từ Backend trả về
+            id: product.id || (product as any).deviceId || (product as any).device_id
+          }}
+        />
       </div>
     </div>
   );

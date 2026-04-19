@@ -134,7 +134,7 @@ const mapCartInfoToProduct = (
     item: CartItemInfo
 ): CartProductWithQuantity => ({
     product: {
-        id: String(item.deviceId),
+        id: String(item.device_id),
         name: item.deviceName,
         slug: toSlug(item.deviceName),
         description: "",
@@ -149,7 +149,7 @@ const mapCartInfoToProduct = (
         category: { id: "", name: "", image: "", categoryType: "", slug: "" },
         brand: { id: "", name: "", slug: "" },
         ratings: [],
-        sku: String(item.deviceId),
+        sku: String(item.device_id),
         warranty: { period: 0, policy: "" },
         origin: "",
         condition: "new",
@@ -430,31 +430,40 @@ export const useCartStore = create<CartState>()(
 
             addToCart: async (product, quantity = 1) => {
                 const { auth_token } = useUserStore.getState();
-                if (!auth_token) {
-                    throw new Error("Authentication required");
+                if (!auth_token) throw new Error("Authentication required");
+
+                // 🔴 SỬA TẠI ĐÂY: Ưu tiên lấy _id từ dữ liệu thô của bạn
+                const idToRender = (product as any)._id || product.id;
+
+                if (!idToRender) {
+                    console.error("LỖI: Sản phẩm không có ID!", product);
+                    return;
                 }
 
                 set({ isLoading: true });
                 try {
-                    const { addToCart } = await import("./cartApi");
-                    const response = await addToCart(auth_token, product.id, quantity);
+                    const { addToCart: apiAdd } = await import("./cartApi");
+
+                    // Gọi API với ID '4' thay vì undefined
+                    const response = await apiAdd(auth_token, idToRender, quantity);
 
                     if (response.success) {
-                        const cartItemsWithQuantities =
-                            response.cart.map(mapCartInfoToProduct);
-
+                        const cartItemsWithQuantities = response.cart.map(mapCartInfoToProduct);
                         set({
                             cartItemsWithQuantities,
                             cartItems: cartItemsWithQuantities.map((item) => item.product),
                         });
+                        // Gọi sync để đảm bảo số lượng trên icon cập nhật ngay lập tức
+                        await get().syncCartFromServer();
                     }
                 } catch (error) {
                     console.error("Add to cart error:", error);
-                    throw error;
                 } finally {
                     set({ isLoading: false });
                 }
             },
+
+
 
             removeFromCart: async (productId) => {
                 const { auth_token } = useUserStore.getState();
@@ -525,7 +534,7 @@ export const useCartStore = create<CartState>()(
                 set({ isLoading: true });
                 try {
                     const { clearCart } = await import("./cartApi");
-                    const response = await clearCart();
+                    const response = await clearCart(auth_token);
 
                     if (response.success) {
                         set({
@@ -551,15 +560,20 @@ export const useCartStore = create<CartState>()(
             getCartItemQuantity: (productId) => {
                 const state = get();
                 const item = state.cartItemsWithQuantities.find(
-                    (item) => item.product.id === productId
+                    (item) => String(item.product.id) === String(productId) ||
+                        String((item.product as any)._id) === String(productId)
                 );
                 return item ? item.quantity : 0;
             },
 
             isInCart: (productId) => {
                 const state = get();
-                return state.cartItems.some((item) => item.id === productId);
+                return state.cartItems.some(
+                    (item) => String(item.id) === String(productId) ||
+                        String((item as any)._id) === String(productId)
+                );
             },
+
 
             syncCartFromServer: async () => {
                 const { auth_token } = useUserStore.getState();
@@ -571,7 +585,7 @@ export const useCartStore = create<CartState>()(
                 set({ isLoading: true });
                 try {
                     const { getUserCart } = await import("./cartApi");
-                    const response = await getUserCart();
+                    const response = await getUserCart(auth_token);
 
                     if (response.success) {
                         const cartItemsWithQuantities =

@@ -14,33 +14,36 @@ interface Props {
 }
 
 const AddToCartButton = ({ product, className }: Props) => {
-  const { addToCart } = useCartStore(); // Remove isLoading from here
+  const { addToCart, syncCartFromServer } = useCartStore(); // Remove isLoading from here
   const { isAuthenticated } = useUserStore();
   const [localLoading, setLocalLoading] = useState(false);
   const router = useRouter();
 
-  const handleAddToCart = async (e: React.MouseEvent) => {
-    e.preventDefault();
+ const handleAddToCart = async (e: React.MouseEvent) => {
+  e.preventDefault();
+  if (!isAuthenticated) {
+    toast.error("Please sign in to add items to your cart");
+    router.push("/auth/signin");
+    return;
+  }
 
-    if (!isAuthenticated) {
-      toast.error("Please sign in to add items to your cart");
-      router.push("/auth/signin");
-      return;
+  setLocalLoading(true);
+  try {
+    // 1. Gửi dữ liệu lên Server
+    await addToCart(product, 1); 
+    
+    // 2. Ép Store gọi lại API GET để cập nhật số lượng mới nhất từ DB
+    if (typeof syncCartFromServer === 'function') {
+      await syncCartFromServer(); 
     }
 
-    setLocalLoading(true);
-    try {
-      await addToCart(product, 1);
-      toast.success("Added to cart successfully!", {
-        description: `Name: ${product?.name}`,
-      });
-    } catch (error) {
-      console.error("Add to cart error:", error);
-      toast.error("Failed to add to cart. Please try again.");
-    } finally {
-      setLocalLoading(false);
-    }
-  };
+    toast.success("Added to cart successfully!");
+  } catch (error) {
+    toast.error("Failed to add to cart");
+  } finally {
+    setLocalLoading(false);
+  }
+};
 
   return (
     <Button

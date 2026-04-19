@@ -2,7 +2,7 @@ import apiClient from "@/services/apiClient";
 
 export interface CartItemInfo {
   id: number;
-  deviceId: number;
+  device_id: number;
   deviceName: string;
   deviceImage: string;
   devicePrice: number;
@@ -42,7 +42,7 @@ const authHeaders = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-export const getUserCart = async (): Promise<CartResponse> => {
+export const getUserCart = async (_token: string): Promise<CartResponse> => {
   try {
     const res = await apiClient.get("/cart", { headers: authHeaders() });
     const data: CartResponseData = res.data;
@@ -51,23 +51,46 @@ export const getUserCart = async (): Promise<CartResponse> => {
     return { success: false, cart: [], message: error?.response?.data?.message || "Failed to get cart" };
   }
 };
-
 export const addToCart = async (
-  _token: string,
-  deviceId: string | number,
+  token: string, // Sử dụng token truyền vào từ tham số
+  device_id: string | number,
   quantity: number = 1
 ): Promise<CartResponse> => {
+  // KIỂM TRA TRƯỚC KHI GỌI
+  if (!device_id || device_id === 'undefined') {
+    console.error("LỖI: device_id bị undefined!");
+    return { success: false, cart: [], message: "Mã sản phẩm không hợp lệ" };
+  }
+
   try {
-    const res = await apiClient.post(`/cart/items?deviceId=${deviceId}&quantity=${quantity}`, null, { headers: authHeaders() });
+    const res = await apiClient.post(
+      `/cart/items?deviceId=${device_id}&quantity=${quantity}`,
+      null,
+      {
+        headers: {
+          'Authorization': `Bearer ${token}` // Truyền trực tiếp token vào đây
+        }
+      }
+    );
+
     const data: CartResponseData = res.data;
-    return { success: true, cart: data.items || [], data, message: "Added to cart" };
+    return {
+      success: true,
+      cart: data.items || [],
+      data,
+      message: "Added to cart"
+    };
   } catch (error: any) {
-    return { success: false, cart: [], message: error?.response?.data?.message || "Failed to add to cart" };
+    return {
+      success: false,
+      cart: [],
+      message: error?.response?.data?.message || "Failed to add to cart"
+    };
   }
 };
 
 export const updateCartItem = async (
-  _token: string,
+  token: string,
   deviceId: string | number,
   quantity: number
 ): Promise<CartResponse> => {
@@ -93,10 +116,11 @@ export const removeFromCart = async (
   }
 };
 
-export const clearCart = async (): Promise<CartResponse> => {
+export const clearCart = async (_token: string): Promise<CartResponse> => {
   try {
-    await apiClient.delete("/cart/clear", { headers: authHeaders() });
-    return { success: true, cart: [], message: "Cart cleared" };
+    const res = await apiClient.delete("/cart/clear", { headers: authHeaders() });
+    const data: CartResponseData = res.data;
+    return { success: true, cart: data.items || [], data, message: "Cart cleared" };
   } catch (error: any) {
     return { success: false, cart: [], message: error?.response?.data?.message || "Failed to clear cart" };
   }
