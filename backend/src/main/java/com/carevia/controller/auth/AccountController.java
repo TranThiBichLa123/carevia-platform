@@ -22,8 +22,10 @@ import com.carevia.shared.constant.SecurityConstants;
 import com.carevia.shared.dto.PageResponse;
 import com.carevia.shared.dto.request.account.AccountActionRequest;
 import com.carevia.shared.dto.request.account.RejectRequest;
+import com.carevia.shared.dto.request.account.UpsertAddressRequest;
 import com.carevia.shared.dto.request.account.UpdateProfileRequest;
 import com.carevia.shared.dto.request.account.UpdateStatusRequest;
+import com.carevia.shared.dto.response.account.AddressMutationResponse;
 import com.carevia.shared.dto.response.account.AccountProfileResponse;
 import com.carevia.shared.dto.response.account.AccountResponse;
 import com.carevia.shared.dto.response.account.UploadAvatarResponse;
@@ -97,6 +99,57 @@ public class AccountController {
         AccountProfileResponse res = accountService.updateProfile(profileRequest);
         return ResponseEntity.ok(res);
 
+    }
+
+    @Operation(
+            summary = "Get current user shipping addresses",
+            description = "Retrieve all saved shipping addresses for the authenticated client account"
+    )
+    @GetMapping("/accounts/me/addresses")
+    @ApiMessage("Get shipping addresses for authenticated user")
+    @Authenticated
+    public ResponseEntity<AddressMutationResponse> getCurrentUserAddresses() {
+        return ResponseEntity.ok(accountService.getCurrentUserAddresses());
+    }
+
+    @Operation(
+            summary = "Add shipping address for current user",
+            description = "Create a new shipping address for the authenticated client account"
+    )
+    @PostMapping("/accounts/me/addresses")
+    @ApiMessage("Add shipping address for authenticated user")
+    @Authenticated
+    public ResponseEntity<AddressMutationResponse> addCurrentUserAddress(
+            @Valid @RequestBody UpsertAddressRequest request
+    ) {
+        return ResponseEntity.ok(accountService.addCurrentUserAddress(request));
+    }
+
+    @Operation(
+            summary = "Update shipping address for current user",
+            description = "Update an existing shipping address for the authenticated client account"
+    )
+    @PutMapping("/accounts/me/addresses/{addressId}")
+    @ApiMessage("Update shipping address for authenticated user")
+    @Authenticated
+    public ResponseEntity<AddressMutationResponse> updateCurrentUserAddress(
+            @PathVariable Long addressId,
+            @Valid @RequestBody UpsertAddressRequest request
+    ) {
+        return ResponseEntity.ok(accountService.updateCurrentUserAddress(addressId, request));
+    }
+
+    @Operation(
+            summary = "Delete shipping address for current user",
+            description = "Delete a saved shipping address for the authenticated client account"
+    )
+    @DeleteMapping("/accounts/me/addresses/{addressId}")
+    @ApiMessage("Delete shipping address for authenticated user")
+    @Authenticated
+    public ResponseEntity<AddressMutationResponse> deleteCurrentUserAddress(
+            @PathVariable Long addressId
+    ) {
+        return ResponseEntity.ok(accountService.deleteCurrentUserAddress(addressId));
     }
 
     @Operation(

@@ -20,6 +20,9 @@ import { useUserStore, useCartStore } from "@/lib/store";
 import { toast } from "sonner";
 import { Address } from "@/types_enum/devices";
 
+const getProductId = (product: { id?: string; _id?: string }) =>
+  product.id || product._id || "";
+
 const CheckoutPageContent = () => {
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
@@ -121,7 +124,7 @@ const CheckoutPageContent = () => {
             _id: "temp",
             userId: authUser._id,
             items: cartItemsWithQuantities.map((item) => ({
-              productId: item.product._id,
+              productId: getProductId(item.product),
               name: item.product.name,
               price: item.product.price,
               quantity: item.quantity,
@@ -226,7 +229,7 @@ const CheckoutPageContent = () => {
       if (order._id === "temp") {
         setIsCreatingOrder(true);
         const orderItems = cartItemsWithQuantities.map((item) => ({
-          _id: item.product._id,
+          _id: getProductId(item.product),
           name: item.product.name,
           price: item.product.price,
           quantity: item.quantity,
@@ -294,8 +297,8 @@ const CheckoutPageContent = () => {
       const result = await createCheckoutSession({
         items: stripeItems,
         customerEmail: authUser?.email,
-        successUrl: `${window.location.origin}/success?orderId=${finalOrder._id}&session_id={CHECKOUT_SESSION_ID}`,
-        cancelUrl: `${window.location.origin}/user/checkout?orderId=${finalOrder._id}`,
+        successUrl: `${window.location.origin}/client/success?orderId=${finalOrder._id}&session_id={CHECKOUT_SESSION_ID}`,
+        cancelUrl: `${window.location.origin}/client/user/checkout?orderId=${finalOrder._id}`,
         metadata: {
           orderId: finalOrder._id,
           shippingAddress: JSON.stringify(selectedAddress),
@@ -433,7 +436,7 @@ const CheckoutPageContent = () => {
                   key={index.toString()}
                   className="flex items-center gap-4 p-4 border border-gray-100 rounded-lg"
                 >
-                  <div className="relative w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0">
+                  <div className="relative w-16 h-16 bg-gray-100 rounded-lg overflow-hidden shrink-0">
                     {item.image ? (
                       <Image
                         src={item.image}

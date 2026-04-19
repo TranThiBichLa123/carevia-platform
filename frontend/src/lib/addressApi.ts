@@ -1,5 +1,7 @@
 const baseURL =
-  process.env.NEXT_PUBLIC_API_ENDPOINT || "http://localhost:8081/api";
+  process.env.NEXT_PUBLIC_API_BASE_URL ||
+  process.env.NEXT_PUBLIC_API_URL ||
+  "http://localhost:8081/api/v1";
 
 export interface Address {
   _id: string;
@@ -20,11 +22,11 @@ export interface AddressInput {
 
 // Add address to user
 export const addAddress = async (
-  userId: string,
+  _userId: string,
   addressData: AddressInput,
   token: string
 ): Promise<{ success: boolean; addresses: Address[]; message: string }> => {
-  const response = await fetch(`${baseURL}/users/${userId}/addresses`, {
+  const response = await fetch(`${baseURL}/accounts/me/addresses`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -43,13 +45,13 @@ export const addAddress = async (
 
 // Update address
 export const updateAddress = async (
-  userId: string,
+  _userId: string,
   addressId: string,
   addressData: Partial<AddressInput>,
   token: string
 ): Promise<{ success: boolean; addresses: Address[]; message: string }> => {
   const response = await fetch(
-    `${baseURL}/users/${userId}/addresses/${addressId}`,
+    `${baseURL}/accounts/me/addresses/${addressId}`,
     {
       method: "PUT",
       headers: {
@@ -70,12 +72,12 @@ export const updateAddress = async (
 
 // Delete address
 export const deleteAddress = async (
-  userId: string,
+  _userId: string,
   addressId: string,
   token: string
 ): Promise<{ success: boolean; addresses: Address[]; message: string }> => {
   const response = await fetch(
-    `${baseURL}/users/${userId}/addresses/${addressId}`,
+    `${baseURL}/accounts/me/addresses/${addressId}`,
     {
       method: "DELETE",
       headers: {

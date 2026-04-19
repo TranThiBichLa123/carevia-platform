@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import com.carevia.shared.entity.PersonBase;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * Client entity with Rich Domain Model - inherits profile behaviors from
  * PersonBase
@@ -48,6 +51,10 @@ public class Client extends PersonBase implements BaseProfile {
 
     @Column(name = "address", length = 500)
     private String address; // Địa chỉ mặc định để ship thiết bị
+
+    @OneToMany(mappedBy = "client", cascade = CascadeType.ALL, orphanRemoval = true)
+    @Builder.Default
+    private List<ClientAddress> addresses = new ArrayList<>();
 
     // Enum định nghĩa hạng thành viên
     public enum MembershipLevel {

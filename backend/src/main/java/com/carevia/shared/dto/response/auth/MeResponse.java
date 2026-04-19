@@ -12,6 +12,7 @@ import com.carevia.shared.constant.Role;
 
 import java.time.Instant;
 import java.time.LocalDate;
+import java.util.List;
 
 @Data
 @Builder
@@ -50,6 +51,55 @@ public class MeResponse {
     @Schema(description = "Gender", example = "MALE")
     private Gender gender;
 
+    @Schema(description = "Phone number", example = "0901234567")
+    private String phone;
+
+    @Schema(description = "Default shipping address", example = "123 Nguyen Trai, Ho Chi Minh, Vietnam 700000")
+    private String address;
+
+    @Schema(description = "Client code", example = "CL2024001")
+    private String clientCode;
+
+    @Schema(description = "Loyalty points", example = "100")
+    private Integer loyaltyPoints;
+
+    @Schema(description = "Membership level", example = "BASIC")
+    private String membershipLevel;
+
+    @Schema(description = "Skin type", example = "Da nhạy cảm")
+    private String skinType;
+
+    @Schema(description = "Skin concerns", example = "mụn, thâm")
+    private String skinConcerns;
+
+    @Schema(description = "Saved shipping addresses")
+    private List<AddressInfo> addresses;
+
     @Schema(description = "Last login timestamp", example = "2025-11-30T10:15:30Z")
     private Instant lastLoginAt;
+
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Schema(description = "Shipping address info for current user")
+    public static class AddressInfo {
+        @Schema(description = "Address ID", example = "1")
+        private Long id;
+
+        @Schema(description = "Street address", example = "123 Nguyen Trai, Ward 1")
+        private String street;
+
+        @Schema(description = "City or province", example = "Ho Chi Minh")
+        private String city;
+
+        @Schema(description = "Country", example = "Vietnam")
+        private String country;
+
+        @Schema(description = "Postal code", example = "700000")
+        private String postalCode;
+
+        @Schema(description = "Whether this is the default address", example = "true")
+        private Boolean isDefault;
+    }
 }

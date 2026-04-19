@@ -4,18 +4,22 @@ import { getAvailableSessionsByProductId } from '@/lib/booking';
 import { Product } from '@/types_enum/devices';
 import { ExperienceSession } from '@/types_enum/booking';
 import { useEffect, useMemo, useState, useCallback } from 'react';
-import { useSearchParams } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import Container from '@/components/common/Container';
 import BookingCard from '@/components/common/client/booking/BookingCard';
 import { bookingService } from '@/services/bookings/bookingService';
 import { deviceApi } from '@/lib/deviceApi';
 import { mapDeviceToProduct, mapApiSession } from '@/lib/mappers';
+import { useUserStore } from '@/lib/store';
+import { toast } from 'sonner';
 
 const BookingPage = () => {
     const searchParams = useSearchParams();
+    const router = useRouter();
     const deviceIdParam = searchParams.get('deviceId');
     const selectParam = searchParams.get('select');
+    const { isAuthenticated } = useUserStore();
 
     const [step, setStep] = useState(1);
     const [selectedDevice, setSelectedDevice] = useState<Product | null>(null);
@@ -150,19 +154,30 @@ const BookingPage = () => {
 
     const handleCompleteBooking = async () => {
         if (submitting) return;
+
+        if (!isAuthenticated) {
+            toast.error('Vui lòng đăng nhập để đặt lịch');
+            router.push('/auth/signin');
+            return;
+        }
+
+        if (!selectedDevice || !selectedSession?.id) {
+            toast.error('Vui lòng chọn sản phẩm và khung giờ hợp lệ');
+            return;
+        }
+
         setSubmitting(true);
 
         try {
-            if (selectedSession?.id) {
-                await bookingService.create({
-                    sessionId: Number(selectedSession.id),
-                    notes: `Khách: ${customerName}, SĐT: ${customerPhone}`,
-                });
-            }
+            await bookingService.create({
+                sessionId: Number(selectedSession.id),
+                deviceId: Number(selectedDevice.id),
+                customerNote: `Khách: ${customerName}, SĐT: ${customerPhone}`,
+            });
             window.location.href = '/client/my-bookings';
         } catch (error) {
             console.error("Booking failed:", error);
-            alert("Đặt lịch thất bại. Vui lòng thử lại.");
+            toast.error('Đặt lịch thất bại. Vui lòng thử lại.');
         } finally {
             setSubmitting(false);
         }

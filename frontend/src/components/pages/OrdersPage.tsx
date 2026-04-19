@@ -167,7 +167,7 @@ const OrdersPageContent = () => {
 
   const handlePayNow = (order: Order) => {
     // Navigate to checkout with the order information
-    router.push(`/user/checkout?orderId=${order._id}`);
+    router.push(`/client/user/checkout?orderId=${order._id}`);
   };
 
   const getStatusColor = (status: string) => {

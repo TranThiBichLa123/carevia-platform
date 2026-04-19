@@ -11,17 +11,21 @@ export interface DeviceData {
   discountPercentage: number;
   stock: number;
   averageRating: number;
-  ratingCount: number;
+  ratingCount?: number;
+  reviewCount?: number;
   image: string;
   images: string[];
   status: string;
   skinType: string;
-  skinConcerns: string[];
+  skinConcerns: string | string[];
   tags: string[];
   isBookingAvailable: boolean;
   bookingPrice: number;
   viewCount: number;
   sold: number;
+  origin: string;
+  deviceCondition: string;
+  videoUrl?: string;
   category: {
     id: number;
     name: string;

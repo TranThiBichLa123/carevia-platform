@@ -49,7 +49,13 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
   // Update form when dialog opens
   useEffect(() => {
     if (isAddDialogOpen) {
-      resetForm();
+      setFormData({
+        street: "",
+        city: "",
+        country: "",
+        postalCode: "",
+        isDefault: addresses.length === 0,
+      });
     }
   }, [isAddDialogOpen, addresses.length]);
 
@@ -301,7 +307,7 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
                       type="button"
                       variant="outline"
                       onClick={() => setIsAddDialogOpen(false)}
-                      className="flex-1 sm:flex-none sm:min-w-[100px]"
+                      className="flex-1 sm:flex-none sm:min-w-25"
                     >
                       Cancel
                     </Button>
@@ -344,7 +350,7 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
                       <RadioGroupItem
                         value={address._id}
                         id={address._id}
-                        className="mt-1 flex-shrink-0"
+                        className="mt-1 shrink-0"
                       />
 
                       {/* Address Content */}
@@ -383,7 +389,7 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
                       </div>
 
                       {/* Action Buttons */}
-                      <div className="flex flex-col sm:flex-row gap-1 flex-shrink-0">
+                      <div className="flex flex-col sm:flex-row gap-1 shrink-0">
                         <Button
                           variant="ghost"
                           size="sm"

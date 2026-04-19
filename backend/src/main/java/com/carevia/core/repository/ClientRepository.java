@@ -15,12 +15,15 @@ import java.util.Optional;
 public interface ClientRepository extends JpaRepository<Client, Long>, JpaSpecificationExecutor<Client> {
     Optional<Client> findByAccount(Account account);
 
+    @Query("SELECT DISTINCT c FROM Client c JOIN FETCH c.account LEFT JOIN FETCH c.addresses WHERE c.account = :account")
+    Optional<Client> findByAccountWithAddresses(@Param("account") Account account);
+
     Optional<Client> findByClientCode(String clientCode);
 
-    @Query("SELECT c FROM Client c JOIN FETCH c.account WHERE c.id = :id")
+    @Query("SELECT DISTINCT c FROM Client c JOIN FETCH c.account LEFT JOIN FETCH c.addresses WHERE c.id = :id")
     Optional<Client> findByIdWithAccount(@Param("id") Long id);
 
-    @Query("SELECT c FROM Client c JOIN FETCH c.account WHERE c.clientCode = :code")
+    @Query("SELECT DISTINCT c FROM Client c JOIN FETCH c.account LEFT JOIN FETCH c.addresses WHERE c.clientCode = :code")
     Optional<Client> findByClientCodeWithAccount(@Param("code") String code);
 }
 

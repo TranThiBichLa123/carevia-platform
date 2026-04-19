@@ -1,5 +1,37 @@
 import apiClient from "@/services/apiClient";
 
+type ApiError = {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+};
+
+type RawOrderItem = Partial<OrderItemInfo> & {
+  deviceId?: number | string;
+  deviceName?: string;
+  unitPrice?: number;
+  deviceImage?: string;
+};
+
+type RawOrder = Partial<Order> & {
+  id?: number | string;
+  accountId?: number | string;
+  totalAmount?: number;
+  status?: string;
+  paymentStatus?: string;
+  paymentTransactionId?: string;
+  updatedAt?: string;
+  createdAt?: string;
+  items?: RawOrderItem[];
+};
+
+const getErrorMessage = (error: unknown, fallback: string) => {
+  const apiError = error as ApiError;
+  return apiError.response?.data?.message || fallback;
+};
+
 
 
 // Định nghĩa lại các Status khớp với ràng buộc CHECK của Database
@@ -68,6 +100,7 @@ export interface ShippingAddress {
 
 export interface CartItem {
   _id: string;
+  id?: string;
   name: string;
   price: number;
   quantity: number;
@@ -89,11 +122,11 @@ const authHeaders = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-const normalizeOrder = (o: any): Order => ({
+const normalizeOrder = (o: RawOrder): Order => ({
   ...o,
   _id: String(o.id),
   userId: Number(o.accountId),
-  total: o.totalAmount,
+  total: o.totalAmount || 0,
   // Đảm bảo status luôn đúng định dạng (vì DB của bạn lưu CHỮ HOA)
   status: o.status as OrderStatus,
   paymentStatus: o.paymentStatus as PaymentStatus,
@@ -105,11 +138,11 @@ const normalizeOrder = (o: any): Order => ({
 
   createdAt: o.createdAt || new Date().toISOString(),
   updatedAt: o.updatedAt || o.createdAt || new Date().toISOString(),
-  items: (o.items || []).map((item: any) => ({
+  items: (o.items || []).map((item) => ({
     ...item,
-    productId: String(item.deviceId),
-    name: item.deviceName,
-    price: item.unitPrice,
+    productId: String(item.deviceId || ""),
+    name: item.deviceName || "",
+    price: item.unitPrice || 0,
     image: item.deviceImage || ""
   })),
 });
@@ -124,15 +157,15 @@ export const createOrderFromCart = async (
 ): Promise<CreateOrderResponse> => {
   try {
     const res = await apiClient.post("/orders/from-cart", {
-      items: cartItems.map(item => ({ deviceId: Number(item._id), quantity: item.quantity })),
+      items: cartItems.map(item => ({ deviceId: Number(item._id ?? item.id), quantity: item.quantity })),
       shippingAddress: shippingAddress.street,
       shippingCity: shippingAddress.city,
       shippingCountry: shippingAddress.country,
       shippingPostalCode: shippingAddress.postalCode,
     }, { headers: authHeaders() });
     return { success: true, order: normalizeOrder(res.data) };
-  } catch (error: any) {
-    return { success: false, order: {} as Order, message: error?.response?.data?.message || "Failed to create order" };
+  } catch (error: unknown) {
+    return { success: false, order: {} as Order, message: getErrorMessage(error, "Failed to create order") };
   }
 };
 
@@ -162,8 +195,8 @@ export const deleteOrder = async (orderId: string, _token: string): Promise<{ su
   try {
     await apiClient.delete(`/orders/${orderId}`, { headers: authHeaders() });
     return { success: true, message: "Order deleted successfully" };
-  } catch (error: any) {
-    return { success: false, message: error?.response?.data?.message || "Failed to delete order" };
+  } catch (error: unknown) {
+    return { success: false, message: getErrorMessage(error, "Failed to delete order") };
   }
 };
 
@@ -175,7 +208,7 @@ export const updateOrderStatus = async (
   try {
     const res = await apiClient.put(`/orders/${orderId}/status?status=${status}`, null, { headers: authHeaders() });
     return { success: true, order: normalizeOrder(res.data) };
-  } catch (error: any) {
-    return { success: false, message: error?.response?.data?.message || "Failed to update order status" };
+  } catch (error: unknown) {
+    return { success: false, message: getErrorMessage(error, "Failed to update order status") };
   }
 };

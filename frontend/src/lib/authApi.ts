@@ -144,20 +144,53 @@ const normalizeResponseData = (url: string, payload: unknown) => {
 			birthday?: string;
 			bio?: string;
 			gender?: string;
+			phone?: string;
+			address?: string;
+			clientCode?: string;
+			loyaltyPoints?: number;
+			membershipLevel?: string;
+			skinType?: string;
+			skinConcerns?: string;
+			addresses?: Array<{
+				id?: number | string;
+				street?: string;
+				city?: string;
+				country?: string;
+				postalCode?: string;
+				isDefault?: boolean;
+			}>;
 			lastLoginAt?: string;
 		};
 
 		return {
 			_id: String(mePayload.accountId ?? ""),
 			name: mePayload.fullName || mePayload.username || "",
+			full_name: mePayload.fullName || mePayload.username || "",
 			username: mePayload.username || "",
 			email: mePayload.email || "",
 			avatar: mePayload.avatarUrl || "",
+			avatar_url: mePayload.avatarUrl || "",
 			role: mePayload.role || "",
 			status: mePayload.status,
 			birthday: mePayload.birthday,
+			birth_date: mePayload.birthday,
 			bio: mePayload.bio,
 			gender: mePayload.gender,
+			phone: mePayload.phone,
+			address: mePayload.address,
+			client_code: mePayload.clientCode,
+			loyalty_points: mePayload.loyaltyPoints,
+			membership_level: mePayload.membershipLevel,
+			skin_type: mePayload.skinType,
+			skin_concerns: mePayload.skinConcerns,
+			addresses: (mePayload.addresses || []).map((address) => ({
+				_id: String(address.id ?? ""),
+				street: address.street || "",
+				city: address.city || "",
+				country: address.country || "",
+				postalCode: address.postalCode || "",
+				isDefault: Boolean(address.isDefault),
+			})),
 			lastLoginAt: mePayload.lastLoginAt,
 		};
 	}

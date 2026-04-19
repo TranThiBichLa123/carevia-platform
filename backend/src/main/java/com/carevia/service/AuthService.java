@@ -301,7 +301,7 @@ public class AuthService {
         // Fetch profile based on role
         BaseProfile profile = switch (account.getRole()) {
             case CLIENT -> {
-                Client client = clientRepository.findByAccount(account)
+                Client client = clientRepository.findByAccountWithAddresses(account)
                         .orElseThrow(() -> new UserNotActivatedException("Account not activated"));
                 yield client;
             }
@@ -337,6 +337,34 @@ public class AuthService {
         meResponse.setGender(profile.getGender());
         meResponse.setBio(profile.getBio());
         meResponse.setBirthday(profile.getBirthDate());
+
+        if (profile instanceof com.carevia.shared.entity.PersonBase personBase) {
+            meResponse.setPhone(personBase.getPhone());
+        }
+
+        if (profile instanceof Client client) {
+            meResponse.setAddress(client.getAddress());
+            meResponse.setClientCode(client.getClientCode());
+            meResponse.setLoyaltyPoints(client.getLoyaltyPoints());
+            meResponse.setMembershipLevel(client.getMembershipLevel() != null ? client.getMembershipLevel().name() : null);
+            meResponse.setSkinType(client.getSkinType());
+            meResponse.setSkinConcerns(client.getSkinConcerns());
+            meResponse.setAddresses(
+                client.getAddresses() == null ? java.util.List.of() : client.getAddresses().stream()
+                    .sorted(java.util.Comparator
+                        .comparing((ClientAddress address) -> Boolean.TRUE.equals(address.getIsDefault()))
+                        .reversed()
+                        .thenComparing(ClientAddress::getCreatedAt, java.util.Comparator.nullsLast(java.util.Comparator.reverseOrder())))
+                    .map(address -> MeResponse.AddressInfo.builder()
+                        .id(address.getId())
+                        .street(address.getStreet())
+                        .city(address.getCity())
+                        .country(address.getCountry())
+                        .postalCode(address.getPostalCode())
+                        .isDefault(address.getIsDefault())
+                        .build())
+                    .toList());
+        }
     }
 
     @Transactional

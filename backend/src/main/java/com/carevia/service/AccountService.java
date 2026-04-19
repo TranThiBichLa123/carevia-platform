@@ -15,6 +15,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.carevia.core.domain.Account;
 import com.carevia.core.domain.AccountActionLog;
 import com.carevia.core.domain.Client;
+import com.carevia.core.domain.ClientAddress;
 import com.carevia.core.domain.Staff;
 import com.carevia.core.repository.AccountRepository;
 import com.carevia.core.repository.ClientRepository;
@@ -24,7 +25,10 @@ import com.carevia.service.storage.CloudinaryStorageService;
 import com.carevia.shared.annotation.Audit;
 import com.carevia.shared.constant.*;
 import com.carevia.shared.dto.PageResponse;
+import com.carevia.shared.dto.request.account.UpsertAddressRequest;
 import com.carevia.shared.dto.request.account.UpdateProfileRequest;
+import com.carevia.shared.dto.response.account.AddressMutationResponse;
+import com.carevia.shared.dto.response.account.AddressResponse;
 import com.carevia.shared.dto.response.account.AccountProfileResponse;
 import com.carevia.shared.dto.response.account.AccountResponse;
 import com.carevia.shared.dto.response.account.UploadAvatarResponse;
@@ -37,6 +41,7 @@ import com.carevia.shared.mapper.ClientMapper;
 import com.carevia.shared.util.CloudinaryUtils;
 import com.carevia.shared.util.SecurityUtils;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -144,6 +149,74 @@ public class AccountService {
 
         return getAccountProfile(account);
     }
+
+        @Transactional(readOnly = true)
+        public AddressMutationResponse getCurrentUserAddresses() {
+                Client client = getCurrentClientWithAddresses();
+                return buildAddressMutationResponse(client, "Addresses retrieved successfully");
+        }
+
+        @Transactional
+        public AddressMutationResponse addCurrentUserAddress(@Valid UpsertAddressRequest request) {
+                Client client = getCurrentClientWithAddresses();
+
+                ClientAddress address = ClientAddress.builder()
+                                .client(client)
+                                .street(request.getStreet().trim())
+                                .city(request.getCity().trim())
+                                .country(request.getCountry().trim())
+                                .postalCode(request.getPostalCode().trim())
+                                .isDefault(Boolean.TRUE.equals(request.getIsDefault()) || client.getAddresses().isEmpty())
+                                .build();
+
+                client.getAddresses().add(address);
+                if (Boolean.TRUE.equals(address.getIsDefault())) {
+                        setDefaultAddress(client, address);
+                } else {
+                        ensureDefaultAddress(client);
+                }
+
+                syncDefaultShippingAddress(client);
+                clientRepository.save(client);
+
+                return buildAddressMutationResponse(client, "Address added successfully");
+        }
+
+        @Transactional
+        public AddressMutationResponse updateCurrentUserAddress(Long addressId, @Valid UpsertAddressRequest request) {
+                Client client = getCurrentClientWithAddresses();
+                ClientAddress address = findAddress(client, addressId);
+
+                address.setStreet(request.getStreet().trim());
+                address.setCity(request.getCity().trim());
+                address.setCountry(request.getCountry().trim());
+                address.setPostalCode(request.getPostalCode().trim());
+
+                if (Boolean.TRUE.equals(request.getIsDefault())) {
+                        setDefaultAddress(client, address);
+                } else if (Boolean.FALSE.equals(request.getIsDefault()) && Boolean.TRUE.equals(address.getIsDefault())) {
+                        address.setIsDefault(false);
+                        ensureDefaultAddress(client);
+                }
+
+                syncDefaultShippingAddress(client);
+                clientRepository.save(client);
+
+                return buildAddressMutationResponse(client, "Address updated successfully");
+        }
+
+        @Transactional
+        public AddressMutationResponse deleteCurrentUserAddress(Long addressId) {
+                Client client = getCurrentClientWithAddresses();
+                ClientAddress address = findAddress(client, addressId);
+
+                client.getAddresses().remove(address);
+                ensureDefaultAddress(client);
+                syncDefaultShippingAddress(client);
+                clientRepository.save(client);
+
+                return buildAddressMutationResponse(client, "Address deleted successfully");
+        }
 
     /**
      * Upload a new avatar for the current user and update the database record.
@@ -291,7 +364,7 @@ public class AccountService {
     public AccountProfileResponse getAccountProfile(Account account) {
         AccountProfileResponse.Profile profile = switch (account.getRole()) {
             case CLIENT -> {
-                Client client = clientRepository.findByAccount(account)
+                                Client client = clientRepository.findByAccountWithAddresses(account)
                         .orElseThrow(() -> new ResourceNotFoundException("Client not found"));
                 yield ClientMapper.toProfileResponse(client);
             }
@@ -305,6 +378,77 @@ public class AccountService {
 
         return AccountMapper.toProfileResponse(account, profile);
     }
+
+        private Client getCurrentClientWithAddresses() {
+                Account account = verifyCurrentAccount();
+                if (!account.isClient()) {
+                        throw new UnauthorizedException("Only client accounts can manage shipping addresses");
+                }
+
+                return clientRepository.findByAccountWithAddresses(account)
+                                .orElseThrow(() -> new ResourceNotFoundException("Client not found"));
+        }
+
+        private ClientAddress findAddress(Client client, Long addressId) {
+                return client.getAddresses().stream()
+                                .filter(address -> Objects.equals(address.getId(), addressId))
+                                .findFirst()
+                                .orElseThrow(() -> new ResourceNotFoundException("Address not found with id: " + addressId));
+        }
+
+        private void setDefaultAddress(Client client, ClientAddress defaultAddress) {
+                client.getAddresses().forEach(address -> address.setIsDefault(false));
+                defaultAddress.setIsDefault(true);
+        }
+
+        private void ensureDefaultAddress(Client client) {
+                if (client.getAddresses().isEmpty()) {
+                        return;
+                }
+
+                boolean hasDefault = client.getAddresses().stream()
+                                .anyMatch(address -> Boolean.TRUE.equals(address.getIsDefault()));
+
+                if (!hasDefault) {
+                        client.getAddresses().get(0).setIsDefault(true);
+                }
+        }
+
+        private void syncDefaultShippingAddress(Client client) {
+                client.setAddress(client.getAddresses().stream()
+                                .filter(address -> Boolean.TRUE.equals(address.getIsDefault()))
+                                .findFirst()
+                                .map(this::formatAddress)
+                                .orElse(null));
+        }
+
+        private String formatAddress(ClientAddress address) {
+                return String.join(", ", address.getStreet(), address.getCity(), address.getCountry())
+                                + " " + address.getPostalCode();
+        }
+
+        private AddressMutationResponse buildAddressMutationResponse(Client client, String message) {
+                List<AddressResponse> addresses = client.getAddresses().stream()
+                                .sorted(Comparator
+                                                .comparing((ClientAddress address) -> Boolean.TRUE.equals(address.getIsDefault()))
+                                                .reversed()
+                                                .thenComparing(ClientAddress::getCreatedAt, Comparator.nullsLast(Comparator.reverseOrder())))
+                                .map(address -> AddressResponse.builder()
+                                                .id(address.getId())
+                                                .street(address.getStreet())
+                                                .city(address.getCity())
+                                                .country(address.getCountry())
+                                                .postalCode(address.getPostalCode())
+                                                .isDefault(address.getIsDefault())
+                                                .build())
+                                .toList();
+
+                return AddressMutationResponse.builder()
+                                .success(true)
+                                .addresses(addresses)
+                                .message(message)
+                                .build();
+        }
 
     /**
      * Approve a staff account by admin.

@@ -7,7 +7,16 @@ import ProductActions from "@/components/pages/product/ProductActions";
 import { deviceApi } from "@/lib/deviceApi";
 import { mapDeviceToProduct } from "@/lib/mappers";
 import { Product } from "@/types_enum/devices";
-import { Share2, Star, Truck, Heart, ShieldCheck, ChevronRight } from "lucide-react";
+import {
+  Share2,
+  Star,
+  Truck,
+  Heart,
+  ShieldCheck,
+  ChevronRight,
+  PackageCheck,
+  BadgePercent,
+} from "lucide-react";
 import Image from "next/image";
 import React from "react";
 
@@ -18,7 +27,6 @@ const ProductDetails = async ({
 }) => {
   const { id } = await params;
   let product: Product | undefined;
-
   try {
     const deviceData = await deviceApi.getById(id);
     product = mapDeviceToProduct(deviceData);
@@ -38,7 +46,11 @@ const ProductDetails = async ({
     );
   }
 
-  const discountedPrice = product.price * (1 - product.discountPercentage / 100);
+  const currentPrice = product.price;
+  const hasDiscount = product.originalPrice > currentPrice;
+  const displayTags = product.tags?.length
+    ? product.tags.slice(0, 3)
+    : ["Chính hãng", "Giao nhanh", "Hỗ trợ booking"];
 
   let relatedProducts: Product[] = [];
   try {
@@ -95,7 +107,7 @@ const ProductDetails = async ({
               {/* Rating & Stats */}
               <div className="flex items-center gap-4 text-sm border-b border-border pb-4">
                 <div className="flex items-center gap-1">
-                  <span className="font-bold text-accent">{product.averageRating}</span>
+                  <span className="font-bold text-accent">{product.averageRating.toFixed(1)}</span>
                   <div className="flex text-secondary">
                     {[...Array(5)].map((_, i) => (
                       <Star key={i} size={16} fill="currentColor" />
@@ -104,12 +116,12 @@ const ProductDetails = async ({
                 </div>
                 <div className="h-4 w-px bg-border" />
                 <div>
-                  <span className="font-bold text-foreground">1.2k</span>
+                  <span className="font-bold text-foreground">{product.reviewCount}</span>
                   <span className="text-muted-foreground ml-1">Đánh giá</span>
                 </div>
                 <div className="h-4 w-px bg-border" />
                 <div>
-                  <span className="font-bold text-foreground">3.5k</span>
+                  <span className="font-bold text-foreground">{product.sold}</span>
                   <span className="text-muted-foreground ml-1">Đã bán</span>
                 </div>
               </div>
@@ -118,13 +130,13 @@ const ProductDetails = async ({
               <div className="bg-linear-to-r from-accent/5 to-accent/10 rounded-xl p-6 border border-accent/20">
                 <div className="flex items-baseline gap-4">
                   <PriceFormatter
-                    amount={discountedPrice}
+                    amount={currentPrice}
                     className="text-4xl font-bold text-accent"
                   />
-                  {product.discountPercentage > 0 && (
+                  {hasDiscount && (
                     <>
                       <PriceFormatter
-                        amount={product.price}
+                        amount={product.originalPrice}
                         className="text-lg text-muted-foreground line-through"
                       />
                       <span className="bg-accent text-white text-sm font-bold px-3 py-1 rounded-md shadow-sm">
@@ -137,18 +149,50 @@ const ProductDetails = async ({
 
               {/* Vouchers */}
               <div className="space-y-3">
-                <p className="text-sm font-medium text-muted-foreground">Mã giảm giá của shop</p>
+                <p className="text-sm font-medium text-muted-foreground">Điểm nổi bật</p>
                 <div className="flex flex-wrap gap-2">
-                  {["Giảm 10k", "Giảm 15%", "Giảm 50k"].map((voucher, i) => (
-                    <button
+                  {displayTags.map((tag, i) => (
+                    <div
                       key={i}
                       className="relative bg-accent/5 text-accent px-4 py-2 text-sm font-medium border border-dashed border-accent/40 rounded-lg hover:bg-accent/10 hoverEffect"
                     >
-                      {voucher}
+                      {tag}
                       <div className="absolute -left-1.5 top-1/2 -translate-y-1/2 w-3 h-3 bg-card rounded-full border border-accent/40" />
                       <div className="absolute -right-1.5 top-1/2 -translate-y-1/2 w-3 h-3 bg-card rounded-full border border-accent/40" />
-                    </button>
+                    </div>
                   ))}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div className="rounded-xl border border-border bg-background px-4 py-3">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                    <PackageCheck size={16} className="text-primary" />
+                    Tình trạng
+                  </div>
+                  <p className="mt-2 text-sm text-muted-foreground uppercase">
+                    {product.condition}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-border bg-background px-4 py-3">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                    <ShieldCheck size={16} className="text-primary" />
+                    Bảo hành
+                  </div>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {product.warranty.period > 0
+                      ? `${product.warranty.period} tháng`
+                      : "Liên hệ tư vấn"}
+                  </p>
+                </div>
+                <div className="rounded-xl border border-border bg-background px-4 py-3">
+                  <div className="flex items-center gap-2 text-sm font-semibold text-foreground">
+                    <BadgePercent size={16} className="text-primary" />
+                    Xuất xứ
+                  </div>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    {product.origin || "Đang cập nhật"}
+                  </p>
                 </div>
               </div>
 

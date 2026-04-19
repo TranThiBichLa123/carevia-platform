@@ -1,5 +1,18 @@
 import apiClient from "@/services/apiClient";
 
+type ApiError = {
+  response?: {
+    data?: {
+      message?: string;
+    };
+  };
+};
+
+const getErrorMessage = (error: unknown, fallback: string) => {
+  const apiError = error as ApiError;
+  return apiError.response?.data?.message || fallback;
+};
+
 const getToken = (): string | undefined => {
   if (typeof document === "undefined") return undefined;
   const cookies = document.cookie.split(";").reduce((acc, cookie) => {
@@ -29,15 +42,16 @@ export const bookingService = {
 
   create: async (bookingData: {
     sessionId: number;
-    notes?: string;
+    deviceId: number;
+    customerNote?: string;
     voucherCode?: string;
   }) => {
     try {
       const res = await apiClient.post("/bookings", bookingData, { headers: authHeaders() });
       return res.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to create booking:", error);
-      throw new Error(error?.response?.data?.message || "Failed to create booking");
+      throw new Error(getErrorMessage(error, "Failed to create booking"));
     }
   },
 
@@ -55,9 +69,9 @@ export const bookingService = {
       const endpoint = status === "CONFIRMED" ? "confirm" : status === "COMPLETED" ? "complete" : "cancel";
       const res = await apiClient.put(`/bookings/${id}/${endpoint}`, null, { headers: authHeaders() });
       return res.data;
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Failed to update booking status:", error);
-      throw new Error(error?.response?.data?.message || "Failed to update booking status");
+      throw new Error(getErrorMessage(error, "Failed to update booking status"));
     }
   },
 

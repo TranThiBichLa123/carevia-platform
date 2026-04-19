@@ -24,6 +24,18 @@ import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 
+type CartProduct = {
+  id?: string;
+  _id?: string;
+  deviceId?: string | number;
+  name: string;
+  image?: string;
+  price: number;
+};
+
+const getCartProductId = (product: CartProduct) =>
+  product.id || product._id || (product.deviceId ? String(product.deviceId) : "");
+
 const CartPageClient = () => {
   const {
     cartItemsWithQuantities,
@@ -116,7 +128,7 @@ const CartPageClient = () => {
       }
 
       // Redirect to checkout page with cart items
-      router.push(`/user/checkout`);
+      router.push(`/client/user/checkout`);
       toast.success("Redirecting to checkout...");
     } catch (error) {
       console.error("Error navigating to checkout:", error);
@@ -277,7 +289,7 @@ const CartPageClient = () => {
     return (
       <Container className="py-16">
         <div className="bg-babyshopWhite rounded-2xl border border-gray-100 shadow-sm p-8">
-          <div className="flex flex-col items-center justify-center min-h-[500px] text-center">
+          <div className="flex flex-col items-center justify-center min-h-125 text-center">
             <div className="w-32 h-32 bg-gray-100 rounded-full flex items-center justify-center mb-8">
               <ShoppingCart className="w-16 h-16 text-gray-300" />
             </div>
@@ -388,18 +400,15 @@ const CartPageClient = () => {
               {cartItemsWithQuantities.map((cartItem, index) => (
                 <div
 
-                  key={cartItem.product?.id ||
-                    (cartItem.product as any)?._id ||
-                    (cartItem.product as any)?.deviceId ||
-                    `temp-key-${index}`}
+                  key={getCartProductId(cartItem.product) || `temp-key-${index}`}
                   className="border border-gray-100 rounded-lg p-4 lg:p-0 lg:border-0 lg:rounded-none"
                 >
                   {/* Mobile Layout */}
                   <div className="block lg:hidden">
                     <div className="flex items-start gap-4">
                       {/* Product Image */}
-                      <Link href={`/product/${cartItem.product?.id || (cartItem.product as any)?._id}`}>
-                        <div className="relative w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 hover:scale-105 transition-transform duration-200 cursor-pointer">
+                      <Link href={`/product/${getCartProductId(cartItem.product)}`}>
+                        <div className="relative w-20 h-20 bg-gray-100 rounded-lg overflow-hidden shrink-0 hover:scale-105 transition-transform duration-200 cursor-pointer">
                           {cartItem.product.image ? (
                             <Image
                               src={cartItem.product.image}
@@ -457,8 +466,8 @@ const CartPageClient = () => {
                               variant="ghost"
                               size="sm"
                               onClick={() => handleQuantityChange(
-                                cartItem.product?.id || (cartItem.product as any)?._id,
-                                cartItem.quantity - 1
+                                getCartProductId(cartItem.product),
+                                cartItem.quantity + 1
                               )}
 
                               className="h-8 w-8 p-0 hover:bg-gray-50 border-0 rounded-none"
@@ -485,10 +494,7 @@ const CartPageClient = () => {
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => handleRemoveItem(cartItem.product?.id ||
-                              (cartItem.product as any)?._id ||
-                              (cartItem.product as any)?.deviceId ||
-                              `temp-key-${index}`)}
+                            onClick={() => handleRemoveItem(getCartProductId(cartItem.product) || `temp-key-${index}`)}
 
                             className="text-red-500 hover:text-red-600 hover:bg-red-50 px-2 py-1 h-auto text-xs"
                           >
@@ -505,7 +511,7 @@ const CartPageClient = () => {
                     {/* Product Info */}
                     <div className="lg:col-span-6 flex items-center gap-4">
                       <Link href={`/product/${cartItem.product.id}`}>
-                        <div className="relative w-20 h-20 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 hover:scale-105 transition-transform duration-200 cursor-pointer">
+                        <div className="relative w-20 h-20 bg-gray-100 rounded-lg overflow-hidden shrink-0 hover:scale-105 transition-transform duration-200 cursor-pointer">
                           {cartItem.product.image ? (
                             <Image
                               src={cartItem.product.image}
@@ -558,10 +564,7 @@ const CartPageClient = () => {
                           size="sm"
                           onClick={() =>
                             handleQuantityChange(
-                              cartItem.product?.id ||
-                              (cartItem.product as any)?._id ||
-                              (cartItem.product as any)?.deviceId ||
-                              `temp-key-${index}`,
+                              getCartProductId(cartItem.product) || `temp-key-${index}`,
                               cartItem.quantity - 1
                             )
                           }
@@ -710,7 +713,7 @@ const CartPageClient = () => {
       {/* Clear Cart Confirmation Modal */}
       <AlertDialog
         open={showClearDialog}
-        onOpenChange={(open: any) => {
+        onOpenChange={(open: boolean) => {
           if (!open) {
             setShowClearDialog(false);
           }

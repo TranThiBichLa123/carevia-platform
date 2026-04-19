@@ -1,10 +1,8 @@
 "use client";
 import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
 import {
   Minus,
   Plus,
-  Star,
   Loader2,
   ShoppingCart,
   CalendarCheck,
@@ -14,11 +12,17 @@ import {
   Package,
 } from "lucide-react";
 import { Product } from "@/types_enum/devices";
-import WishlistButton from "@/components/common/products/WishlistButton";
 import { toast } from "sonner";
 import { useCartStore, useUserStore } from "@/lib/store";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+
+type ProductWithLegacyId = Product & {
+  deviceId?: string | number;
+};
+
+const getProductId = (product: ProductWithLegacyId) =>
+  product.id || product._id || (product.deviceId ? String(product.deviceId) : "");
 
 interface ProductActionsProps {
   product: Product;
@@ -32,11 +36,23 @@ const ProductActions: React.FC<ProductActionsProps> = ({ product }) => {
   const { addToCart, cartItemsWithQuantities } = useCartStore();
   const { isAuthenticated } = useUserStore();
   const router = useRouter();
+  const safeProductId = getProductId(product as ProductWithLegacyId);
+  const isOutOfStock = product.stock <= 0;
+
+  const updateQuantity = (nextQuantity: number) => {
+    const maxQuantity = Math.max(1, product.stock || 1);
+    setQuantity(Math.max(1, Math.min(nextQuantity, maxQuantity)));
+  };
 
   const handleAddToCart = async () => {
     if (!isAuthenticated) {
       toast.error("Vui lòng đăng nhập để thêm vào giỏ hàng");
       router.push("/auth/signin");
+      return;
+    }
+
+    if (!safeProductId || isOutOfStock) {
+      toast.error("Sản phẩm hiện không thể thêm vào giỏ hàng");
       return;
     }
 
@@ -64,6 +80,11 @@ const ProductActions: React.FC<ProductActionsProps> = ({ product }) => {
       return;
     }
 
+    if (!safeProductId || isOutOfStock) {
+      toast.error("Sản phẩm hiện đã hết hàng");
+      return;
+    }
+
     setBuyNowLoading(true);
     try {
       await addToCart(product, quantity);
@@ -77,7 +98,18 @@ const ProductActions: React.FC<ProductActionsProps> = ({ product }) => {
   };
 
   const handleBooking = () => {
-    router.push(`/client/booking?deviceId=${product._id}`);
+    if (!isAuthenticated) {
+      toast.error("Vui lòng đăng nhập để đặt lịch trải nghiệm");
+      router.push("/auth/signin");
+      return;
+    }
+
+    if (!safeProductId) {
+      toast.error("Không xác định được sản phẩm để đặt lịch");
+      return;
+    }
+
+    router.push(`/client/booking?deviceId=${safeProductId}`);
   };
 
   return (
@@ -89,23 +121,23 @@ const ProductActions: React.FC<ProductActionsProps> = ({ product }) => {
         </span>
         <div className="flex items-center gap-3">
           <button
-            onClick={() => setQuantity(Math.max(1, quantity - 1))}
-            disabled={localLoading || buyNowLoading}
+            onClick={() => updateQuantity(quantity - 1)}
+            disabled={localLoading || buyNowLoading || isOutOfStock}
             className="w-10 h-10 flex items-center justify-center border-2 border-border rounded-lg hover:border-primary hover:text-primary hoverEffect disabled:opacity-50"
           >
             <Minus size={18} />
           </button>
           <span className="w-12 text-center font-bold text-lg">{quantity}</span>
           <button
-            onClick={() => setQuantity(quantity + 1)}
-            disabled={localLoading || buyNowLoading}
+            onClick={() => updateQuantity(quantity + 1)}
+            disabled={localLoading || buyNowLoading || isOutOfStock}
             className="w-10 h-10 flex items-center justify-center border-2 border-border rounded-lg hover:border-primary hover:text-primary hoverEffect disabled:opacity-50"
           >
             <Plus size={18} />
           </button>
         </div>
         <span className="text-sm text-muted-foreground">
-          {product.stock} sản phẩm có sẵn
+          {isOutOfStock ? "Tạm hết hàng" : `${product.stock} sản phẩm có sẵn`}
         </span>
       </div>
 
@@ -114,7 +146,7 @@ const ProductActions: React.FC<ProductActionsProps> = ({ product }) => {
           {/* Add to Cart */}
           <button
             onClick={handleAddToCart}
-            disabled={localLoading || buyNowLoading}
+            disabled={localLoading || buyNowLoading || isOutOfStock}
             className="flex-1 h-14 flex items-center justify-center gap-2 bg-background text-primary font-bold border-2 border-primary rounded-xl hover:bg-primary/5 hoverEffect shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {localLoading ? (
@@ -122,21 +154,21 @@ const ProductActions: React.FC<ProductActionsProps> = ({ product }) => {
             ) : (
               <ShoppingCart size={20} />
             )}
-            {localLoading ? "Đang thêm..." : "Thêm vào giỏ"}
+            {localLoading ? "Đang thêm..." : isOutOfStock ? "Hết hàng" : "Thêm vào giỏ"}
           </button>
 
           {/* Buy Now */}
           <button
             onClick={handleBuyNow}
-            disabled={localLoading || buyNowLoading}
-            className="flex-1 h-14 bg-accent text-accent-foreground font-bold rounded-xl hover:bg-accent/90 hoverEffect shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            disabled={localLoading || buyNowLoading || isOutOfStock}
+            className="flex-1 h-14 bg-accent text-white font-bold rounded-xl hover:bg-accent/90 hoverEffect shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {buyNowLoading ? (
               <Loader2 size={20} className="animate-spin" />
             ) : (
               <ArrowRight size={20} />
             )}
-            {buyNowLoading ? "Đang xử lý..." : "Mua ngay"}
+            {buyNowLoading ? "Đang xử lý..." : isOutOfStock ? "Hết hàng" : "Mua ngay"}
           </button>
         </div>
 
@@ -145,7 +177,7 @@ const ProductActions: React.FC<ProductActionsProps> = ({ product }) => {
           <>
             <button
               onClick={handleBooking}
-              className="w-full h-14 flex items-center justify-center gap-2 bg-gradient-to-r from-primary to-primary/80 text-primary-foreground font-bold rounded-xl hover:shadow-lg hoverEffect border-2 border-primary/20"
+              className="w-full h-14 flex items-center justify-center gap-2 bg-linear-to-r from-primary to-primary/80 text-white font-bold rounded-xl hover:shadow-lg hoverEffect border-2 border-primary/20"
             >
               <CalendarCheck size={20} />
               Đặt Lịch Trải Nghiệm Sản Phẩm (Miễn Phí)
@@ -177,14 +209,16 @@ const ProductActions: React.FC<ProductActionsProps> = ({ product }) => {
 
           {/* Cart Items Preview (last 3) */}
           <div className="p-3 space-y-2 max-h-48 overflow-y-auto">
-            {cartItemsWithQuantities.slice(-3).map((item) => (
-              <div
-                key={item.product._id}
-                className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50"
-              >
-                <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden shrink-0">
-                  {item.product.image ? (
-                    <img
+            {cartItemsWithQuantities.slice(-3).map((item) => {
+              const safeId = getProductId(item.product as ProductWithLegacyId);
+              return (
+                <div
+                  key={safeId}
+                  className="flex items-center gap-3 p-2 rounded-lg hover:bg-gray-50"
+                >
+                  <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden shrink-0">
+                    {item.product.image ? (
+                      <img
                       src={item.product.image}
                       alt={item.product.name}
                       className="w-full h-full object-cover"
@@ -204,7 +238,7 @@ const ProductActions: React.FC<ProductActionsProps> = ({ product }) => {
                   </p>
                 </div>
               </div>
-            ))}
+            )})}
           </div>
 
           {/* Footer */}

@@ -1,5 +1,6 @@
 export interface Category {
   id: string;
+  _id?: string;
   name: string;
   slug: string; // Thêm để làm URL: /category/may-rua-mat
   image: string;
@@ -8,6 +9,7 @@ export interface Category {
 
 export interface Brand {
   id: string;
+  _id?: string;
   name: string;
   slug: string; // Thêm để làm URL: /brand/halio
   image?: string;
@@ -16,6 +18,7 @@ export interface Brand {
 
 export interface Product {
   id: string;
+  _id?: string;
   name: string;
   slug: string;               // CỰC KỲ QUAN TRỌNG: Để làm link /product/may-day-tinh-chat-rf
   description: string;        // Mô tả ngắn (hiển thị ở card hoặc dưới tên SP)
@@ -29,7 +32,7 @@ export interface Product {
   images: string[];           // Array các ảnh chi tiết để làm slider
   category: Category;
   brand: Brand;
-  ratings: any[]; 
+  ratings: unknown[];
   
   // --- ĐẶC THÙ THIẾT BỊ ĐIỆN TỬ ---
   sku: string;                // Mã quản lý kho (VD: HALIO-001)
