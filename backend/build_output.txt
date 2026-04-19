@@ -1,0 +1,12 @@
+> Task :clean
+
+> Task :compileJava
+D:\UIT\NAM3\DOAN1\PROJECT\carevia-platform\backend\src\main\java\com\carevia\shared\entity\PersonBase.java:18: warning: Generating equals/hashCode implementation but without a call to superclass, even though this class does not extend java.lang.Object. If this is intentional, add '@EqualsAndHashCode(callSuper=false)' to your type.
+@Data
+^
+Note: D:\UIT\NAM3\DOAN1\PROJECT\carevia-platform\backend\src\main\java\com\carevia\service\storage\CloudinaryStorageService.java uses unchecked or unsafe operations.
+Note: Recompile with -Xlint:unchecked for details.
+1 warning
+
+BUILD SUCCESSFUL in 19s
+2 actionable tasks: 2 executed

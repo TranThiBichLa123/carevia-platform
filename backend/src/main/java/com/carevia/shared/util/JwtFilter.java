@@ -26,20 +26,30 @@ public class JwtFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
-        
-        // 1. Trích xuất Token từ header Authorization
-        String jwt = resolveToken(request);
+        try {
+            String jwt = resolveToken(request);
 
-        // 2. Kiểm tra nếu Token có tồn tại và hợp lệ (đúng chữ ký, chưa hết hạn)
-        if (StringUtils.hasText(jwt) && tokenProvider.validateToken(jwt)) {
-            // 3. Lấy đối tượng Authentication (bên trong chứa CustomUserDetails có ID)
-            Authentication authentication = tokenProvider.getAuthentication(jwt);
-            
-            // 4. Nạp vào SecurityContext để hệ thống nhận diện User cho Request này
-            SecurityContextHolder.getContext().setAuthentication(authentication);
+            // Log xem Filter có nhận được Token từ Frontend gửi lên không
+            if (jwt != null) {
+                System.out.println("DEBUG - JwtFilter: Nhan duoc token: " + jwt.substring(0, 10) + "...");
+            }
+
+            if (StringUtils.hasText(jwt) && !"undefined".equalsIgnoreCase(jwt) && !"null".equalsIgnoreCase(jwt)) {
+                if (tokenProvider.validateToken(jwt)) {
+                    Authentication authentication = tokenProvider.getAuthentication(jwt);
+                    SecurityContextHolder.getContext().setAuthentication(authentication);
+
+                    // Log xác nhận đã nạp User thành công
+                    System.out
+                            .println("DEBUG - JwtFilter: Da nap Authentication cho user: " + authentication.getName());
+                } else {
+                    System.out.println("DEBUG - JwtFilter: Token khong hop le (validateToken = false)");
+                }
+            }
+        } catch (Exception e) {
+            SecurityContextHolder.clearContext();
+            System.out.println("DEBUG - JwtFilter LOI: " + e.getMessage()); // Sửa logger thành System.out để dễ thấy
         }
-        
-        // Cho phép request đi tiếp qua các filter khác
         filterChain.doFilter(request, response);
     }
 
@@ -49,8 +59,14 @@ public class JwtFilter extends OncePerRequestFilter {
     private String resolveToken(HttpServletRequest request) {
         String bearerToken = request.getHeader("Authorization");
         if (StringUtils.hasText(bearerToken) && bearerToken.startsWith("Bearer ")) {
-            return bearerToken.substring(7);
+            String token = bearerToken.substring(7);
+            // Nếu là chuỗi "undefined" thì coi như không có token
+            if ("undefined".equalsIgnoreCase(token) || "null".equalsIgnoreCase(token)) {
+                return null;
+            }
+            return token;
         }
         return null;
     }
+
 }

@@ -41,7 +41,7 @@ public class MailService {
     @Value("${spring.mail.username:noreply@carevia.local}")
     private String sender;
 
-    @Value("${app.base-url:http://localhost:8080}")
+    @Value("${app.base-url:http://localhost:8081}")
     private String baseUrl;
 
     @Value("${app.frontend-url:http://localhost:3000}")

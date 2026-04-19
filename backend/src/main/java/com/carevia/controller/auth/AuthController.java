@@ -111,20 +111,28 @@ public class AuthController {
          * @param request     HTTP request (used to extract client IP)
          * @return login response containing tokens and account info
          */
-        @Operation(summary = "Login to the system", description = "Authenticate user credentials and receive access token and refresh token for subsequent API calls.")
-        @PostMapping("/login")
+        @PostMapping("/signin")
         @ApiMessage("Login to the system")
         public ResponseEntity<ResLoginDTO> login(
-                        @Parameter(description = "Login credentials (username or email and password)", required = true) @Valid @RequestBody ReqLoginDTO reqLoginDTO,
+                        @Valid @RequestBody ReqLoginDTO reqLoginDTO,
                         HttpServletRequest request) {
+
                 log.info("Login attempt for user: {}", reqLoginDTO.getLogin());
 
                 String clientIp = request.getHeader("X-Forwarded-For");
                 if (clientIp == null)
                         clientIp = request.getRemoteAddr();
-
                 reqLoginDTO.setIpAddress(clientIp);
+
                 ResLoginDTO res = this.authService.login(reqLoginDTO);
+
+                // --- THÊM DÒNG NÀY ĐỂ DEBUG ---
+                if (res != null && res.getAccessToken() != null) {
+                        String token = res.getAccessToken();
+                        System.out.println("DEBUG - Token vừa tạo lúc Login (10 ký tự cuối): "
+                                        + token.substring(token.length() - 10));
+                }
+                // ------------------------------
 
                 log.info("Login successful for user: {}", reqLoginDTO.getLogin());
                 return ResponseEntity.ok(res);

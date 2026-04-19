@@ -30,9 +30,9 @@ public class DomainUserDetailsService implements UserDetailsService {
     }
 
     private CustomUserDetails createSpringSecurityUser(Account account) {
-        // Lấy quyền (Role) và thêm tiền tố ROLE_ nếu cần
+        // Lấy quyền (Role) 
         List<SimpleGrantedAuthority> authorities = Collections.singletonList(
-                new SimpleGrantedAuthority("ROLE_" + account.getRole().name())
+                new SimpleGrantedAuthority(account.getRole().name())
         );
 
         // Trả về CustomUserDetails kèm theo ID từ database

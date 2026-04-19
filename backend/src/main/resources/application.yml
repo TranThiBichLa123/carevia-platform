@@ -1,8 +1,8 @@
 server:
-  port: 8080
+  port: 8081
 
 jwt:
-  secret: ${JWT_SECRET:carevia-local-jwt-secret-carevia-2026-key}
+  secret: carevialocaljwtsecretcarevia2026keyv1v2v3v4v5v6
   access-token:
     expiration: ${JWT_ACCESS_TOKEN_EXPIRATION:3600}
   refresh-token:
@@ -11,7 +11,7 @@ jwt:
 spring:
   application:
     name: carevia-backend
-    
+
   datasource:
     # Nếu chạy Docker, hãy đổi 'localhost' thành 'postgres'
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/carevia?options=-c%20timezone=UTC}
@@ -20,7 +20,7 @@ spring:
     driver-class-name: org.postgresql.Driver
 
   jpa:
-   # Khi dùng Docker, ta nên ép Dialect luôn để tránh Hibernate mất công tìm kiếm metadata khi kết nối chưa ổn định
+    # Khi dùng Docker, ta nên ép Dialect luôn để tránh Hibernate mất công tìm kiếm metadata khi kết nối chưa ổn định
     database-platform: org.hibernate.dialect.PostgreSQLDialect
     # Để Hibernate tự động nhận diện Dialect (tránh cảnh báo thừa)
     hibernate:
@@ -84,3 +84,4 @@ cloudinary:
 logging:
   level:
     org.apache.commons.logging: ERROR
+    org.springframework.security: DEBUG

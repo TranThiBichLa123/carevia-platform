@@ -3,6 +3,7 @@ package com.carevia.config.security;
 import com.carevia.shared.util.JwtFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod; // Thêm import này
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -25,12 +26,11 @@ import java.util.List;
 
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity // Cho phép dùng @PreAuthorize sau này
+@EnableMethodSecurity
 public class SecurityConfig {
 
     private final JwtFilter jwtFilter;
 
-    // Inject JwtFilter vào đây
     public SecurityConfig(JwtFilter jwtFilter) {
         this.jwtFilter = jwtFilter;
     }
@@ -48,46 +48,37 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            // 1. Cấu hình CORS
-            .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                // !!! ADD THIS LINE !!!
+                .csrf(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/error").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                        .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/devices/**").permitAll()
 
-            // 2. Tắt CSRF và cấu hình Stateless (JWT không dùng Session)
-            .csrf(AbstractHttpConfigurer::disable)
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            .formLogin(AbstractHttpConfigurer::disable)
-            .httpBasic(AbstractHttpConfigurer::disable)
+                        // THÊM DÒNG NÀY: Cho phép người dùng đã đăng nhập truy cập Wishlist
+                        .requestMatchers("/api/v1/wishlist/**").authenticated()
 
-            // 3. Phân quyền API
-            .authorizeHttpRequests(auth -> auth
-                // Công khai
-                .requestMatchers("/api/v1/auth/**", "/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
-                .requestMatchers("/api/v1/devices/**", "/api/v1/categories/**", "/api/v1/brands/**").permitAll()
-                
-                // Yêu cầu đăng nhập (Dứt điểm lỗi 401 cho Wishlist/Orders)
-                .requestMatchers("/api/v1/wishlist/**", "/api/v1/orders/**").authenticated()
+                        .anyRequest().authenticated())
 
-                // Mọi request khác (nếu cần quản lý chặt chẽ hơn sau này)
-                .anyRequest().authenticated()
-            )
-
-            // 4. CHÈN NGƯỜI GÁC CỔNG JWT VÀO ĐÂY
-            .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
-
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:3000"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"));
-        // Cực kỳ quan trọng: Phải cho phép các Header này để JWT đi qua
-        configuration.setAllowedHeaders(Arrays.asList("Authorization", "Content-Type", "Accept", "X-Requested-With"));
-        configuration.setAllowCredentials(true);
-        configuration.setMaxAge(3600L);
+        CorsConfiguration config = new CorsConfiguration();
+        config.setAllowedOrigins(List.of("http://localhost:3000"));
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        // Quan trọng: Cho phép các header mà axios thường gửi
+        config.setAllowedHeaders(
+                List.of("Authorization", "Content-Type", "Accept", "X-Requested-With", "Cache-Control", "Origin"));
+        config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
+        source.registerCorsConfiguration("/**", config);
         return source;
     }
 

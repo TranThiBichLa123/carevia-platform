@@ -45,7 +45,7 @@ services:
     build: .
     container_name: carevia-backend
     ports:
-      - "${APP_PORT}:8080"
+      - "${APP_PORT}:8081"
     depends_on:
       - postgres
       - minio

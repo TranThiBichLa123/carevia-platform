@@ -42,7 +42,7 @@ public class WishlistController {
     @PostMapping("/{deviceId}")
     @Authenticated
     @Operation(summary = "Add device to wishlist")
-    public ResponseEntity<?> addToWishlist(@PathVariable Long deviceId) {
+    public ResponseEntity<?> addToWishlist(@PathVariable("deviceId") Long deviceId) {
         Long accountId = SecurityUtils.getCurrentUserId()
                 .orElseThrow(() -> new UnauthorizedException("Authentication required"));
         wishlistService.addToWishlist(accountId, deviceId);
@@ -52,7 +52,7 @@ public class WishlistController {
     @DeleteMapping("/{deviceId}")
     @Authenticated
     @Operation(summary = "Remove device from wishlist")
-    public ResponseEntity<?> removeFromWishlist(@PathVariable Long deviceId) {
+    public ResponseEntity<?> removeFromWishlist(@PathVariable("deviceId") Long deviceId) {
         Long accountId = SecurityUtils.getCurrentUserId()
                 .orElseThrow(() -> new UnauthorizedException("Authentication required"));
         wishlistService.removeFromWishlist(accountId, deviceId);
@@ -62,7 +62,7 @@ public class WishlistController {
     @GetMapping("/check/{deviceId}")
     @Authenticated
     @Operation(summary = "Check if device is in wishlist")
-    public ResponseEntity<Boolean> isInWishlist(@PathVariable Long deviceId) {
+    public ResponseEntity<Boolean> isInWishlist(@PathVariable("deviceId") Long deviceId) {
         Long accountId = SecurityUtils.getCurrentUserId()
                 .orElseThrow(() -> new UnauthorizedException("Authentication required"));
         return ResponseEntity.ok(wishlistService.isInWishlist(accountId, deviceId));
