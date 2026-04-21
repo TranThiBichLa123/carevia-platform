@@ -2,6 +2,7 @@
 
 import { Product } from "@/types_enum/devices";
 import { mockProducts } from "../../../constants/data";
+import { deviceApi, DeviceData } from "@/lib/deviceApi";
 import { Input } from "../../../components/ui/input";
 import { fetchData, hasExplicitApiEndpoint } from "../../../lib/api";
 import { Loader2, Search, X, Camera, Mic } from "lucide-react";
@@ -26,8 +27,8 @@ const placeholders = [
 const SearchInput = () => {
   const [search, setSearch] = useState("");
   const [debouncedSearch] = useDebounce(search, 300);
-  const [products, setProducts] = useState<Product[]>([]);
-  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
+  const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showResults, setShowResults] = useState(false);
@@ -36,41 +37,60 @@ const SearchInput = () => {
   const searchRef = useRef<HTMLDivElement>(null);
   const mobileInputRef = useRef<HTMLInputElement>(null);
 
-  const filterMockProducts = useCallback((searchTerm: string) => {
+  const filterMockProducts = useCallback(async (searchTerm: string) => {
     const normalizedTerm = searchTerm.trim().toLowerCase();
-
-    if (!normalizedTerm) {
-      return [];
-    }
-
-    return mockProducts.filter((product: Product) => {
-      const searchableText = [
-        product.name,
-        product.description,
-        product.category?.name,
-        product.brand?.name,
-      ]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase();
-
-      return searchableText.includes(normalizedTerm);
-    });
-  }, []);
-
-  const fetchFeaturedProducts = useCallback(async () => {
-    if (!hasExplicitApiEndpoint()) {
-      setFeaturedProducts(mockProducts.slice(0, 6));
-      return;
-    }
+    if (!normalizedTerm) return [];
 
     try {
-      const response = await fetchData<ProductsResponse>("/products?page=1&limit=6");
-      setFeaturedProducts(response.products);
-    } catch {
-      setFeaturedProducts(mockProducts.slice(0, 6));
+      // Đợi API trả về dữ liệu (Giả sử DevicePageResponse có field 'content' chứa mảng Product)
+      const response = await deviceApi.getAll();
+
+      // Lưu ý: Kiểm tra cấu trúc DevicePageResponse của bạn, ví dụ là response.content hoặc response.data
+      const allProducts = response.items || [];
+      // Đổi (product: Product) thành (product: DeviceData)
+      return allProducts.filter((product: DeviceData) => {
+        const searchableText = [
+          product.name,
+          product.description,
+          product.category?.name,
+          product.brand?.name,
+        ]
+          .filter(Boolean)
+          .join(" ")
+          .toLowerCase();
+
+        return searchableText.includes(normalizedTerm);
+      });
+
+    } catch (error) {
+      console.error("Lỗi khi lấy dữ liệu:", error);
+      return [];
     }
   }, []);
+
+
+ const fetchFeaturedProducts = useCallback(async () => {
+  // Nếu không có API thật, dùng hàm getPopular từ deviceApi
+  if (!hasExplicitApiEndpoint()) {
+    try {
+      const data = await deviceApi.getPopular(); // Gọi hàm và đợi dữ liệu về
+      setFeaturedProducts(data.slice(0, 6));     // Lúc này data mới là mảng để slice
+    } catch (err) {
+      console.error("Lỗi lấy sản phẩm phổ biến:", err);
+    }
+    return;
+  }
+
+  try {
+    const response = await fetchData<ProductsResponse>("/products?page=1&limit=6");
+    setFeaturedProducts(response.products);
+  } catch {
+    // Tương tự cho phần catch
+    const data = await deviceApi.getPopular();
+    setFeaturedProducts(data.slice(0, 6));
+  }
+}, []);
+
 
   const fetchProducts = useCallback(
     async (searchTerm: string) => {
@@ -84,7 +104,9 @@ const SearchInput = () => {
       setError(null);
 
       if (!hasExplicitApiEndpoint()) {
-        setProducts(filterMockProducts(searchTerm).slice(0, 10));
+        // Sửa trong fetchProducts
+        const filtered = await filterMockProducts(searchTerm);
+        setProducts(filtered as unknown as Product[]); // Ép kiểu để TypeScript không báo lỗi
         setLoading(false);
         return;
       }
@@ -95,7 +117,8 @@ const SearchInput = () => {
         );
         setProducts(response.products);
       } catch {
-        setProducts(filterMockProducts(searchTerm).slice(0, 10));
+        const filtered = await filterMockProducts(searchTerm);
+        setProducts(filtered.slice(0, 10) as unknown as Product[]);
         setError("Dang hien thi ket qua tu du lieu mau");
       } finally {
         setLoading(false);

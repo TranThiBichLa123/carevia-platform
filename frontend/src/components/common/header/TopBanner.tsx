@@ -20,8 +20,8 @@ const TopBanner = () => {
               </Link>
           ))}
         </div>
-        <p className="text-center hidden md:inline-flex">
-          100% Secure delivery without contacting the courier
+        <p className="text-center hidden md:inline-flex items-center justify-center">
+          100% an toàn và bảo mật khi mua sắm tại Carevia
         </p>
         <div className="hidden md:inline-flex items-center justify-end">
           <SelectCurrency />

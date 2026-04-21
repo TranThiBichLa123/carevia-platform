@@ -59,7 +59,7 @@ const OrderDetailsPage = () => {
     const fetchOrder = async () => {
       if (!orderId || !auth_token) {
         toast.error("Order ID or authentication token missing");
-        router.push("/user/orders");
+        router.push("/client/user/orders");
         return;
       }
       setLoading(true);
@@ -72,12 +72,12 @@ const OrderDetailsPage = () => {
           }
         } else {
           toast.error("Order not found");
-          router.push("/user/orders");
+          router.push("/client/user/orders");
         }
       } catch (error) {
         console.error("Error fetching order:", error);
         toast.error("Failed to load order details");
-        router.push("/user/orders");
+        router.push("/client/user/orders");
       } finally {
         setLoading(false);
       }
@@ -132,7 +132,7 @@ const OrderDetailsPage = () => {
     return (
       <Container>
         <PageBreadcrumb
-          items={[{ label: "Orders", href: "/user/orders" }]}
+          items={[{ label: "Orders", href: "/client/user/orders" }]}
           currentPage="Order Details"
         />
         <div className="space-y-6">
@@ -164,7 +164,7 @@ const OrderDetailsPage = () => {
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             Order not found
           </h1>
-          <Button onClick={() => router.push("/user/orders")}>
+          <Button onClick={() => router.push("/client/user/orders")}>
             Back to Orders
           </Button>
         </div>
@@ -192,7 +192,7 @@ const OrderDetailsPage = () => {
   return (
     <Container className="pt-5">
       <PageBreadcrumb
-        items={[{ label: "Orders", href: "/user/orders" }]}
+        items={[{ label: "Orders", href: "/client/user/orders" }]}
         currentPage="Order Details"
       />
 
@@ -217,7 +217,7 @@ const OrderDetailsPage = () => {
         {/* Back Button */}
         <Button
           variant="ghost"
-          onClick={() => router.push("/user/orders")}
+          onClick={() => router.push("/client/user/orders")}
           className="mb-6 pl-0"
         >
           <ArrowLeft className="h-4 w-4 mr-2" />
@@ -351,7 +351,7 @@ const OrderDetailsPage = () => {
         <div className="flex gap-4">
           <Button
             variant="outline"
-            onClick={() => router.push("/user/orders")}
+            onClick={() => router.push("/client/user/orders")}
             className="flex-1"
           >
             View All Orders

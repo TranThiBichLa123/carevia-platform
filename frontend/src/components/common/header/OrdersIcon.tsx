@@ -24,7 +24,7 @@ const OrdersIcon = () => {
   if (!mounted) {
     return (
       <Link
-        href="/user/orders"
+        href="/client/user/orders"
         className="relative hover:text-babyshopSky hoverEffect"
         title="My Orders"
       >
@@ -40,7 +40,7 @@ const OrdersIcon = () => {
 
   return (
     <Link
-      href="/user/orders"
+      href="/client/user/orders"
       className="relative hover:text-babyshopSky hoverEffect"
       title="My Orders"
     >

@@ -201,7 +201,7 @@ const LeftSideBar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   onClick={onClose}
                 >
                   <HelpCircle size={18} />
-                  <span>Help Center</span>
+                  <span>Trung tâm trợ giúp</span>
                 </Link>
                 <Link
                   href="/help/shipping"
@@ -209,7 +209,7 @@ const LeftSideBar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   onClick={onClose}
                 >
                   <Truck size={18} />
-                  <span>Shipping Info</span>
+                  <span>Thông tin vận chuyển</span>
                 </Link>
                 <Link
                   href="/help/contact"
@@ -217,7 +217,7 @@ const LeftSideBar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   onClick={onClose}
                 >
                   <Phone size={18} />
-                  <span>Contact Us</span>
+                  <span>Liên hệ chúng tôi</span>
                 </Link>
               </div>
             </div>
@@ -231,16 +231,16 @@ const LeftSideBar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   variant="outline"
                   onClick={handleLogout}
                 >
-                  Logout
+                  Đăng xuất
                 </Button>
               ) : (
                 <>
                   <p className="flex items-center gap-1 font-medium">
-                    <User /> My Account
+                    <User /> Tài khoản của tôi
                   </p>
                   <Link href="/auth/signin" onClick={onClose}>
                     <Button className="w-full py-5.5 text-base font-semibold">
-                      Login
+                      Đăng nhập
                     </Button>
                   </Link>
                   <Link href="/auth/signup" onClick={onClose}>

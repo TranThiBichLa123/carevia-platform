@@ -1,5 +1,4 @@
 "use client";
-
 import {
   Select,
   SelectContent,
@@ -9,51 +8,71 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../../../components/ui/select";
-import React, { useState, useEffect } from "react"; // Added useEffect
+import React, { useState, useEffect } from "react";
 
 const SelectCurrency = () => {
-  const [selectedCurrency, setSelectedCurrency] = useState("USD");
-  
-  // 1. Add a mounted state to handle hydration
+  const [selectedCurrency, setSelectedCurrency] = useState("VND");
   const [mounted, setMounted] = useState(false);
 
-  // 2. Set mounted to true after initial render
   useEffect(() => {
     setMounted(true);
   }, []);
 
   const currencies = [
-    { code: "USD", name: "US Dollar", symbol: "$", rate: 1.0 },
-    { code: "EUR", name: "Euro", symbol: "€", rate: 0.85 },
-    { code: "GBP", name: "British Pound", symbol: "£", rate: 0.73 },
-    { code: "JPY", name: "Japanese Yen", symbol: "¥", rate: 110.0 },
-    { code: "CAD", name: "Canadian Dollar", symbol: "C$", rate: 1.25 },
-    { code: "AUD", name: "Australian Dollar", symbol: "A$", rate: 1.35 },
-    { code: "CHF", name: "Swiss Franc", symbol: "CHF", rate: 0.92 },
+    { code: "VND", name: "Việt Nam Đồng", symbol: "₫", rate: 1 },
+    { code: "USD", name: "US Dollar", symbol: "$", rate: 25450 },
+    { code: "EUR", name: "Euro", symbol: "€", rate: 27000 },
+    { code: "JPY", name: "Japanese Yen", symbol: "¥", rate: 165 },
+    { code: "KRW", name: "South Korean Won", symbol: "₩", rate: 18 },
   ];
 
-  // 3. Return a placeholder or null during SSR (Server Side Rendering)
-  // This prevents the ID mismatch error (radix-_R_...)
+  // Tìm thông tin tiền tệ hiện tại để hiển thị trên header
+  const current = currencies.find((c) => c.code === selectedCurrency);
+
   if (!mounted) {
     return (
-      <div className="flex items-center px-2 py-1 h-6 w-[60px] text-white/50 text-sm">
-        USD
+      <div className="flex items-center px-2 py-1 h-6 w-fit text-white text-xs font-medium">
+        ₫ VND - Việt Nam Đồng
       </div>
     );
   }
 
   return (
     <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
-      <SelectTrigger className="border-none bg-transparent text-white focus:ring-0 focus:outline-none shadow-none flex items-center justify-between px-2 py-1 data-[size=default]:h-6 dark:bg-transparent dark:hover:transparent ">
-        <SelectValue>{selectedCurrency}</SelectValue>
+      <SelectTrigger className="border-none bg-transparent focus:ring-0 focus:outline-none shadow-none flex items-center gap-1 px-2 py-1 h-6 w-fit transition-opacity hover:opacity-80 text-white">
+        {/* ĐÂY LÀ PHẦN QUAN TRỌNG: Hiển thị thủ công để giữ màu trắng */}
+        <div className="flex items-center gap-1 text-[12px]">
+          <span className="opacity-80">{current?.symbol}</span>
+          <span className="font-bold">{current?.code}</span>
+          <span className="opacity-50">-</span>
+          <span className="opacity-80 whitespace-nowrap">{current?.name}</span>
+        </div>
+        
+        {/* SelectValue để trống để nó không ghi đè màu đen lên */}
+        <div className="hidden">
+           <SelectValue placeholder="VND" />
+        </div>
       </SelectTrigger>
 
-      <SelectContent>
+      <SelectContent className="min-w-[220px] bg-white border-gray-100 shadow-lg rounded-lg">
         <SelectGroup>
-          <SelectLabel>Currencies</SelectLabel>
+          <SelectLabel className="text-gray-400 font-normal text-xs px-3 py-2">
+            Currencies
+          </SelectLabel>
           {currencies.map((c) => (
-            <SelectItem key={c.code} value={c.code}>
-              {c.code} - {c.name}
+            <SelectItem
+              key={c.code}
+              value={c.code}
+              className="cursor-pointer hover:bg-gray-50 focus:bg-gray-50 py-2.5 px-3 transition-colors"
+            >
+              <div className="flex items-center gap-3 text-[14px]">
+                <span className="text-gray-600 w-4 text-center">{c.symbol}</span>
+                <div className="flex items-center gap-1.5">
+                  <span className="font-semibold text-gray-900">{c.code}</span>
+                  <span className="text-gray-400 font-normal">-</span>
+                  <span className="text-gray-600 font-normal">{c.name}</span>
+                </div>
+              </div>
             </SelectItem>
           ))}
         </SelectGroup>

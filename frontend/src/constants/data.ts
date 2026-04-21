@@ -3,9 +3,9 @@ import { Product } from "@/types_enum/devices";
 import { Booking, BookingStatus, ExperienceSession, SessionStatus } from "@/types_enum/booking";
 
 const topHelpCenter = [
-  { title: "Help Center", href: "/help" },
-  { title: "Wishlist", href: "/client/user/wishlist" },
-  { title: "Order Tracking", href: "/client/user/orders" },
+  { title: "Trung tâm trợ giúp", href: "/help" },
+  { title: "Danh sách yêu thích", href: "/client/user/wishlist" },
+  { title: "Theo dõi đơn hàng", href: "/client/user/orders" },
 ];
 
 const footerTopData = [

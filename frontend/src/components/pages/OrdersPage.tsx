@@ -33,6 +33,10 @@ import {
   CreditCard,
   RefreshCw,
   Calendar,
+  Clock,
+  ArrowRight,
+  ShoppingBag,
+  Sparkles,
 } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
@@ -56,7 +60,6 @@ const OrdersPageContent = () => {
   const success = searchParams.get("success");
   const orderId = searchParams.get("orderId");
 
-  // Verify authentication on component mount
   useEffect(() => {
     const checkAuth = async () => {
       setAuthLoading(true);
@@ -92,34 +95,29 @@ const OrdersPageContent = () => {
       toast.success(
         "Payment completed successfully! Your order has been placed."
       );
-      // Remove the success params from URL
       const newSearchParams = new URLSearchParams(searchParams);
       newSearchParams.delete("success");
       newSearchParams.delete("orderId");
-      router.replace(`/user/orders?${newSearchParams.toString()}`);
+      router.replace(`/client/user/orders?${newSearchParams.toString()}`);
 
-      // Refresh orders to get the latest status
       setTimeout(() => {
         fetchOrders();
-      }, 1000); // Wait a second for the webhook to process
+      }, 1000);
     }
   }, [success, searchParams, router, fetchOrders]);
 
   useEffect(() => {
-    // Only fetch orders after auth check is complete
     if (!authLoading) {
       fetchOrders();
     }
   }, [fetchOrders, authLoading]);
 
-  // Auto-refresh orders with pending status
   useEffect(() => {
     if (orders.length === 0) return;
 
     const hasPendingOrders = orders.some((order) => order.status === "PENDING_PAYMENT");
     if (!hasPendingOrders) return;
 
-    // Show a one-time notification about pending orders
     const notificationShown = sessionStorage.getItem(
       "pendingOrderNotification"
     );
@@ -133,7 +131,6 @@ const OrdersPageContent = () => {
       sessionStorage.setItem("pendingOrderNotification", "true");
     }
 
-    // Check for updates every 30 seconds if there are pending orders
     const interval = setInterval(() => {
       console.log(
         "Auto-refreshing orders to check for payment status updates..."
@@ -166,32 +163,43 @@ const OrdersPageContent = () => {
   };
 
   const handlePayNow = (order: Order) => {
-    // Navigate to checkout with the order information
     router.push(`/client/user/checkout?orderId=${order._id}`);
   };
 
   const getStatusColor = (status: string) => {
     switch (status) {
+      case "PENDING_PAYMENT":
+        return "bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 border-amber-300/60";
       case "pending":
-        return "bg-yellow-100 text-yellow-800 border-yellow-200";
+        return "bg-gradient-to-r from-amber-50 to-orange-50 text-amber-700 border-amber-300/60";
+      case "PAID":
+        return "bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 border-blue-300/60";
       case "paid":
-        return "bg-blue-100 text-blue-800 border-blue-200";
+        return "bg-gradient-to-r from-blue-50 to-cyan-50 text-blue-700 border-blue-300/60";
+      case "COMPLETED":
+        return "bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 border-emerald-300/60";
       case "completed":
-        return "bg-green-100 text-green-800 border-green-200";
+        return "bg-gradient-to-r from-emerald-50 to-teal-50 text-emerald-700 border-emerald-300/60";
+      case "CANCELLED":
+        return "bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border-red-300/60";
       case "cancelled":
-        return "bg-red-100 text-red-800 border-red-200";
+        return "bg-gradient-to-r from-red-50 to-rose-50 text-red-700 border-red-300/60";
       default:
-        return "bg-gray-100 text-gray-800 border-gray-200";
+        return "bg-gradient-to-r from-gray-50 to-slate-50 text-gray-700 border-gray-300/60";
     }
   };
 
   const getPaymentStatusIcon = (status: string) => {
     switch (status) {
+      case "PAID":
       case "paid":
+      case "COMPLETED":
       case "completed":
-        return <CheckCircle className="w-4 h-4 text-green-500" />;
+        return <CheckCircle className="w-4 h-4 text-emerald-500" />;
+      case "PENDING_PAYMENT":
       case "pending":
-        return <CreditCard className="w-4 h-4 text-yellow-500" />;
+        return <Clock className="w-4 h-4 text-amber-500" />;
+      case "CANCELLED":
       case "cancelled":
         return <CreditCard className="w-4 h-4 text-red-500" />;
       default:
@@ -201,12 +209,16 @@ const OrdersPageContent = () => {
 
   const getPaymentStatusText = (status: string) => {
     switch (status) {
+      case "PAID":
       case "paid":
         return "Paid";
+      case "COMPLETED":
       case "completed":
         return "Completed";
+      case "PENDING_PAYMENT":
       case "pending":
         return "Pending";
+      case "CANCELLED":
       case "cancelled":
         return "Cancelled";
       default:
@@ -239,54 +251,64 @@ const OrdersPageContent = () => {
         />
 
         <div className="max-w-2xl mx-auto">
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-center">
-            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
-              <CheckCircle className="w-12 h-12 text-green-600" />
-            </div>
+          <div className="relative overflow-hidden bg-gradient-to-br from-emerald-50 via-teal-50 to-cyan-50 rounded-3xl border-2 border-emerald-200/60 shadow-xl p-8 sm:p-12 text-center">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-emerald-200/30 to-cyan-200/30 rounded-full blur-3xl"></div>
+            <div className="absolute bottom-0 left-0 w-48 h-48 bg-gradient-to-tr from-teal-200/30 to-blue-200/30 rounded-full blur-3xl"></div>
 
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">
-              Order Placed Successfully!
-            </h1>
+            <div className="relative z-10">
+              <div className="w-24 h-24 bg-gradient-to-br from-emerald-400 to-teal-500 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg">
+                <CheckCircle className="w-14 h-14 text-white" />
+              </div>
 
-            <p className="text-gray-600 mb-6 text-lg">
-              Thank you for your purchase. Your order has been received and is
-              being processed.
-            </p>
+              <div className="flex items-center justify-center gap-2 mb-4">
+                <Sparkles className="w-6 h-6 text-emerald-600" />
+                <h1 className="text-3xl sm:text-4xl font-bold bg-gradient-to-r from-emerald-700 to-teal-700 bg-clip-text text-transparent">
+                  Order Placed Successfully!
+                </h1>
+                <Sparkles className="w-6 h-6 text-emerald-600" />
+              </div>
 
-            <div className="bg-gray-50 rounded-lg p-4 mb-6">
-              <p className="text-sm text-gray-600 mb-1">Order ID</p>
-              <p className="font-mono text-lg font-semibold text-gray-900">
-                {orderId}
-              </p>
-            </div>
-
-            <div className="space-y-4">
-              <p className="text-gray-600">
-                You will receive an email confirmation shortly with your order
-                details and tracking information.
+              <p className="text-gray-700 mb-8 text-base sm:text-lg max-w-md mx-auto">
+                Thank you for your purchase. Your order has been received and is
+                being processed.
               </p>
 
-              <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                <Link href="/shop">
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    className="w-full sm:w-auto"
-                  >
-                    <Package className="w-4 h-4 mr-2" />
-                    Continue Shopping
-                  </Button>
-                </Link>
+              <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-emerald-200/50 shadow-md">
+                <p className="text-sm text-gray-600 mb-2 font-medium">Order ID</p>
+                <p className="font-mono text-lg sm:text-xl font-bold text-gray-900 break-all">
+                  {orderId}
+                </p>
+              </div>
 
-                <Link href="/">
-                  <Button
-                    size="lg"
-                    className="w-full sm:w-auto bg-black hover:bg-gray-800"
-                  >
-                    <Home className="w-4 h-4 mr-2" />
-                    Go to Homepage
-                  </Button>
-                </Link>
+              <div className="space-y-4">
+                <p className="text-gray-700 text-sm sm:text-base">
+                  You will receive an email confirmation shortly with your order
+                  details and tracking information.
+                </p>
+
+                <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
+                  <Link href="/shop" className="w-full sm:w-auto">
+                    <Button
+                      variant="outline"
+                      size="lg"
+                      className="w-full group hover:bg-emerald-50 hover:border-emerald-300 transition-all"
+                    >
+                      <ShoppingBag className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
+                      Continue Shopping
+                    </Button>
+                  </Link>
+
+                  <Link href="/" className="w-full sm:w-auto">
+                    <Button
+                      size="lg"
+                      className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg group"
+                    >
+                      <Home className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
+                      Go to Homepage
+                      <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+                    </Button>
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
@@ -318,19 +340,26 @@ const OrdersPageContent = () => {
         />
 
         <div className="max-w-2xl mx-auto">
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8 text-center">
-            <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
-              Please Sign In
-            </h2>
-            <p className="text-gray-600 mb-6">
-              You need to sign in to view your orders.
-            </p>
-            <Link href="/auth/signin">
-              <Button size="lg" className="bg-black hover:bg-gray-800">
-                Sign In
-              </Button>
-            </Link>
+          <div className="relative overflow-hidden bg-gradient-to-br from-sky-50 via-blue-50 to-indigo-50 rounded-3xl border-2 border-sky-200/60 shadow-xl p-12 text-center">
+            <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-sky-200/30 to-blue-200/30 rounded-full blur-3xl"></div>
+
+            <div className="relative z-10">
+              <div className="w-20 h-20 bg-gradient-to-br from-sky-100 to-blue-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <Package className="w-10 h-10 text-sky-600" />
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-3">
+                Please Sign In
+              </h2>
+              <p className="text-gray-600 mb-8 max-w-sm mx-auto">
+                You need to sign in to view your orders and track your purchases.
+              </p>
+              <Link href="/auth/signin">
+                <Button size="lg" className="bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 shadow-lg">
+                  Sign In to Continue
+                  <ArrowRight className="w-4 h-4 ml-2" />
+                </Button>
+              </Link>
+            </div>
           </div>
         </div>
       </Container>
@@ -347,17 +376,20 @@ const OrdersPageContent = () => {
 
       <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">
             My Orders
           </h1>
-          <p className="text-gray-600">View and manage your order history</p>
+          <p className="text-gray-600 flex items-center gap-2">
+            <Package className="w-4 h-4" />
+            View and manage your order history
+          </p>
         </div>
         <Button
           onClick={fetchOrders}
           variant="outline"
           size="sm"
           disabled={loading}
-          className="self-start sm:self-auto"
+          className="self-start sm:self-auto hover:bg-sky-50 hover:border-sky-300 transition-all"
         >
           <RefreshCw
             className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`}
@@ -369,18 +401,24 @@ const OrdersPageContent = () => {
       {loading ? (
         <OrderTableSkeleton />
       ) : orders.length === 0 ? (
-        <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-8">
-          <div className="text-center py-12">
-            <Package className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-            <h2 className="text-xl font-semibold text-gray-900 mb-2">
+        <div className="relative overflow-hidden bg-gradient-to-br from-purple-50 via-pink-50 to-rose-50 rounded-3xl border-2 border-purple-200/60 shadow-xl p-12">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-gradient-to-br from-purple-200/30 to-pink-200/30 rounded-full blur-3xl"></div>
+
+          <div className="relative z-10 text-center">
+            <div className="w-24 h-24 bg-gradient-to-br from-purple-100 to-pink-100 rounded-full flex items-center justify-center mx-auto mb-6">
+              <ShoppingBag className="w-12 h-12 text-purple-600" />
+            </div>
+            <h2 className="text-2xl font-bold text-gray-900 mb-3">
               No Orders Yet
             </h2>
-            <p className="text-gray-600 mb-6">
-              You haven&apos;t placed any orders yet.
+            <p className="text-gray-600 mb-8 max-w-md mx-auto">
+              You haven&apos;t placed any orders yet. Start shopping to see your orders here!
             </p>
             <Link href="/shop">
-              <Button size="lg" className="bg-black hover:bg-gray-800">
+              <Button size="lg" className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 shadow-lg group">
+                <ShoppingBag className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
                 Start Shopping
+                <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
           </div>
@@ -388,63 +426,65 @@ const OrdersPageContent = () => {
       ) : (
         <>
           {/* Desktop Table View */}
-          <div className="hidden md:block bg-white rounded-lg border border-gray-200 overflow-hidden">
+          <div className="hidden md:block bg-white/80 backdrop-blur-sm rounded-2xl border-2 border-gray-200/60 overflow-hidden shadow-lg">
             <Table>
               <TableHeader>
-                <TableRow className="bg-gray-50">
-                  <TableHead className="font-semibold">Order ID</TableHead>
-                  <TableHead className="font-semibold">Date</TableHead>
-                  <TableHead className="font-semibold">Items</TableHead>
-                  <TableHead className="font-semibold">Total</TableHead>
-                  <TableHead className="font-semibold">Status</TableHead>
-                  <TableHead className="font-semibold">Payment</TableHead>
-                  <TableHead className="font-semibold">Actions</TableHead>
+                <TableRow className="bg-gradient-to-r from-gray-50 to-slate-50 border-b-2 border-gray-200/80 hover:bg-gradient-to-r">
+                  <TableHead className="font-bold text-gray-700">Order ID</TableHead>
+                  <TableHead className="font-bold text-gray-700">Date</TableHead>
+                  <TableHead className="font-bold text-gray-700">Items</TableHead>
+                  <TableHead className="font-bold text-gray-700">Total</TableHead>
+                  <TableHead className="font-bold text-gray-700">Status</TableHead>
+                  <TableHead className="font-bold text-gray-700">Payment</TableHead>
+                  <TableHead className="font-bold text-gray-700">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {orders.map((order) => (
-                  <TableRow key={order._id} className="hover:bg-gray-50">
-                    <TableCell className="font-mono text-sm">
-                      {order._id.slice(-8)}
+                  <TableRow key={order._id} className="hover:bg-gradient-to-r hover:from-sky-50/50 hover:to-blue-50/50 transition-all border-b border-gray-100">
+                    <TableCell className="font-mono text-sm font-semibold text-gray-700">
+                      #{order._id.slice(-8)}
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-2 text-sm">
-                        <Calendar className="w-4 h-4 text-gray-400" />
+                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Calendar className="w-4 h-4 text-sky-500" />
                         {formatDate(order.createdAt)}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm text-gray-600">
-                        {order.items.length} item
-                        {order.items.length > 1 ? "s" : ""}
-                      </span>
+                      <div className="flex items-center gap-2">
+                        <Package className="w-4 h-4 text-purple-500" />
+                        <span className="text-sm font-medium text-gray-700">
+                          {order.items.length} item{order.items.length > 1 ? "s" : ""}
+                        </span>
+                      </div>
                     </TableCell>
-                    <TableCell className="font-semibold">
+                    <TableCell className="font-bold text-emerald-600">
                       {formatPrice(order.total)}
                     </TableCell>
                     <TableCell>
                       <Badge
                         variant="outline"
-                        className={`${getStatusColor(order.status)} capitalize`}
+                        className={`${getStatusColor(order.status)} capitalize font-semibold shadow-sm`}
                       >
-                        {order.status}
+                        {order.status.replace("_", " ")}
                       </Badge>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         {getPaymentStatusIcon(order.status)}
-                        <span className="text-sm text-gray-600">
+                        <span className="text-sm font-medium text-gray-600">
                           {getPaymentStatusText(order.status)}
                         </span>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Link href={`/user/orders/${order?._id}`}>
+                        <Link href={`/client/user/orders/${order?._id}`}>
                           <Button
                             variant="outline"
                             size="sm"
-                            // onClick={() => handleViewDetails(order)}
+                            className="hover:bg-sky-50 hover:border-sky-300 transition-all"
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
@@ -455,7 +495,7 @@ const OrdersPageContent = () => {
                             <Button
                               size="sm"
                               onClick={() => handlePayNow(order)}
-                              className="bg-green-600 hover:bg-green-700"
+                              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-md"
                             >
                               <CreditCard className="w-4 h-4 mr-1" />
                               Pay Now
@@ -467,25 +507,26 @@ const OrdersPageContent = () => {
                                   variant="destructive"
                                   size="sm"
                                   disabled={deletingOrder === order._id}
+                                  className="hover:bg-red-600 shadow-md"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
                               </AlertDialogTrigger>
-                              <AlertDialogContent>
+                              <AlertDialogContent className="rounded-2xl">
                                 <AlertDialogHeader>
-                                  <AlertDialogTitle>
+                                  <AlertDialogTitle className="text-xl">
                                     Delete Order
                                   </AlertDialogTitle>
-                                  <AlertDialogDescription>
+                                  <AlertDialogDescription className="text-base">
                                     Are you sure you want to delete this order?
                                     This action cannot be undone.
                                   </AlertDialogDescription>
                                 </AlertDialogHeader>
                                 <AlertDialogFooter>
-                                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                  <AlertDialogCancel className="rounded-lg">Cancel</AlertDialogCancel>
                                   <AlertDialogAction
                                     onClick={() => handleDeleteOrder(order._id)}
-                                    className="bg-red-600 hover:bg-red-700"
+                                    className="bg-red-600 hover:bg-red-700 rounded-lg"
                                   >
                                     Delete
                                   </AlertDialogAction>
@@ -507,53 +548,55 @@ const OrdersPageContent = () => {
             {orders.map((order) => (
               <div
                 key={order._id}
-                className="bg-white rounded-lg border border-gray-200 p-4 shadow-sm"
+                className="bg-white/90 backdrop-blur-sm rounded-2xl border-2 border-gray-200/60 p-5 shadow-lg hover:shadow-xl transition-all"
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="space-y-1">
+                <div className="flex items-start justify-between mb-4">
+                  <div className="space-y-2">
                     <div className="flex items-center gap-2">
-                      <span className="text-xs text-gray-500">Order</span>
-                      <span className="font-mono text-sm font-medium">
+                      <span className="text-xs font-semibold text-gray-500 uppercase">Order</span>
+                      <span className="font-mono text-sm font-bold text-gray-800">
                         #{order._id.slice(-8)}
                       </span>
                     </div>
                     <div className="flex items-center gap-2 text-sm text-gray-600">
-                      <Calendar className="w-4 h-4" />
+                      <Calendar className="w-4 h-4 text-sky-500" />
                       {formatDate(order.createdAt)}
                     </div>
                   </div>
                   <div className="flex flex-col items-end space-y-2">
                     <Badge
                       variant="outline"
-                      className={`${getStatusColor(order.status)} capitalize`}
+                      className={`${getStatusColor(order.status)} capitalize font-semibold shadow-sm`}
                     >
-                      {order.status}
+                      {order.status.replace("_", " ")}
                     </Badge>
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1.5">
                       {getPaymentStatusIcon(order.status)}
-                      <span className="text-xs text-gray-500">
+                      <span className="text-xs font-medium text-gray-500">
                         {getPaymentStatusText(order.status)}
                       </span>
                     </div>
                   </div>
                 </div>
 
-                <div className="flex items-center justify-between mb-4">
-                  <div className="text-sm text-gray-600">
-                    {order.items.length} item{order.items.length > 1 ? "s" : ""}
+                <div className="flex items-center justify-between mb-5 p-3 bg-gradient-to-r from-gray-50 to-slate-50 rounded-xl">
+                  <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Package className="w-4 h-4 text-purple-500" />
+                    <span className="font-medium">
+                      {order.items.length} item{order.items.length > 1 ? "s" : ""}
+                    </span>
                   </div>
-                  <div className="text-lg font-semibold">
+                  <div className="text-lg font-bold text-emerald-600">
                     {formatPrice(order.total)}
                   </div>
                 </div>
 
                 <div className="flex flex-wrap gap-2">
-                  <Link href={`/user/orders/${order?._id}`} className="w-full">
+                  <Link href={`/client/user/orders/${order?._id}`} className="flex-1 min-w-[120px]">
                     <Button
                       variant="outline"
                       size="sm"
-                      // onClick={() => handleViewDetails(order)}
-                      className="w-full"
+                      className="w-full hover:bg-sky-50 hover:border-sky-300 transition-all"
                     >
                       <Eye className="w-4 h-4 mr-2" />
                       Details
@@ -565,7 +608,7 @@ const OrdersPageContent = () => {
                       <Button
                         size="sm"
                         onClick={() => handlePayNow(order)}
-                        className="bg-green-600 hover:bg-green-700 flex-1 min-w-0"
+                        className="flex-1 min-w-[120px] bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-md"
                       >
                         <CreditCard className="w-4 h-4 mr-2" />
                         Pay Now
@@ -577,26 +620,26 @@ const OrdersPageContent = () => {
                             variant="destructive"
                             size="sm"
                             disabled={deletingOrder === order._id}
-                            className="px-3"
+                            className="px-4 hover:bg-red-600 shadow-md"
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </AlertDialogTrigger>
-                        <AlertDialogContent className="mx-4">
+                        <AlertDialogContent className="mx-4 rounded-2xl">
                           <AlertDialogHeader>
-                            <AlertDialogTitle>Delete Order</AlertDialogTitle>
-                            <AlertDialogDescription>
+                            <AlertDialogTitle className="text-xl">Delete Order</AlertDialogTitle>
+                            <AlertDialogDescription className="text-base">
                               Are you sure you want to delete this order? This
                               action cannot be undone.
                             </AlertDialogDescription>
                           </AlertDialogHeader>
                           <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-                            <AlertDialogCancel className="w-full sm:w-auto">
+                            <AlertDialogCancel className="w-full sm:w-auto rounded-lg">
                               Cancel
                             </AlertDialogCancel>
                             <AlertDialogAction
                               onClick={() => handleDeleteOrder(order._id)}
-                              className="bg-red-600 hover:bg-red-700 w-full sm:w-auto"
+                              className="bg-red-600 hover:bg-red-700 w-full sm:w-auto rounded-lg"
                             >
                               Delete
                             </AlertDialogAction>

@@ -58,7 +58,7 @@ const SuccessPageClient = () => {
     }
 
     if (!orderId) {
-      router.push("/user/orders");
+      router.push("/client/user/orders");
       return;
     }
 
@@ -119,7 +119,7 @@ const SuccessPageClient = () => {
             } catch (error) {
               console.error("Success: Error in payment status update:", error);
             }
-          } else if (orderData.status === "paid" && sessionId) {
+          } else if (orderData.status === "PAID" && sessionId) {
             // Order is already paid, probably updated by webhook
             console.log("Success: Order already marked as paid");
             toast.success("Payment confirmed!");
@@ -152,7 +152,7 @@ const SuccessPageClient = () => {
 
   // Periodically check if order status needs updating (fallback mechanism)
   useEffect(() => {
-    if (!order || !sessionId || statusUpdated || order.status !== "pending") {
+    if (!order || !sessionId || statusUpdated || order.status !== "PENDING_PAYMENT") {
       return;
     }
 
@@ -283,7 +283,7 @@ const SuccessPageClient = () => {
                     <span className="font-medium">Payment Status</span>
                   </div>
                   <div className="flex items-center justify-center gap-2">
-                    {order.status === "paid" ? (
+                    {order.status === "PAID" ? (
                       <>
                         <CheckCircle className="w-5 h-5 text-green-500" />
                         <span className="font-semibold text-green-600">
@@ -317,7 +317,7 @@ const SuccessPageClient = () => {
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in delay-300">
-            <Link href="/user/orders">
+            <Link href="/client/user/orders">
               <Button
                 size="lg"
                 className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-3 rounded-full shadow-lg transition-all transform hover:scale-105"

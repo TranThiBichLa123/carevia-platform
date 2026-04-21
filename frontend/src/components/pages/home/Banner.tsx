@@ -57,7 +57,7 @@ const Banner = async () => {
         />
         <div className="absolute top-0 left-0 w-full h-full flex flex-col gap-3 items-center justify-center">
           <p className="text-amber-400 font-semibold text-sm italic">{imageOne?.name}</p>
-          <h2 className="text-3xl md:text-4xl font-medium max-w-md text-center capitalize text-gray-900">
+          <h2 className="text-3xl md:text-4xl font-medium max-w-md text-center capitalize text-white">
             {imageOne?.title}
           </h2>
           <Link

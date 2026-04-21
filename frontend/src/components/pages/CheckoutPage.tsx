@@ -10,7 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import PriceFormatter from "@/components/common/PriceFormatter";
 import { CreditCard, Lock, CheckCircle, AlertCircle } from "lucide-react";
 import Image from "next/image";
-import { getOrderById, type Order, createOrderFromCart } from "@/lib/orderApi";
+import { getOrderById, type Order, createOrderFromCart, OrderStatus, PaymentStatus } from "@/lib/orderApi";
 import {
   createCheckoutSession,
   redirectToCheckout,
@@ -122,28 +122,63 @@ const CheckoutPageContent = () => {
           // Create a temporary order object for display
           const tempOrder: Order = {
             _id: "temp",
-            userId: authUser._id,
-            items: cartItemsWithQuantities.map((item) => ({
-              productId: getProductId(item.product),
-              name: item.product.name,
-              price: item.product.price,
-              quantity: item.quantity,
-              image: item.product.image,
-            })),
-            total: cartItemsWithQuantities.reduce(
-              (total, item) => total + item.product.price * item.quantity,
-              0
-            ),
-            status: "pending",
-            shippingAddress: {
-              street: "",
-              city: "",
-              country: "",
-              postalCode: "",
-            },
+            id: 0,
+            orderCode: `TEMP-${Date.now()}`,
+            accountId: 0,
+            userId: Number(authUser._id),
+
+            items: cartItemsWithQuantities.map((item) => {
+              const price = item.product.price;
+              const quantity = item.quantity;
+              const rawId = getProductId(item.product); // Giả sử hàm này trả về string
+
+              return {
+                id: 0,
+                // DeviceId yêu cầu number
+                deviceId: Number(rawId),
+                deviceName: item.product.name,
+                deviceImage: item.product.image,
+
+                // ProductId yêu cầu string (Lỗi của bạn nằm ở đây)
+                productId: String(rawId),
+                name: item.product.name,
+                image: item.product.image,
+
+                // Pricing fields
+                price: price,
+                unitPrice: price,
+                quantity: quantity,
+                subtotal: price * quantity,
+              };
+            }),
+
+            // Flat address fields
+            shippingAddress: "",
+            shippingCity: "",
+            shippingCountry: "",
+            shippingPostalCode: "",
+
+            // Totals
+            subtotal: cartItemsWithQuantities.reduce((sum, item) => sum + (item.product.price * item.quantity), 0),
+            total: cartItemsWithQuantities.reduce((sum, item) => sum + (item.product.price * item.quantity), 0),
+            totalAmount: cartItemsWithQuantities.reduce((sum, item) => sum + (item.product.price * item.quantity), 0),
+
+            discountAmount: 0,
+            shippingFee: 0,
+            taxAmount: 0,
+
+            status: "PENDING_PAYMENT" as OrderStatus,
+            paymentStatus: "PENDING" as PaymentStatus,
+            paymentMethod: "STRIPE",
+            paymentTransactionId: "",
+            voucherCode: "",
+            customerNote: "",
             createdAt: new Date().toISOString(),
             updatedAt: new Date().toISOString(),
           };
+
+
+
           setOrder(tempOrder);
         }
       } catch (error) {

@@ -122,30 +122,36 @@ const authHeaders = () => {
   return token ? { Authorization: `Bearer ${token}` } : {};
 };
 
-const normalizeOrder = (o: RawOrder): Order => ({
+const normalizeOrder = (o: any): Order => ({
   ...o,
-  _id: String(o.id),
-  userId: Number(o.accountId),
+  id: Number(o.id) || 0,
+  orderCode: o.orderCode || "",
+  _id: String(o.id || ""),
+  userId: Number(o.accountId || 0),
   total: o.totalAmount || 0,
-  // Đảm bảo status luôn đúng định dạng (vì DB của bạn lưu CHỮ HOA)
+  
+  // Ép kiểu các Enum/String
   status: o.status as OrderStatus,
   paymentStatus: o.paymentStatus as PaymentStatus,
   
-  // Ánh xạ các trường từ DB vào các biến mà UI đang gọi để hết lỗi đỏ
-  paymentIntentId: o.paymentTransactionId, // UI gọi paymentIntentId -> trả về Transaction ID
-  stripeSessionId: o.paymentTransactionId, // Dự phòng cho UI
-  paidAt: o.status === 'PAID' || o.paymentStatus === 'SUCCESS' ? o.updatedAt : undefined,
-
+  // Ánh xạ các trường từ DB
+  paymentIntentId: o.paymentTransactionId,
+  stripeSessionId: o.paymentTransactionId,
+  
+  paidAt: (o.status === 'PAID' || o.paymentStatus === 'SUCCESS') ? o.updatedAt : undefined,
+  
   createdAt: o.createdAt || new Date().toISOString(),
   updatedAt: o.updatedAt || o.createdAt || new Date().toISOString(),
-  items: (o.items || []).map((item) => ({
+  
+  items: (o.items || []).map((item: any) => ({
     ...item,
     productId: String(item.deviceId || ""),
     name: item.deviceName || "",
     price: item.unitPrice || 0,
     image: item.deviceImage || ""
   })),
-});
+} as Order); // <-- THÊM DÒNG NÀY ĐỂ XÓA LỖI ĐỎ
+
 
 
 
