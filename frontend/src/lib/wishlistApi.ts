@@ -45,17 +45,22 @@ export const addToWishlist = async (
 export const removeFromWishlist = async (
   productId: string,
   _token: string
-): Promise<WishlistResponse> => {
+): Promise<any> => { // Đổi sang Promise<any> hoặc một interface Success đơn giản
   try {
-    await apiClient.delete(`/wishlist/${productId}`, {
-      headers: { Authorization: `Bearer ${_token}` } // Gửi trực tiếp ở đây
+    // 1. Chỉ thực hiện lệnh xóa
+    const response = await apiClient.delete(`/wishlist/${productId}`, {
+      headers: { Authorization: `Bearer ${_token}` },
     });
-    const updated = await getUserWishlist(_token);
-    return updated;
+
+    // 2. Trả về data từ response (thường chứa message success)
+    return response.data;
+
+    // KHÔNG gọi lại getUserWishlist ở đây để tiết kiệm tài nguyên và thời gian
   } catch (error: any) {
-    throw new Error(error?.response?.data?.message || "Failed to remove from wishlist");
+    throw new Error(error?.response?.data?.message || "Không thể xóa sản phẩm");
   }
 };
+
 export const getWishlistProducts = async (
   _productIds: string[],
   _token: string

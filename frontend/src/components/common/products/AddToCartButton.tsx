@@ -22,7 +22,7 @@ const AddToCartButton = ({ product, className }: Props) => {
  const handleAddToCart = async (e: React.MouseEvent) => {
   e.preventDefault();
   if (!isAuthenticated) {
-    toast.error("Please sign in to add items to your cart");
+    toast.error("Vui lòng đăng nhập để thêm sản phẩm vào giỏ hàng");
     router.push("/auth/signin");
     return;
   }
@@ -37,9 +37,9 @@ const AddToCartButton = ({ product, className }: Props) => {
       await syncCartFromServer(); 
     }
 
-    toast.success("Added to cart successfully!");
+    toast.success("Thêm vào giỏ hàng thành công!");
   } catch (error) {
-    toast.error("Failed to add to cart");
+    toast.error("Thêm vào giỏ hàng thất bại");
   } finally {
     setLocalLoading(false);
   }
@@ -50,17 +50,17 @@ const AddToCartButton = ({ product, className }: Props) => {
       onClick={handleAddToCart}
       variant="outline"
       disabled={localLoading} // Only use localLoading
-      className={cn("rounded-full px-6 mt-1", className)}
+      className={cn("rounded-lg px-4 mt-1 font-vietnam hover:bg-primary-light hover:text-primary transition-colors", className)}
     >
       {localLoading ? (
         <>
           <Loader2 className="w-4 h-4 animate-spin mr-2" />
-          Adding...
+          Đang thêm...
         </>
       ) : (
         <>
-          <ShoppingCart className="w-4 h-4 mr-2" />
-          Add to cart
+          <ShoppingCart className=" h-4" />
+          Thêm vào giỏ hàng
         </>
       )}
     </Button>

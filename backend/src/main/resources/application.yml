@@ -69,7 +69,7 @@ app:
   avatar:
     folder: ${APP_AVATAR_FOLDER:avatars}
     max-size-bytes: ${APP_AVATAR_MAX_SIZE:5242880} # 5MB
-    default-url: "${APP_DEFAULT_AVATAR_URL:https://ui-avatars.com}"
+    default-url: "${APP_DEFAULT_AVATAR_URL:https://cloudinary.com}"
   websocket:
     endpoint: "/ws-notification"
     topic: "/topic/messages"

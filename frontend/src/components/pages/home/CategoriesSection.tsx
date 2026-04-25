@@ -62,7 +62,7 @@ const CategoriesSection = () => {
     <div className="relative group h-full flex items-center">
       <a
         href={path || "#"}
-        className="flex items-center gap-1 px-4 h-full text-[13px] font-bold uppercase text-gray-800 hover:text-[#20afb2] transition-colors whitespace-nowrap"
+        className="flex items-center gap-1 px-4 h-full text-[13px]  font-vietnam font-bold uppercase text-gray-800 hover:text-primary transition-colors whitespace-nowrap"
       >
         {title}
         {items && <ChevronDown size={14} className="group-hover:rotate-180 transition-transform" />}
@@ -75,7 +75,7 @@ const CategoriesSection = () => {
             <a
               key={index}
               href={sub.path}
-              className="flex items-center gap-3 px-4 py-2.5 text-[14px] text-gray-600 hover:bg-[#f5fbfc] hover:text-[#20afb2] transition-colors"
+              className="flex items-center gap-3 px-4 py-2.5 text-[14px] text-gray-600 hover:bg-[#f5fbfc] hover:text-primary transition-colors"
             >
               {sub.emoji && <span>{sub.emoji}</span>}
               {sub.name}
@@ -88,9 +88,9 @@ const CategoriesSection = () => {
   return (
     <nav className="hidden md:flex items-center bg-white h-12 border-t border-gray-100">
       {/* 1. DANH MỤC SẢN PHẨM */}
-      <div className="flex items-center gap-2 px-4 py-3 cursor-pointer hover:text-[#20afb2] transition-colors border-r border-gray-100">
+      <div className="flex items-center gap-2 px-4 py-3 cursor-pointer hover:text-primary transition-colors border-r border-gray-100">
         <Menu size={18} />
-        <span className="text-[13px] font-semibold uppercase whitespace-nowrap">
+        <span className="text-[13px]  font-vietnam font-semibold uppercase whitespace-nowrap">
           Danh mục sản phẩm
         </span>
       </div>

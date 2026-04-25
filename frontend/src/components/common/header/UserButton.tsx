@@ -81,8 +81,8 @@ const UserButton = () => {
       >
         <User size={30} />
         <span>
-          <p className="text-xs font-medium">Welcome</p>
-          <p className="font-semibold text-sm">Sign in / Register</p>
+          <p className="text-xs font-medium font-vietnam">Welcome</p>
+          <p className="font-semibold text-sm font-vietnam">Sign in / Register</p>
         </span>
       </Link>
     );
@@ -93,9 +93,9 @@ const UserButton = () => {
       {/* Nút bấm trên Header */}
       <Link
         href="/client/account"
-        className="flex items-center gap-2 text-slate-700 hover:text-cyan-600 transition-colors duration-200"
+        className="flex items-center gap-2 text-slate-700 hover:text-primary-hover transition-colors duration-200"
       >
-        <span className="flex h-9 w-9 items-center justify-center rounded-full border border-cyan-500/50 p-0.5 transition-colors duration-200 group-hover:border-cyan-600">
+        <span className="flex h-9 w-9 items-center justify-center rounded-full border border-primary p-0.5 transition-colors duration-200 group-hover:border-primary-hover">
           {authUser.avatar_url ? (
             <img
               src={authUser.avatar_url}
@@ -103,14 +103,14 @@ const UserButton = () => {
               className="h-full w-full rounded-full object-cover"
             />
           ) : (
-            <div className="flex h-full w-full items-center justify-center rounded-full bg-cyan-50 text-[13px] font-semibold text-cyan-700">
+            <div className="flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-[13px] font-semibold text-primary font-vietnam">
               {avatarInitial}
             </div>
           )}
         </span>
         <span className="leading-tight">
-          <p className="text-xs font-medium text-slate-500">Welcome</p>
-          <p className="max-w-24 truncate text-sm font-semibold text-cyan-600">
+          <p className="text-xs font-medium text-slate-500 font-vietnam">Welcome</p>
+          <p className="max-w-24 truncate text-sm font-semibold text-primary font-vietnam">
             {displayName}
           </p>
         </span>
@@ -122,7 +122,7 @@ const UserButton = () => {
 
           {/* Header của Dropdown */}
           <div className="flex items-center gap-3 px-4 py-4 bg-slate-50/50">
-            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white shadow-sm ring-1 ring-cyan-100 p-0.5">
+            <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white shadow-sm ring-1 ring-primary/20 p-0.5">
               {authUser.avatar_url ? (
                 <img
                   src={authUser.avatar_url}
@@ -130,16 +130,16 @@ const UserButton = () => {
                   className="h-full w-full rounded-full object-cover"
                 />
               ) : (
-                <div className="flex h-full w-full items-center justify-center rounded-full bg-white text-base font-bold text-cyan-700">
+                <div className="flex h-full w-full items-center justify-center rounded-full bg-primary/10 text-base font-bold text-primary font-vietnam">
                   {avatarInitial}
                 </div>
               )}
             </span>
             <div className="min-w-0">
-              <p className="truncate text-[14px] font-bold text-slate-800">
+              <p className="truncate text-[14px] font-bold text-slate-800 font-vietnam">
                 {displayName}
               </p>
-              <p className="truncate text-[12px] text-slate-500">
+              <p className="truncate text-[12px] text-slate-500 font-vietnam">
                 {authUser.email}
               </p>
             </div>
@@ -155,10 +155,10 @@ const UserButton = () => {
                 <Link
                   key={item.label}
                   href={item.href}
-                  className="flex items-center gap-3 rounded-xl px-3 py-2 text-[13px] text-slate-600 transition-all duration-200 hover:bg-cyan-50 hover:text-cyan-700 group/item"
+                  className="flex items-center gap-3 rounded-xl px-3 py-2 text-[13px] text-slate-600 transition-all duration-200 hover:bg-cyan-50 hover:text-primary-hover group/item"
                 >
-                  <Icon className="h-4 w-4 shrink-0 text-slate-400 group-hover/item:text-cyan-600" />
-                  <span className="font-medium">{item.label}</span>
+                  <Icon className="h-4 w-4 shrink-0 text-slate-400 group-hover/item:text-primary-hover" />
+                  <span className="font-medium font-vietnam">{item.label}</span>
                 </Link>
               );
             })}
@@ -172,7 +172,7 @@ const UserButton = () => {
               className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-[13px] font-semibold text-red-500 transition-all duration-200 hover:bg-red-50"
             >
               <LogOut className="h-4 w-4 shrink-0" />
-              <span>Logout</span>
+              <span className="font-vietnam">Logout</span>
             </button>
           </div>
         </div>

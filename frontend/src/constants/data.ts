@@ -1,6 +1,7 @@
 import { footerTwo, footerFour, footerOne, footerThree } from "@/assets/image";
 import { Product } from "@/types_enum/devices";
 import { Booking, BookingStatus, ExperienceSession, SessionStatus } from "@/types_enum/booking";
+import { ShieldCheck, Tags, Truck, LifeBuoy } from "lucide-react";
 
 const topHelpCenter = [
   { title: "Trung tâm trợ giúp", href: "/help" },
@@ -8,28 +9,30 @@ const topHelpCenter = [
   { title: "Theo dõi đơn hàng", href: "/client/user/orders" },
 ];
 
+
 const footerTopData = [
   {
     title: "High Quality Selection",
-    subTitle: "Total product quality control for peace of mind",
-    image: footerOne,
+    subTitle: "Zero-defect quality control.",
+    icon: ShieldCheck, // Đổi từ image thành icon
   },
   {
     title: "Affordable Prices",
     subTitle: "Factory direct prices for maximum savings",
-    image: footerTwo,
+    icon: Tags,
   },
   {
     title: "Express Shipping",
     subTitle: "Fast, reliable delivery from global warehouse",
-    image: footerThree,
+    icon: Truck,
   },
   {
     title: "Worry free",
     subTitle: "Instant access to professional support",
-    image: footerFour,
+    icon: LifeBuoy,
   },
 ];
+
 
 export { topHelpCenter, footerTopData, mockProducts, mockSessions, mockBookings };
 

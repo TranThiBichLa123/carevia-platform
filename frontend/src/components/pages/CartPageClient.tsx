@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useCartStore, useUserStore } from "@/lib/store";
 import Container from "@/components/common/Container";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
-import { Button } from "@/components/ui/button";
+// import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
@@ -23,6 +23,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { cn } from "./OrdersPage";
+import { Button } from "../ui/button";
 
 type CartProduct = {
   id?: string;
@@ -141,7 +143,7 @@ const CartPageClient = () => {
   // Show loading screen
   if (isLoading) {
     return (
-      <Container className="py-8">
+      <Container className="py-5">
         {/* Breadcrumb Skeleton */}
         <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-4 mb-8">
           <div className="flex items-center justify-between">
@@ -287,25 +289,24 @@ const CartPageClient = () => {
 
   if (cartItemsWithQuantities.length === 0) {
     return (
-      <Container className="py-16">
+      <Container className="py-5">
         <div className="bg-babyshopWhite rounded-2xl border border-gray-100 shadow-sm p-8">
           <div className="flex flex-col items-center justify-center min-h-125 text-center">
             <div className="w-32 h-32 bg-gray-100 rounded-full flex items-center justify-center mb-8">
               <ShoppingCart className="w-16 h-16 text-gray-300" />
             </div>
             <h1 className="text-3xl font-bold text-gray-900 mb-4">
-              Your cart is currently empty.
+              Giỏ hàng của bạn đang trống.
             </h1>
             <p className="text-gray-500 text-lg mb-8 max-w-md">
-              You may check out all the available products and buy some in the
-              shop.
+              Bạn có thể xem tất cả các sản phẩm có sẵn và mua một số sản phẩm trong cửa hàng.
             </p>
             <Link href="/shop">
               <Button
                 size="lg"
                 className="bg-black hover:bg-gray-800 text-white px-8 py-3 rounded-full font-medium"
               >
-                Return to shop
+                Quay lại cửa hàng
               </Button>
             </Link>
 
@@ -316,10 +317,10 @@ const CartPageClient = () => {
                   <ShoppingCart className="w-8 h-8 text-blue-600" />
                 </div>
                 <h3 className="font-semibold text-sm text-gray-900 mb-2"> {/* Giảm xuống text-sm */}
-                  High Quality Selection
+                  Lựa chọn chất lượng cao
                 </h3>
                 <p className="text-[13px] text-gray-600"> {/* Giảm mô tả xuống 13px để phân cấp rõ rệt */}
-                  Total product quality control for peace of mind
+                  Kiểm soát chất lượng sản phẩm tổng thể để yên tâm
                 </p>
               </div>
 
@@ -329,10 +330,10 @@ const CartPageClient = () => {
                   <ArrowLeft className="w-8 h-8 text-green-600" />
                 </div>
                 <h3 className="font-semibold text-sm text-gray-900 mb-2"> {/* Thêm text-sm */}
-                  Affordable Prices
+                  Giá cả phải chăng
                 </h3>
                 <p className="text-[13px] text-gray-600">
-                  Factory direct prices for maximum savings
+                  Giá trực tiếp từ nhà máy để tiết kiệm tối đa
                 </p>
               </div>
 
@@ -342,10 +343,10 @@ const CartPageClient = () => {
                   <Plus className="w-8 h-8 text-purple-600" />
                 </div>
                 <h3 className="font-semibold text-sm text-gray-900 mb-2"> {/* Thêm text-sm */}
-                  Express Shipping
+                  Giao hàng nhanh
                 </h3>
                 <p className="text-[13px] text-gray-600">
-                  Fast, reliable delivery from global warehouse
+                  Giao hàng nhanh, đáng tin cậy từ kho hàng toàn cầu
                 </p>
               </div>
             </div>
@@ -357,23 +358,21 @@ const CartPageClient = () => {
   }
 
   return (
-    <Container className="py-8">
+    <Container className="py-5">
       {/* Breadcrumb */}
       <PageBreadcrumb
         items={[]}
-        currentPage="Cart"
+        currentPage="Giỏ hàng"
         showSocialShare={true}
         shareData={{
-          title: "My Shopping Cart",
-          text: `Check out my cart with ${cartItemsWithQuantities.length} item${cartItemsWithQuantities.length !== 1 ? "s" : ""
-            } from Babyshop`,
+          title: "Giỏ hàng của tôi",
+          text: `Xem giỏ hàng của tôi với ${cartItemsWithQuantities.length} sản phẩm${cartItemsWithQuantities.length !== 1 ? "s" : ""
+            } từ Carevia!`,
           url: typeof window !== "undefined" ? window.location.href : "",
         }}
       />
 
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Cart</h1>
-      </div>
+
 
       <div className="grid grid-cols-1 xl:grid-cols-4 gap-6 lg:gap-8">
         {/* Cart Items Section */}
@@ -382,16 +381,16 @@ const CartPageClient = () => {
             {/* Cart Table Header - Only visible on larger screens */}
             <div className="hidden lg:grid grid-cols-12 gap-4 py-4 border-b border-gray-200 mb-6">
               <div className="col-span-6 text-sm font-medium text-gray-900 uppercase tracking-wide">
-                Product
+                Sản phẩm
               </div>
               <div className="col-span-2 text-sm font-medium text-gray-900 uppercase tracking-wide text-center">
-                Price
+                Giá
               </div>
               <div className="col-span-2 text-sm font-medium text-gray-900 uppercase tracking-wide text-center">
-                Quantity
+                Số lượng
               </div>
               <div className="col-span-2 text-sm font-medium text-gray-900 uppercase tracking-wide text-center">
-                Subtotal
+                Tổng cộng
               </div>
             </div>
 
@@ -436,7 +435,7 @@ const CartPageClient = () => {
                         <div className="flex items-center justify-between mb-3">
                           <div>
                             <span className="text-xs text-gray-500 block">
-                              Price
+                              Giá
                             </span>
                             <PriceFormatter
                               amount={cartItem.product.price}
@@ -447,7 +446,7 @@ const CartPageClient = () => {
                           {/* Quantity Controls */}
                           <div className="flex items-center border border-gray-300 rounded-md overflow-hidden">
                             <Button
-                              variant="ghost"
+                              variant="destructive"
                               size="sm"
                               onClick={() =>
                                 handleQuantityChange(
@@ -463,7 +462,7 @@ const CartPageClient = () => {
                               {cartItem.quantity}
                             </div>
                             <Button
-                              variant="ghost"
+                              variant="destructive"
                               size="sm"
                               onClick={() => handleQuantityChange(
                                 getCartProductId(cartItem.product),
@@ -481,7 +480,7 @@ const CartPageClient = () => {
                         <div className="flex items-center justify-between">
                           <div>
                             <span className="text-xs text-gray-500 block">
-                              Subtotal
+                              Tổng cộng
                             </span>
                             <PriceFormatter
                               amount={
@@ -492,14 +491,14 @@ const CartPageClient = () => {
                           </div>
 
                           <Button
-                            variant="ghost"
+                            variant="clean"
                             size="sm"
                             onClick={() => handleRemoveItem(getCartProductId(cartItem.product) || `temp-key-${index}`)}
 
                             className="text-red-500 hover:text-red-600 hover:bg-red-50 px-2 py-1 h-auto text-xs"
                           >
                             <Trash2 className="w-3 h-3 mr-1" />
-                            Remove
+                            Xóa
                           </Button>
                         </div>
                       </div>
@@ -528,21 +527,21 @@ const CartPageClient = () => {
                       </Link>
                       <div className="flex-1 min-w-0">
                         <Link href={`/product/${cartItem.product.id}`}>
-                          <h3 className="font-medium text-gray-900 mb-1 line-clamp-2 hover:text-blue-600 transition-colors cursor-pointer">
+                          <h3 className="font-medium text-gray-900 mb-1 line-clamp-2 hover:text-primary transition-colors cursor-pointer">
                             {cartItem.product.name}
                           </h3>
                         </Link>
                         <div className="flex items-center gap-3">
                           <Button
-                            variant="ghost"
+                            variant="clean"
                             size="sm"
                             onClick={() =>
                               handleRemoveItem(cartItem.product.id)
                             }
-                            className="text-red-500 hover:text-red-600 hover:bg-red-50 p-0 h-auto text-xs"
+                            className="text-red-500  p-0 h-auto text-xs"
                           >
                             <Trash2 className="w-3 h-3 mr-1" />
-                            Remove
+                            Xóa
                           </Button>
                         </div>
                       </div>
@@ -606,38 +605,65 @@ const CartPageClient = () => {
 
             {/* Cart Actions */}
             <div className="flex flex-col sm:flex-row justify-between items-stretch sm:items-center gap-3 mt-8 pt-6 border-t border-gray-200">
-              <Link href="/shop" className="flex-1 sm:flex-initial">
+              <Link href="/client" className="flex-1 sm:flex-initial">
                 <Button
                   variant="outline"
                   size="lg"
-                  className="w-full sm:w-auto rounded-full px-8"
+                  className={cn(
+                    "group relative w-full sm:w-auto rounded-full px-5 py-6 overflow-hidden",
+                    "font-vietnam font-bold tracking-tight text-primary border-primary",
+                    "bg-white transition-all duration-500 active:scale-95 shadow-sm hover:shadow-lg hover:shadow-primary/30"
+                  )}
                 >
-                  <ArrowLeft className="w-4 h-4 mr-2" />
-                  Continue Shopping
+                  {/* Lớp nền trượt màu Primary */}
+                  <span className="absolute inset-y-0 left-0 w-0 bg-primary transition-all duration-500 ease-out group-hover:w-full" />
+
+                  {/* Nội dung bên trên lớp nền */}
+                  <div className="relative z-10 flex items-center justify-center transition-colors duration-500 group-hover:text-white">
+                    <ArrowLeft
+                      className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:-translate-x-2"
+                    />
+                    <span>Tiếp tục mua sắm</span>
+                  </div>
                 </Button>
               </Link>
+
               <Button
+                onClick={handleClearCart}
                 variant="outline"
                 size="lg"
-                onClick={handleClearCart}
-                className="w-full sm:w-auto rounded-full px-8 text-red-600 border-red-300 hover:bg-red-50 hover:border-red-400"
+                className={cn(
+                  "group relative w-full sm:w-auto rounded-full px-10 py-6 overflow-hidden",
+                  "font-vietnam font-bold tracking-tight text-red-600 border-red-200",
+                  "bg-white transition-all duration-500 active:scale-95 shadow-sm hover:shadow-lg hover:shadow-red-200"
+                )}
               >
-                Clear Cart
+                {/* Lớp nền trượt màu Đỏ (Danger) */}
+                <span className="absolute inset-y-0 left-0 w-0 bg-red-600 transition-all duration-500 ease-out group-hover:w-full" />
+
+                {/* Nội dung bên trên lớp nền */}
+                <div className="relative z-10 flex items-center justify-center transition-colors duration-500 group-hover:text-white">
+                  <Trash2
+                    className="w-4 h-4 mr-2 transition-transform duration-300 group-hover:scale-110 group-hover:rotate-12"
+                  />
+                  <span>Xóa giỏ hàng</span>
+                </div>
               </Button>
+
             </div>
           </div>
         </div>
 
-        {/* Cart Totals */}
+        {/* Tổng giỏ hàng */}
         <div className="xl:col-span-1">
           <div className="bg-babyshopWhite rounded-2xl p-6 sticky top-4 border border-gray-100 shadow-sm">
             <h2 className="text-xl font-bold text-gray-900 mb-6">
-              Cart totals
+              Tổng giỏ hàng
             </h2>
 
             <div className="space-y-4">
               <div className="flex justify-between items-center py-2">
-                <span className="text-gray-600">Subtotal</span>
+                <span className="text-gray-600">Tạm tính</span>
                 <PriceFormatter
                   amount={calculateSubtotal()}
                   className="text-base font-medium text-gray-900"
@@ -645,10 +671,10 @@ const CartPageClient = () => {
               </div>
 
               <div className="flex justify-between items-center py-2">
-                <span className="text-gray-600">Shipping</span>
+                <span className="text-gray-600">Vận chuyển</span>
                 <span className="text-base font-medium">
                   {calculateSubtotal() > 100 ? (
-                    <span className="text-green-600">Free shipping</span>
+                    <span className="text-green-600">Miễn phí vận chuyển</span>
                   ) : (
                     <PriceFormatter
                       amount={15}
@@ -659,7 +685,7 @@ const CartPageClient = () => {
               </div>
 
               <div className="flex justify-between items-center py-2">
-                <span className="text-gray-600">Tax</span>
+                <span className="text-gray-600">Thuế</span>
                 <PriceFormatter
                   amount={calculateSubtotal() * 0.08}
                   className="text-base font-medium text-gray-900"
@@ -669,7 +695,7 @@ const CartPageClient = () => {
               {calculateSubtotal() > 100 && (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-3">
                   <p className="text-green-700 text-sm font-medium">
-                    🎉 You qualify for free shipping!
+                    🎉 Bạn đủ điều kiện để được miễn phí vận chuyển!
                   </p>
                 </div>
               )}
@@ -677,7 +703,7 @@ const CartPageClient = () => {
               <Separator className="my-4" />
 
               <div className="flex justify-between items-center py-2">
-                <span className="text-lg font-bold text-gray-900">Total</span>
+                <span className="text-lg font-bold text-gray-900">Tổng cộng</span>
                 <PriceFormatter
                   amount={calculateTotal()}
                   className="text-xl font-bold text-gray-900"
@@ -694,16 +720,16 @@ const CartPageClient = () => {
               {isCheckingOut ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                  Creating Order...
+                  Đang tạo đơn hàng...
                 </>
               ) : (
-                "Proceed to checkout"
+                "Tiến hành thanh toán"
               )}
             </Button>
 
             <div className="mt-4 text-center">
               <p className="text-xs text-gray-500">
-                Secure checkout • SSL encrypted
+                Thanh toán an toàn • Mã hóa SSL
               </p>
             </div>
           </div>
@@ -721,21 +747,21 @@ const CartPageClient = () => {
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Clear Cart</AlertDialogTitle>
+            <AlertDialogTitle>Xóa giỏ hàng</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to clear your cart? This action cannot be
-              undone and all items will be removed from your cart.
+              Bạn có chắc chắn muốn xóa giỏ hàng của mình không? Hành động này không thể
+              hoàn tác và tất cả các mặt hàng sẽ bị xóa khỏi giỏ hàng của bạn.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setShowClearDialog(false)}>
-              Cancel
+              Hủy
             </AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmClearCart}
               className="bg-red-600 hover:bg-red-700 text-white"
             >
-              Yes, Clear Cart
+              Có, Xóa giỏ hàng
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

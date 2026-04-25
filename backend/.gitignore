@@ -35,3 +35,14 @@ out/
 
 ### VS Code ###
 .vscode/
+
+
+# Node modules (Chặn folder thư viện JS)
+node_modules/
+backend/node_modules/
+
+
+# Environment files (Chặn file chứa mật khẩu, key)
+# .env
+# .env.local
+

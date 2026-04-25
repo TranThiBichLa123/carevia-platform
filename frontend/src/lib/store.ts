@@ -666,14 +666,14 @@ export const useWishlistStore = create<WishlistState>()(
             removeFromWishlist: (productId) =>
                 set((state) => ({
                     wishlistItems: state.wishlistItems.filter(
-                        (item) => item.id !== productId
+                        (item) => String(item.id) !== String(productId)
                     ),
-                    wishlistIds: state.wishlistIds.filter((id) => id !== productId),
+                    wishlistIds: state.wishlistIds.filter((id) => String(id) !== String(productId)),
                 })),
             setWishlistItems: (products) =>
                 set({
                     wishlistItems: products,
-                    wishlistIds: products.map((product) => product.id),
+                    wishlistIds: products.map((product) => String(product.id)),
                 }),
             setWishlistIds: (ids) =>
                 set((state) => ({

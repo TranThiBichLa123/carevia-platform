@@ -200,7 +200,7 @@ const BookingPage = () => {
 
 
     return (
-        <Container className="bg-[#f2f2f2] font-sans text-gray-900  pb-10">
+        <Container className="bg-[white] font-sans text-gray-900  pb-10">
             {/* Breadcrumb - Hiển thị đúng chữ TRANG CHỦ thay vì Icon */}
             <div className="">
                 <div className="container px-4 py-3">
@@ -227,15 +227,15 @@ const BookingPage = () => {
                 <div className=" flex flex-col lg:flex-row gap-8">
                     {step === 1 && (
                         <aside className="lg:w-72 shrink-0 animate-in fade-in duration-500">
-                            <div className="bg-white rounded-sm border border-gray-200 sticky top-24">
-                                <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                                    <h3 className="font-bold text-[13px] uppercase tracking-tight">Bộ lọc tìm kiếm</h3>
+                            <div className="bg-white border border-gray-200 sticky top-24 rounded-2xl">
+                                <div className="p-4 border-b border-gray-100  rounded-t-2xl flex justify-between items-center bg-gray-50">
+                                    <h3 className="font-vietnam font-bold text-[13px] uppercase tracking-tight">Bộ lọc tìm kiếm</h3>
                                     <button className="text-[13px] text-primary underline font-bold">Xóa tất cả</button>
                                 </div>
 
                                 <div className="p-4 space-y-8">
                                     <div>
-                                        <h4 className="font-bold text-[13px] mb-4 flex justify-between items-center tracking-widest uppercase">
+                                        <h4 className="font-vietnam font-bold text-[13px] mb-4 flex items-center uppercase">
                                             Loại dịch vụ <span className="text-gray-400 font-light">+</span>
                                         </h4>
                                         <div className="space-y-3 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
@@ -251,7 +251,7 @@ const BookingPage = () => {
                                                     <div className="relative flex items-center">
                                                         <input
                                                             type="checkbox"
-                                                            className="peer appearance-none w-4 h-4 border border-gray-300 checked:bg-black checked:border-black transition-all mr-3"
+                                                            className="peer appearance-none w-4 h-4 border border-gray-300 checked:bg-black checked:border-black transition-all mr-3 rounded-sm"
                                                         />
                                                         <svg
                                                             className="absolute w-2.5 h-2.5 text-white left-0.75 opacity-0 peer-checked:opacity-100 pointer-events-none"
@@ -272,7 +272,7 @@ const BookingPage = () => {
                                     </div>
 
                                     <div>
-                                        <h4 className="font-bold text-[13px] mb-4">KHOẢNG GIÁ</h4>
+                                        <h4 className="font-vietnam font-bold text-[13px] mb-4">KHOẢNG GIÁ</h4>
                                         <div className="space-y-3">
                                             {[
                                                 { label: "Dưới 200.000đ", id: "p1" },
@@ -289,7 +289,7 @@ const BookingPage = () => {
                                 </div>
 
                                 <div className="p-4 border-t border-gray-100">
-                                    <button className="w-full py-3 bg-[#00b2bd] text-white text-xs font-black uppercase tracking-widest hover:bg-[#008e96] transition-all">
+                                    <button className="w-full py-3 bg-primary text-white font-bold text-xs font-vietnam uppercase tracking-widest hover:bg-primary-dark rounded-lg transition-all">
                                         Áp dụng bộ lọc
                                     </button>
                                 </div>
@@ -297,15 +297,15 @@ const BookingPage = () => {
                         </aside>
                     )}
 
-                    <main className={`flex-1 bg-white p-6 ${step > 1 ? '' : ''}`}>
+                    <main className={`flex-1 bg-white ${step > 1 ? '' : ''}`}>
                         {step > 1 && (
                             <div className="flex justify-center gap-8 mb-3 border-b border-gray-100">
                                 {['Chọn dịch vụ', 'Thông tin đặt lịch', 'Xác nhận'].map((label, i) => (
                                     <div key={i} className={`flex items-center gap-2 transition-all ${step >= i + 1 ? 'opacity-100' : 'opacity-40'}`}>
-                                        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-bold ${step === i + 1 ? 'bg-[#00b2bd] text-white' : 'bg-gray-200 text-gray-500'}`}>
+                                        <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-vietnam ${step === i + 1 ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500'}`}>
                                             {i + 1}
                                         </span>
-                                        <span className={`uppercase text-[10px] tracking-widest font-bold ${step === i + 1 ? 'text-black' : 'text-gray-400'}`}>
+                                        <span className={`uppercase text-[10px] tracking-widest font-vietnam ${step === i + 1 ? 'text-black' : 'text-gray-400'}`}>
                                             {label}
                                         </span>
                                         {i < 2 && <div className="w-8 h-px bg-gray-200 ml-4 hidden md:block" />}
@@ -316,6 +316,7 @@ const BookingPage = () => {
 
                         {step === 1 && (
                             <>
+                            {/* phần bên phải thanh filter */}
                                 <div className=" flex flex-wrap justify-between items-end mb-6 pb-4 border-b border-gray-200 gap-4">
                                     <div>
                                         <p className="text-[13px] text-gray-500 font-medium">
@@ -324,13 +325,13 @@ const BookingPage = () => {
                                     </div>
 
                                     <div className="flex items-center gap-3">
-                                        <span className="text-[13px] font-bold text-gray-900 uppercase tracking-tighter">Sắp xếp:</span>
+                                        <span className="text-[13px] font-vietnam font-bold text-gray-900 uppercase tracking-tighter">Sắp xếp:</span>
 
                                         {/* Khối Dropdown chính */}
                                         <div className="relative group min-w-35">
                                             {/* Nút hiển thị giá trị đang chọn */}
                                             <div className="flex items-center justify-between px-3 py-2 bg-white border border-gray-200 rounded-md cursor-pointer hover:border-gray-300 transition-all">
-                                                <span className="text-[13px] font-medium text-gray-700"> Mới nhất </span>
+                                                <span className="text-[13px] font-vietnam font-medium text-gray-700"> Mới nhất </span>
                                                 <svg className="w-4 h-4 text-gray-400 group-hover:rotate-180 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                                                 </svg>
@@ -338,19 +339,17 @@ const BookingPage = () => {
 
                                             {/* List danh sách khi mở ra - Giống y hệt hình */}
                                             <div className="absolute top-full left-0 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                                                <div className="flex flex-col">
+                                                <div className="flex flex-col whitespace-nowrap">
                                                     {/* Item 1 */}
-
-                                                    {/* Item 2 */}
-                                                    <div className="px-3 py-2.5 text-[13px] text-gray-700 hover:bg-gray-50 cursor-pointer border-b border-gray-100 transition-colors">
-                                                        Giá: Thấp đến Cao
+                                                    <div className="px-3 py-2.5 text-[13px] font-vietnam text-gray-700 hover:bg-gray-50 cursor-pointer border-b border-gray-100 transition-colors">
+                                                        Giá: Thấp đến cao
                                                     </div>
                                                     {/* Item 3 */}
-                                                    <div className="px-3 py-2.5 text-[13px] text-gray-700 hover:bg-gray-50 cursor-pointer last:border-b-0 transition-colors">
-                                                        Giá: Cao đến Thấp
+                                                    <div className="px-3 py-2.5 text-[13px] font-vietnam text-gray-700 hover:bg-gray-50 cursor-pointer last:border-b-0 transition-colors">
+                                                        Giá: Cao đến thấp
                                                     </div>
                                                     {/* Item 4 */}
-                                                    <div className="px-3 py-2.5 text-[13px] text-gray-700 hover:bg-gray-50 cursor-pointer last:border-b-0 transition-colors">
+                                                    <div className="px-3 py-2.5 text-[13px] font-vietnam text-gray-700 hover:bg-gray-50 cursor-pointer last:border-b-0 transition-colors">
                                                         Bán chạy nhất
                                                     </div>
                                                 </div>
@@ -386,7 +385,7 @@ const BookingPage = () => {
 
                                             {bookingDevices.length === 0 && (
                                                 <div className="col-span-full py-20 text-center border-2 border-dashed border-gray-100 rounded-xl">
-                                                    <p className="text-gray-400 text-sm uppercase tracking-widest italic">
+                                                    <p className="text-gray-400 text-sm uppercase tracking-widest italic font-vietnam">
                                                         Không tìm thấy thiết bị phù hợp.
                                                     </p>
                                                 </div>
@@ -401,12 +400,12 @@ const BookingPage = () => {
                             <div className="bg-[#f0f2f5] p-2 space-y-4 animate-in fade-in duration-500">
 
                                 <div className="bg-white p-6 shadow-sm">
-                                    <h4 className="text-sm font-bold mb-4 text-gray-800">Thông Tin Đặt Hẹn <span className="text-red-500">*</span></h4>
+                                    <h4 className="text-sm font-vietnam font-bold mb-4 text-gray-800">Thông Tin Đặt Hẹn <span className="text-red-500">*</span></h4>
                                     <div className="grid md:grid-cols-2 gap-4">
                                         <input
                                             type="tel"
                                             placeholder="Số điện thoại (10 số)"
-                                            className={`w-full p-3 border outline-none text-sm transition-all ${customerPhone && !validatePhone(customerPhone)
+                                            className={`w-full p-3 border outline-none text-sm font-vietnam transition-all ${customerPhone && !validatePhone(customerPhone)
                                                 ? 'border-red-500 bg-red-50'
                                                 : 'border-gray-200 focus:border-[#00b2bd]'
                                                 }`}
@@ -414,12 +413,12 @@ const BookingPage = () => {
                                             onChange={(e) => setCustomerPhone(e.target.value.replace(/\D/g, ''))} // Chỉ cho phép nhập số
                                         />
                                         {customerPhone && !validatePhone(customerPhone) && (
-                                            <p className="text-[10px] text-red-500 font-bold uppercase italic">Số điện thoại không hợp lệ</p>
+                                            <p className="text-[10px] text-red-500 font-vietnam font-bold uppercase italic">Số điện thoại không hợp lệ</p>
                                         )}
                                         <input
                                             type="text"
                                             placeholder="Họ và tên"
-                                            className={`w-full p-3 border outline-none text-sm transition-all ${customerName && !validateName(customerName)
+                                            className={`w-full p-3 border outline-none text-sm font-vietnam transition-all ${customerName && !validateName(customerName)
                                                 ? 'border-red-500 bg-red-50'
                                                 : 'border-gray-200 focus:border-[#00b2bd]'
                                                 }`}
@@ -427,13 +426,13 @@ const BookingPage = () => {
                                             onChange={(e) => setCustomerName(e.target.value)}
                                         />
                                         {customerName && !validateName(customerName) && (
-                                            <p className="text-[10px] text-red-500 font-bold uppercase italic">Tên không được chứa số hoặc quá ngắn</p>
+                                            <p className="text-[10px] text-red-500 font-vietnam font-bold uppercase italic">Tên không được chứa số hoặc quá ngắn</p>
                                         )}
                                     </div>
                                 </div>
 
                                 <div className="bg-white p-6 shadow-sm">
-                                    <h4 className="text-sm font-bold mb-4 text-gray-800">Chọn Chi Nhánh <span className="text-red-500">*</span></h4>
+                                    <h4 className="text-sm font-vietnam font-bold mb-4 text-gray-800">Chọn Chi Nhánh <span className="text-red-500">*</span></h4>
                                     <div className="flex gap-4 overflow-x-auto pb-4 scrollbar-hide">
                                         {availableBranches.map((branch, index) => (
                                             <div
@@ -445,7 +444,7 @@ const BookingPage = () => {
                                                     <img src={`https://picsum.photos/seed/branch-${index}/300/200`} className="w-full h-full object-cover" alt={branch} />
                                                 </div>
                                                 <div className="p-3 text-center bg-gray-50 group-hover:bg-white">
-                                                    <p className="text-[11px] font-bold uppercase">{branch}</p>
+                                                    <p className="text-[11px] font-vietnam font-bold uppercase">{branch}</p>
                                                     <div className={`w-4 h-4 mx-auto mt-2 rounded-full border-2 flex items-center justify-center ${selectedBranch === branch ? 'border-orange-500' : 'border-gray-300'}`}>
                                                         {selectedBranch === branch && <div className="w-2 h-2 bg-orange-500 rounded-full" />}
                                                     </div>
@@ -456,16 +455,16 @@ const BookingPage = () => {
                                 </div>
 
                                 <div className="bg-white p-6 shadow-sm">
-                                    <h4 className="text-sm font-bold mb-4 text-gray-800">Dịch vụ bạn muốn làm <span className="text-red-500">*</span></h4>
-                                    <div className="w-full p-3 bg-gray-50 border border-gray-100 text-sm font-medium text-gray-600">
+                                    <h4 className="text-sm font-vietnam font-bold mb-4 text-gray-800">Dịch vụ bạn muốn làm <span className="text-red-500">*</span></h4>
+                                    <div className="w-full p-3 bg-gray-50 border border-gray-100 text-sm font-vietnam font-medium text-gray-600">
                                         {selectedDevice?.name} (1 Buổi)
                                     </div>
                                 </div>
 
                                 <div className="bg-white shadow-sm overflow-hidden">
                                     <div className="p-4 border-b flex items-center justify-between">
-                                        <h4 className="text-sm font-bold">Chọn Ngày Giờ <span className="text-red-500">*</span></h4>
-                                        <div className="flex gap-4 text-[9px] font-bold text-gray-400 uppercase">
+                                        <h4 className="text-sm font-vietnam font-bold">Chọn Ngày Giờ <span className="text-red-500">*</span></h4>
+                                        <div className="flex gap-4 text-[9px] font-vietnam font-bold text-gray-400 uppercase">
                                             <div className="flex items-center gap-1"><span className="w-2 h-2 bg-gray-100" /> Hết chỗ</div>
                                             <div className="flex items-center gap-1"><span className="w-2 h-2 bg-[#e6f4f1]" /> Còn chỗ</div>
                                             <div className="flex items-center gap-1"><span className="w-2 h-2 bg-orange-500" /> Đang chọn</div>
@@ -479,8 +478,8 @@ const BookingPage = () => {
                                                 onClick={() => { setSelectedDate(dateStr); setSelectedSession(null); }}
                                                 className={`flex-1 min-w-30 py-3 px-2 border-r transition-all flex flex-col items-center ${selectedDate === dateStr ? 'bg-orange-500 text-white' : 'bg-white text-gray-500'}`}
                                             >
-                                                <span className="text-[10px] uppercase font-bold">{getDayName(dateStr)}</span>
-                                                <span className="text-xs font-black">{new Date(dateStr).getDate()}/{new Date(dateStr).getMonth() + 1}</span>
+                                                <span className="text-[10px] uppercase font-vietnam font-bold">{getDayName(dateStr)}</span>
+                                                <span className="text-xs font-vietnam font-black">{new Date(dateStr).getDate()}/{new Date(dateStr).getMonth() + 1}</span>
                                             </button>
                                         ))}
                                     </div>
@@ -511,7 +510,7 @@ const BookingPage = () => {
                                     {/* Nút quay lại - Dạng Text link có Icon */}
                                     <button
                                         onClick={prevStep}
-                                        className="order-2 sm:order-1 flex items-center gap-2 text-[11px] font-bold text-gray-400 uppercase tracking-[0.15em] hover:text-black transition-colors group"
+                                        className="order-2 sm:order-1 flex items-center gap-2 text-[11px] font-vietnam font-bold text-gray-400 uppercase tracking-[0.15em] hover:text-black transition-colors group"
                                     >
                                         <svg
                                             className="w-4 h-4 transition-transform group-hover:-translate-x-1"
@@ -528,7 +527,7 @@ const BookingPage = () => {
                                     <button
                                         disabled={!customerPhone || !selectedBranch || !selectedSession}
                                         onClick={nextStep}
-                                        className="order-1 sm:order-2 w-full sm:w-auto min-w-60 px-10 py-4 bg-[#00b2bd] text-white text-[11px] font-black uppercase tracking-[0.2em] shadow-xl shadow-[#00b2bd]/20 hover:bg-[#008e96] disabled:bg-gray-200 disabled:shadow-none disabled:cursor-not-allowed transition-all"
+                                        className="order-1 sm:order-2 w-full sm:w-auto min-w-60 px-10 py-4 bg-[#00b2bd] text-white text-[11px] font-vietnam font-black uppercase tracking-[0.2em] shadow-xl shadow-[#00b2bd]/20 hover:bg-[#008e96] disabled:bg-gray-200 disabled:shadow-none disabled:cursor-not-allowed transition-all"
                                     >
                                         Tiếp tục xác nhận
                                     </button>
@@ -541,8 +540,8 @@ const BookingPage = () => {
                             <div className="w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
                                 <div className="bg-white border border-gray-200 shadow-sm overflow-hidden">
                                     <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
-                                        <h2 className="text-sm font-bold uppercase tracking-widest text-gray-700">Xác nhận thông tin đặt lịch</h2>
-                                        <span className="text-[10px] bg-black text-white px-2 py-1 font-bold">MÃ: #TEMP_{Math.floor(Math.random() * 1000)}</span>
+                                        <h2 className="text-sm font-vietnam font-bold uppercase tracking-widest text-gray-700">Xác nhận thông tin đặt lịch</h2>
+                                        <span className="text-[10px] bg-black text-white px-2 py-1 font-vietnam font-bold">MÃ: #TEMP_{Math.floor(Math.random() * 1000)}</span>
                                     </div>
 
                                     <div className="p-6 md:p-10">
@@ -565,18 +564,18 @@ const BookingPage = () => {
                                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
                                                     <div>
                                                         <p className="text-[10px] uppercase font-bold text-gray-400 mb-1">Chi nhánh thực hiện</p>
-                                                        <p className="text-sm font-bold text-black flex items-center gap-1">
+                                                        <p className="text-sm font-vietnam font-bold text-black flex items-center gap-1">
                                                             <MapPin size={14} className="text-red-500" /> {selectedSession?.branchName}
                                                         </p>
-                                                        <p className="text-[11px] text-gray-500 mt-1">{selectedSession?.locationDetail}</p>
+                                                        <p className="text-[11px] font-vietnam text-gray-500 mt-1">{selectedSession?.locationDetail}</p>
                                                     </div>
 
                                                     <div>
-                                                        <p className="text-[10px] uppercase font-bold text-gray-400 mb-1">Thời gian hẹn</p>
-                                                        <p className="text-sm font-bold text-black flex items-center gap-1">
+                                                        <p className="text-[10px] font-vietnam uppercase font-bold text-gray-400 mb-1">Thời gian hẹn</p>
+                                                        <p className="text-sm font-vietnam font-bold text-black flex items-center gap-1">
                                                             <Calendar size={14} /> {selectedDate ? new Date(selectedDate).toLocaleDateString('vi-VN') : ''}
                                                         </p>
-                                                        <p className="text-sm font-black text-red-600 mt-1">
+                                                        <p className="text-sm font-vietnam font-black text-red-600 mt-1">
                                                             {formatSessionTime(selectedSession?.startTime)} - {formatSessionTime(selectedSession?.endTime)}
                                                         </p>
                                                     </div>
@@ -584,12 +583,12 @@ const BookingPage = () => {
 
                                                 <div className="pt-6 border-t border-dashed border-gray-200">
                                                     <div className="flex justify-between items-center mb-2">
-                                                        <span className="text-sm text-gray-600">Phí trải nghiệm dịch vụ:</span>
-                                                        <span className="text-lg font-black text-black">
+                                                        <span className="text-sm font-vietnam text-gray-600">Phí trải nghiệm dịch vụ:</span>
+                                                        <span className="text-lg font-vietnam font-black text-black">
                                                             {selectedDevice && selectedDevice.bookingPrice > 0 ? `${selectedDevice.bookingPrice} USD` : 'MIỄN PHÍ'}
                                                         </span>
                                                     </div>
-                                                    <p className="text-[10px] text-gray-400 italic font-medium">
+                                                    <p className="text-[10px] font-vietnam text-gray-400 italic font-medium">
                                                         * Lưu ý: Quý khách vui lòng đến trước 10 phút để được hỗ trợ tốt nhất. Lịch hẹn sẽ tự động hủy nếu quý khách đến trễ quá 15 phút.
                                                     </p>
                                                 </div>
@@ -616,10 +615,10 @@ const BookingPage = () => {
 
                                 <div className="mt-6 flex justify-center gap-10 opacity-50">
                                     <div className="flex items-center gap-2">
-                                        <CheckCircle size={14} /> <span className="text-[9px] font-bold uppercase tracking-tighter">Công nghệ chính hãng</span>
+                                        <CheckCircle size={14} /> <span className="text-[9px] font-vietnam font-bold uppercase tracking-tighter">Công nghệ chính hãng</span>
                                     </div>
                                     <div className="flex items-center gap-2">
-                                        <CheckCircle size={14} /> <span className="text-[9px] font-bold uppercase tracking-tighter">Đội ngũ chuyên nghiệp</span>
+                                        <CheckCircle size={14} /> <span className="text-[9px] font-vietnam font-bold uppercase tracking-tighter">Đội ngũ chuyên nghiệp</span>
                                     </div>
                                 </div>
                             </div>

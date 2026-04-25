@@ -17,12 +17,16 @@ import Image from "next/image";
 import Link from "next/link";
 import PriceFormatter from "@/components/common/PriceFormatter";
 import { useRouter } from "next/navigation";
+import { Breadcrumb } from "../ui/breadcrumb";
+import ProductCard from "../common/products/ProductCard";
+import { motion } from "framer-motion";
 
 const WishlistPage = () => {
+  const [mounted, setMounted] = useState(false); // BƯỚC 1: Xử lý Hydration
   const [loading, setLoading] = useState(true);
   const [removing, setRemoving] = useState<string | null>(null);
-  const router = useRouter();
 
+  const router = useRouter();
   const { isAuthenticated, auth_token } = useUserStore();
   const {
     wishlistItems,
@@ -32,33 +36,24 @@ const WishlistPage = () => {
     clearWishlist: clearWishlistStore,
   } = useWishlistStore();
 
+  // Đảm bảo chỉ render nội dung sau khi đã mount vào Client
   useEffect(() => {
-    if (!isAuthenticated || !auth_token) {
+    setMounted(true);
+    if (isAuthenticated === false) { // Kiểm tra rõ ràng giá trị false
       router.push("/auth/signin");
       return;
     }
-
     fetchWishlistData();
-  }, [isAuthenticated, auth_token, router]);
+  }, [isAuthenticated, auth_token]);
 
   const fetchWishlistData = async () => {
     if (!auth_token) return;
-
     try {
       setLoading(true);
-
-      // Get wishlist IDs from server
       const wishlistResponse = await getUserWishlist(auth_token);
-
       if (wishlistResponse.success && wishlistResponse.wishlist.length > 0) {
         setWishlistIds(wishlistResponse.wishlist);
-
-        // Fetch product details for the IDs
-        const productsResponse = await getWishlistProducts(
-          wishlistResponse.wishlist,
-          auth_token
-        );
-
+        const productsResponse = await getWishlistProducts(wishlistResponse.wishlist, auth_token);
         if (productsResponse.success) {
           setWishlistItems(productsResponse.products);
         }
@@ -67,8 +62,7 @@ const WishlistPage = () => {
         setWishlistItems([]);
       }
     } catch (error) {
-      console.error("Error fetching wishlist:", error);
-      toast.error("Failed to load wishlist");
+      toast.error("Không thể tải danh sách yêu thích");
     } finally {
       setLoading(false);
     }
@@ -76,15 +70,18 @@ const WishlistPage = () => {
 
   const handleRemoveItem = async (productId: string) => {
     if (!auth_token) return;
-
     try {
       setRemoving(productId);
       await removeFromWishlist(productId, auth_token);
+
+      // BƯỚC 2: Cập nhật UI ngay lập tức
       removeFromWishlistStore(productId);
-      toast.success("Removed from wishlist");
+      // Lọc trực tiếp mảng items để biến mất khỏi màn hình ngay
+      setWishlistItems(wishlistItems.filter((item) => item.id !== productId));
+
+      toast.success("Đã xóa khỏi danh sách");
     } catch (error) {
-      console.error("Error removing from wishlist:", error);
-      toast.error("Failed to remove item");
+      toast.error("Lỗi khi xóa sản phẩm");
     } finally {
       setRemoving(null);
     }
@@ -92,29 +89,26 @@ const WishlistPage = () => {
 
   const handleClearWishlist = async () => {
     if (!auth_token) return;
-
     try {
       await clearWishlist(auth_token);
       clearWishlistStore();
-      toast.success("Wishlist cleared");
+      setWishlistItems([]); // Clear UI
+      toast.success("Đã dọn sạch danh sách");
     } catch (error) {
-      console.error("Error clearing wishlist:", error);
-      toast.error("Failed to clear wishlist");
+      toast.error("Lỗi khi dọn dẹp");
     }
   };
 
-  if (!isAuthenticated) {
-    return null;
+  // Tránh lỗi Hydration: Render khung rỗng ở Server
+  if (!mounted) {
+    return <Container className="py-8"><div className="h-screen" /></Container>;
   }
 
   if (loading) {
     return (
-      <Container className="py-8">
-        <PageBreadcrumb
-          items={[{ label: "User", href: "/user/profile" }]}
-          currentPage="Wishlist"
-          showSocialShare={false}
-        />
+      <Container className="">
+        {/* Thay PageBreadcrumb cũ bằng Breadcrumb tự động */}
+        <Breadcrumb />
 
         <div className="animate-pulse space-y-4">
           <div className="h-8 bg-gray-200 rounded w-1/4"></div>
@@ -133,10 +127,12 @@ const WishlistPage = () => {
     );
   }
 
+
   return (
-    <Container className="py-8">
+    <Container className="py-5">
       <PageBreadcrumb
-        items={[{ label: "User", href: "/user/profile" }]}
+        // items={[{ label: "User", href: "/user/profile" }]}
+        items={[]}
         currentPage="Wishlist"
         showSocialShare={false}
       />
@@ -144,126 +140,108 @@ const WishlistPage = () => {
       <div className="space-y-6">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <div>
+          {/* <div>
             <h1 className="text-2xl font-bold">My Wishlist</h1>
             <p className="text-gray-600">
               {wishlistItems.length}{" "}
               {wishlistItems.length === 1 ? "item" : "items"} in your wishlist
             </p>
-          </div>
+          </div> */}
           {wishlistItems.length > 0 && (
             <Button
               onClick={handleClearWishlist}
               variant="outline"
-              className="text-red-600 border-red-200 hover:bg-red-50"
+              className="group relative ml-auto border-red-500 bg-transparent px-6 py-2 text-red-600 transition-colors duration-300 hover:text-white"
             >
-              <Trash2 size={16} className="mr-2" />
-              Clear All
+              <span className="absolute inset-0 w-0 bg-red-600 transition-all duration-300 ease-out group-hover:w-full"></span>
+              <span className="relative flex items-center">
+                <Trash2 size={16} className="mr-2 group-hover:animate-bounce" />
+                Xóa tất cả
+              </span>
             </Button>
+
+
           )}
         </div>
 
         {/* Wishlist Items */}
         {wishlistItems.length === 0 ? (
-          <div className="text-center py-16">
-            <Heart size={64} className="mx-auto text-gray-300 mb-4" />
-            <h2 className="text-xl font-semibold mb-2">
-              Your wishlist is empty
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5 }}
+            className="flex flex-col items-center justify-center py-20 px-4 text-center"
+          >
+            {/* Icon với hiệu ứng nhịp đập */}
+            <div className="relative mb-6">
+              <motion.div
+                animate={{ scale: [1, 1.1, 1] }}
+                transition={{ repeat: Infinity, duration: 2, ease: "easeInOut" }}
+                className="bg-red-50 p-6 rounded-full"
+              >
+                <Heart size={64} className="text-red-400 fill-red-100" />
+              </motion.div>
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 0.3 }}
+                className="absolute -top-1 -right-1 bg-white p-2 rounded-full shadow-sm"
+              >
+                {/* <ShoppingBag size={20} className="text-primary" /> */}
+              </motion.div>
+            </div>
+
+            {/* Nội dung văn bản */}
+            <h2 className="text-2xl font-bold font-vietnam text-gray-900 mb-3 tracking-tight">
+              Danh sách yêu thích đang trống
             </h2>
-            <p className="text-gray-600 mb-6">
-              Start adding items to your wishlist by clicking the heart icon on
-              products you love
+            <p className="text-gray-500 max-w-sm mx-auto mb-8 leading-relaxed font-vietnam text-[15px]">
+              Hãy lấp đầy trái tim bằng những thiết bị chăm sóc da tuyệt vời. Chúng tôi sẽ giúp bạn lưu giữ chúng tại đây!
             </p>
-            <Button asChild>
-              <Link href="/shop">
-                <ShoppingBag size={16} className="mr-2" />
-                Continue Shopping
+
+            {/* Nút bấm với hiệu ứng trượt nền (như đã làm ở trên) */}
+            <Button
+              asChild
+              className="group relative overflow-hidden bg-primary px-10 py-6 rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-primary/25"
+            >
+              <Link href="/shop" className="flex items-center text-white">
+                <span className="absolute inset-0 w-0 bg-white/10 transition-all duration-300 group-hover:w-full" />
+                <ShoppingBag size={18} className="mr-2 group-hover:animate-bounce" />
+                <span className="font-semibold tracking-wide">Khám phá cửa hàng</span>
               </Link>
             </Button>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {wishlistItems.map((product: Product) => (
-              <div
-                key={product.id}
-                className="border rounded-lg overflow-hidden group"
-              >
-                <Link href={`/product/${product.id}`} className="block">
-                  <div className="relative">
-                    <Image
-                      src={product.image}
-                      alt={product.name}
-                      width={300}
-                      height={200}
-                      className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
-                    />
-                    {product.discountPercentage > 0 && (
-                      <div className="absolute top-2 left-2 bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold">
-                        -{product.discountPercentage}%
-                      </div>
-                    )}
-                  </div>
-                </Link>
+          </motion.div>
+        )
+          : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {wishlistItems.map((product: Product) => (
+                <div key={product.id || (product as any).deviceId}>
+                  <ProductCard product={product} />
 
-                <div className="p-4 space-y-3">
-                  <div>
-                    <p className="text-xs text-gray-500 uppercase font-medium">
-                      {product.category?.name}
-                    </p>
-                    <Link href={`/product/${product.id}`}>
-                      <h3 className="font-semibold line-clamp-2 hover:text-babyshopSky transition-colors h-12">
-                        {product.name}
-                      </h3>
-                    </Link>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    {product.discountPercentage > 0 ? (
-                      <>
-                        <PriceFormatter
-                          amount={product.price}
-                          className="text-gray-400 line-through text-sm"
-                        />
-                        <PriceFormatter
-                          amount={
-                            product.price *
-                            (1 - product.discountPercentage / 100)
-                          }
-                          className="text-red-600 font-semibold"
-                        />
-                      </>
-                    ) : (
-                      <PriceFormatter
-                        amount={product.price}
-                        className="font-semibold"
-                      />
-                    )}
-                  </div>
-
-                  <div className="flex gap-2">
+                  {/* Nút xóa riêng biệt của trang Wishlist (nếu bạn muốn giữ lại bên ngoài Card) */}
+                  {/* <div className="mt-2">
                     <Button
                       onClick={() => handleRemoveItem(product.id)}
                       disabled={removing === product.id}
-                      variant="outline"
+                      variant="ghost"
                       size="sm"
-                      className="flex-1 text-red-600 border-red-200 hover:bg-red-50"
+                      className="w-full text-red-500 hover:text-red-700 hover:bg-red-50 text-xs gap-2"
                     >
                       {removing === product.id ? (
-                        <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin" />
+                        <div className="w-3 h-3 border-2 border-red-500 border-t-transparent rounded-full animate-spin" />
                       ) : (
-                        <Trash2 size={14} />
+                        <>
+                          <Trash2 size={12} />
+                          Bỏ yêu thích
+                        </>
                       )}
                     </Button>
-                    <Button size="sm" className="flex-1">
-                      <ShoppingBag size={14} className="mr-1" />
-                      Add to Cart
-                    </Button>
-                  </div>
+                  </div> */}
                 </div>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>)
+
+        }
       </div>
     </Container>
   );

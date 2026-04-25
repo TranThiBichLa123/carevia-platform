@@ -3,6 +3,14 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import ReactQueryProvider from "@/components/providers/ReactQueryProvider";
 import { Toaster } from "@/components/ui/sonner";
+import { Be_Vietnam_Pro } from 'next/font/google';
+
+// Cấu hình font
+const beVietnamPro = Be_Vietnam_Pro({
+  subsets: ['vietnamese'], // Bắt buộc có cái này để không bị lỗi dấu
+  weight: ['400', '700'],  // Chọn các độ dày bạn cần
+  variable: '--font-be-vietnam', // Đặt tên biến để dùng trong Tailwind
+});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,7 +38,7 @@ export default function RootLayout({
   return (
     <html lang="vi" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${beVietnamPro.variable} antialiased`}
         suppressHydrationWarning
       >
         <ReactQueryProvider>

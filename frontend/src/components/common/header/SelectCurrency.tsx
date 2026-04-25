@@ -31,7 +31,7 @@ const SelectCurrency = () => {
 
   if (!mounted) {
     return (
-      <div className="flex items-center px-2 py-1 h-6 w-fit text-white text-xs font-medium">
+      <div className="flex items-center px-2 py-1 h-6 w-fit text-white text-[14px] font-medium">
         ₫ VND - Việt Nam Đồng
       </div>
     );
@@ -41,7 +41,7 @@ const SelectCurrency = () => {
     <Select value={selectedCurrency} onValueChange={setSelectedCurrency}>
       <SelectTrigger className="border-none bg-transparent focus:ring-0 focus:outline-none shadow-none flex items-center gap-1 px-2 py-1 h-6 w-fit transition-opacity hover:opacity-80 text-white">
         {/* ĐÂY LÀ PHẦN QUAN TRỌNG: Hiển thị thủ công để giữ màu trắng */}
-        <div className="flex items-center gap-1 text-[12px]">
+        <div className="flex items-center gap-1 text-[14px]">
           <span className="opacity-80">{current?.symbol}</span>
           <span className="font-bold">{current?.code}</span>
           <span className="opacity-50">-</span>

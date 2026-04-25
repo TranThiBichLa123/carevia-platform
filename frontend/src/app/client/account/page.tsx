@@ -23,6 +23,7 @@ import AccountOrdersTab from "@/components/pages/account/OrdersTab";
 import AccountAnalyticsTab from "@/components/pages/account/AnalyticsTab";
 import AccountNotificationsTab from "@/components/pages/account/NotificationsTab";
 import AccountSettingsTab from "@/components/pages/account/SettingsTab";
+import PageBreadcrumb from "@/components/common/PageBreadcrumb";
 
 const tabs = [
   { key: "profile", label: "Profile", icon: User },
@@ -63,6 +64,13 @@ const AccountPage = () => {
       </div>
     );
   }
+  const tabTitles: Record<string, string> = {
+    profile: "Hồ sơ cá nhân",
+    orders: "Đơn hàng của bạn",
+    analytics: "Phân tích dữ liệu",
+    notifications: "Thông báo",
+    settings: "Cài đặt tài khoản",
+  };
 
   const renderTab = () => {
     switch (activeTab) {
@@ -82,26 +90,14 @@ const AccountPage = () => {
   };
 
   return (
-    <Container className="py-8">
-      {/* Breadcrumb */}
-      <nav className="flex items-center text-[13px] gap-2 mb-6">
-        <Link
-          href="/client"
-          className="text-gray-500 hover:text-black transition-colors font-medium"
-        >
-          Trang chủ
-        </Link>
-        <span className="text-gray-300">/</span>
-        <span className="text-gray-900 font-medium">My Account</span>
-      </nav>
+    <Container className="py-3">
 
-      {/* Page Header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold text-gray-900">My Account</h1>
-        <p className="text-gray-500 mt-1">
-          Manage your account, orders, and preferences
-        </p>
-      </div>
+      <PageBreadcrumb
+        // items={[{ label: "Tài khoản", href: "/user" }]}
+        items={[]}
+        currentPage={tabTitles[activeTab] || "Tài khoản"}
+      />
+
 
       {/* Tab Navigation */}
       <div className="flex flex-wrap gap-2 mb-6 border-b border-gray-200">
@@ -112,14 +108,13 @@ const AccountPage = () => {
             <button
               key={tab.key}
               onClick={() => handleTabChange(tab.key)}
-              className={`flex items-center gap-2 px-5 py-3 text-sm font-medium rounded-t-lg transition-all ${
-                isActive
-                  ? "bg-teal-600 text-white shadow-md"
-                  : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
-              }`}
+              className={`flex items-center gap-2 px-5 py-3 text-sm font-medium rounded-t-lg transition-all ${isActive
+                ? "bg-teal-600 text-white shadow-md"
+                : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
+                }`}
             >
               <Icon size={16} />
-              {tab.label}
+              <span className="font-vietnam">{tab.label}</span>
             </button>
           );
         })}
@@ -164,11 +159,10 @@ const AccountPage = () => {
               onClick={() => handleTabChange("profile")}
               className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur text-white rounded-lg hover:bg-white/30 transition-all text-sm font-medium"
             >
-              <Edit3 size={14} /> Edit Profile
+              <Edit3 size={14} /> <span className="font-vietnam">Chỉnh sử hồ sơ</span>
             </button>
             <button className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur text-white rounded-lg hover:bg-white/30 transition-all text-sm font-medium">
-              <Shield size={14} />
-              {authUser.auth_provider === "google" ? "OAuth Account" : "Email Account"}
+              <Shield size={14} /> <span className="font-vietnam">{authUser.auth_provider === "google" ? "Tài khoản OAuth" : "Tài khoản Email"}</span>
             </button>
           </div>
         </div>
@@ -178,11 +172,11 @@ const AccountPage = () => {
       <div className="flex items-center gap-4 mb-8 p-4 bg-blue-50 rounded-xl border border-blue-100">
         <Shield className="text-blue-600" size={20} />
         <div>
-          <p className="text-sm font-semibold text-blue-800">Account Security</p>
+          <p className="text-sm font-vietnam font-semibold text-blue-800">Bảo mật tài khoản</p>
           <p className="text-xs text-blue-600">
             {authUser.auth_provider === "google"
-              ? "OAuth Account - Secured by Google"
-              : "Email & Password Account"}
+              ? "Tài khoản OAuth - Bảo mật bởi Google"
+              : "Tài khoản Email & Mật khẩu - Bảo mật bởi hệ thống"}
           </p>
         </div>
       </div>

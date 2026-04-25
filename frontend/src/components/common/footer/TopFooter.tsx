@@ -9,24 +9,20 @@ const TopFooter = () => {
     <div className="w-full border-t border-gray-200 border-b"> 
       
       {/* 2. Thẻ Container này sẽ bóp nội dung vào giữa (có margin left/right) */}
-      <Container className="py-5 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+      <Container className=" py-4 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
         {footerTopData?.map((item) => (
           <div
             key={item?.title}
-            className="flex items-center gap-4 lg:border-r lg:border-gray-300 last:border-r-0"
+            className="flex items-center font-vietnam gap-4 lg:border-r lg:border-gray-300 last:border-r-0"
           >
-            <Image 
-              src={item?.image} 
-              alt="footerOneImage" 
-              width={40} 
-              height={40} 
-              className="object-contain"
-            />
+            <item.icon className="w-10 h-10 text-primary" />
+
+            
             <div>
-              <h3 className="text-[15px] font-semibold capitalize mb-0.5">
+              <h3 className="text-[15px] font-semibold font-vietnam capitalize mb-0.5">
                 {item?.title}
               </h3>
-              <p className="text-[13px] font-medium text-babyshopBlack/60 leading-tight">
+              <p className="text-[13px] font-medium font-vietnam text-babyshopBlack/60 leading-tight">
                 {item?.subTitle}
               </p>
             </div>

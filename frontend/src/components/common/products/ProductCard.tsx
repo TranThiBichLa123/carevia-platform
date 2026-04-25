@@ -12,7 +12,7 @@ const ProductCard = ({ product }: { product: Product }) => {
   const safeId = product?.id || (product as any)?._id || (product as any)?.deviceId;
   return (
     /* 1. Đổi hover:border thành primary-light (hoặc primary nếu muốn đậm hơn) */
-    <div className="border border-gray-100 rounded-xl group overflow-hidden w-full relative bg-white hover:border-primary hover:shadow-lg transition-all duration-300">
+    <div className="border border-gray-200 rounded-xl group overflow-hidden w-full relative bg-white hover:border-primary hover:shadow-lg transition-all duration-300">
       <Link
         href={`/client/devices/${safeId}`} // Sử dụng safeId ở đây
         className="overflow-hidden relative block"
@@ -41,12 +41,12 @@ const ProductCard = ({ product }: { product: Product }) => {
       <hr className="border-gray-50" />
 
       <div className="px-4 py-3 space-y-1">
-        <p className="uppercase text-[10px] tracking-wider font-semibold text-gray-400">
+        <p className="uppercase text-[10px] tracking-wider font-vietnam  font-semibold text-gray-400">
           {product?.category?.name}
         </p>
 
         {/* 3. Tên sản phẩm khi hover sẽ đổi sang màu primary-hover */}
-        <p className="line-clamp-2 text-sm h-10 font-medium text-gray-800 group-hover:text-primary-hover transition-colors">
+        <p className="line-clamp-2 text-sm h-10 font-vietnam font-[13px] text-gray-800 group-hover:text-primary-hover transition-colors">
           {product?.name}
         </p>
 

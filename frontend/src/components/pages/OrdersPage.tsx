@@ -5,6 +5,24 @@ import Container from "@/components/common/Container";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { clsx, type ClassValue } from "clsx"
+import { twMerge } from "tailwind-merge"
+import { ChevronRight } from "lucide-react";
+export function cn(...inputs: ClassValue[]) {
+  return twMerge(clsx(inputs))
+}
+
+interface BreadcrumbItem {
+  label: string;
+  href: string;
+}
+
+interface PageBreadcrumbProps {
+  items: BreadcrumbItem[];
+  currentPage: string;
+  showSocialShare?: boolean;
+}
+
 import {
   Table,
   TableBody,
@@ -44,6 +62,7 @@ import { useUserStore } from "@/lib/store";
 import { getUserOrders, deleteOrder, Order } from "@/lib/orderApi";
 import { OrderTableSkeleton } from "@/components/skeleton/OrderSkeleton";
 import OrderDetailsModal from "@/components/pages/OrderDetailsModal";
+import { motion } from "framer-motion";
 
 const OrdersPageContent = () => {
   const searchParams = useSearchParams();
@@ -243,7 +262,7 @@ const OrdersPageContent = () => {
 
   if (success === "true" && orderId) {
     return (
-      <Container className="py-8">
+      <Container className="py-5">
         <PageBreadcrumb
           items={[{ label: "User", href: "/user" }]}
           currentPage="Orders"
@@ -367,36 +386,43 @@ const OrdersPageContent = () => {
   }
 
   return (
-    <Container className="py-8">
+    <Container className="py-5">
+
+      {/* BREADCRUMB - Đã thay giá trị thực tế để hết lỗi */}
+      {/* <div className="mb-3 flex items-center justify-between">
+        <nav className="flex items-center space-x-2 font-vietnam text-[13px]">
+          <Link
+            href="/"
+            className="text-muted-foreground hover:text-primary transition-colors duration-200"
+          >
+            Trang chủ
+          </Link>
+
+          <ChevronRight className="h-3.5 w-3.5 text-gray-300" /> */}
+
+      {/* <Link
+            href="/client/user"
+            className="font-medium text-muted-foreground hover:text-primary transition-colors duration-200"
+          >
+            User
+          </Link> */}
+
+      {/* <ChevronRight className="h-3.5 w-3.5 text-gray-300" /> */}
+
+      {/* <span className="font-bold text-primary tracking-tight">
+            Đơn hàng của bạn
+          </span>
+        </nav>
+      </div> */}
       <PageBreadcrumb
         items={[{ label: "User", href: "/user" }]}
         currentPage="Orders"
         showSocialShare={false}
       />
 
-      <div className="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-3xl md:text-4xl font-bold bg-gradient-to-r from-gray-900 to-gray-700 bg-clip-text text-transparent mb-2">
-            My Orders
-          </h1>
-          <p className="text-gray-600 flex items-center gap-2">
-            <Package className="w-4 h-4" />
-            View and manage your order history
-          </p>
-        </div>
-        <Button
-          onClick={fetchOrders}
-          variant="outline"
-          size="sm"
-          disabled={loading}
-          className="self-start sm:self-auto hover:bg-sky-50 hover:border-sky-300 transition-all"
-        >
-          <RefreshCw
-            className={`w-4 h-4 mr-2 ${loading ? "animate-spin" : ""}`}
-          />
-          Refresh
-        </Button>
-      </div>
+
+
+
 
       {loading ? (
         <OrderTableSkeleton />
@@ -409,15 +435,15 @@ const OrdersPageContent = () => {
               <ShoppingBag className="w-12 h-12 text-purple-600" />
             </div>
             <h2 className="text-2xl font-bold text-gray-900 mb-3">
-              No Orders Yet
+              Chưa có đơn hàng
             </h2>
             <p className="text-gray-600 mb-8 max-w-md mx-auto">
-              You haven&apos;t placed any orders yet. Start shopping to see your orders here!
+              Bạn chưa đặt đơn hàng nào. Bắt đầu mua sắm để xem đơn hàng của bạn ở đây!
             </p>
             <Link href="/shop">
               <Button size="lg" className="bg-gradient-to-r from-purple-500 to-pink-600 hover:from-purple-600 hover:to-pink-700 shadow-lg group">
                 <ShoppingBag className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
-                Start Shopping
+                Bắt đầu mua sắm
                 <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
@@ -426,66 +452,105 @@ const OrdersPageContent = () => {
       ) : (
         <>
           {/* Desktop Table View */}
-          <div className="hidden md:block bg-white/80 backdrop-blur-sm rounded-2xl border-2 border-gray-200/60 overflow-hidden shadow-lg">
+          <div className="hidden md:block bg-white rounded-sm border-t-2 border-primary overflow-hidden">
+            <div className=" border-b-0 border-gray-200 p-3 flex justify-between items-center rounded-t-lg">
+              <div className="flex items-center gap-2">
+                <div className="w-1 h-4 bg-primary" /> {/* Vạch màu điểm nhấn */}
+                <span className="text-[13px] font-bold font-vietnam uppercase text-gray-600">
+                  Danh sách ({orders.length})
+                </span>
+              </div>
+
+              <Button
+                onClick={fetchOrders}
+                variant="outline"
+                size="sm"
+                disabled={loading}
+                className={cn(
+                  "group relative overflow-hidden self-start sm:self-auto",
+                  "font-vietnam font-medium tracking-tight",
+                  "border-primary bg-white text-primary", // Màu mặc định
+                  "hover:border-primary transition-all duration-500",
+                  "rounded-lg px-5 shadow-sm active:scale-95 disabled:opacity-70"
+                )}
+              >
+                {/* Lớp nền trượt màu Primary đậm */}
+                <span className="absolute inset-y-0 left-0 w-0 bg-primary transition-all duration-500 ease-out group-hover:w-full" />
+
+                <div className="relative z-10 flex items-center transition-colors duration-500 group-hover:text-white">
+                  <RefreshCw
+                    className={cn(
+                      "w-3.5 h-3.5 mr-2 transition-transform duration-700 ease-in-out",
+                      loading ? "animate-spin" : "group-hover:rotate-180"
+                    )}
+                  />
+                  <span className="relative">Làm mới</span>
+                </div>
+              </Button>
+
+
+
+
+            </div>
+            {/* Bảng đơn hàng dán ngay bên dưới này */}
+
             <Table>
               <TableHeader>
-                <TableRow className="bg-gradient-to-r from-gray-50 to-slate-50 border-b-2 border-gray-200/80 hover:bg-gradient-to-r">
-                  <TableHead className="font-bold text-gray-700">Order ID</TableHead>
-                  <TableHead className="font-bold text-gray-700">Date</TableHead>
-                  <TableHead className="font-bold text-gray-700">Items</TableHead>
-                  <TableHead className="font-bold text-gray-700">Total</TableHead>
-                  <TableHead className="font-bold text-gray-700">Status</TableHead>
-                  <TableHead className="font-bold text-gray-700">Payment</TableHead>
-                  <TableHead className="font-bold text-gray-700">Actions</TableHead>
+                <TableRow className="bg-gray-50/50 border-b border-gray-200 hover:bg-transparent">
+                  <TableHead className="font-vietnam font-bold text-gray-900 uppercase text-[12px] tracking-wider">Order ID</TableHead>
+                  <TableHead className="font-vietnam font-bold text-gray-900 uppercase text-[12px] tracking-wider">Ngày đặt</TableHead>
+                  <TableHead className="font-vietnam font-bold text-gray-900 uppercase text-[12px] tracking-wider">Sản phẩm</TableHead>
+                  <TableHead className="font-vietnam font-bold text-gray-900 uppercase text-[12px] tracking-wider">Tổng tiền</TableHead>
+                  <TableHead className="font-vietnam font-bold text-gray-900 uppercase text-[12px] tracking-wider">Trạng thái</TableHead>
+                  <TableHead className="font-vietnam font-bold text-gray-900 uppercase text-[12px] tracking-wider">Thanh toán</TableHead>
+                  <TableHead className="font-vietnam font-bold text-gray-900 uppercase text-[12px] tracking-wider text-right">Thao tác</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {orders.map((order) => (
-                  <TableRow key={order._id} className="hover:bg-gradient-to-r hover:from-sky-50/50 hover:to-blue-50/50 transition-all border-b border-gray-100">
-                    <TableCell className="font-mono text-sm font-semibold text-gray-700">
-                      #{order._id.slice(-8)}
+                  <TableRow key={order._id} className="group hover:bg-sky-50/30 transition-colors border-b border-gray-100 last:border-0">
+                    {/* Order ID với phong cách mã số báo chí */}
+                    <TableCell className="font-mono text-[13px] font-bold text-primary py-4">
+                      #{order._id.slice(-8).toUpperCase()}
                     </TableCell>
+
+                    {/* Date */}
+                    <TableCell className="font-vietnam text-gray-600 text-[13px]">
+                      {formatDate(order.createdAt)}
+                    </TableCell>
+
+                    {/* Items */}
                     <TableCell>
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
-                        <Calendar className="w-4 h-4 text-sky-500" />
-                        {formatDate(order.createdAt)}
-                      </div>
+                      <span className="font-vietnam text-[13px] text-gray-700 bg-gray-100 px-2 py-1 rounded-sm">
+                        {order.items.length} món
+                      </span>
                     </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Package className="w-4 h-4 text-purple-500" />
-                        <span className="text-sm font-medium text-gray-700">
-                          {order.items.length} item{order.items.length > 1 ? "s" : ""}
-                        </span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="font-bold text-emerald-600">
+
+                    {/* Total - Nhấn mạnh số tiền */}
+                    <TableCell className="font-vietnam font-bold text-gray-900 text-[14px]">
                       {formatPrice(order.total)}
                     </TableCell>
+
+                    {/* Status Badge - Phẳng và tối giản */}
                     <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={`${getStatusColor(order.status)} capitalize font-semibold shadow-sm`}
-                      >
+                      <Badge variant="outline" className={`${getStatusColor(order.status)} rounded-none border-0 border-l-2 font-vietnam px-2 py-0.5 text-[11px] font-bold uppercase tracking-tighter`} >
                         {order.status.replace("_", " ")}
                       </Badge>
                     </TableCell>
+
+                    {/* Payment Status */}
                     <TableCell>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 font-vietnam text-[13px] text-gray-600">
                         {getPaymentStatusIcon(order.status)}
-                        <span className="text-sm font-medium text-gray-600">
-                          {getPaymentStatusText(order.status)}
-                        </span>
+                        {getPaymentStatusText(order.status)}
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
+
+                    {/* Actions - Tinh gọn nút bấm */}
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-1">
                         <Link href={`/client/user/orders/${order?._id}`}>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            className="hover:bg-sky-50 hover:border-sky-300 transition-all"
-                          >
+                          <Button variant="ghost" size="sm" className="h-8 w-8 p-0 text-gray-400 hover:text-primary hover:bg-primary/5">
                             <Eye className="w-4 h-4" />
                           </Button>
                         </Link>
@@ -495,44 +560,91 @@ const OrdersPageContent = () => {
                             <Button
                               size="sm"
                               onClick={() => handlePayNow(order)}
-                              className="bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-md"
+                              className="h-8 bg-primary hover:bg-primary-hover text-white font-vietnam text-[12px] px-3 rounded-sm shadow-none"
                             >
-                              <CreditCard className="w-4 h-4 mr-1" />
-                              Pay Now
+                              Thanh toán
                             </Button>
 
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
                                 <Button
-                                  variant="destructive"
+                                  variant="ghost"
                                   size="sm"
-                                  disabled={deletingOrder === order._id}
-                                  className="hover:bg-red-600 shadow-md"
+                                  className="h-9 w-9 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all active:scale-90"
                                 >
                                   <Trash2 className="w-4 h-4" />
                                 </Button>
                               </AlertDialogTrigger>
-                              <AlertDialogContent className="rounded-2xl">
-                                <AlertDialogHeader>
-                                  <AlertDialogTitle className="text-xl">
-                                    Delete Order
-                                  </AlertDialogTitle>
-                                  <AlertDialogDescription className="text-base">
-                                    Are you sure you want to delete this order?
-                                    This action cannot be undone.
-                                  </AlertDialogDescription>
-                                </AlertDialogHeader>
-                                <AlertDialogFooter>
-                                  <AlertDialogCancel className="rounded-lg">Cancel</AlertDialogCancel>
-                                  <AlertDialogAction
-                                    onClick={() => handleDeleteOrder(order._id)}
-                                    className="bg-red-600 hover:bg-red-700 rounded-lg"
+
+                              <AlertDialogContent className="max-w-[420px] p-0 border-none bg-white shadow-2xl rounded-[24px] overflow-hidden">
+                                {/* Thanh trang trí phía trên với hiệu ứng chạy màu */}
+                                <motion.div
+                                  initial={{ width: 0 }}
+                                  animate={{ width: "100%" }}
+                                  transition={{ duration: 0.8, ease: "circOut" }}
+                                  className="h-1.5 bg-gradient-to-r from-red-400 via-red-600 to-red-400"
+                                />
+
+                                <div className="p-8 flex flex-col items-center">
+                                  {/* 1. Icon Cảnh báo với hiệu ứng Nảy và Rung */}
+                                  <motion.div
+                                    initial={{ scale: 0, rotate: -45 }}
+                                    animate={{ scale: 1, rotate: 0 }}
+                                    transition={{ type: "spring", stiffness: 260, damping: 20, delay: 0.1 }}
+                                    className="relative mb-6"
                                   >
-                                    Delete
-                                  </AlertDialogAction>
-                                </AlertDialogFooter>
+                                    <div className="absolute inset-0 bg-red-100 rounded-full animate-ping opacity-20" />
+                                    <div className="relative bg-red-50 p-5 rounded-full">
+                                      <Trash2 className="w-8 h-8 text-red-600" />
+                                    </div>
+                                  </motion.div>
+
+                                  {/* 2. Nội dung text xuất hiện dần từ dưới lên */}
+                                  <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.2 }}
+                                    className="text-center space-y-3"
+                                  >
+                                    <AlertDialogTitle className="text-[22px] font-bold text-gray-900 font-vietnam">
+                                      Xác nhận xóa đơn hàng
+                                    </AlertDialogTitle>
+                                    <AlertDialogDescription className="text-gray-500 leading-relaxed font-vietnam px-4">
+                                      Hành động này <span className="text-red-600 font-bold">không thể hoàn tác</span>.
+                                      Mọi dữ liệu của đơn hàng sẽ biến mất vĩnh viễn.
+                                    </AlertDialogDescription>
+                                  </motion.div>
+
+                                  {/* 3. Nút bấm với hiệu ứng hover nâng cao */}
+                                  <motion.div
+                                    initial={{ opacity: 0, y: 10 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: 0.3 }}
+                                    className="flex w-full gap-3 mt-8"
+                                  >
+                                    <AlertDialogCancel className="flex-1 h-12 rounded-2xl border-gray-100 font-vietnam font-medium hover:bg-gray-50 transition-all">
+                                      Quay lại
+                                    </AlertDialogCancel>
+
+                                    <AlertDialogAction
+                                      onClick={() => handleDeleteOrder(order._id)}
+                                      className="flex-[1.5] h-12 bg-red-600 hover:bg-red-700 text-white font-bold rounded-2xl shadow-lg shadow-red-200 transition-all active:scale-95 flex items-center justify-center"
+                                    >
+                                      {deletingOrder === order._id ? (
+                                        <motion.div
+                                          animate={{ rotate: 360 }}
+                                          transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
+                                          className="h-5 w-5 border-2 border-white/30 border-t-white rounded-full"
+                                        />
+                                      ) : (
+                                        "Xác nhận xóa"
+                                      )}
+                                    </AlertDialogAction>
+                                  </motion.div>
+                                </div>
                               </AlertDialogContent>
                             </AlertDialog>
+
                           </>
                         )}
                       </div>
@@ -542,6 +654,7 @@ const OrdersPageContent = () => {
               </TableBody>
             </Table>
           </div>
+
 
           {/* Mobile Card View */}
           <div className="md:hidden space-y-4">

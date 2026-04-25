@@ -107,7 +107,7 @@ const AllProductsPage = () => {
     };
 
     return (
-        <Container className="bg-[#f4f4f4] min-h-screen pb-20 font-sans">
+        <Container className="bg-white min-h-screen pb-20 font-vietnam">
             {/* Breadcrumb - Style Watsons tối giản */}
             <div className="">
                 <div className="container mx-auto px-4 py-3">
@@ -122,18 +122,14 @@ const AllProductsPage = () => {
             </div>
 
             <div className="container mx-auto ">
-                {/* Tiêu đề trang */}
-                {/* <h1 className="text-2xl font-black text-gray-900 mb-6 uppercase italic">
-                    Tất cả sản phẩm
-                </h1> */}
 
                 <div className="flex flex-col lg:flex-row gap-6">
                     {/* SIDEBAR - BỘ LỌC */}
                     <aside className="w-full lg:w-72 shrink-0">
-                        <div className="bg-white rounded-sm border border-gray-200 sticky top-24">
-                            <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                                <h3 className="font-bold text-[13px] uppercase tracking-tight">Bộ lọc tìm kiếm</h3>
-                                <button onClick={handleClearFilters} className="text-[11px] text-primary underline font-bold">Xóa tất cả</button>
+                        <div className="bg-white rounded-lg border border-gray-200 sticky top-24">
+                            <div className="p-4 border-b border-gray-100 flex justify-between items-center bg-gray-50 rounded-lg">
+                                <h3 className="font-bold text-[13px]  font-vietnam uppercase tracking-tight">Bộ lọc tìm kiếm</h3>
+                                <button onClick={handleClearFilters} className="text-[11px] text-primary  font-vietnam underline font-bold">Xóa tất cả</button>
                             </div>
 
                             <div className="p-4 space-y-8">
@@ -159,7 +155,7 @@ const AllProductsPage = () => {
 
                                 {/* Thương hiệu */}
                                 <div>
-                                    <h4 className="font-bold text-[13px] mb-4 flex justify-between items-center">
+                                    <h4 className="font-bold font-vietnam text-[13px] mb-4 flex justify-between items-center">
                                         THƯƠNG HIỆU <span className="text-gray-400">+</span>
                                     </h4>
                                     <div className="space-y-3 max-h-60 overflow-y-auto pr-2 custom-scrollbar">
@@ -170,24 +166,24 @@ const AllProductsPage = () => {
                                                         type="checkbox"
                                                         checked={selectedBrandIds.includes(brand.id)}
                                                         onChange={() => handleBrandToggle(brand.id)}
-                                                        className="peer appearance-none w-5 h-5 border-2 border-gray-300 checked:bg-primary checked:border-primary transition-all mr-3"
+                                                        className="peer appearance-none w-5 h-5 border-2 border-gray-300 checked:bg-primary rounded-sm checked:border-primary transition-all mr-3"
                                                     />
                                                     <svg className="absolute w-3 h-3 text-white left-1 opacity-0 peer-checked:opacity-100 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="4">
                                                         <path d="M5 13l4 4L19 7" />
                                                     </svg>
                                                 </div>
-                                                <span className="text-[13px] text-gray-700 group-hover:text-primary">{brand.name}</span>
+                                                <span className="text-[13px] text-gray-700 group-hover:text-primary font-vietnam">{brand.name}</span>
                                             </label>
                                         ))}
                                         {brands.length === 0 && (
-                                            <p className="text-xs text-gray-400 italic">Đang tải...</p>
+                                            <p className="text-xs text-gray-400 italic font-vietnam">Đang tải...</p>
                                         )}
                                     </div>
                                 </div>
 
                                 {/* Khoảng giá */}
                                 <div>
-                                    <h4 className="font-bold text-[13px] mb-4">KHOẢNG GIÁ</h4>
+                                    <h4 className="font-bold font-vietnam text-[13px] mb-4">KHOẢNG GIÁ</h4>
                                     <div className="space-y-3">
                                         {[
                                             { label: "Dưới 200.000đ", id: "p1" },
@@ -196,7 +192,7 @@ const AllProductsPage = () => {
                                         ].map((price) => (
                                             <label key={price.id} className="flex items-center cursor-pointer group">
                                                 <input type="radio" name="price" id={price.id} className="w-4 h-4 text-primary border-gray-300 focus:ring-0" />
-                                                <span className="ml-3 text-[13px] text-gray-700 group-hover:text-primary">{price.label}</span>
+                                                <span className="ml-3 text-[13px] text-gray-700 group-hover:text-primary font-vietnam">{price.label}</span>
                                             </label>
                                         ))}
                                     </div>
@@ -206,7 +202,7 @@ const AllProductsPage = () => {
                             <div className="p-4 border-t border-gray-100">
                                 <button
                                     onClick={() => fetchProducts(0)}
-                                    className="w-full py-3 bg-[#00b2bd] text-white text-xs font-black uppercase tracking-widest hover:bg-[#008e96] transition-all"
+                                    className="w-full py-3 bg-primary text-white text-xs font-vietnam font-black uppercase tracking-widest hover:bg-primary-hover rounded-lg transition-all"
                                 >
                                     Áp dụng bộ lọc
                                 </button>
@@ -215,34 +211,34 @@ const AllProductsPage = () => {
                     </aside>
 
                     {/* MAIN CONTENT */}
-                    <main className="flex-1 bg-white p-6">
+                    <main className="flex-1 bg-white">
                         {/* Toolbar tối giản kiểu Watsons */}
                         <div className="flex flex-wrap justify-between items-end mb-6 pb-4 border-b border-gray-200 gap-4">
                             <div>
-                                <p className="text-[13px] text-gray-500 font-medium">
+                                <p className="text-[13px] text-gray-500 font-medium font-vietnam">
                                     Tìm thấy <span className="text-gray-900 font-bold">{totalItems}</span> sản phẩm
                                 </p>
                             </div>
 
                             <div className="flex items-center gap-3">
-                                <span className="text-[13px] font-bold text-gray-900 uppercase tracking-tighter">Sắp xếp:</span>
+                                <span className="text-[13px] font-bold text-gray-900 uppercase tracking-tighter font-vietnam">Sắp xếp:</span>
 
                                 {/* Khối Dropdown chính */}
                                 <div className="relative group min-w-[140px]">
                                     <div className="flex items-center justify-between px-3 py-2 bg-white border border-gray-200 rounded-md cursor-pointer hover:border-gray-300 transition-all">
-                                        <span className="text-[13px] font-medium text-gray-700">{sortLabel[sortBy]}</span>
+                                        <span className="text-[13px] font-medium text-gray-700 font-vietnam whitespace-nowrap">{sortLabel[sortBy]}</span>
                                         <svg className="w-4 h-4 text-gray-400 group-hover:rotate-180 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
                                         </svg>
                                     </div>
 
                                     <div className="absolute top-full left-0 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
-                                        <div className="flex flex-col">
+                                        <div className="flex flex-col whitespace-nowrap">
                                             {(Object.keys(sortLabel) as SortOption[]).map((key) => (
                                                 <div
                                                     key={key}
                                                     onClick={() => handleSortChange(key)}
-                                                    className={`px-3 py-2.5 text-[13px] cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors ${sortBy === key ? 'text-primary font-bold bg-gray-50' : 'text-gray-700 hover:bg-gray-50'}`}
+                                                    className={`px-3 py-2.5 text-[13px] cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors ${sortBy === key ? 'text-primary font-bold bg-gray-50' : 'text-gray-700 hover:bg-gray-50'} font-vietnam`}
                                                 >
                                                     {sortLabel[key]}
                                                 </div>

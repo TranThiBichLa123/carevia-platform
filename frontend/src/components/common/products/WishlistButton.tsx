@@ -6,7 +6,7 @@ import { useUserStore, useWishlistStore } from "../../../lib/store";
 import { addToWishlist, removeFromWishlist } from "../../../lib/wishlistApi";
 import { Product } from "@/types_enum/devices";
 import { useIsHydrated } from "../../../hooks";
-
+import { cn } from "@/lib/utils";
 interface WishlistButtonProps {
   product: Product;
   className?: string;
@@ -20,30 +20,26 @@ const WishlistButton: React.FC<WishlistButtonProps> = ({
   const {
     isInWishlist,
     addToWishlist: addToWishlistStore,
-    removeFromWishlist: removeFromWishlistStore,
+    removeFromWishlist: removeFromWishlistStore
   } = useWishlistStore();
+
   const [isLoading, setIsLoading] = useState(false);
   const isHydrated = useIsHydrated();
-  // --- BƯỚC 1: LẤY ID CHUẨN ---
-  // Đảm bảo productId là một chuỗi có giá trị, hoặc null
-  const productId = (product.id || (product as any).value?.id || (product as any)._id)?.toString() || null;
 
-  // --- BƯỚC 2: CHECK TRẠNG THÁI ---
-  // Chỉ check khi productId tồn tại, nếu không có ID thì không bao giờ đỏ
-  const isInWishlistState = (isHydrated && productId) ? isInWishlist(productId) : false;
+  const productId = (product.id || (product as any).value?.id || (product as any)._id)?.toString() || null;
+  const isInWishlistState = isHydrated && productId ? isInWishlist(productId) : false;
 
   const handleWishlistToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
 
     if (!productId) {
-      console.error("Product data is missing ID:", product);
-      toast.error("Missing product ID");
+      toast.error("Thiếu ID sản phẩm");
       return;
     }
 
     if (!isAuthenticated || !auth_token) {
-      toast.error("Please sign in to add items to wishlist");
+      toast.error("Vui lòng đăng nhập để thực hiện");
       return;
     }
 
@@ -52,27 +48,30 @@ const WishlistButton: React.FC<WishlistButtonProps> = ({
       if (isInWishlistState) {
         await removeFromWishlist(productId, auth_token);
         removeFromWishlistStore(productId);
-        toast.success("Removed from wishlist");
+        toast.success("Đã xóa khỏi danh sách yêu thích");
       } else {
         await addToWishlist(productId, auth_token);
-
-        // Đảm bảo object lưu vào store có trường .id khớp với productId đã tìm
         const productToStore = { ...product, id: productId };
         addToWishlistStore(productToStore);
-
-        toast.success("Added to wishlist");
+        toast.success("Đã thêm vào danh sách yêu thích");
       }
     } catch (error) {
-      toast.error("Failed to update wishlist");
+      toast.error("Cập nhật thất bại");
     } finally {
       setIsLoading(false);
     }
   };
 
-  // --- BƯỚC 3: RENDER ---
-  if (!isAuthenticated || !isHydrated || !productId) {
-    return null;
+  // Hydration Fix: Giữ nguyên cấu trúc thẻ để Server/Client khớp nhau
+  if (!isHydrated) {
+    return (
+      <div className={cn("p-2 rounded-full text-gray-200", className)}>
+        <Heart size={20} />
+      </div>
+    );
   }
+
+  if (!productId || !isAuthenticated) return null;
 
   return (
     <button
