@@ -715,7 +715,7 @@ const CartPageClient = () => {
               size="lg"
               onClick={handleCheckout}
               disabled={isCheckingOut || cartItemsWithQuantities.length === 0}
-              className="w-full mt-6 bg-black hover:bg-gray-800 text-white rounded-full py-3 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full mt-6 bg-black  text-white rounded-full py-3 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {isCheckingOut ? (
                 <>

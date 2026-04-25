@@ -19,7 +19,7 @@ const buttonVariants = cva(
         outline: "border border-input bg-background shadow-sm hover:bg-slate-100 hover:text-slate-900",
 
         // 4. Secondary: Màu nhẹ nhàng
-        secondary: "bg-slate-100 text-slate-900 shadow-sm hover:bg-slate-200",
+        fortrashicon: " text-slate-900  hover:bg-slate-200",
 
         // 5. Ghost: SỬA LẠI - Không dùng accent, dùng slate-100 cho thanh lịch
         ghost: "hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-slate-50",

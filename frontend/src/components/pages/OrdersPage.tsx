@@ -415,8 +415,8 @@ const OrdersPageContent = () => {
         </nav>
       </div> */}
       <PageBreadcrumb
-        items={[{ label: "User", href: "/user" }]}
-        currentPage="Orders"
+        items={[]}
+        currentPage="Đơn hàng của bạn"
         showSocialShare={false}
       />
 
@@ -568,7 +568,7 @@ const OrdersPageContent = () => {
                             <AlertDialog>
                               <AlertDialogTrigger asChild>
                                 <Button
-                                  variant="ghost"
+                                  variant="fortrashicon"
                                   size="sm"
                                   className="h-9 w-9 rounded-full text-gray-400 hover:text-red-600 hover:bg-red-50 transition-all active:scale-90"
                                 >

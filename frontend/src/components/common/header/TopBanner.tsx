@@ -7,7 +7,7 @@ import SelectCurrency from "./SelectCurrency";
 
 const TopBanner = () => {
   return (
-    <div className="w-full bg-[#A96BDE] text-white py-1 text-sm font-medium">
+    <div className="w-full bg-[#A96BDE] text-white text-sm font-medium">
       <Container className="grid grid-cols-1 md:grid-cols-3">
         <div className="flex items-center gap-5">
           {topHelpCenter?.map((item) => (

@@ -12,23 +12,24 @@ const topHelpCenter = [
 
 const footerTopData = [
   {
-    title: "High Quality Selection",
-    subTitle: "Zero-defect quality control.",
+    title: "Chất lượng đảm bảo",
+    subTitle: "Kiểm soát chất lượng không lỗi.",
     icon: ShieldCheck, // Đổi từ image thành icon
   },
   {
-    title: "Affordable Prices",
-    subTitle: "Factory direct prices for maximum savings",
+    title: "Giá cả phải chăng",
+    subTitle: "Giá trực tiếp từ nhà máy, tiết kiệm tối đa",
     icon: Tags,
   },
   {
-    title: "Express Shipping",
-    subTitle: "Fast, reliable delivery from global warehouse",
+    title: "Giao hàng nhanh",
+    subTitle: "Giao hàng nhanh chóng, đáng tin cậy từ kho toàn cầu",
     icon: Truck,
   },
   {
-    title: "Worry free",
-    subTitle: "Instant access to professional support",
+    title: "Yên tâm",
+
+    subTitle: "Truy cập ngay hỗ trợ chuyên nghiệp",
     icon: LifeBuoy,
   },
 ];

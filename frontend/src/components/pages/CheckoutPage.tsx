@@ -438,15 +438,11 @@ const CheckoutPageContent = () => {
     <Container className="py-8">
       {/* Breadcrumb */}
       <PageBreadcrumb
-        items={[{ label: "Cart", href: "/cart" }]}
-        currentPage="Checkout"
+        items={[{ label: "Đơn hàng của bạn", href: "/client/user/orders" }]}
+        currentPage="Thanh toán"
         showSocialShare={false}
       />
 
-      <div className="mb-8">
-        <h1 className="text-4xl font-bold text-gray-900 mb-2">Checkout</h1>
-        <p className="text-gray-600">Complete your order</p>
-      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Order Details */}
