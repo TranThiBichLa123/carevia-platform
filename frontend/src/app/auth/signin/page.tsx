@@ -9,7 +9,9 @@ import { ENV } from "@/config/env";
 import { authService } from "@/services/auth/auth.service";
 import { useUserStore } from "@/lib/store";
 import { AuthResponse } from "@/services/auth/auth.types";
-const logoImage = "/assets/images/logo_final.png";
+import { AnimatePresence } from "framer-motion";
+
+const logoImage = "/assets/images/smallLogo.png";
 const leftImage = "/assets/images/leftsignin.png";
 
 export default function LoginPage() {
@@ -19,7 +21,26 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { setAuthToken, updateUser } = useUserStore();
   const animationSpeed = 0.8;
+  // Hiệu ứng chữ trượt nhẹ nhàng
+  const textVariants = {
+    initial: { opacity: 0, y: 15 },
+    animate: { opacity: 1, y: 0, transition: { duration: 0.2 } },
+    exit: { opacity: 0, y: -15, transition: { duration: 0.2 } }
+  };
 
+  // Hiệu ứng mũi tên chuyển động tịnh tiến (Ping-pong)
+  const arrowVariants = {
+    rest: { x: 0 },
+    hover: { x: 4 },
+    submitting: {
+      x: [0, 8, 0], // Chạy tới 8px rồi quay về 0
+      transition: {
+        repeat: Infinity,
+        duration: 0.8,
+        ease: "easeInOut" as const,
+      }
+    }
+  };
   const getRedirectPath = (role: string) => {
     if (role === "ADMIN") {
       return "/admin";
@@ -57,7 +78,7 @@ export default function LoginPage() {
       // Lưu thêm các token khác vào localStorage nếu cần cho logic cũ
       localStorage.setItem(ENV.TOKEN_KEY, response.accessToken);
       localStorage.setItem(ENV.REFRESH_TOKEN_KEY, response.refreshToken);
-     toast.success("Đăng nhập thành công! Chào mừng " + response.user.username);
+      toast.success("Đăng nhập thành công! Chào mừng " + response.user.username);
 
 
       router.push(getRedirectPath(response.user.role));
@@ -157,12 +178,10 @@ export default function LoginPage() {
             }}
           >
             <div
-              className="w-20 h-20 rounded-full bg-linear-to-br from-[#ecf284] via-[#eff299] to-[#f2f2a5] opacity-90 flex items-center justify-center shadow-xl"
-              style={{
-                boxShadow: "0 8px 20px rgba(236, 242, 132, 0.4), inset 0 2px 10px rgba(255, 255, 255, 0.5)",
-              }}
+              className="w-20 h-20 rounded-full bg-linear-to-br bg-blue-100 opacity-90 flex items-center justify-center shadow-xl"
+
             >
-              <ShoppingCart className="w-10 h-10 text-[#20afb2]" strokeWidth={2.5} />
+              <ShoppingCart className="w-10 h-10 text-[var(--primary)]" strokeWidth={2.5} />
             </div>
           </motion.div>
 
@@ -182,12 +201,10 @@ export default function LoginPage() {
             }}
           >
             <div
-              className="w-32 h-32 rounded-full bg-linear-to-br from-[#ecf284] via-[#eff299] to-[#f2f2a5] opacity-85 flex items-center justify-center shadow-xl"
-              style={{
-                boxShadow: "0 10px 30px rgba(236, 242, 132, 0.5), inset 0 2px 10px rgba(255, 255, 255, 0.5)",
-              }}
+              className="w-32 h-32 rounded-full bg-linear-to-br bg-blue-100 opacity-85 flex items-center justify-center shadow-xl"
+
             >
-              <ShoppingBag className="w-16 h-16 text-[#20afb2]" strokeWidth={2.5} />
+              <ShoppingBag className="w-16 h-16 text-[var(--primary)]" strokeWidth={2.5} />
             </div>
           </motion.div>
 
@@ -207,12 +224,10 @@ export default function LoginPage() {
             }}
           >
             <div
-              className="w-24 h-24 rounded-full bg-linear-to-br from-[#ecf284] via-[#eff299] to-[#f2f2a5] opacity-90 flex items-center justify-center shadow-xl"
-              style={{
-                boxShadow: "0 8px 25px rgba(236, 242, 132, 0.45), inset 0 2px 10px rgba(255, 255, 255, 0.5)",
-              }}
+              className="w-24 h-24 rounded-full bg-linear-to-br bg-blue-100 opacity-90 flex items-center justify-center shadow-xl"
+
             >
-              <Package className="w-12 h-12 text-[#20afb2]" strokeWidth={2.5} />
+              <Package className="w-12 h-12 text-[var(--primary)]" strokeWidth={2.5} />
             </div>
           </motion.div>
 
@@ -226,7 +241,7 @@ export default function LoginPage() {
             <motion.img
               src={leftImage}
               alt="3D Shopping illustration"
-              className="w-full h-56 object-cover"
+              className="w-full h-56 object-contain"
               animate={{
                 scale: [1, 1.05, 1],
               }}
@@ -264,7 +279,7 @@ export default function LoginPage() {
           animate="visible"
           variants={itemVariants}
         >
-          <div className="flex items-center gap-3 mb-6">
+          <div className="flex items-center gap-0.5 mb-6">
             <motion.div
               initial={{ opacity: 0, scale: 0.8 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -287,7 +302,7 @@ export default function LoginPage() {
                 <motion.img
                   src={logoImage}
                   alt="Carevia logo"
-                  className="h-16 w-16 object-contain drop-shadow-lg"
+                  className="h-16 w-16 object-contain"
                   animate={{ y: [0, -2, 0] }}
                   transition={{
                     duration: 2.6,
@@ -299,7 +314,7 @@ export default function LoginPage() {
             </motion.div>
 
             <motion.h3
-              className="text-2xl font-semibold bg-linear-to-r from-[#20afb2] to-[#10aeb2] bg-clip-text text-transparent"
+              className="text-2xl font-semibold bg-linear-to-r bg-primary bg-clip-text text-transparent"
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
@@ -309,11 +324,11 @@ export default function LoginPage() {
           </div>
 
           <motion.div className="mb-8" variants={itemVariants}>
-            <motion.h2 className="text-4xl text-gray-700 font-medium mb-3">
-              My account
+            <motion.h2 className="text-4xl  text-gray-700 font-medium mb-3">
+              Chào mừng bạn
             </motion.h2>
-            <motion.p className="text-xl text-gray-600">
-              Sign in to continue
+            <motion.p className="text-xl  text-gray-600">
+              Đăng nhập để tiếp tục
             </motion.p>
           </motion.div>
 
@@ -321,7 +336,7 @@ export default function LoginPage() {
             <div className="space-y-4">
               <motion.div variants={itemVariants}>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email or username
+                  Email hoặc tên người dùng
                 </label>
                 <motion.div
                   className="relative"
@@ -344,7 +359,7 @@ export default function LoginPage() {
 
               <motion.div variants={itemVariants}>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Password
+                  Mật khẩu
                 </label>
                 <motion.div
                   className="relative"
@@ -372,56 +387,61 @@ export default function LoginPage() {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
-                  className="h-4 w-4 rounded cursor-pointer border-gray-200 bg-gray-50 text-[#20afb2] focus:ring-[#20afb2] focus:ring-2 focus:ring-offset-0 transition-all"
-                  style={{ accentColor: "#20afb2" }}
+                  // Dùng text-primary để dấu tick có màu xanh, viền gray-200 cho mỏng nhẹ
+                  className="h-4 w-4 rounded-md border border-gray-200 cursor-pointer text-primary focus:ring-primary/20 focus:ring-2 transition-all"
+                  style={{ accentColor: "var(--primary)" }}
                   whileTap={{ scale: 0.9 }}
                 />
                 <motion.label
                   htmlFor="remember-me"
-                  className="ml-2 block text-sm text-gray-700 cursor-pointer"
-                  whileHover={{ color: "#20afb2" }}
+                  className="ml-2 block text-sm font-medium cursor-pointer select-none"
+                  // Ép màu tím luôn hiển thị ở trạng thái mặc định
+                  style={{ color: "var(--purple)" }}
+                  // Hiệu ứng hover cho sáng hơn một chút để đỡ chán
+                  whileHover={{ color: "var(--purple-hover)", x: 2 }}
                 >
-                  Remember me
+                  Ghi nhớ đăng nhập
                 </motion.label>
+
               </div>
+
 
               <div className="text-sm">
                 <motion.a
                   href="/auth/forgotpassword"
                   className="transition-colors duration-200"
-                  style={{ color: "#ff4162" }}
-                  whileHover={{ x: 2, color: "#e63855" }}
+                  style={{ color: "var(--purple)" }}
+                  whileHover={{ x: 2, color: "var(--purple-hover)" }}
                 >
-                  Forgot password?
+                  Quên mật khẩu?
                 </motion.a>
               </div>
             </motion.div>
 
-            <motion.div variants={itemVariants}>
-              <motion.button
-                type="submit"
-                disabled={isSubmitting}
-                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-lg text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#20afb2] transition-all duration-200 disabled:cursor-not-allowed"
-                style={{
-                  background: "linear-gradient(135deg, #20afb2 0%, #18adb0 50%, #10aeb2 100%)",
-                  boxShadow: "0 8px 20px rgba(32, 175, 178, 0.3), 0 2px 8px rgba(0, 0, 0, 0.1)",
-                  opacity: isSubmitting ? 0.8 : 1,
-                }}
-                variants={buttonHoverVariants}
-                initial="rest"
-                whileHover={isSubmitting ? "rest" : "hover"}
-                whileTap="tap"
-              >
-                {isSubmitting ? "Signing in..." : "Sign in"}
+
+            <motion.button
+              type="submit"
+              disabled={isSubmitting}
+              className="relative w-full flex justify-center items-center py-3 px-4 rounded-xl text-white font-bold bg-primary shadow-lg transition-all"
+              style={{
+                // Đổ bóng đơn giản theo tông Primary
+                boxShadow: "0 10px 15px -3px rgba(21, 159, 216, 0.3)",
+              }}
+              whileHover={{
+                scale: 1.02,
+                backgroundColor: "var(--primary-hover)"
+              }}
+              whileTap={{ scale: 0.98 }}
+            >
+              <span className="relative z-10 flex items-center tracking-wide">
+                {isSubmitting ? "Đang tải..." : "Đăng nhập"}
                 <motion.svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-6 w-6 ml-2"
+                  className="h-5 w-5 ml-2"
                   fill="none"
                   viewBox="0 0 24 24"
                   stroke="currentColor"
-                  initial={{ x: 0 }}
-                  whileHover={{ x: isSubmitting ? 0 : 3 }}
-                  transition={{ type: "spring", stiffness: 400 }}
+                  animate={{ x: isSubmitting ? 0 : [0, 3, 0] }}
+                  transition={{ repeat: Infinity, duration: 1.5 }}
                 >
                   <path
                     strokeLinecap="round"
@@ -430,8 +450,10 @@ export default function LoginPage() {
                     d="M14 5l7 7m0 0l-7 7m7-7H3"
                   />
                 </motion.svg>
-              </motion.button>
-            </motion.div>
+              </span>
+            </motion.button>
+
+
           </form>
 
           <motion.div
@@ -440,11 +462,11 @@ export default function LoginPage() {
             transition={{ delay: 0.2 }}
           >
             <p className="text-gray-600">
-              Don't have an account?{" "}
+              Không có tài khoản?{" "}
               <a
                 href="/auth/signup"
                 className="font-medium transition-colors duration-200"
-                style={{ color: "#ff4162" }}
+                style={{ color: "var(--purple)" }}
               >
                 Sign up
               </a>
