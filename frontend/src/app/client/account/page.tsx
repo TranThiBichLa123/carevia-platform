@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Container from "@/components/common/Container";
 import { useUserStore } from "@/lib/store";
@@ -14,6 +14,10 @@ import {
   LogOut,
   Shield,
   Mail,
+  RefreshCw,
+  Camera,
+  Award,
+  Star,
 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +30,10 @@ import AccountNotificationsTab from "@/components/pages/account/NotificationsTab
 import AccountSettingsTab from "@/components/pages/account/SettingsTab";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
 import { motion } from "framer-motion";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { toast } from "sonner";
+import authApi from "@/lib/authApi";
 
 const tabs = [
   { key: "profile", label: "Hồ sơ", icon: User },
@@ -40,6 +48,10 @@ const AccountPage = () => {
   const router = useRouter();
   const { authUser, isAuthenticated } = useUserStore();
   const [activeTab, setActiveTab] = useState("profile");
+  const avatarInputRef = useRef<HTMLInputElement>(null);
+  const [isAvatarUploading, setIsAvatarUploading] = useState(false);
+  const { updateUser, logoutUser, verifyAuth, refreshProfile } = useUserStore();
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   useEffect(() => {
     const tab = searchParams.get("tab");
@@ -51,6 +63,39 @@ const AccountPage = () => {
   const handleTabChange = (key: string) => {
     setActiveTab(key);
     router.replace(`/client/account?tab=${key}`, { scroll: false });
+  };
+
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
+      toast.error("Chỉ chấp nhận ảnh JPG, PNG hoặc WEBP.");
+      return;
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Ảnh không được vượt quá 5MB.");
+      return;
+    }
+
+    setIsAvatarUploading(true);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const response = await authApi.upload<{ avatarUrl: string }>("/accounts/me/avatar", formData);
+      if (response.success) {
+        await refreshProfile();
+        toast.success("Cập nhật ảnh đại diện thành công!");
+      } else {
+        throw new Error(response.error?.message || "Không thể tải ảnh lên.");
+      }
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Không thể tải ảnh lên.");
+    } finally {
+      setIsAvatarUploading(false);
+      if (avatarInputRef.current) avatarInputRef.current.value = "";
+    }
   };
 
   if (!isAuthenticated || !authUser) {
@@ -124,85 +169,158 @@ const AccountPage = () => {
 
       {/* Profile Banner */}
 
-      <motion.div
-        initial={{ opacity: 0, scale: 0.95 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.5 }}
-        className="relative bg-gradient-to-r from-primary to-purple rounded-2xl p-8 mb-8 overflow-hidden shadow-lg border border-white/10"
-      >
-        {/* Lớp phủ họa tiết chìm cho sang hơn */}
-        <div className="absolute inset-0 opacity-10 bg-[url('https://transparenttextures.com')]" />
+      {/* ── Hero Profile Card ── */}
+      <Card className="border-none overflow-hidden shadow-xl bg-white">
+        {/* Banner - Màu Primary với Bong Bóng Blue-100 Animation */}
+        <div className="h-20 bg-primary relative overflow-hidden">
+          {/* Bong bóng 1 - Chuyển động lên xuống */}
+          <div
+            className="absolute top-[-20px] left-[10%] w-32 h-32 rounded-full bg-blue-100/20 animate-bounce duration-[3000ms]"
+            style={{ animationDuration: '6s' }}
+          />
 
-        {/* Quầng sáng trang trí */}
-        <div className="absolute -top-10 -left-10 w-40 h-40 bg-white/20 rounded-full blur-3xl" />
+          {/* Bong bóng 2 - Chuyển động xoay & trôi nổi */}
+          <div
+            className="absolute bottom-[-40px] right-[15%] w-48 h-48 rounded-full bg-blue-100/10 animate-pulse"
+            style={{ animationDuration: '4s' }}
+          />
 
-        <div className="relative flex flex-col md:flex-row items-center gap-6">
-          {/* Avatar Section */}
-          <motion.div
-            whileHover={{ scale: 1.05 }}
-            className="relative"
-          >
-            {authUser.avatar_url ? (
-              <img
-                src={authUser.avatar_url}
-                alt="Avatar"
-                className="h-24 w-24 rounded-full border-4 border-white/30 shadow-xl object-cover"
+          {/* Bong bóng 3 - Chuyển động nhỏ, lơ lửng */}
+          <div
+            className="absolute top-[20%] right-[5%] w-20 h-20 rounded-full bg-blue-100/20 animate-pulse"
+            style={{ animationDuration: '5s' }}
+          />
+
+          {/* Bong bóng 4 - Nằm góc trái dưới */}
+          <div
+            className="absolute bottom-[10%] left-[5%] w-16 h-16 rounded-full bg-blue-100/15 animate-bounce"
+            style={{ animationDuration: '7s' }}
+          />
+        </div>
+
+
+        <div className="px-8 pb-8">
+          {/* Profile Header Container - Điều chỉnh Gap và Alignment */}
+          <div className="flex flex-col md:flex-row items-center md:items-end gap-6 -mt-12 relative z-10">
+
+            {/* Avatar - Chuyển thành HÌNH TRÒN */}
+            <div className="relative group shrink-0">
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="hidden"
+                onChange={handleAvatarChange}
               />
-            ) : (
-              <div className="h-24 w-24 rounded-full bg-white/90 flex items-center justify-center text-primary text-3xl font-bold shadow-xl">
-                {authUser.username?.charAt(0).toUpperCase()}
+              <div className="w-32 h-32 rounded-full border-4 border-white shadow-2xl overflow-hidden bg-white">
+                {authUser.avatar_url ? (
+                  <img src={authUser.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full flex items-center justify-center bg-teal-50 text-teal-600 text-4xl font-black">
+                    {authUser.username?.charAt(0).toUpperCase()}
+                  </div>
+                )}
               </div>
-            )}
-            {/* Online indicator */}
-            <div className="absolute bottom-1 right-1 w-5 h-5 bg-green-500 border-2 border-white rounded-full shadow-md" />
-          </motion.div>
 
-          {/* User Info */}
-          <div className="flex-1 text-center md:text-left">
-            <div className="flex flex-wrap items-center gap-3 justify-center md:justify-start">
-              <h2 className="text-2xl font-bold text-white tracking-tight">
-                {authUser.username}
-              </h2>
-              <Badge className="bg-white/10 backdrop-blur-md text-white border-white/20 hover:bg-white/20 transition-all">
-                {authUser.role || "user"}
-              </Badge>
+              {/* Upload Overlay - Cũng chuyển thành HÌNH TRÒN */}
+              <button
+                type="button"
+                onClick={() => avatarInputRef.current?.click()}
+                disabled={isAvatarUploading}
+                className="absolute inset-0 rounded-full bg-black/40 flex flex-col items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-all duration-200 cursor-pointer backdrop-blur-[2px]"
+              >
+                {isAvatarUploading ? (
+                  <RefreshCw className="h-6 w-6 text-white animate-spin" />
+                ) : (
+                  <>
+                    <Camera className="h-6 w-6 text-white" />
+                    <span className="text-white text-[10px] font-black uppercase tracking-wider">Đổi ảnh</span>
+                  </>
+                )}
+              </button>
             </div>
 
-            <div className="flex items-center gap-2 mt-2 justify-center md:justify-start text-white/80 text-sm">
-              <Mail size={14} />
-              <span>{authUser.email}</span>
-            </div>
-          </div>
+            {/* User Info - Xử lý chống tràn và đè chữ */}
+            <div className="flex-1 text-center md:text-left min-w-0 pb-1">
+              <div className="flex flex-wrap justify-center md:justify-start items-center gap-3 mb-1">
+                <h2 className="text-3xl font-black font-vietnam text-white leading-none tracking-tight">
+                  {authUser.full_name || authUser.username}
+                </h2>
 
-          {/* Actions */}
-          <div className="flex gap-3 mt-4 md:mt-0">
-            <motion.button
-              whileHover={{ scale: 1.03, backgroundColor: "rgba(255, 255, 255, 0.3)" }}
-              whileTap={{ scale: 0.97 }}
-              onClick={() => handleTabChange("profile")}
-              className="flex items-center gap-2 px-5 py-2.5 bg-white/20 backdrop-blur-md text-white rounded-xl border border-white/30 transition-all text-sm font-semibold shadow-sm"
-            >
-              <Edit3 size={16} />
-              <span className="font-vietnam">Chỉnh sửa</span>
-            </motion.button>
+                <div className="flex gap-2">
+                  <Badge className="flex items-center justify-center bg-white/20 text-white backdrop-blur-md border-none px-2.5 h-6 font-black text-[9px] tracking-widest uppercase rounded-md">
+                    {authUser.role}
+                  </Badge>
 
-            <div className="hidden sm:flex items-center gap-2 px-5 py-2.5 bg-black/10 backdrop-blur-sm text-white/90 rounded-xl border border-white/10 text-sm font-medium">
-              <Shield size={16} />
-              <span className="font-vietnam">
-                {authUser.auth_provider === "google" ? "Google" : "Email"}
-              </span>
+                  {authUser.membership_level && (
+                    <Badge className="flex items-center justify-center bg-yellow-400/20 text-yellow-200 border-none px-2.5 h-6 font-black text-[9px] tracking-widest uppercase rounded-md">
+                      <Award size={10} className="mr-1.5 shrink-0" />
+                      <span className="leading-none">{authUser.membership_level}</span>
+                    </Badge>
+                  )}
+                </div>
+
+              </div>
+
+              {/* 2. Email - Cho gần lại Tên và tạo khoảng cách với phần bên dưới */}
+              <p className="text-gray-500 font-medium text-sm mt-2 mb-3">
+                {authUser.email}
+              </p>
+
+              {/* Stats Row */}
+              <div className="flex flex-wrap justify-center md:justify-start items-center gap-3">
+                {/* Khối Điểm - Dùng h-10 để cố định chiều cao */}
+                <div className="flex items-center gap-2 bg-gray-50 px-4 h-10 rounded-lg border border-gray-100 shadow-sm">
+                  <Star size={16} className="text-orange-400 fill-orange-400 shrink-0" />
+                  <span className="text-sm font-bold text-gray-700 whitespace-nowrap">
+                    {authUser.loyalty_points || 0} CarePoints
+                  </span>
+                </div>
+
+                {/* Khối Mã KH */}
+                {authUser.client_code && (
+                  <div className="flex items-center gap-2 bg-gray-50 px-4 h-10 rounded-lg border border-gray-100 shadow-sm">
+                    <span className="text-sm font-medium text-gray-500 whitespace-nowrap">Mã KH:</span>
+                    <span className="font-mono font-bold text-sm text-primary tracking-wider">
+                      {authUser.client_code}
+                    </span>
+                  </div>
+                )}
+              </div>
+
             </div>
+            {/* Logout Action */}
+            <div className=" self-center md:self-end">
+              <Button
+                variant="outline"
+                className="relative overflow-hidden group border-red-100 text-red-500 hover:text-white font-vietnam font-bold text-xs  tracking-widest rounded-xl px-5 py-5 transition-all duration-500"
+                onClick={() => setIsLogoutModalOpen(true)}
+              >
+                {/* Lớp nền trượt từ TRÁI QUA PHẢI */}
+                <span className="absolute inset-0 bg-red-500 -translate-x-full group-hover:translate-x-0 transition-transform duration-500 ease-in-out" />
+
+                {/* Nội dung bên trên */}
+                <span className="relative flex items-center gap-2 z-10">
+                  <LogOut
+                    size={18}
+                    className="transition-all duration-300 group-hover:translate-x-1 group-hover:scale-110"
+                  />
+                  <span>Đăng xuất</span>
+                </span>
+              </Button>
+            </div>
+
           </div>
         </div>
-      </motion.div>
+      </Card>
 
 
       {/* Account Security Badge */}
-      <div className="flex items-center gap-4 mb-8 p-4 bg-blue-50 rounded-xl border border-blue-100">
-        <Shield className="text-blue-600" size={20} />
+      <div className="flex items-center mt-5 gap-4 mb-6 p-4 bg-purple-50 rounded-xl border border-purple-100">
+        <Shield className="text-purple" size={20} />
         <div>
-          <p className="text-sm font-vietnam font-semibold text-blue-800">Bảo mật tài khoản</p>
-          <p className="text-xs text-blue-600">
+          <p className="text-sm font-vietnam font-semibold text-purple">Bảo mật tài khoản</p>
+          <p className="text-xs font-vietnam text-purple">
             {authUser.auth_provider === "google"
               ? "Tài khoản OAuth - Bảo mật bởi Google"
               : "Tài khoản Email & Mật khẩu - Bảo mật bởi hệ thống"}

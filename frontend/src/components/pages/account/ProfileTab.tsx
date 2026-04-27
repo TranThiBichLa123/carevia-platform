@@ -46,6 +46,7 @@ import {
   Camera,
   Award,
   Star,
+  ShieldCheck,
 } from "lucide-react";
 import authApi from "@/lib/authApi";
 import { AnimatePresence, motion } from "framer-motion";
@@ -302,155 +303,99 @@ const ProfileTab = () => {
 
   return (
     <div className="space-y-6">
-      {/* ── Hero Profile Card ── */}
-      <Card className="border-none overflow-hidden shadow-lg">
-        {/* Banner */}
-        <div className="h-28 bg-gradient-to-r from-teal-500 via-teal-600 to-emerald-500 relative overflow-hidden">
-          <div className="absolute -top-10 -left-10 w-40 h-40 rounded-full bg-white/10" />
-          <div className="absolute -bottom-8 right-24 w-28 h-28 rounded-full bg-white/10" />
-        </div>
 
-        <div className="px-8 pb-8">
-          <div className="flex flex-col sm:flex-row sm:items-end gap-6 -mt-16">
-            {/* Avatar with upload overlay */}
-            <div className="relative group shrink-0">
-              <input
-                ref={avatarInputRef}
-                type="file"
-                accept="image/jpeg,image/png,image/webp"
-                className="hidden"
-                onChange={handleAvatarChange}
-              />
-              <div className="w-28 h-28 rounded-3xl border-4 border-white shadow-xl overflow-hidden bg-teal-100">
-                {authUser.avatar_url ? (
-                  <img
-                    src={authUser.avatar_url}
-                    alt="Avatar"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <div className="w-full h-full flex items-center justify-center text-teal-600 text-4xl font-black">
-                    {authUser.username?.charAt(0).toUpperCase()}
-                  </div>
-                )}
-              </div>
-              <button
-                type="button"
-                onClick={() => avatarInputRef.current?.click()}
-                disabled={isAvatarUploading}
-                className="absolute inset-0 rounded-3xl bg-black/50 flex flex-col items-center justify-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200 cursor-pointer"
-              >
-                {isAvatarUploading ? (
-                  <RefreshCw className="h-6 w-6 text-white animate-spin" />
-                ) : (
-                  <>
-                    <Camera className="h-6 w-6 text-white" />
-                    <span className="text-white text-[10px] font-bold">Đổi ảnh</span>
-                  </>
-                )}
-              </button>
+
+      {/* ── Personal Details Section ── */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+        {/* Card 1: Thông tin tài khoản */}
+        <div className="group p-6 bg-white rounded-[32px] border border-gray-100 hover:border-primary/20 hover:shadow-2xl hover:shadow-gray-200/50 transition-all duration-300">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2.5 bg-primary/10 rounded-xl text-primary">
+              <User size={20} strokeWidth={2.5} />
             </div>
+            <div>
+              <h3 className="text-[11px] font-black font-vietnam text-primary uppercase tracking-[0.15em]">Hồ sơ</h3>
+              <p className="text-sm font-bold font-vietnam text-gray-900">Tài khoản</p>
+            </div>
+          </div>
 
-            {/* User info */}
-            <div className="flex-1 pb-1">
-              <div className="flex flex-wrap items-center gap-2 mb-1">
-                <h2 className="text-2xl font-black text-gray-900">{authUser.username}</h2>
-                <Badge className="bg-teal-100 text-teal-700 border-none capitalize">{authUser.role}</Badge>
-                {authUser.membership_level && (
-                  <Badge className="bg-orange-100 text-orange-700 border-none">
-                    <Award size={11} className="mr-1" /> {authUser.membership_level}
-                  </Badge>
-                )}
-              </div>
-              <p className="text-gray-500 text-sm">{authUser.email}</p>
-              <div className="flex flex-wrap items-center gap-4 mt-3">
-                <div className="flex items-center gap-1.5">
-                  <Star size={14} className="text-orange-400 fill-orange-400" />
-                  <span className="text-sm font-bold text-gray-700">{authUser.loyalty_points || 0} CarePoints</span>
-                </div>
-                {authUser.client_code && (
-                  <span className="text-sm text-gray-400">
-                    Mã KH: <span className="font-bold text-gray-600">{authUser.client_code}</span>
-                  </span>
-                )}
+          <div className="space-y-5 font-vietnam">
+            <InfoField label="Tên người dùng" value={authUser.username} placeholder="Chưa cập nhật" />
+
+            <div className="space-y-1.5">
+              <p className="text-[10px] font-black font-vietnam text-gray-400 uppercase tracking-widest">Vai trò hệ thống</p>
+              <div className="inline-flex px-3 py-1 bg-gray-900 text-white rounded-lg text-[10px] font-bold font-vietnam uppercase tracking-tighter">
+                {authUser.role}
               </div>
             </div>
 
-            {/* Logout shortcut */}
-            <Button
-              variant="outline"
-              size="sm"
-              className="border-red-200 text-red-500 hover:bg-red-50 shrink-0"
-              onClick={() => setIsLogoutModalOpen(true)}
-            >
-              <LogOut size={14} className="mr-1.5" /> Đăng xuất
-            </Button>
+            <div className="pt-4 border-t border-dashed border-gray-100">
+              <p className="text-[10px] font-black font-vietnam text-gray-400 uppercase tracking-widest mb-1">Mã định danh</p>
+              <p className="text-sm font-mono font-bold font-vietnam text-primary">{authUser.client_code || "---"}</p>
+            </div>
           </div>
         </div>
-      </Card>
 
-      {/* ── Info Cards ── */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card className="border shadow-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-bold text-teal-600 uppercase flex items-center gap-2">
-              <User size={14} /> Account Info
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <InfoField label="Username" value={authUser.username} placeholder="" />
-            <div>
-              <p className="text-[10px] font-bold text-gray-400 uppercase">Role</p>
-              <Badge variant="outline" className="capitalize text-teal-600 border-teal-200">
-                {authUser.role}
-              </Badge>
+        {/* Card 2: Liên hệ & Giao hàng */}
+        <div className="group p-6 bg-white rounded-[32px] border border-gray-100 hover:border-primary/20 hover:shadow-2xl hover:shadow-gray-200/50 transition-all duration-300">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2.5 bg-primary/10 rounded-xl text-primary">
+              <Phone size={20} strokeWidth={2.5} />
             </div>
-            <InfoField label="Client Code" value={authUser.client_code || "N/A"} placeholder="" />
-          </CardContent>
-        </Card>
+            <div>
+              <h3 className="text-[11px] font-black font-vietnam text-primary uppercase tracking-[0.15em]">Liên hệ</h3>
+              <p className="text-sm font-bold font-vietnam text-gray-900">Giao nhận</p>
+            </div>
+          </div>
 
-        <Card className="border shadow-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-bold text-teal-600 uppercase flex items-center gap-2">
-              <Phone size={14} /> Contact & Delivery
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <InfoField label="Phone" value={authUser.phone} placeholder="Add phone number" />
-            <InfoField label="Address" value={authUser.address} placeholder="Add shipping address" />
-            <InfoField label="Birth Date" value={authUser.birth_date} placeholder="Add your birthday" />
-          </CardContent>
-        </Card>
+          <div className="space-y-5 font-vietnam">
+            <InfoField label="Số điện thoại" value={authUser.phone} placeholder="Chưa cập nhật" />
+            <InfoField label="Địa chỉ chính" value={authUser.address} placeholder="Chưa cập nhật" />
+            <InfoField label="Ngày sinh" value={authUser.birth_date} placeholder="-- / -- / ----" />
+          </div>
+        </div>
 
-        <Card className="border shadow-sm">
-          <CardHeader className="pb-3">
-            <CardTitle className="text-sm font-bold text-teal-600 uppercase flex items-center gap-2">
-              <Sparkles size={14} /> Skin & Loyalty
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-3">
-            <div>
-              <p className="text-[10px] font-bold text-gray-400 uppercase">Skin Type</p>
-              {authUser.skin_type ? (
-                <Badge className="bg-teal-600">{authUser.skin_type}</Badge>
-              ) : (
-                <span className="text-xs text-gray-400 italic">Chưa cập nhật</span>
-              )}
+        {/* Card 3: Đặc điểm da & Tích điểm */}
+        <div className="group p-6 bg-white rounded-[32px] border border-gray-100 hover:border-primary/20 hover:shadow-2xl hover:shadow-gray-200/50 transition-all duration-300">
+          <div className="flex items-center gap-3 mb-6">
+            <div className="p-2.5 bg-primary/10 rounded-xl text-primary">
+              <Sparkles size={20} strokeWidth={2.5} />
             </div>
             <div>
-              <p className="text-[10px] font-bold text-gray-400 uppercase">Skin Concerns</p>
-              {authUser.skin_concerns ? (
-                <p className="text-sm text-gray-700 font-medium">{authUser.skin_concerns}</p>
-              ) : (
-                <span className="text-xs text-gray-400 italic">Chưa cập nhật</span>
-              )}
+              <h3 className="text-[11px] font-black font-vietnam text-primary uppercase tracking-[0.15em]">Chăm sóc</h3>
+              <p className="text-sm font-bold font-vietnam text-gray-900">Đặc quyền</p>
             </div>
-            <div>
-              <p className="text-[10px] font-bold text-gray-400 uppercase">CarePoints</p>
-              <p className="text-xl font-black text-orange-500">{authUser.loyalty_points || 0} pts</p>
+          </div>
+
+          <div className="space-y-4">
+            <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+              <p className="text-[10px] font-black font-vietnam text-gray-400 uppercase tracking-widest mb-2">Tình trạng da</p>
+              <div className="flex flex-wrap gap-2">
+                {authUser.skin_type ? (
+                  <Badge className="bg-primary text-white border-none text-[10px] font-bold font-vietnam">{authUser.skin_type}</Badge>
+                ) : (
+                  <span className="text-xs text-gray-400 italic">Chưa xác định</span>
+                )}
+              </div>
             </div>
-          </CardContent>
-        </Card>
+
+            <div className="p-4 bg-primary/5 rounded-2xl border border-primary/10">
+              <div className="flex justify-between items-end">
+                <div>
+                  <p className="text-[10px] font-black font-vietnam text-primary uppercase tracking-widest mb-1">CarePoints</p>
+                  <p className="text-2xl font-black font-vietnam text-gray-900 leading-none">
+                    {authUser.loyalty_points || 0} <span className="text-sm font-bold font-vietnam text-primary">pts</span>
+                  </p>
+                </div>
+                <div className="h-10 w-10 bg-white rounded-full flex items-center justify-center shadow-sm">
+                  <Award size={20} className="text-orange-400" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       {/* Address Book */}
@@ -459,13 +404,13 @@ const ProfileTab = () => {
         <CardHeader className="px-8 pt-8 pb-4 border-none">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="space-y-1">
-              <CardTitle className="text-[16px] font-black tracking-tight text-gray-900 flex items-center gap-3">
+              <CardTitle className="text-[14px] font-black font-vietnam tracking-tight text-gray-900 flex items-center gap-3">
                 <div className="p-3 bg-primary/10 rounded-2xl">
                   <MapPin className="h-6 w-6 text-primary" />
                 </div>
                 Sổ địa chỉ nhận hàng
               </CardTitle>
-              <p className="text-gray-400 text-sm font-medium ml-1">Quản lý danh sách địa chỉ giao hàng của bạn</p>
+              <p className="text-gray-400 text-sm font-medium font-vietnam ml-1">Quản lý danh sách địa chỉ giao hàng của bạn</p>
             </div>
 
             <motion.button
@@ -481,14 +426,14 @@ const ProfileTab = () => {
                 "group relative overflow-hidden", // Cực kỳ quan trọng để nền trượt không tràn ra ngoài
                 "flex items-center justify-center gap-2",
                 "bg-white border-2 border-primary text-primary", // Trạng thái mặc định: nền trắng, viền & chữ primary
-                "font-bold py-3.5 px-7 rounded-2xl transition-all duration-500 shadow-lg shadow-primary/10"
+                "font-bold py-2 px-3 rounded-2xl transition-all duration-500 shadow-lg shadow-primary/10"
               )}
             >
               {/* Lớp nền trượt màu Primary từ trái sang phải */}
               <span className="absolute inset-y-0 left-0 w-0 bg-primary transition-all duration-500 ease-out group-hover:w-full" />
 
               {/* Nội dung nút - Phải có z-10 để nổi lên trên lớp nền màu */}
-              <div className="relative text-[16px] z-10 flex items-center gap-2 transition-colors group-hover:text-white">
+              <div className="relative text-[14px] z-10 flex  items-center gap-1 transition-colors group-hover:text-white">
                 <Plus
                   size={16}
                   strokeWidth={3}
@@ -520,86 +465,96 @@ const ProfileTab = () => {
             </div>
           ) : (
             /* 3. Hiển thị danh sách địa chỉ */
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div className="grid grid-cols-1 gap-4"> {/* Chuyển sang dạng danh sách dọc để dễ đọc như Shopee */}
               <AnimatePresence mode="popLayout">
                 {authUser.addresses.map((address) => {
-                  // Ưu tiên dùng ID từ database, nếu không có mới dùng index
-                  const addressKey = address._id || address._id;
+                  const addressKey = address._id;
 
                   return (
                     <motion.div
                       key={addressKey}
                       layout
-                      initial={{ opacity: 0, scale: 0.9 }}
-                      animate={{ opacity: 1, scale: 1 }}
-                      exit={{ opacity: 0, scale: 0.9, transition: { duration: 0.2 } }}
-                      className={`group relative p-6 rounded-[28px] border-2 transition-all duration-500 ${address.isDefault
-                        ? "border-primary bg-primary/[0.03] shadow-md shadow-primary/5"
-                        : "border-gray-100 bg-white hover:border-primary/20 hover:shadow-2xl hover:shadow-gray-200/40"
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, x: -20 }}
+                      className={`group relative p-5 rounded-2xl border transition-all duration-300 ${address.isDefault
+                        ? "border-primary bg-white shadow-sm"
+                        : "border-gray-100 bg-white hover:border-gray-300"
                         }`}
                     >
-                      {address.isDefault && (
-                        <div className="absolute top-6 right-6 flex items-center gap-1.5 bg-primary text-white text-[10px] font-black uppercase tracking-[0.1em] px-3 py-1.5 rounded-full shadow-lg shadow-primary/20">
-                          <Check size={12} strokeWidth={4} /> Mặc định
-                        </div>
-                      )}
+                      <div className="flex items-start justify-between gap-4">
+                        <div className="flex-1 space-y-2">
+                          {/* Header: Tên & SĐT (Shopee thường để thông tin liên hệ lên đầu) */}
+                          <div className="flex items-center gap-3">
+                            <span className="font-bold text-gray-900 border-r pr-3 py-0.5">
+                              {authUser.full_name || authUser.username}
+                            </span>
+                            <span className="text-gray-500 text-sm">
+                              (+84) {authUser.phone || "Chưa cập nhật SĐT"}
+                            </span>
+                            {address.isDefault && (
+                              <span className="text-[10px] font-bold text-primary bg-primary/5 px-2 py-0.5 rounded border border-primary/20 uppercase tracking-wider">
+                                Mặc định
+                              </span>
+                            )}
+                          </div>
 
-                      <div className="flex items-start gap-5">
-                        <div
-                          className={`mt-1 p-4 rounded-2xl transition-all duration-300 ${address.isDefault
-                            ? "bg-primary text-white shadow-lg shadow-primary/30"
-                            : "bg-gray-50 text-gray-400 group-hover:bg-primary group-hover:text-white"
-                            }`}
-                        >
-                          <Home size={22} />
-                        </div>
+                          {/* Body: Địa chỉ chi tiết */}
+                          <div className="text-sm text-gray-600 leading-relaxed max-w-2xl">
+                            <p className="font-medium text-gray-800">{address.street}</p>
+                            <p>{address.ward}, {address.district}, {address.city}</p>
+                          </div>
 
-                        <div className="space-y-2 pr-10">
-                          <h4 className="font-bold text-gray-900 text-xl leading-tight tracking-tight">
-                            {address.street}
-                          </h4>
-                          <div className="space-y-1">
-                            <p className="text-gray-500 font-medium text-[15px]">
-                              {address.ward}, {address.district}
-                            </p>
-                            <div className="inline-block px-2.5 py-1 bg-primary/10 rounded-lg text-[11px] font-black text-primary uppercase tracking-widest">
-                              {address.city}
-                            </div>
+                          {/* Loại địa chỉ Badge (Nhà riêng/Văn phòng) */}
+                          <div className="flex gap-2 pt-1">
+                            <span className="text-[10px] px-2 py-0.5 rounded border border-gray-200 text-gray-400 font-medium">
+                              Nhà Riêng
+                            </span>
                           </div>
                         </div>
+
+                        {/* Actions: Góc trên bên phải như các web lớn */}
+                        <div className="flex flex-col items-end gap-3">
+                          <div className="flex items-center gap-4 text-sm">
+                            <button
+                              onClick={() => {
+                                setEditingAddress(address);
+                                setSelectedAddressId(addressKey);
+                                addressForm.reset(address);
+                                setIsAddressModalOpen(true);
+                              }}
+                              className="text-blue-500 hover:text-blue-700 transition-colors font-medium"
+                            >
+                              Cập nhật
+                            </button>
+                            {!address.isDefault && (
+                              <button
+                                onClick={() => {
+                                  setSelectedAddressId(addressKey);
+                                  setIsDeleteModalOpen(true);
+                                }}
+                                className="text-red-400 hover:text-red-600 transition-colors font-medium"
+                              >
+                                Xóa
+                              </button>
+                            )}
+                          </div>
+
+                          {/* Nút Thiết lập mặc định (Chỉ hiện nếu không phải mặc định) */}
+                          {!address.isDefault && (
+                            <button className="text-xs px-3 py-1.5 border border-gray-200 rounded-md hover:bg-gray-50 transition-all text-gray-600">
+                              Thiết lập mặc định
+                            </button>
+                          )}
+                        </div>
                       </div>
 
-                      {/* Action Buttons - Sửa lại logic ID */}
-                      <div className="mt-8 pt-5 border-t border-gray-100/60 flex justify-end items-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 transform translate-y-2 group-hover:translate-y-0">
-                        <button
-                          onClick={() => {
-                            setEditingAddress(address);
-                            setSelectedAddressId(addressKey); // Dùng ID thật
-                            addressForm.reset(address);
-                            setIsAddressModalOpen(true);
-                          }}
-                          className="flex items-center gap-2 px-4 py-2 text-gray-500 hover:text-primary hover:bg-primary/5 rounded-xl transition-all font-bold text-sm"
-                        >
-                          <Edit2 size={16} /> Sửa
-                        </button>
-
-                        <div className="w-px h-4 bg-gray-200 mx-1" />
-
-                        <button
-                          onClick={() => {
-                            setSelectedAddressId(addressKey); // Dùng ID thật
-                            setIsDeleteModalOpen(true);
-                          }}
-                          className="flex items-center gap-2 px-4 py-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-xl transition-all font-bold text-sm"
-                        >
-                          <Trash2 size={16} /> Xóa
-                        </button>
-                      </div>
                     </motion.div>
                   );
                 })}
               </AnimatePresence>
             </div>
+
           )}
         </CardContent>
 
@@ -607,123 +562,185 @@ const ProfileTab = () => {
 
 
       {/* Update Profile Form */}
-      <Card className="border shadow-sm">
-        <CardHeader className="border-b bg-gray-50/30">
-          <CardTitle className="flex items-center gap-2 text-lg font-bold text-teal-700">
-            <Save size={16} /> Cập nhật hồ sơ
-          </CardTitle>
+      <Card className="border-none shadow-[0_20px_50px_rgba(0,0,0,0.05)] bg-white mt-10 overflow-hidden rounded-[32px]">
+        <CardHeader className="px-8 pt-8 pb-4 border-none">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <CardTitle className="text-[14px] font-black font-vietnam tracking-tight text-gray-900 flex items-center gap-3">
+                <div className="p-3 bg-primary/10 rounded-2xl">
+                  <User className="h-6 w-6 text-primary" />
+                </div>
+                Thiết lập hồ sơ cá nhân
+              </CardTitle>
+              <p className="text-gray-400 text-sm font-medium font-vietnam ml-1">
+                Cập nhật thông tin của bạn để có trải nghiệm tốt nhất
+              </p>
+            </div>
+
+            {/* Nút Reset Form hoặc Quay lại nếu cần, hoặc bỏ trống để giữ khoảng cách */}
+            <div className="hidden md:block">
+              <Badge variant="outline" className="text-primary border-primary/20 bg-primary/5 px-4 py-1.5 rounded-xl font-bold">
+                <ShieldCheck size={14} className="mr-2" /> Tài khoản xác thực
+              </Badge>
+            </div>
+          </div>
         </CardHeader>
-        <CardContent className="pt-6">
+
+        <CardContent className="p-8">
           <Form {...updateForm}>
-            <form onSubmit={updateForm.handleSubmit(onUpdateSubmit)} className="space-y-4 max-w-lg">
-              <FormField
-                control={updateForm.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-600 font-bold text-xs uppercase">Họ và tên</FormLabel>
-                    <FormControl>
-                      <Input {...field} disabled={isLoading} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={updateForm.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-600 font-bold text-xs uppercase">Số điện thoại</FormLabel>
-                    <FormControl>
-                      <Input {...field} value={field.value ?? ""} />                  
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={updateForm.control}
-                name="skinType"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-600 font-bold text-xs uppercase">Loại da</FormLabel>
-                    <FormControl>
-                      <Input {...field} disabled={isLoading} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={updateForm.control}
-                name="skinConcerns"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-600 font-bold text-xs uppercase">Vấn đề về da</FormLabel>
-                    <FormControl>
-                      <Input {...field} disabled={isLoading} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={updateForm.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel className="text-gray-600 font-bold text-xs uppercase">
-                      Mật khẩu mới (Để trống nếu không đổi)
-                    </FormLabel>
-                    <FormControl>
-                      <div className="relative">
-                        <Input
-                          type={showPassword ? "text" : "password"}
-                          {...field}
-                          disabled={isLoading}
-                          className="pr-10"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => setShowPassword(!showPassword)}
-                          className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400"
-                        >
-                          {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
-                        </button>
-                      </div>
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <Button type="submit" disabled={isLoading} className="bg-teal-600 hover:bg-teal-700 text-white">
-                {isLoading ? "Đang xử lý..." : "Lưu thay đổi"}
-              </Button>
+            <form onSubmit={updateForm.handleSubmit(onUpdateSubmit)} className="space-y-8">
+
+              {/* Lưới thông tin - Đồng bộ kiểu grid của Address list */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+                <FormField
+                  control={updateForm.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem className="space-y-1.5">
+                      <FormLabel className="text-[11px] font-black text-gray-400 font-vietnam uppercase tracking-widest ml-1">Họ và tên khách hàng</FormLabel>
+                      <FormControl>
+                        <Input {...field} disabled={isLoading} value={field.value ?? ""} className="h-12 rounded-2xl border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-primary/20 transition-all font-bold" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={updateForm.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem className="space-y-1.5">
+                      <FormLabel className="text-[11px] font-black text-gray-400 font-vietnam uppercase tracking-widest ml-1">Số điện thoại liên lạc</FormLabel>
+                      <FormControl>
+                        <Input {...field} disabled={isLoading} value={field.value ?? ""} className="h-12 rounded-2xl border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-primary/20 transition-all font-bold" />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Khối chuyên sâu về Da - Đồng bộ style Badge & Background */}
+              <div className="p-6 bg-primary/[0.02] rounded-[28px] border-2 border-dashed border-primary/10">
+                <div className="flex items-center gap-2 mb-6">
+                  <Sparkles size={18} className="text-primary animate-pulse" />
+                  <h4 className="text-xs font-black font-vietnam text-primary uppercase tracking-widest">Phân tích đặc điểm làn da</h4>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <FormField
+                    control={updateForm.control}
+                    name="skinType"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[10px] font-bold font-vietnam text-gray-500 uppercase ml-1">Loại da</FormLabel>
+                        <FormControl>
+                          <Input {...field} disabled={isLoading} value={field.value ?? ""} className="h-11 rounded-xl border-white bg-white shadow-sm focus:ring-primary/20 transition-all font-medium" />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={updateForm.control}
+                    name="skinConcerns"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-[10px] font-bold font-vietnam text-gray-500 uppercase ml-1">Vấn đề quan tâm</FormLabel>
+                        <FormControl>
+                          <Input {...field} disabled={isLoading} value={field.value ?? ""} className="h-11 rounded-xl border-white bg-white shadow-sm focus:ring-primary/20 transition-all font-medium" />
+                        </FormControl>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+              </div>
+
+              {/* Password field - Tối giản */}
+              <div className="max-w-md">
+                <FormField
+                  control={updateForm.control}
+                  name="password"
+                  render={({ field }) => (
+                    <FormItem className="space-y-1.5">
+                      <FormLabel className="text-[11px] font-black text-red-400 font-vietnam uppercase tracking-widest ml-1">Mật khẩu bảo mật</FormLabel>
+                      <FormControl>
+                        <div className="relative group">
+                          <Input
+                            type={showPassword ? "text" : "password"}
+                            {...field}
+                            disabled={isLoading}
+                            value={field.value ?? ""}
+                            placeholder="••••••••"
+                            className="h-12 rounded-2xl border-gray-100 bg-gray-50/50 pr-12 focus:bg-white transition-all font-mono"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => setShowPassword(!showPassword)}
+                            className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-400 hover:text-primary transition-colors"
+                          >
+                            {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
+                          </button>
+                        </div>
+                      </FormControl>
+                      <p className="text-[10px] text-gray-400 mt-2 ml-1 italic font-medium">* Để trống nếu bạn không muốn thay đổi mật khẩu hiện tại</p>
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Nút bấm Lưu - Áp dụng hiệu ứng trượt giống nút "Thêm địa chỉ" */}
+              <div className="pt-6 border-t border-gray-50 flex justify-end">
+                <motion.button
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  type="submit"
+                  disabled={isLoading}
+                  className="group relative overflow-hidden flex items-center justify-center gap-2 bg-white border-2 border-primary text-primary font-black px-10 py-3 rounded-2xl transition-all duration-500 shadow-xl shadow-primary/10 min-w-[200px]"
+                >
+                  {/* Lớp nền trượt màu Primary */}
+                  <span className="absolute inset-y-0 left-0 w-0 bg-primary transition-all duration-500 ease-out group-hover:w-full" />
+
+                  <div className="relative z-10 flex items-center gap-2 transition-colors group-hover:text-white uppercase text-xs tracking-widest">
+                    {isLoading ? <RefreshCw className="animate-spin" size={16} /> : <Save size={16} />}
+                    <span>{isLoading ? "Đang xử lý..." : "Lưu thay đổi hồ sơ"}</span>
+                  </div>
+                </motion.button>
+              </div>
             </form>
           </Form>
         </CardContent>
       </Card>
 
+
+
       {/* Danger Zone */}
       <Card className="border border-red-200 shadow-sm">
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-red-600 text-lg">
-            <LogOut size={16} /> Danger Zone
+            <LogOut size={16} /> Vùng nguy hiểm
           </CardTitle>
         </CardHeader>
         <CardContent className="flex items-center justify-between">
           <div>
-            <p className="font-medium text-gray-800">Log out of your account</p>
-            <p className="text-sm text-gray-500">You will need to sign in again to access your account.</p>
+            <p className="font-medium text-gray-800">Đăng xuất khỏi tài khoản của bạn</p>
+            <p className="text-sm text-gray-500">Bạn sẽ cần đăng nhập lại để truy cập vào tài khoản của mình.</p>
           </div>
           <Button
             variant="outline"
-            className="border-red-300 text-red-600 hover:bg-red-50"
+            className="relative group overflow-hidden border-red-300 text-red-600 transition-colors duration-500"
             onClick={() => setIsLogoutModalOpen(true)}
           >
-            <LogOut size={14} className="mr-2" /> Log Out
+            {/* Lớp nền trượt từ trái sang phải */}
+            <span className="absolute inset-y-0 left-0 w-0 bg-red-500 transition-all duration-500 ease-out group-hover:w-full" />
+
+            {/* Nội dung bên trên - z-10 để không bị che, transition để đổi màu chữ */}
+            <span className="relative z-10 flex items-center transition-colors duration-500 group-hover:text-white">
+              <LogOut size={14} className="mr-2" />
+              Đăng xuất
+            </span>
           </Button>
+
         </CardContent>
       </Card>
 
