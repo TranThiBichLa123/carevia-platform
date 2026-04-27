@@ -131,71 +131,74 @@ const mapCartItemToProduct = (
 });
 
 const mapCartInfoToProduct = (item: any): CartProductWithQuantity => {
-  // Lấy ID từ mọi trường hợp có thể xảy ra (deviceId, device_id, hoặc id)
-  const rawId = item.deviceId || item.device_id || item.id;
-  
-  return {
-    product: {
-      // 🟢 Chuyển sang String một cách an toàn, tránh ra chữ "undefined"
-      id: rawId ? String(rawId) : Math.random().toString(36).substr(2, 9), 
-      
-      name: item.deviceName || "Sản phẩm không tên",
-      slug: toSlug(item.deviceName || "san-pham"),
-      description: "",
-      content: "",
-      price: item.devicePrice || 0,
-      originalPrice: item.originalPrice || item.devicePrice || 0,
-      discountPercentage: item.discountPercentage || 0,
-      stock: item.stock || 0,
-      averageRating: 0,
-      image: item.deviceImage || "",
-      images: item.deviceImage ? [item.deviceImage] : [],
-      category: { id: "", name: "", image: "", categoryType: "", slug: "" },
-      brand: { id: "", name: "", slug: "" },
-      ratings: [],
-      sku: rawId ? String(rawId) : "N/A",
-      warranty: { period: 0, policy: "" },
-      origin: "",
-      condition: "new",
-      specifications: [],
-      sold: 0,
-      reviewCount: 0,
-      isBookingAvailable: false,
-      bookingPrice: 0,
-      sessionIds: [],
-      tags: [],
-      videoUrl: undefined,
-      createdAt: new Date().toISOString(),
-    },
-    quantity: item.quantity || 1,
-  };
+    // Lấy ID từ mọi trường hợp có thể xảy ra (deviceId, device_id, hoặc id)
+    const rawId = item.deviceId || item.device_id || item.id;
+
+    return {
+        product: {
+            // 🟢 Chuyển sang String một cách an toàn, tránh ra chữ "undefined"
+            id: rawId ? String(rawId) : Math.random().toString(36).substr(2, 9),
+
+            name: item.deviceName || "Sản phẩm không tên",
+            slug: toSlug(item.deviceName || "san-pham"),
+            description: "",
+            content: "",
+            price: item.devicePrice || 0,
+            originalPrice: item.originalPrice || item.devicePrice || 0,
+            discountPercentage: item.discountPercentage || 0,
+            stock: item.stock || 0,
+            averageRating: 0,
+            image: item.deviceImage || "",
+            images: item.deviceImage ? [item.deviceImage] : [],
+            category: { id: "", name: "", image: "", categoryType: "", slug: "" },
+            brand: { id: "", name: "", slug: "" },
+            ratings: [],
+            sku: rawId ? String(rawId) : "N/A",
+            warranty: { period: 0, policy: "" },
+            origin: "",
+            condition: "new",
+            specifications: [],
+            sold: 0,
+            reviewCount: 0,
+            isBookingAvailable: false,
+            bookingPrice: 0,
+            sessionIds: [],
+            tags: [],
+            videoUrl: undefined,
+            createdAt: new Date().toISOString(),
+        },
+        quantity: item.quantity || 1,
+    };
 };
 
 
-interface User {
+export interface User {
     _id: string;
     username: string;
     email: string;
     avatar_url?: string;
     role: string;
-    addresses?: Array<{
-        _id: string;
-        street: string;
-        city: string;
-        country: string;
-        postalCode: string;
-        isDefault: boolean;
-    }>;
-    full_name?: string;
     phone?: string;
-    address?: string;
+    address?: string; // Địa chỉ mặc định
     birth_date?: string;
     skin_type?: string;
+    skin_concerns?: string;
     loyalty_points?: number;
+    membership_level?: 'BASIC' | 'SILVER' | 'GOLD' | 'PLATINUM';
     client_code?: string;
-    membership_level?: string;
     auth_provider?: string;
+    full_name?: string;
+    // Cập nhật cấu trúc mảng addresses bên dưới
+    addresses?: {
+        _id: string;
+        street: string;
+        ward: string;
+        district: string;
+        city: string;
+        isDefault: boolean;
+    }[];
 }
+
 
 interface UserState {
     authUser: User | null;
@@ -205,6 +208,7 @@ interface UserState {
     setAuthToken: (token: string | null) => void;
     logoutUser: () => void;
     verifyAuth: () => Promise<void>;
+    refreshProfile: () => Promise<void>;
     loadUserData: (token: string) => Promise<void>;
     register: (data: {
         name: string;
@@ -261,6 +265,18 @@ export const useUserStore = create<UserState>()(
             isAuthenticated: !!Cookies.get("auth_token"),
             updateUser: (user) => {
                 set({ authUser: user, isAuthenticated: true });
+            },
+            refreshProfile: async () => {
+                const token = Cookies.get("auth_token");
+                if (!token) return;
+                try {
+                    const response = await authApi.get("/auth/me");
+                    if (response.data) {
+                        set({ authUser: response.data as User, isAuthenticated: true, auth_token: token });
+                    }
+                } catch (error) {
+                    console.error("Store: Refresh profile error:", error);
+                }
             },
             setAuthToken: (token) => {
                 if (token) {
@@ -354,13 +370,8 @@ export const useUserStore = create<UserState>()(
                     return;
                 }
 
-                const currentState = get();
-                if (currentState.authUser && currentState.isAuthenticated) {
-                    return;
-                }
-
                 try {
-                    const response = await authApi.get("/auth/profile");
+                    const response = await authApi.get("/auth/me");
 
                     if (response.data) {
                         set({

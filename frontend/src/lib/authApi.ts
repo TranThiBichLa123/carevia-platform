@@ -154,9 +154,9 @@ const normalizeResponseData = (url: string, payload: unknown) => {
 			addresses?: Array<{
 				id?: number | string;
 				street?: string;
+				ward?: string;
+				district?: string;
 				city?: string;
-				country?: string;
-				postalCode?: string;
 				isDefault?: boolean;
 			}>;
 			lastLoginAt?: string;
@@ -186,9 +186,9 @@ const normalizeResponseData = (url: string, payload: unknown) => {
 			addresses: (mePayload.addresses || []).map((address) => ({
 				_id: String(address.id ?? ""),
 				street: address.street || "",
+				ward: address.ward || "",
+				district: address.district || "",
 				city: address.city || "",
-				country: address.country || "",
-				postalCode: address.postalCode || "",
 				isDefault: Boolean(address.isDefault),
 			})),
 			lastLoginAt: mePayload.lastLoginAt,
@@ -289,6 +289,49 @@ const request = async <T = unknown>(
 	}
 };
 
+const uploadFile = async <T = unknown>(
+	url: string,
+	formData: FormData
+): Promise<ApiResponse<T>> => {
+	try {
+		const token = getAuthToken();
+		const normalizedUrl = normalizeUrl(url);
+		const response = await fetch(`${baseURL}${normalizedUrl}`, {
+			method: "POST",
+			headers: {
+				...(token && { Authorization: `Bearer ${token}` }),
+				// Do NOT set Content-Type — browser sets it with the boundary for multipart
+			},
+			credentials: "include",
+			body: formData,
+		});
+
+		const rawPayload = await readResponseBody(response);
+		if (!response.ok) {
+			return {
+				success: false,
+				error: buildError(response.status, rawPayload),
+			};
+		}
+
+		const unwrappedPayload = unwrapPayload(rawPayload);
+		return {
+			success: true,
+			data: unwrappedPayload as T,
+		};
+	} catch (error) {
+		console.error("authApi uploadFile failed:", url, error);
+		return {
+			success: false,
+			error: {
+				message:
+					"Unable to connect to the server. Please check if the server is running.",
+				code: "ERR_NETWORK",
+			},
+		};
+	}
+};
+
 const authApi = {
 	get: <T = unknown>(url: string) => request<T>("GET", url),
 	post: <T = unknown>(url: string, body: unknown) =>
@@ -296,6 +339,8 @@ const authApi = {
 	put: <T = unknown>(url: string, body: unknown) =>
 		request<T>("PUT", url, body),
 	delete: <T = unknown>(url: string) => request<T>("DELETE", url),
+	upload: <T = unknown>(url: string, formData: FormData) =>
+		uploadFile<T>(url, formData),
 };
 
 export default authApi;

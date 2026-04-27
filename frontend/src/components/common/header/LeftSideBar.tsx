@@ -144,7 +144,7 @@ const LeftSideBar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                   <p className="font-semibold text-lg">{authUser.username}</p>
                 </div>
                 <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
-                  My Account
+                  Tài khoản của tôi 
                 </h3>
                 <div className="space-y-2">
                   <Link
@@ -153,7 +153,7 @@ const LeftSideBar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     onClick={onClose}
                   >
                     <UserCircle size={18} />
-                    <span>My Profile</span>
+                    <span>Hồ sơ của tôi</span>
                   </Link>
                   <Link
                     href="/client/user/orders"
@@ -161,7 +161,7 @@ const LeftSideBar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     onClick={onClose}
                   >
                     <Package size={18} />
-                    <span>My Orders</span>
+                    <span>Đơn hàng của tôi</span>
                   </Link>
                   <Link
                     href="/client/user/wishlist"
@@ -169,7 +169,7 @@ const LeftSideBar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     onClick={onClose}
                   >
                     <Heart size={18} />
-                    <span>My Wishlist</span>
+                    <span>Danh sách yêu thích của tôi</span>
                   </Link>
                   <Link
                     href="/client/user/cart"
@@ -177,14 +177,14 @@ const LeftSideBar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                     onClick={onClose}
                   >
                     <ShoppingBag size={18} />
-                    <span>My Cart</span>
+                    <span>Giỏ hàng của tôi</span>
                   </Link>
                 </div>
               </div>
             ) : (
               <div className="mb-6">
                 <p className="text-gray-600 mb-4">
-                  Access your account to view orders and wishlist
+                  Truy cập tài khoản của bạn để xem đơn hàng và danh sách yêu thích
                 </p>
               </div>
             )}
@@ -192,7 +192,7 @@ const LeftSideBar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
             {/* Help & Support Section */}
             <div className="space-y-3 mb-6">
               <h3 className="text-sm font-semibold text-gray-600 uppercase tracking-wider">
-                Help & Support
+                Trợ giúp & Hỗ trợ
               </h3>
               <div className="space-y-2">
                 <Link
@@ -248,7 +248,7 @@ const LeftSideBar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
                       className="w-full py-5.5 text-base font-semibold"
                       variant="outline"
                     >
-                      Register
+                      Đăng ký
                     </Button>
                   </Link>
                 </>

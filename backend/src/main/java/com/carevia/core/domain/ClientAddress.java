@@ -38,14 +38,14 @@ public class ClientAddress extends BaseEntity {
     @Column(name = "street", nullable = false, length = 255)
     private String street;
 
+    @Column(name = "ward", nullable = false, length = 120) // Thêm mới
+    private String ward;
+
+    @Column(name = "district", nullable = false, length = 120) // Thêm mới
+    private String district;
+
     @Column(name = "city", nullable = false, length = 120)
     private String city;
-
-    @Column(name = "country", nullable = false, length = 120)
-    private String country;
-
-    @Column(name = "postal_code", nullable = false, length = 30)
-    private String postalCode;
 
     @Column(name = "is_default", nullable = false)
     @Builder.Default

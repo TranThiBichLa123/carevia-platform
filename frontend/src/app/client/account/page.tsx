@@ -13,6 +13,7 @@ import {
   Edit3,
   LogOut,
   Shield,
+  Mail,
 } from "lucide-react";
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
@@ -24,13 +25,14 @@ import AccountAnalyticsTab from "@/components/pages/account/AnalyticsTab";
 import AccountNotificationsTab from "@/components/pages/account/NotificationsTab";
 import AccountSettingsTab from "@/components/pages/account/SettingsTab";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
+import { motion } from "framer-motion";
 
 const tabs = [
-  { key: "profile", label: "Profile", icon: User },
-  { key: "orders", label: "Orders", icon: Package },
-  { key: "analytics", label: "Analytics", icon: BarChart3 },
-  { key: "notifications", label: "Notifications", icon: Bell },
-  { key: "settings", label: "Settings", icon: Settings },
+  { key: "profile", label: "Hồ sơ", icon: User },
+  { key: "orders", label: "Đơn hàng", icon: Package },
+  { key: "analytics", label: "Phân tích", icon: BarChart3 },
+  { key: "notifications", label: "Thông báo", icon: Bell },
+  { key: "settings", label: "Cài đặt", icon: Settings },
 ];
 
 const AccountPage = () => {
@@ -54,12 +56,12 @@ const AccountPage = () => {
   if (!isAuthenticated || !authUser) {
     return (
       <div className="min-h-[60vh] flex flex-col items-center justify-center gap-4">
-        <p className="text-gray-500">Please sign in to view your account.</p>
+        <p className="text-gray-500">Vui lòng đăng nhập để xem tài khoản của bạn.</p>
         <Link
           href="/auth/signin"
-          className="px-6 py-2 bg-teal-600 text-white rounded-lg font-medium hover:bg-teal-700"
+          className="px-6 py-2 bg-primary text-white rounded-lg font-medium hover:bg-primary-dark"
         >
-          Sign In
+          Đăng nhập
         </Link>
       </div>
     );
@@ -109,7 +111,7 @@ const AccountPage = () => {
               key={tab.key}
               onClick={() => handleTabChange(tab.key)}
               className={`flex items-center gap-2 px-5 py-3 text-sm font-medium rounded-t-lg transition-all ${isActive
-                ? "bg-teal-600 text-white shadow-md"
+                ? "bg-primary text-white shadow-md"
                 : "text-gray-500 hover:text-gray-700 hover:bg-gray-50"
                 }`}
             >
@@ -121,52 +123,79 @@ const AccountPage = () => {
       </div>
 
       {/* Profile Banner */}
-      <div className="relative bg-gradient-to-r from-teal-500 to-purple-500 rounded-2xl p-6 mb-8 overflow-hidden">
-        <div className="absolute inset-0 bg-black/10" />
+
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="relative bg-gradient-to-r from-primary to-purple rounded-2xl p-8 mb-8 overflow-hidden shadow-lg border border-white/10"
+      >
+        {/* Lớp phủ họa tiết chìm cho sang hơn */}
+        <div className="absolute inset-0 opacity-10 bg-[url('https://transparenttextures.com')]" />
+
+        {/* Quầng sáng trang trí */}
+        <div className="absolute -top-10 -left-10 w-40 h-40 bg-white/20 rounded-full blur-3xl" />
+
         <div className="relative flex flex-col md:flex-row items-center gap-6">
-          {/* Avatar */}
-          <div className="relative">
+          {/* Avatar Section */}
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            className="relative"
+          >
             {authUser.avatar_url ? (
               <img
                 src={authUser.avatar_url}
                 alt="Avatar"
-                className="h-24 w-24 rounded-full border-4 border-white shadow-lg object-cover"
+                className="h-24 w-24 rounded-full border-4 border-white/30 shadow-xl object-cover"
               />
             ) : (
-              <div className="h-24 w-24 rounded-full bg-white flex items-center justify-center text-teal-600 text-3xl font-bold border-4 border-white shadow-lg">
+              <div className="h-24 w-24 rounded-full bg-white/90 flex items-center justify-center text-primary text-3xl font-bold shadow-xl">
                 {authUser.username?.charAt(0).toUpperCase()}
               </div>
             )}
-            <div className="absolute bottom-0 right-0 w-6 h-6 bg-green-500 border-2 border-white rounded-full" />
-          </div>
+            {/* Online indicator */}
+            <div className="absolute bottom-1 right-1 w-5 h-5 bg-green-500 border-2 border-white rounded-full shadow-md" />
+          </motion.div>
 
           {/* User Info */}
           <div className="flex-1 text-center md:text-left">
-            <h2 className="text-2xl font-bold text-white flex items-center gap-2 justify-center md:justify-start">
-              {authUser.full_name || authUser.username}
-            </h2>
-            <div className="flex items-center gap-2 mt-1 justify-center md:justify-start">
-              <span className="text-white/80 text-sm">{authUser.email}</span>
-              <Badge className="bg-white/20 text-white border-white/30 text-xs">
+            <div className="flex flex-wrap items-center gap-3 justify-center md:justify-start">
+              <h2 className="text-2xl font-bold text-white tracking-tight">
+                {authUser.username}
+              </h2>
+              <Badge className="bg-white/10 backdrop-blur-md text-white border-white/20 hover:bg-white/20 transition-all">
                 {authUser.role || "user"}
               </Badge>
+            </div>
+
+            <div className="flex items-center gap-2 mt-2 justify-center md:justify-start text-white/80 text-sm">
+              <Mail size={14} />
+              <span>{authUser.email}</span>
             </div>
           </div>
 
           {/* Actions */}
-          <div className="flex gap-3">
-            <button
+          <div className="flex gap-3 mt-4 md:mt-0">
+            <motion.button
+              whileHover={{ scale: 1.03, backgroundColor: "rgba(255, 255, 255, 0.3)" }}
+              whileTap={{ scale: 0.97 }}
               onClick={() => handleTabChange("profile")}
-              className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur text-white rounded-lg hover:bg-white/30 transition-all text-sm font-medium"
+              className="flex items-center gap-2 px-5 py-2.5 bg-white/20 backdrop-blur-md text-white rounded-xl border border-white/30 transition-all text-sm font-semibold shadow-sm"
             >
-              <Edit3 size={14} /> <span className="font-vietnam">Chỉnh sử hồ sơ</span>
-            </button>
-            <button className="flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur text-white rounded-lg hover:bg-white/30 transition-all text-sm font-medium">
-              <Shield size={14} /> <span className="font-vietnam">{authUser.auth_provider === "google" ? "Tài khoản OAuth" : "Tài khoản Email"}</span>
-            </button>
+              <Edit3 size={16} />
+              <span className="font-vietnam">Chỉnh sửa</span>
+            </motion.button>
+
+            <div className="hidden sm:flex items-center gap-2 px-5 py-2.5 bg-black/10 backdrop-blur-sm text-white/90 rounded-xl border border-white/10 text-sm font-medium">
+              <Shield size={16} />
+              <span className="font-vietnam">
+                {authUser.auth_provider === "google" ? "Google" : "Email"}
+              </span>
+            </div>
           </div>
         </div>
-      </div>
+      </motion.div>
+
 
       {/* Account Security Badge */}
       <div className="flex items-center gap-4 mb-8 p-4 bg-blue-50 rounded-xl border border-blue-100">

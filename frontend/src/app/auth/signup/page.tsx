@@ -106,7 +106,7 @@ export default function SignupPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-linear-to-br from-cyan-50 via-teal-50 to-blue-50 p-4 overflow-hidden">
+    <div className="min-h-screen w-full flex items-center justify-center bg-blue-50 p-4 overflow-hidden">
       <motion.div
         className="fixed top-[15%] left-[10%] w-64 h-64 rounded-full opacity-70"
         style={{
@@ -176,17 +176,18 @@ export default function SignupPage() {
         <motion.div className="p-10">
           <motion.div className="mb-8" variants={itemVariants}>
             <motion.h2 className="text-4xl text-gray-700 font-medium mb-2">
-              Create Account
+              Tạo tài khoản mới
             </motion.h2>
             <motion.p className="text-lg text-gray-600">
-              Join Carevia community
+              Tham gia cộng đồng Carevia
+
             </motion.p>
           </motion.div>
 
           <form onSubmit={handleSignup} className="space-y-5">
             <motion.div variants={itemVariants}>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Username
+                Tên người dùng
               </label>
               <motion.div
                 className="relative"
@@ -209,7 +210,7 @@ export default function SignupPage() {
 
             <motion.div variants={itemVariants}>
               <label className="block text-sm font-medium text-gray-700 mb-1">
-                Email Address
+                Địa chỉ email
               </label>
               <motion.div
                 className="relative"
@@ -232,7 +233,7 @@ export default function SignupPage() {
 
             <motion.div variants={itemVariants}>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Account Type
+                Loại tài khoản
               </label>
               <div className="grid grid-cols-2 gap-3">
                 <button
@@ -240,22 +241,22 @@ export default function SignupPage() {
                   onClick={() => setRole("CLIENT")}
                   className={`rounded-lg border px-4 py-3 text-sm font-medium transition-all ${
                     role === "CLIENT"
-                      ? "border-[#20afb2] bg-[#20afb2]/10 text-[#0f8f92]"
+                      ? "border-[var(--primary)] bg-[var(--primary)]/10 text-[var(--primary)]"
                       : "border-gray-200 bg-gray-50 text-gray-600"
                   }`}
                 >
-                  Client
+                  Khách hàng
                 </button>
                 <button
                   type="button"
                   onClick={() => setRole("STAFF")}
                   className={`rounded-lg border px-4 py-3 text-sm font-medium transition-all ${
                     role === "STAFF"
-                      ? "border-[#20afb2] bg-[#20afb2]/10 text-[#0f8f92]"
+                      ? "border-[var(--primary)] bg-[var(--primary)]/10 text-[var(--primary)]"
                       : "border-gray-200 bg-gray-50 text-gray-600"
                   }`}
                 >
-                  Staff
+                  Nhân viên
                 </button>
               </div>
             </motion.div>
@@ -263,7 +264,7 @@ export default function SignupPage() {
             <div className="grid grid-cols-2 gap-4">
               <motion.div variants={itemVariants}>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Password
+                  Mật khẩu
                 </label>
                 <motion.div
                   className="relative"
@@ -287,7 +288,7 @@ export default function SignupPage() {
 
               <motion.div variants={itemVariants}>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Confirm Password
+                  Xác nhận mật khẩu
                 </label>
                 <motion.div
                   className="relative"
@@ -316,31 +317,31 @@ export default function SignupPage() {
                   id="terms"
                   name="terms"
                   type="checkbox"
-                  className="h-4 w-4 mt-1 rounded cursor-pointer border-gray-200 bg-gray-50 text-[#20afb2] focus:ring-[#20afb2] focus:ring-2 focus:ring-offset-0 transition-all"
-                  style={{ accentColor: "#20afb2" }}
+                  className="h-4 w-4 mt-1 rounded cursor-pointer border-gray-200 bg-gray-50 text-[var(--primary)] focus:ring-[var(--primary)] focus:ring-2 focus:ring-offset-0 transition-all"
+                  style={{ accentColor: "var(--primary)" }}
                   required
                   whileTap={{ scale: 0.9 }}
                 />
                 <motion.label
                   htmlFor="terms"
                   className="ml-2 block text-sm text-gray-600 cursor-pointer"
-                  whileHover={{ color: "#20afb2" }}
+                  whileHover={{ color: "var(--primary)" }}
                 >
-                  I agree to the{" "}
+                  Tôi đồng ý với{" "}
                   <a
                     href="/terms"
                     className="transition-colors duration-200"
-                    style={{ color: "#20afb2" }}
+                    style={{ color: "var(--primary)" }}
                   >
-                    Terms of Service
+                    Điều khoản dịch vụ
                   </a>{" "}
-                  and{" "}
+                  và{" "}
                   <a
                     href="/privacy"
                     className="transition-colors duration-200"
-                    style={{ color: "#20afb2" }}
+                    style={{ color: "var(--primary)" }}
                   >
-                    Privacy Policy
+                    Chính sách bảo mật
                   </a>
                 </motion.label>
               </div>
@@ -350,9 +351,9 @@ export default function SignupPage() {
               <motion.button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full flex items-center justify-center py-3 px-4 border border-transparent rounded-lg shadow-lg text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#20afb2] transition-all duration-200 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center py-3 px-4 border border-transparent rounded-lg shadow-lg text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--primary)] transition-all duration-200 disabled:cursor-not-allowed"
                 style={{
-                  background: "linear-gradient(135deg, #20afb2 0%, #18adb0 50%, #10aeb2 100%)",
+                  background: "linear-gradient(135deg, var(--primary) 0%, var(--primary) 50%, var(--primary) 100%)",
                   boxShadow: "0 8px 20px rgba(32, 175, 178, 0.3), 0 2px 8px rgba(0, 0, 0, 0.1)",
                   opacity: isSubmitting ? 0.8 : 1,
                 }}
@@ -361,7 +362,7 @@ export default function SignupPage() {
                 whileHover={isSubmitting ? "rest" : "hover"}
                 whileTap="tap"
               >
-                {isSubmitting ? "Creating Account..." : "Create Account"}
+                {isSubmitting ? "Đang tạo tài khoản..." : "Tạo tài khoản mới"}
                 <motion.svg
                   xmlns="http://www.w3.org/2000/svg"
                   className="h-6 w-6 ml-2"
@@ -388,13 +389,13 @@ export default function SignupPage() {
               transition={{ delay: 0.2 }}
             >
               <p className="text-gray-600">
-                Already have an account?{" "}
+                Đã có tài khoản?{" "}
                 <a
                   href="/auth/signin"
                   className="font-medium transition-colors duration-200"
-                  style={{ color: "#ff4162" }}
+                  style={{ color: "var(--purple)" }}
                 >
-                  Sign in
+                  Đăng nhập
                 </a>
               </p>
             </motion.div>

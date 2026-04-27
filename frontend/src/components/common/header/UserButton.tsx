@@ -18,32 +18,32 @@ import { useUserStore } from "../../../lib/store";
 const accountMenuItems = [
   {
     href: "/client/account?tab=profile",
-    label: "My Profile",
+    label: "Hồ sơ của tôi",
     icon: UserCircle2,
   },
   {
     href: "/client/account?tab=orders",
-    label: "Orders",
+    label: "Đơn hàng ",
     icon: Package,
   },
   {
     href: "/client/user/wishlist",
-    label: "Wishlist",
+    label: "Danh sách yêu thích ",
     icon: Heart,
   },
   {
     href: "/client/account?tab=notifications",
-    label: "Notifications",
+    label: "Thông báo",
     icon: Bell,
   },
   {
     href: "/client",
-    label: "Continue Shopping",
+    label: "Tiếp tục mua sắm",
     icon: ShoppingBag,
   },
   {
     href: "/client/account?tab=settings",
-    label: "Settings",
+    label: "Cài đặt",
     icon: Settings,
   },
 ] as const;
@@ -64,7 +64,7 @@ const UserButton = () => {
   const displayName =
     authUser?.username?.trim() || 
     authUser?.email?.split("@")[0] || 
-    "My Profile";
+    "Hồ sơ của tôi";
 
   const avatarInitial = displayName.charAt(0).toUpperCase() || "?";
 
@@ -81,8 +81,8 @@ const UserButton = () => {
       >
         <User size={30} />
         <span>
-          <p className="text-xs font-medium font-vietnam">Welcome</p>
-          <p className="font-semibold text-sm font-vietnam">Sign in / Register</p>
+          <p className="text-xs font-medium font-vietnam">Chào mừng</p>
+          <p className="font-semibold text-sm font-vietnam">Đăng nhập / Đăng ký</p>
         </span>
       </Link>
     );
@@ -109,7 +109,7 @@ const UserButton = () => {
           )}
         </span>
         <span className="leading-tight">
-          <p className="text-xs font-medium text-slate-500 font-vietnam">Welcome</p>
+          <p className="text-xs font-medium text-slate-500 font-vietnam">Chào mừng</p>
           <p className="max-w-24 truncate text-sm font-semibold text-primary font-vietnam">
             {displayName}
           </p>
@@ -172,7 +172,7 @@ const UserButton = () => {
               className="flex w-full items-center gap-3 rounded-xl px-3 py-2 text-left text-[13px] font-semibold text-red-500 transition-all duration-200 hover:bg-red-50"
             >
               <LogOut className="h-4 w-4 shrink-0" />
-              <span className="font-vietnam">Logout</span>
+              <span className="font-vietnam">Đăng xuất</span>
             </button>
           </div>
         </div>

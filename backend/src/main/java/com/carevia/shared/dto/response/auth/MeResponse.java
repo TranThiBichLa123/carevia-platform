@@ -1,6 +1,5 @@
 package com.carevia.shared.dto.response.auth;
 
-
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -87,17 +86,21 @@ public class MeResponse {
         @Schema(description = "Address ID", example = "1")
         private Long id;
 
-        @Schema(description = "Street address", example = "123 Nguyen Trai, Ward 1")
+        @Schema(description = "Street address", example = "123 Nguyen Trai")
         private String street;
+
+        // --- THÊM MỚI ---
+        @Schema(description = "Ward", example = "Phường 1")
+        private String ward;
+
+        @Schema(description = "District", example = "Quận 1")
+        private String district;
+        // ----------------
 
         @Schema(description = "City or province", example = "Ho Chi Minh")
         private String city;
 
-        @Schema(description = "Country", example = "Vietnam")
-        private String country;
-
-        @Schema(description = "Postal code", example = "700000")
-        private String postalCode;
+        // ĐÃ XÓA country và postalCode theo yêu cầu của bạn
 
         @Schema(description = "Whether this is the default address", example = "true")
         private Boolean isDefault;

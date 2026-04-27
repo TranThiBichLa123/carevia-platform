@@ -1,23 +1,22 @@
-const baseURL =
-  process.env.NEXT_PUBLIC_API_BASE_URL ||
-  process.env.NEXT_PUBLIC_API_URL ||
-  "http://localhost:8081/api/v1";
+const baseURL = process.env.NEXT_PUBLIC_API_BASE_URL || process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081/api/v1";
 
+// Interface đại diện cho dữ liệu trả về từ API (đã có _id)
 export interface Address {
   _id: string;
   street: string;
+  ward: string;      // Thêm mới
+  district: string;  // Thêm mới
   city: string;
-  country: string;
-  postalCode: string;
   isDefault: boolean;
 }
 
+// Interface đại diện cho dữ liệu gửi lên API (khi thêm mới)
 export interface AddressInput {
   street: string;
+  ward: string;      // Thêm mới
+  district: string;  // Thêm mới
   city: string;
-  country: string;
-  postalCode: string;
-  isDefault?: boolean;
+  isDefault: boolean; // Để boolean bắt buộc để khớp với logic form
 }
 
 // Add address to user
@@ -39,7 +38,6 @@ export const addAddress = async (
     const error = await response.json();
     throw new Error(error.message || "Failed to add address");
   }
-
   return await response.json();
 };
 
@@ -47,7 +45,7 @@ export const addAddress = async (
 export const updateAddress = async (
   _userId: string,
   addressId: string,
-  addressData: Partial<AddressInput>,
+  addressData: Partial<AddressInput>, // Partial cho phép cập nhật lẻ từng trường
   token: string
 ): Promise<{ success: boolean; addresses: Address[]; message: string }> => {
   const response = await fetch(
@@ -66,7 +64,6 @@ export const updateAddress = async (
     const error = await response.json();
     throw new Error(error.message || "Failed to update address");
   }
-
   return await response.json();
 };
 
@@ -91,6 +88,5 @@ export const deleteAddress = async (
     const error = await response.json();
     throw new Error(error.message || "Failed to delete address");
   }
-
   return await response.json();
 };

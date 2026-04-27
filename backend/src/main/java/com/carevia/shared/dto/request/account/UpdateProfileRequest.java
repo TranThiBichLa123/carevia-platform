@@ -42,4 +42,12 @@ public class UpdateProfileRequest {
     @Size(max = 128, message = "Degree must not exceed 128 characters")
     @Schema(description = "Academic degree (for instructors)", example = "Ph.D. in Computer Science", maxLength = 128)
     private String degree;
+
+    @Size(max = 100, message = "Skin type must not exceed 100 characters")
+    @Schema(description = "Skin type (for clients)", example = "Da dầu, Da khô, Da nhạy cảm", maxLength = 100)
+    private String skinType;
+
+    @Size(max = 500, message = "Skin concerns must not exceed 500 characters")
+    @Schema(description = "Skin concerns (for clients)", example = "Mụn, lão hóa, thâm nám", maxLength = 500)
+    private String skinConcerns;
 }

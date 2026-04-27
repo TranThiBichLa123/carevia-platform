@@ -51,6 +51,7 @@ import {
   PlusCircle,
   Edit3,
   Sparkles,
+  RefreshCw,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import authApi from "@/lib/authApi";
@@ -68,15 +69,20 @@ const updateSchema = z.object({
 });
 
 const addressSchema = z.object({
-  street: z.string().min(1, "Street is required"),
-  city: z.string().min(1, "City is required"),
-  country: z.string().min(1, "Country is required"),
-  postalCode: z.string().min(1, "Postal code is required"),
-  isDefault: z.boolean(),
+  street: z.string().min(1, "Vui lòng nhập số nhà"),
+  ward: z.string().min(1, "Vui lòng nhập xã/phường"),
+  district: z.string().min(1, "Vui lòng nhập quận/huyện"),
+  city: z.string().min(1, "Vui lòng nhập tỉnh/thành phố"),
+  // Ép kiểu boolean và đảm bảo có giá trị mặc định ngay từ bước validation
+  isDefault: z.preprocess((val) => !!val, z.boolean().default(false)),
 });
 
-type FormData = z.infer<typeof updateSchema>;
 type AddressFormData = z.infer<typeof addressSchema>;
+
+
+
+
+type FormData = z.infer<typeof updateSchema>;
 type ProfileAddress = AddressFormData & { _id: string };
 type ProfileUser = {
   _id: string;
@@ -134,12 +140,12 @@ const ProfilePage = () => {
   }, [authUser, updateForm]);
 
   const addressForm = useForm<AddressFormData, AddressFormData>({
-    resolver: zodResolver(addressSchema),
+    resolver: zodResolver(addressSchema) as any,
     defaultValues: {
       street: "",
       city: "",
-      country: "",
-      postalCode: "",
+      district: "",
+      ward: "",
       isDefault: false,
     },
   });
@@ -223,64 +229,68 @@ const ProfilePage = () => {
 
   const onAddressSubmit = async (data: AddressFormData) => {
     setIsLoading(true);
-    const newAddresses = [...(authUser.addresses || [])];
-    if (editingAddress && selectedAddressId !== null) {
-      // Update existing address
-      const index = parseInt(selectedAddressId);
-      newAddresses[index] = {
-        ...data,
-        _id: authUser.addresses?.[index]?._id ?? "",
-      };
-    } else {
-      // Add new address
-      newAddresses.push({ ...data, _id: "" });
-    }
-
-    // If the new/edited address is default, reset others
-    if (data.isDefault) {
-      newAddresses.forEach((addr, i) => {
-        addr.isDefault =
-          i ===
-          (editingAddress
-            ? parseInt(selectedAddressId!)
-            : newAddresses.length - 1);
-      });
-    }
-
     try {
-      const response = await authApi.put<ProfileUser>(
-        `/users/${authUser._id}`,
-        {
-          addresses: newAddresses,
-        }
-      );
+      let response;
+
+      if (editingAddress && selectedAddressId !== null) {
+        // 1. TRƯỜNG HỢP CẬP NHẬT (UPDATE)
+        // Lấy ID của địa chỉ đang sửa từ mảng của authUser
+        const addressId = authUser.addresses?.[parseInt(selectedAddressId)]?._id;
+
+        if (!addressId) throw new Error("Không tìm thấy ID địa chỉ");
+
+        // Gọi đúng endpoint: PUT /api/v1/accounts/me/addresses/{addressId}
+        response = await authApi.put<ProfileUser>(
+          `/accounts/me/addresses/${addressId}`,
+          data
+        );
+      } else {
+        // 2. TRƯỜNG HỢP THÊM MỚI (ADD)
+        // Gọi đúng endpoint: POST /api/v1/accounts/me/addresses
+        response = await authApi.post<ProfileUser>(
+          `/accounts/me/addresses`,
+          data
+        );
+      }
+
+      // Kiểm tra kết quả trả về
       if (response.success && response.data) {
         syncProfileUser(response.data);
-        toast.success("Address saved", {
-          description: editingAddress
-            ? "Address updated successfully."
-            : "Address added successfully.",
+        toast.success(editingAddress ? "Cập nhật thành công" : "Đã thêm địa chỉ mới", {
           className: "bg-green-50 text-gray-800 border-green-200",
-          duration: 5000,
+          duration: 3000,
         });
         setIsAddressModalOpen(false);
         addressForm.reset();
         setEditingAddress(null);
         setSelectedAddressId(null);
       } else {
-        throw new Error(response.error?.message || "Failed to save address.");
+        // --- ĐOẠN SỬA ĐỂ IN LỖI CHI TIẾT ---
+        console.error("Dữ liệu lỗi từ Backend:", response.error);
+
+        // Kiểm tra nếu Backend trả về mảng các lỗi validation cụ thể
+        const errorDetails = response.error?.message
+          ? Object.entries(response.error.message).map(([field, msg]) => `${field}: ${msg}`).join(", ")
+          : response.error?.message;
+
+        throw new Error(errorDetails || "Lưu địa chỉ thất bại do sai định dạng dữ liệu");
       }
-    } catch (error) {
-      console.error("Address save error:", error);
-      toast.error("Address save failed", {
-        description:
-          error instanceof Error ? error.message : "Failed to save address.",
+    } catch (error: any) {
+      // In toàn bộ object error ra console để bạn kiểm tra trong tab Inspect -> Console
+      console.error("Full Error Object:", error);
+
+      toast.error("Lỗi lưu địa chỉ", {
+        // Hiển thị chi tiết lỗi cụ thể lên Toast để bạn đọc được luôn
+        description: error.message || "Đã có lỗi xảy ra",
         className: "bg-red-50 text-gray-800 border-red-200",
-        duration: 7000,
+        duration: 8000, // Tăng thời gian để bạn kịp đọc lỗi
       });
+    } finally {
+      setIsLoading(false);
     }
-    setIsLoading(false);
+
   };
+
 
   const handleEditAddress = (address: AddressFormData, index: number) => {
     console.log("Editing address:", address, "Index:", index);
@@ -369,7 +379,7 @@ const ProfilePage = () => {
                 </div>
                 <div className="mt-10">
                   <h2 className="text-2xl font-bold text-gray-900 flex items-center gap-2">
-                    {authUser.full_name || authUser.username}
+                    {authUser.username}
                     <Badge className="bg-teal-100 text-teal-700 border-none">{authUser.membership_level || 'BASIC'}</Badge>
                   </h2>
                   <p className="text-sm text-gray-500">{authUser.email}</p>
@@ -499,15 +509,30 @@ const ProfilePage = () => {
                     )}
 
                     <div className="flex items-start gap-3">
-                      <div className={`p-2 rounded-full ${address.isDefault ? "bg-teal-500 text-white" : "bg-gray-100 text-gray-400"}`}>
-                        <MapPin size={16} />
+                      {/* Đổi màu từ teal sang primary */}
+                      <div className={`p-2.5 rounded-xl transition-colors ${address.isDefault ? "bg-primary text-white shadow-md shadow-primary/20" : "bg-gray-100 text-gray-400"
+                        }`}>
+                        <MapPin size={18} />
                       </div>
+
                       <div className="space-y-1 pr-12">
-                        <p className="font-bold text-gray-800 text-base">{address.street}</p>
-                        <p className="text-sm text-gray-600">{address.city}, {address.country}</p>
-                        <p className="text-xs text-gray-400 font-medium tracking-wider">Mã bưu điện: {address.postalCode}</p>
+                        {/* Tên đường */}
+                        <p className="font-bold text-gray-900 text-base leading-tight">
+                          {address.street}
+                        </p>
+
+                        {/* Phường/Xã, Quận/Huyện */}
+                        <p className="text-sm text-gray-600 font-medium">
+                          {address.ward}, {address.district}
+                        </p>
+
+                        {/* Thay Mã bưu điện bằng Tỉnh/Thành phố để địa chỉ đầy đủ */}
+                        <p className="text-xs text-primary font-bold uppercase tracking-widest">
+                          {address.city}
+                        </p>
                       </div>
                     </div>
+
 
                     <div className="absolute bottom-4 right-4 flex gap-1">
                       <Button
@@ -707,155 +732,151 @@ const ProfilePage = () => {
                 {editingAddress ? "Edit Address" : "Add Address"}
               </DialogTitle>
             </DialogHeader>
-            <Form<AddressFormData> {...addressForm}>
-              <form
-                onSubmit={addressForm.handleSubmit(onAddressSubmit)}
-                className="space-y-6"
-              >
-                <FormField
-                  control={addressForm.control}
-                  name="street"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-gray-700 font-medium">
-                        Street
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          disabled={isLoading}
-                          className="border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        />
-                      </FormControl>
-                      <FormMessage className="text-red-500 text-xs" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={addressForm.control}
-                  name="city"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-gray-700 font-medium">
-                        City
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          disabled={isLoading}
-                          className="border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        />
-                      </FormControl>
-                      <FormMessage className="text-red-500 text-xs" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={addressForm.control}
-                  name="country"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-gray-700 font-medium">
-                        Country
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          disabled={isLoading}
-                          className="border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        />
-                      </FormControl>
-                      <FormMessage className="text-red-500 text-xs" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={addressForm.control}
-                  name="postalCode"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel className="text-gray-700 font-medium">
-                        Postal Code
-                      </FormLabel>
-                      <FormControl>
-                        <Input
-                          {...field}
-                          disabled={isLoading}
-                          className="border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500"
-                        />
-                      </FormControl>
-                      <FormMessage className="text-red-500 text-xs" />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={addressForm.control}
-                  name="isDefault"
-                  render={({ field }) => (
-                    <FormItem className="flex items-center space-x-2">
-                      <FormControl>
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={field.onChange}
-                          disabled={isLoading}
-                          className="border-gray-300 data-[state=checked]:bg-indigo-600"
-                        />
-                      </FormControl>
-                      <FormLabel className="text-gray-700 font-medium">
-                        Set as default address
-                      </FormLabel>
-                      <FormMessage className="text-red-500 text-xs" />
-                    </FormItem>
-                  )}
-                />
-                <DialogFooter className="mt-6 flex justify-end gap-3">
+            <Form {...addressForm}>
+              <form onSubmit={addressForm.handleSubmit(onAddressSubmit)} className="space-y-6">
+                <div className="grid grid-cols-1 gap-5">
+
+                  {/* Hàng 1: Tỉnh/Thành & Quận/Huyện */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <FormField
+                      control={addressForm.control}
+                      name="city"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1">Tỉnh / Thành phố</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Ví dụ: Hà Nội"
+                              disabled={isLoading}
+                              className="h-12 rounded-xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-primary/20 transition-all"
+                            />
+                          </FormControl>
+                          <FormMessage className="text-xs text-red-500" />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={addressForm.control}
+                      name="district"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1">Quận / Huyện</FormLabel>
+                          <FormControl>
+                            <Input
+                              {...field}
+                              placeholder="Ví dụ: Cầu Giấy"
+                              disabled={isLoading}
+                              className="h-12 rounded-xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-primary/20 transition-all"
+                            />
+                          </FormControl>
+                          <FormMessage className="text-xs text-red-500" />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  {/* Hàng 2: Phường/Xã */}
+                  <FormField
+                    control={addressForm.control}
+                    name="ward"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1">Phường / Xã</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="Ví dụ: Phường Dịch Vọng"
+                            disabled={isLoading}
+                            className="h-12 rounded-xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-primary/20 transition-all"
+                          />
+                        </FormControl>
+                        <FormMessage className="text-xs text-red-500" />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Hàng 3: Địa chỉ chi tiết */}
+                  <FormField
+                    control={addressForm.control}
+                    name="street"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1">Số nhà / Tên đường</FormLabel>
+                        <FormControl>
+                          <Input
+                            {...field}
+                            placeholder="Ví dụ: Số 10, ngõ 80, phố Xuân Thủy..."
+                            disabled={isLoading}
+                            className="h-12 rounded-xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-primary/20 transition-all"
+                          />
+                        </FormControl>
+                        <FormMessage className="text-xs text-red-500" />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Checkbox Mặc định - Thiết kế dạng Card nhỏ */}
+                  <FormField
+                    control={addressForm.control}
+                    name="isDefault"
+                    render={({ field }) => (
+                      <FormItem className="flex flex-row items-center space-x-3 space-y-0 p-4 bg-gray-50 rounded-2xl border border-gray-100 transition-all hover:bg-gray-100/50">
+                        <FormControl>
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={field.onChange}
+                            disabled={isLoading}
+                            className="w-5 h-5 rounded border-gray-300 data-[state=checked]:bg-primary data-[state=checked]:border-primary"
+                          />
+                        </FormControl>
+                        <div className="space-y-1 leading-none">
+                          <FormLabel className="text-sm font-bold text-gray-700 cursor-pointer">
+                            Đặt làm địa chỉ mặc định
+                          </FormLabel>
+                          <p className="text-[11px] text-gray-400 font-medium">Sử dụng địa chỉ này ưu tiên khi thanh toán.</p>
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
+                <DialogFooter className="mt-8 flex flex-col sm:flex-row gap-3">
                   <Button
                     type="button"
-                    variant="outline"
+                    variant="ghost"
                     onClick={() => setIsAddressModalOpen(false)}
                     disabled={isLoading}
-                    className="border-gray-300 text-gray-700 hover:bg-gray-100"
+                    className="h-12 rounded-xl font-bold text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
                   >
-                    Cancel
+                    Hủy bỏ
                   </Button>
+
+                  {/* Nút bấm hiệu ứng nền trượt Primary */}
                   <Button
                     type="submit"
                     disabled={isLoading}
-                    className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                    className="group relative overflow-hidden flex-1 h-12 bg-white border-2 border-primary text-primary font-bold rounded-xl transition-all duration-500 shadow-lg shadow-primary/10"
                   >
-                    {isLoading ? (
-                      <span className="flex items-center gap-2">
-                        <svg
-                          className="animate-spin h-5 w-5 text-white"
-                          xmlns="http://www.w3.org/2000/svg"
-                          fill="none"
-                          viewBox="0 0 24 24"
-                        >
-                          <circle
-                            className="opacity-25"
-                            cx="12"
-                            cy="12"
-                            r="10"
-                            stroke="currentColor"
-                            strokeWidth="4"
-                          />
-                          <path
-                            className="opacity-75"
-                            fill="currentColor"
-                            d="M4 12a8 8 0 018-8v8H4z"
-                          />
-                        </svg>
-                        Saving...
-                      </span>
-                    ) : editingAddress ? (
-                      "Update Address"
-                    ) : (
-                      "Add Address"
-                    )}
+                    <span className="absolute inset-y-0 left-0 w-0 bg-primary transition-all duration-500 ease-out group-hover:w-full" />
+                    <div className="relative z-10 flex items-center justify-center gap-2 group-hover:text-white transition-colors duration-500">
+                      {isLoading ? (
+                        <>
+                          <RefreshCw className="animate-spin h-5 w-5" />
+                          <span>Đang lưu...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Save size={18} />
+                          <span>{editingAddress ? "Cập nhật địa chỉ" : "Lưu địa chỉ ngay"}</span>
+                        </>
+                      )}
+                    </div>
                   </Button>
                 </DialogFooter>
               </form>
             </Form>
+
           </DialogContent>
         </Dialog>
 

@@ -39,9 +39,9 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
   const [editingAddress, setEditingAddress] = useState<Address | null>(null);
   const [formData, setFormData] = useState<AddressInput>({
     street: "",
+    ward: "",
+    district: "",
     city: "",
-    country: "",
-    postalCode: "",
     isDefault: false,
   });
   const [isLoading, setIsLoading] = useState(false);
@@ -54,8 +54,8 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
       setFormData({
         street: "",
         city: "",
-        country: "",
-        postalCode: "",
+        ward: "",
+        district: "",
         isDefault: addresses.length === 0,
       });
     }
@@ -65,8 +65,8 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
     setFormData({
       street: "",
       city: "",
-      country: "",
-      postalCode: "",
+      ward: "",
+      district: "",
       isDefault: addresses.length === 0, // Auto-check if this is the first address
     });
   };
@@ -138,9 +138,9 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
     setEditingAddress(address);
     setFormData({
       street: address.street,
+      ward: address.ward,
+      district: address.district,
       city: address.city,
-      country: address.country,
-      postalCode: address.postalCode,
       isDefault: address.isDefault,
     });
     setIsEditDialogOpen(true);
@@ -207,37 +207,61 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
                   </div>
 
                   <form onSubmit={handleAddAddress} className="p-8 space-y-6 bg-white">
-                    <div className="grid grid-cols-1 gap-5">
-                      {/* Mỗi Input sẽ trượt nhẹ khi hiện */}
-                      <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
-                        <Label className="text-xs font-bold uppercase font-vietnam tracking-widest text-gray-400 mb-2 block ml-1">Địa chỉ nhà / Tên đường</Label>
-                        <Input
-                          value={formData.street}
-                          onChange={(e) => setFormData({ ...formData, street: e.target.value })}
-                          placeholder="Ví dụ: 123 Đường ABC, Phường X..."
-                          className="h-12 rounded-xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-primary/20"
-                        />
-                      </motion.div>
-
+                    <div className="grid grid-cols-1 gap-6">
+                      {/* Tỉnh / Thành phố & Quận / Huyện */}
                       <div className="grid grid-cols-2 gap-4">
-                        <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
-                          <Label className="text-xs font-bold uppercase font-vietnam tracking-widest text-gray-400 mb-2 block ml-1">Thành phố</Label>
+                        <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.1 }}>
+                          <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 block ml-1">
+                            Tỉnh / Thành phố
+                          </Label>
                           <Input
                             value={formData.city}
                             onChange={(e) => setFormData({ ...formData, city: e.target.value })}
-                            className="h-12 rounded-xl bg-gray-50 border-none"
+                            placeholder="Hà Nội..."
+                            className="h-12 rounded-xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-primary/20 transition-all"
                           />
                         </motion.div>
-                        <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
-                          <Label className="text-xs font-bold uppercase font-vietnam tracking-widest text-gray-400 mb-2 block ml-1">Mã bưu điện</Label>
+
+                        <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.2 }}>
+                          <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 block ml-1">
+                            Quận / Huyện
+                          </Label>
                           <Input
-                            value={formData.postalCode}
-                            onChange={(e) => setFormData({ ...formData, postalCode: e.target.value })}
-                            className="h-12 rounded-xl bg-gray-50 border-none"
+                            value={formData.district}
+                            onChange={(e) => setFormData({ ...formData, district: e.target.value })}
+                            placeholder="Quận Cầu Giấy..."
+                            className="h-12 rounded-xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-primary/20 transition-all"
                           />
                         </motion.div>
                       </div>
+
+                      {/* Phường / Xã */}
+                      <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }}>
+                        <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 block ml-1">
+                          Phường / Xã
+                        </Label>
+                        <Input
+                          value={formData.ward}
+                          onChange={(e) => setFormData({ ...formData, ward: e.target.value })}
+                          placeholder="Phường Dịch Vọng..."
+                          className="h-12 rounded-xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-primary/20 transition-all"
+                        />
+                      </motion.div>
+
+                      {/* Địa chỉ chi tiết */}
+                      <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.4 }}>
+                        <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 mb-2 block ml-1">
+                          Số nhà / Tên đường
+                        </Label>
+                        <Input
+                          value={formData.street}
+                          onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+                          placeholder="Số 123, đường ABC..."
+                          className="h-12 rounded-xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-primary/20 transition-all"
+                        />
+                      </motion.div>
                     </div>
+
 
                     {/* Toggle Mặc định - Thiết kế như một thẻ nhỏ */}
                     <div className="flex items-center justify-between p-4 bg-gray-50 rounded-2xl border border-gray-100">
@@ -297,8 +321,8 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
                   <div
                     key={address._id}
                     className={`relative p-4 border-2 rounded-xl transition-all duration-200 hover:shadow-md ${selectedAddress?._id === address._id
-                        ? "border-blue-500 bg-blue-50/50 ring-2 ring-blue-500/20"
-                        : "border-gray-200 hover:border-gray-300"
+                      ? "border-blue-500 bg-blue-50/50 ring-2 ring-blue-500/20"
+                      : "border-gray-200 hover:border-gray-300"
                       }`}
                   >
                     <div className="flex items-start space-x-4">
@@ -336,9 +360,9 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
                               {address.street}
                             </div>
                             <div className="text-sm font-vietnam text-gray-600 flex flex-wrap gap-1">
-                              <span>{address.city},</span>
-                              <span>{address.country}</span>
-                              <span>{address.postalCode}</span>
+                              <span>{address.ward},</span>
+                              <span>{address.district},</span>
+                              <span>{address.city}</span>
                             </div>
                           </div>
                         </Label>
@@ -393,168 +417,197 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
                 <DialogHeader>
                   <DialogTitle>Thêm địa chỉ mới</DialogTitle>
                 </DialogHeader>
-                <form onSubmit={handleAddAddress} className="space-y-4">
-                  <div>
-                    <Label htmlFor="street">Địa chỉ đường phố</Label>
-                    <Input
-                      id="street"
-                      value={formData.street}
-                      onChange={(e) =>
-                        setFormData({ ...formData, street: e.target.value })
-                      }
-                      placeholder="123 Main St"
-                      required
-                    />
+                <form onSubmit={handleAddAddress} className="space-y-6">
+                  <div className="grid grid-cols-1 gap-5">
+                    {/* Tỉnh / Thành phố & Quận / Huyện */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="city" className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1">Tỉnh / Thành phố</Label>
+                        <Input
+                          id="city"
+                          value={formData.city}
+                          onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                          placeholder="Ví dụ: Hà Nội"
+                          className="h-12 rounded-xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="district" className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1">Quận / Huyện</Label>
+                        <Input
+                          id="district"
+                          value={formData.district}
+                          onChange={(e) => setFormData({ ...formData, district: e.target.value })}
+                          placeholder="Ví dụ: Cầu Giấy"
+                          className="h-12 rounded-xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    {/* Phường / Xã */}
+                    <div className="space-y-2">
+                      <Label htmlFor="ward" className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1">Phường / Xã</Label>
+                      <Input
+                        id="ward"
+                        value={formData.ward}
+                        onChange={(e) => setFormData({ ...formData, ward: e.target.value })}
+                        placeholder="Ví dụ: Phường Dịch Vọng"
+                        className="h-12 rounded-xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                        required
+                      />
+                    </div>
+
+                    {/* Địa chỉ chi tiết */}
+                    <div className="space-y-2">
+                      <Label htmlFor="street" className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1">Số nhà / Tên đường</Label>
+                      <Input
+                        id="street"
+                        value={formData.street}
+                        onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+                        placeholder="Ví dụ: Số 10, ngõ 80, phố Xuân Thủy..."
+                        className="h-12 rounded-xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-primary/20"
+                        required
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <Label htmlFor="city">Thành phố</Label>
-                    <Input
-                      id="city"
-                      value={formData.city}
-                      onChange={(e) =>
-                        setFormData({ ...formData, city: e.target.value })
-                      }
-                      placeholder="New York"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="country">Quốc gia</Label>
-                    <Input
-                      id="country"
-                      value={formData.country}
-                      onChange={(e) =>
-                        setFormData({ ...formData, country: e.target.value })
-                      }
-                      placeholder="United States"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="postalCode">Mã bưu điện</Label>
-                    <Input
-                      id="postalCode"
-                      value={formData.postalCode}
-                      onChange={(e) =>
-                        setFormData({ ...formData, postalCode: e.target.value })
-                      }
-                      placeholder="10001"
-                      required
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2">
+
+                  {/* Checkbox Mặc định thiết kế lại */}
+                  <div className="flex items-center space-x-3 p-4 bg-gray-50 rounded-2xl border border-gray-100 transition-all hover:bg-gray-100/50">
                     <input
                       type="checkbox"
                       id="isDefault"
+                      className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary accent-primary"
                       checked={formData.isDefault}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          isDefault: e.target.checked,
-                        })
-                      }
+                      onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
                     />
-                    <Label htmlFor="isDefault" className="font-vietnam">Set as default address</Label>
+                    <Label htmlFor="isDefault" className="font-vietnam font-bold text-sm text-gray-700 cursor-pointer">
+                      Đặt làm địa chỉ mặc định
+                    </Label>
                   </div>
-                  <div className="flex gap-2">
-                    <Button type="submit" disabled={isLoading}>
-                      {isLoading ? "Adding..." : "Add Address"}
+
+                  {/* Nhóm nút bấm với hiệu ứng trượt */}
+                  <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                    <Button
+                      type="submit"
+                      disabled={isLoading}
+                      className="group relative overflow-hidden flex-1 h-12 bg-white border-2 border-primary text-primary font-bold rounded-xl transition-all duration-500"
+                    >
+                      <span className="absolute inset-y-0 left-0 w-0 bg-primary transition-all duration-500 ease-out group-hover:w-full" />
+                      <span className="relative z-10 group-hover:text-white transition-colors duration-500">
+                        {isLoading ? "Đang xử lý..." : "Lưu địa chỉ ngay"}
+                      </span>
                     </Button>
+
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="ghost"
+                      className="h-12 rounded-xl font-medium text-gray-500 hover:bg-gray-100"
                       onClick={() => setIsAddDialogOpen(false)}
                     >
-                      Cancel
+                      Hủy bỏ
                     </Button>
                   </div>
                 </form>
+
               </DialogContent>
             </Dialog>
 
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
               <DialogContent>
                 <DialogHeader>
-                  <DialogTitle>Edit Address</DialogTitle>
+                  <DialogTitle>Chỉnh sửa địa chỉ</DialogTitle>
                 </DialogHeader>
-                <form onSubmit={handleEditAddress} className="space-y-4">
-                  <div>
-                    <Label htmlFor="edit-street">Địa chỉ đường phố</Label>
-                    <Input
-                      id="edit-street"
-                      value={formData.street}
-                      onChange={(e) =>
-                        setFormData({ ...formData, street: e.target.value })
-                      }
-                      placeholder="123 Main St"
-                      required
-                    />
+                <form onSubmit={handleEditAddress} className="space-y-6">
+                  <div className="grid grid-cols-1 gap-5">
+                    {/* Tỉnh / Thành phố & Quận / Huyện */}
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-city" className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 ml-1">Tỉnh / Thành phố</Label>
+                        <Input
+                          id="edit-city"
+                          value={formData.city}
+                          onChange={(e) => setFormData({ ...formData, city: e.target.value })}
+                          className="h-12 rounded-xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-primary/20 transition-all"
+                          required
+                        />
+                      </div>
+                      <div className="space-y-2">
+                        <Label htmlFor="edit-district" className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 ml-1">Quận / Huyện</Label>
+                        <Input
+                          id="edit-district"
+                          value={formData.district}
+                          onChange={(e) => setFormData({ ...formData, district: e.target.value })}
+                          className="h-12 rounded-xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-primary/20 transition-all"
+                          required
+                        />
+                      </div>
+                    </div>
+
+                    {/* Phường / Xã */}
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-ward" className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 ml-1">Phường / Xã</Label>
+                      <Input
+                        id="edit-ward"
+                        value={formData.ward}
+                        onChange={(e) => setFormData({ ...formData, ward: e.target.value })}
+                        className="h-12 rounded-xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-primary/20 transition-all"
+                        required
+                      />
+                    </div>
+
+                    {/* Địa chỉ chi tiết */}
+                    <div className="space-y-2">
+                      <Label htmlFor="edit-street" className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 ml-1">Số nhà / Tên đường</Label>
+                      <Input
+                        id="edit-street"
+                        value={formData.street}
+                        onChange={(e) => setFormData({ ...formData, street: e.target.value })}
+                        className="h-12 rounded-xl bg-gray-50 border-none focus-visible:ring-2 focus-visible:ring-primary/20 transition-all"
+                        required
+                      />
+                    </div>
                   </div>
-                  <div>
-                    <Label htmlFor="edit-city">Thành phố</Label>
-                    <Input
-                      id="edit-city"
-                      value={formData.city}
-                      onChange={(e) =>
-                        setFormData({ ...formData, city: e.target.value })
-                      }
-                      placeholder="New York"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="edit-country">Quốc gia</Label>
-                    <Input
-                      id="edit-country"
-                      value={formData.country}
-                      onChange={(e) =>
-                        setFormData({ ...formData, country: e.target.value })
-                      }
-                      placeholder="United States"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="edit-postalCode">Mã bưu điện</Label>
-                    <Input
-                      id="edit-postalCode"
-                      value={formData.postalCode}
-                      onChange={(e) =>
-                        setFormData({ ...formData, postalCode: e.target.value })
-                      }
-                      placeholder="10001"
-                      required
-                    />
-                  </div>
-                  <div className="flex items-center space-x-2">
+
+                  {/* Checkbox Mặc định cao cấp */}
+                  <div className={`flex items-center space-x-3 p-4 rounded-2xl border transition-all ${formData.isDefault ? "bg-primary/5 border-primary/20" : "bg-gray-50 border-gray-100"
+                    }`}>
                     <input
                       type="checkbox"
                       id="edit-isDefault"
+                      className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary accent-primary cursor-pointer"
                       checked={formData.isDefault}
-                      onChange={(e) =>
-                        setFormData({
-                          ...formData,
-                          isDefault: e.target.checked,
-                        })
-                      }
+                      onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
                     />
-                    <Label htmlFor="edit-isDefault" className="font-vietnam">
+                    <Label htmlFor="edit-isDefault" className="font-vietnam font-bold text-sm text-gray-700 cursor-pointer select-none">
                       Đặt làm địa chỉ mặc định
                     </Label>
                   </div>
-                  <div className="flex gap-2">
-                    <Button type="submit" disabled={isLoading}>
-                      {isLoading ? "Đang cập nhật..." : "Cập nhật địa chỉ"}
+
+                  {/* Nhóm nút bấm đồng bộ hệ thống */}
+                  <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                    <Button
+                      type="submit"
+                      disabled={isLoading}
+                      className="group relative overflow-hidden flex-[2] h-12 bg-white border-2 border-primary text-primary font-bold rounded-xl transition-all duration-500 shadow-lg shadow-primary/5"
+                    >
+                      <span className="absolute inset-y-0 left-0 w-0 bg-primary transition-all duration-500 ease-out group-hover:w-full" />
+                      <span className="relative z-10 group-hover:text-white transition-colors duration-500">
+                        {isLoading ? "Đang lưu thay đổi..." : "Cập nhật ngay"}
+                      </span>
                     </Button>
+
                     <Button
                       type="button"
-                      variant="outline"
+                      variant="ghost"
+                      className="flex-1 h-12 rounded-xl font-medium text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
                       onClick={() => setIsEditDialogOpen(false)}
                     >
-                      Hủy
+                      Hủy bỏ
                     </Button>
                   </div>
                 </form>
+
               </DialogContent>
             </Dialog>
           </>

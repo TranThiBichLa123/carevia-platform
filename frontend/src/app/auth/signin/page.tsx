@@ -67,7 +67,7 @@ export default function LoginPage() {
         login: login.trim(),
         password,
       });
-      // ✅ BƯỚC 1: Cập nhật Token (Hàm này của bạn sẽ tự lưu vào Cookie)
+      // BƯỚC 1: Cập nhật Token (Hàm này của bạn sẽ tự lưu vào Cookie)
       setAuthToken(response.accessToken);
 
       updateUser({
@@ -147,7 +147,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-linear-to-br from-cyan-50 via-teal-50 to-blue-50 p-4">
+    <div className="min-h-screen w-full flex items-center justify-center bg-blue-50 p-4">
       <motion.div
         className="relative w-full max-w-4xl h-150 bg-white rounded-3xl overflow-hidden shadow-2xl flex"
         variants={containerVariants}

@@ -33,7 +33,7 @@ export interface Product {
   category: Category;
   brand: Brand;
   ratings: unknown[];
-  
+
   // --- ĐẶC THÙ THIẾT BỊ ĐIỆN TỬ ---
   sku: string;                // Mã quản lý kho (VD: HALIO-001)
   warranty: {
@@ -44,20 +44,20 @@ export interface Product {
   condition: "new" | "used" | "refurbished"; // Tình trạng máy
 
   // --- THÔNG SỐ KỸ THUẬT (Dạng cấu trúc) ---
-  specifications: {          
+  specifications: {
     label: string;            // VD: "Chống nước", "Dung lượng pin"
     value: string;            // VD: "IPX7", "1000mAh"
   }[];
 
   // --- DỮ LIỆU KINH DOANH ---
-  sold: number;               
-  reviewCount: number;       
-  isBookingAvailable: boolean; 
+  sold: number;
+  reviewCount: number;
+  isBookingAvailable: boolean;
   bookingPrice: number;       // Gia trai nghiem/booking neu khac gia mua san pham
   sessionIds: string[];       // Danh sach cac phien trai nghiem lien ket voi san pham
   tags: string[];             // VD: ["Best Seller", "New Arrival", "Trending"]
   videoUrl?: string;          // Link Youtube/Video review hướng dẫn sử dụng
-  
+
   // --- DÙNG CHO FRONTEND ---
   quantity?: number;          // Phục vụ logic giỏ hàng
   createdAt: string;          // Để lọc sản phẩm mới nhất
@@ -66,18 +66,19 @@ export interface Product {
 export interface Address {
   _id: string;
   street: string;
+  ward: string;      // Thêm mới
+  district: string;  // Thêm mới
   city: string;
-  country: string;
-  postalCode: string;
   isDefault: boolean;
 }
 
+// Interface đại diện cho dữ liệu gửi lên API (khi thêm mới)
 export interface AddressInput {
   street: string;
+  ward: string;      // Thêm mới
+  district: string;  // Thêm mới
   city: string;
-  country: string;
-  postalCode: string;
-  isDefault?: boolean;
+  isDefault: boolean; // Để boolean bắt buộc để khớp với logic form
 }
 
 export type Banners = {

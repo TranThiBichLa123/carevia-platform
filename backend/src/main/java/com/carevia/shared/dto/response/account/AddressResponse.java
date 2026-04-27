@@ -22,12 +22,13 @@ public class AddressResponse {
     @Schema(description = "City or province", example = "Ho Chi Minh")
     private String city;
 
-    @Schema(description = "Country", example = "Vietnam")
-    private String country;
+    // --- THÊM MỚI ---
+    @Schema(description = "Ward", example = "Ward 1")
+    private String ward;
 
-    @Schema(description = "Postal code", example = "700000")
-    private String postalCode;
-
+    @Schema(description = "District", example = "District 1")
+    private String district;
+    // ----------------
     @Schema(description = "Whether this is the default address", example = "true")
     private Boolean isDefault;
 }

@@ -346,24 +346,29 @@ public class AuthService {
             meResponse.setAddress(client.getAddress());
             meResponse.setClientCode(client.getClientCode());
             meResponse.setLoyaltyPoints(client.getLoyaltyPoints());
-            meResponse.setMembershipLevel(client.getMembershipLevel() != null ? client.getMembershipLevel().name() : null);
+            meResponse.setMembershipLevel(client.getMembershipLevel() != null
+                    ? client.getMembershipLevel().name()
+                    : null);
             meResponse.setSkinType(client.getSkinType());
             meResponse.setSkinConcerns(client.getSkinConcerns());
-            meResponse.setAddresses(
-                client.getAddresses() == null ? java.util.List.of() : client.getAddresses().stream()
-                    .sorted(java.util.Comparator
-                        .comparing((ClientAddress address) -> Boolean.TRUE.equals(address.getIsDefault()))
-                        .reversed()
-                        .thenComparing(ClientAddress::getCreatedAt, java.util.Comparator.nullsLast(java.util.Comparator.reverseOrder())))
-                    .map(address -> MeResponse.AddressInfo.builder()
-                        .id(address.getId())
-                        .street(address.getStreet())
-                        .city(address.getCity())
-                        .country(address.getCountry())
-                        .postalCode(address.getPostalCode())
-                        .isDefault(address.getIsDefault())
-                        .build())
-                    .toList());
+
+            meResponse.setAddresses(client.getAddresses() == null
+                    ? java.util.List.of()
+                    : client.getAddresses().stream()
+                            .sorted(java.util.Comparator
+                                    .comparing((ClientAddress address) -> Boolean.TRUE.equals(address.getIsDefault()))
+                                    .reversed()
+                                    .thenComparing(ClientAddress::getCreatedAt,
+                                            java.util.Comparator.nullsLast(java.util.Comparator.reverseOrder())))
+                            .map(address -> MeResponse.AddressInfo.builder()
+                                    .id(address.getId())
+                                    .street(address.getStreet())
+                                    .ward(address.getWard()) // Đã thêm
+                                    .district(address.getDistrict()) // Đã thêm
+                                    .city(address.getCity())
+                                    .isDefault(address.getIsDefault())
+                                    .build())
+                            .toList());
         }
     }
 
