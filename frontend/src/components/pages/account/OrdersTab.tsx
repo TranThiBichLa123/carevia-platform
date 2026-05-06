@@ -100,7 +100,7 @@ const OrdersTab = () => {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-vietnam">
       {/* Filter Tabs */}
       <div className="flex flex-wrap gap-2">
         {[
@@ -116,7 +116,7 @@ const OrdersTab = () => {
             onClick={() => setFilter(tab.key)}
             className={`px-4 py-2 rounded-full text-xs font-medium transition-all ${
               filter === tab.key
-                ? "bg-teal-600 text-white"
+                ? "bg-primary text-white"
                 : "bg-gray-100 text-gray-600 hover:bg-gray-200"
             }`}
           >
@@ -138,62 +138,63 @@ const OrdersTab = () => {
             {filter === "all" ? "Bạn chưa có đơn hàng nào." : "Không có đơn hàng nào trong trạng thái này."}
           </p>
           <Link href="/client/devices">
-            <Button className="mt-4 bg-teal-600 hover:bg-teal-700 text-white">
+            <Button className="mt-4 bg-primary hover:bg-primary-dark text-white">
               Mua sắm ngay
             </Button>
           </Link>
         </div>
       ) : (
-        <div className="space-y-4">
+        <div className="space-y-3">
           {filteredOrders.map((order) => {
             const orderId = order._id || order.id;
             const status = statusConfig[order.status] || statusConfig.pending_payment;
             return (
-              <Card key={orderId} className="overflow-hidden border hover:shadow-md transition-shadow">
+              <Card key={orderId} className="overflow-hidden border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all duration-200 rounded-xl">
                 {/* Order Header */}
-                <div className="flex items-center justify-between px-5 py-3 bg-gray-50 border-b">
-                  <div className="flex items-center gap-4">
-                    <span className="text-xs font-mono text-gray-500">
-                      #{order.orderCode || orderId?.slice(-8)}
+                <div className="flex items-center justify-between px-5 py-3 bg-gray-50 border-b border-gray-100">
+                  <div className="flex items-center gap-3">
+                    <span className="text-[11px] font-mono font-semibold text-gray-400 tracking-wider">
+                      #{order.orderCode || String(orderId)?.slice(-8)}
                     </span>
-                    <span className="text-xs text-gray-400">{formatDate(order.createdAt)}</span>
+                    <span className="w-1 h-1 rounded-full bg-gray-300" />
+                    <span className="text-[11px] text-gray-400">{formatDate(order.createdAt)}</span>
                   </div>
-                  <Badge className={`${status.color} border flex items-center gap-1`}>
+                  <Badge className={`${status.color} border border-current/20 flex items-center gap-1 text-[11px] font-semibold rounded-full px-3`}>
                     {status.icon} {status.label}
                   </Badge>
                 </div>
 
                 {/* Order Items */}
-                <div className="p-5">
+                <div className="px-5 py-4">
                   <div className="space-y-3">
                     {order.items?.slice(0, 3).map((item, idx) => (
-                      <div key={idx} className="flex items-center gap-4">
-                        <div className="w-16 h-16 bg-gray-100 rounded-lg overflow-hidden flex-shrink-0 border">
+                      <div key={idx} className="flex items-center gap-3">
+                        <div className="w-14 h-14 bg-gray-50 rounded-lg overflow-hidden shrink-0 border border-gray-100">
                           {item.deviceImage ? (
                             <Image
                               src={item.deviceImage}
                               alt={item.deviceName}
-                              width={64}
-                              height={64}
+                              width={56}
+                              height={56}
                               className="object-cover w-full h-full"
                             />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-gray-300">
-                              <Package size={20} />
+                              <Package size={18} />
                             </div>
                           )}
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-sm font-semibold text-gray-800 truncate">{item.deviceName}</p>
-                          <p className="text-xs text-gray-500">x{item.quantity}</p>
+                          <p className="text-xs text-gray-400 mt-0.5">Số lượng: {item.quantity}</p>
                         </div>
-                        <p className="text-sm font-bold text-gray-900">
+                        <p className="text-sm font-bold text-gray-700 shrink-0">
                           <PriceFormatter amount={item.subtotal} />
                         </p>
                       </div>
                     ))}
                     {(order.items?.length || 0) > 3 && (
-                      <p className="text-xs text-gray-400">
+                      <p className="text-xs text-gray-400 pl-1">
                         +{(order.items?.length || 0) - 3} sản phẩm khác
                       </p>
                     )}
@@ -201,37 +202,37 @@ const OrdersTab = () => {
                 </div>
 
                 {/* Order Footer */}
-                <div className="flex items-center justify-between px-5 py-3 bg-gray-50 border-t">
-                  <div className="text-sm">
-                    <span className="text-gray-500">Tổng: </span>
-                    <span className="font-bold text-lg text-gray-900">
+                <div className="flex items-center justify-between px-5 py-3 bg-gray-50 border-t border-gray-100">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-xs text-gray-400">Tổng cộng</span>
+                    <span className="font-bold text-base text-gray-900">
                       <PriceFormatter amount={order.totalAmount || order.total || 0} />
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    {order.status === "pending_payment" && (
+                    {order.status === "PENDING_PAYMENT" && (
                       <Button
                         size="sm"
-                        className="bg-orange-500 hover:bg-orange-600 text-white"
+                        className="bg-orange-500 hover:bg-orange-600 text-white rounded-lg text-xs"
                         onClick={() => router.push(`/client/user/checkout?orderId=${orderId}`)}
                       >
-                        <CreditCard size={14} className="mr-1" /> Thanh toán
+                        <CreditCard size={13} className="mr-1" /> Thanh toán
                       </Button>
                     )}
                     <Link href={`/client/user/orders/${orderId}`}>
-                      <Button size="sm" variant="outline" className="text-teal-600 border-teal-200">
-                        <Eye size={14} className="mr-1" /> Chi tiết
-                        <ChevronRight size={14} />
+                      <Button size="sm" variant="outline" className="text-primary border-gray-200 hover:border-primary hover:bg-primary/5 rounded-lg text-xs">
+                        <Eye size={13} className="mr-1" /> Chi tiết
+                        <ChevronRight size={13} />
                       </Button>
                     </Link>
-                    {(order.status === "cancelled" || order.status === "failed") && (
+                    {(order.status === "CANCELLED" || order.status === "FAILED") && (
                       <Button
                         size="sm"
                         variant="ghost"
-                        className="text-red-500 hover:text-red-700"
-                        onClick={() => setDeletingId(orderId)}
+                        className="text-red-400 hover:text-red-600 hover:bg-red-50 rounded-lg"
+                        onClick={() => setDeletingId(String(orderId))}
                       >
-                        <Trash2 size={14} />
+                        <Trash2 size={13} />
                       </Button>
                     )}
                   </div>

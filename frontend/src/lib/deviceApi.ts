@@ -77,6 +77,20 @@ export interface BrandData {
   isActive: boolean;
 }
 
+export interface SpecificationData {
+  label: string;
+  value: string;
+}
+
+export interface ExperienceStepData {
+  id: number;
+  stepNumber: number;
+  stepTitle: string;
+  stepContent: string;
+  iconUrl?: string;
+  durationMinutes?: number;
+}
+
 export const deviceApi = {
   getAll: async (params?: {
     search?: string;
@@ -117,6 +131,16 @@ export const deviceApi = {
 
   getSimilar: async (id: number | string, limit = 4): Promise<DeviceData[]> => {
     const res = await apiClient.get(`/devices/${id}/similar?limit=${limit}`);
+    return res.data;
+  },
+
+  getExperienceSteps: async (id: number | string): Promise<ExperienceStepData[]> => {
+    const res = await apiClient.get(`/devices/${id}/experience-steps`);
+    return res.data;
+  },
+
+  getSpecifications: async (id: number | string): Promise<SpecificationData[]> => {
+    const res = await apiClient.get(`/devices/${id}/specifications`);
     return res.data;
   },
 

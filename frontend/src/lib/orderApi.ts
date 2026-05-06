@@ -93,9 +93,9 @@ export interface CreateOrderResponse {
 
 export interface ShippingAddress {
   street: string;
+  ward: string;
+  district: string;
   city: string;
-  country: string;
-  postalCode: string;
 }
 
 export interface CartItem {
@@ -164,10 +164,10 @@ export const createOrderFromCart = async (
   try {
     const res = await apiClient.post("/orders/from-cart", {
       items: cartItems.map(item => ({ deviceId: Number(item._id ?? item.id), quantity: item.quantity })),
-      shippingAddress: shippingAddress.street,
+      shippingAddress: [shippingAddress.street, shippingAddress.ward, shippingAddress.district].filter(Boolean).join(', '),
       shippingCity: shippingAddress.city,
-      shippingCountry: shippingAddress.country,
-      shippingPostalCode: shippingAddress.postalCode,
+      shippingCountry: "",
+      shippingPostalCode: "",
     }, { headers: authHeaders() });
     return { success: true, order: normalizeOrder(res.data) };
   } catch (error: unknown) {

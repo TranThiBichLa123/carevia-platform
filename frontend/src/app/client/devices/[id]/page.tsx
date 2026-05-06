@@ -19,6 +19,7 @@ import {
 } from "lucide-react";
 import Image from "next/image";
 import React from "react";
+import FavoriteBadge from "@/components/common/FavoriteBadge";
 
 const ProductDetails = async ({
   params,
@@ -65,7 +66,7 @@ const ProductDetails = async ({
   return (
     <div className=" bg-muted py-8 ">
       <Container>
-        <div className=" mx-auto bg-card rounded-2xl shadow-xl overflow-hidden border border-border">
+        <div className=" mx-auto bg-white rounded-2xl shadow-xl font-vietnam overflow-hidden border border-border">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 md:p-8">
 
             {/* Left: Image Section */}
@@ -80,14 +81,14 @@ const ProductDetails = async ({
               </div>
 
               <div className="flex items-center justify-between text-sm text-muted-foreground">
+
                 <button className="flex items-center gap-2 hover:text-primary hoverEffect">
-                  <Share2 size={18} />
-                  <span>Chia sẻ</span>
-                </button>
-                <button className="flex items-center gap-2 hover:text-accent hoverEffect">
                   <Heart size={18} />
-                  <span>Yêu thích (1.2k)</span>
-                </button>
+                  <span>
+                    Yêu thích ({product.wishlistCount > 999
+                      ? `${(product.wishlistCount / 1000).toFixed(1)}k`
+                      : product.wishlistCount})
+                  </span>                </button>
               </div>
             </div>
 
@@ -96,9 +97,10 @@ const ProductDetails = async ({
 
               {/* Product Name */}
               <div>
-                <span className="inline-block bg-primary text-white text-xs font-bold px-3 py-1 rounded-md mb-3 shadow-sm">
+                {/* <span className="inline-block bg-primary text-white text-xs font-bold px-3 py-1 rounded-md mb-3 shadow-sm">
                   YÊU THÍCH
-                </span>
+                </span> */}
+                <FavoriteBadge productId={product.id} />
                 <h1 className="text-2xl md:text-3xl font-bold text-foreground leading-tight">
                   {product.name}
                 </h1>
@@ -216,7 +218,7 @@ const ProductDetails = async ({
         </div>
 
         {/* Description Section */}
-        <div className="mt-6 bg-card shadow-xl rounded-2xl p-6 md:p-8 border border-border">
+        <div className="mt-6 bg-white shadow-xl rounded-2xl p-6 md:p-8 border border-border">
           <ProductDescription product={product} />
         </div>
         {/* --- PHẦN MỚI: CÓ THỂ BẠN CŨNG THÍCH --- */}

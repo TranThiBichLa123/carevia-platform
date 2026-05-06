@@ -274,7 +274,12 @@ const CheckoutPageContent = () => {
         const response = await createOrderFromCart(
           auth_token!,
           orderItems,
-          selectedAddress
+          {
+            street: selectedAddress.street,
+            ward: selectedAddress.ward,
+            district: selectedAddress.district,
+            city: selectedAddress.city,
+          }
         );
         if (!response.success || !response.order) {
           throw new Error(response.message || "Failed to create order");
@@ -458,7 +463,7 @@ const CheckoutPageContent = () => {
           {/* Order Items */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-6">
-              Order Details
+              Chi tiết đơn hàng
             </h2>
 
             <div className="space-y-4">
@@ -487,7 +492,7 @@ const CheckoutPageContent = () => {
                       {item.name}
                     </h3>
                     <p className="text-sm text-gray-600">
-                      Quantity: {item.quantity} ×{" "}
+                      Số lượng: {item.quantity} ×{" "}
                       <PriceFormatter amount={item.price} />
                     </p>
                   </div>
@@ -506,24 +511,24 @@ const CheckoutPageContent = () => {
           {/* Payment Information */}
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6">
             <h2 className="text-xl font-bold text-gray-900 mb-6">
-              Payment Information
+              Thông tin thanh toán
             </h2>
 
             <div className="space-y-4">
-              <div className="flex items-center gap-3 p-4 border-2 border-blue-200 bg-blue-50 rounded-lg">
-                <CreditCard className="w-5 h-5 text-blue-600" />
+              <div className="flex items-center gap-3 p-4 border-2 border-primary-light bg-primary-light/20 rounded-lg">
+                <CreditCard className="w-5 h-5 text-primary" />
                 <div className="flex-1">
-                  <h3 className="font-medium text-gray-900">Stripe Checkout</h3>
+                  <h3 className="font-medium text-gray-900">Zalopay Checkout</h3>
                   <p className="text-sm text-gray-600">
-                    Secure payment with Stripe
+                    Thanh toán an toàn với Zalopay, được bảo mật bởi Stripe
                   </p>
                 </div>
-                <CheckCircle className="w-5 h-5 text-blue-600" />
+                <CheckCircle className="w-5 h-5 text-primary" />
               </div>
 
               <div className="flex items-center gap-2 text-sm text-gray-600">
                 <Lock className="w-4 h-4" />
-                <span>Your payment information is secure and encrypted</span>
+                <span>Thông tin thanh toán của bạn được bảo mật và mã hóa</span>
               </div>
             </div>
           </div>
@@ -533,12 +538,12 @@ const CheckoutPageContent = () => {
         <div className="lg:col-span-1">
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 sticky top-4">
             <h2 className="text-xl font-bold text-gray-900 mb-6">
-              Order Summary
+              Tóm tắt đơn hàng
             </h2>
 
             <div className="space-y-4">
               <div className="flex justify-between items-center py-2">
-                <span className="text-gray-600">Subtotal</span>
+                <span className="text-gray-600">Tạm tính</span>
                 <PriceFormatter
                   amount={calculateSubtotal()}
                   className="text-base font-medium text-gray-900"
@@ -546,10 +551,10 @@ const CheckoutPageContent = () => {
               </div>
 
               <div className="flex justify-between items-center py-2">
-                <span className="text-gray-600">Shipping</span>
+                <span className="text-gray-600">Vận chuyển</span>
                 <span className="text-base font-medium">
                   {calculateShipping() === 0 ? (
-                    <span className="text-green-600">Free shipping</span>
+                    <span className="text-green-600">Miễn phí vận chuyển</span>
                   ) : (
                     <PriceFormatter
                       amount={calculateShipping()}
@@ -560,7 +565,7 @@ const CheckoutPageContent = () => {
               </div>
 
               <div className="flex justify-between items-center py-2">
-                <span className="text-gray-600">Tax</span>
+                <span className="text-gray-600">Thuế</span>
                 <PriceFormatter
                   amount={calculateTax()}
                   className="text-base font-medium text-gray-900"
@@ -570,7 +575,7 @@ const CheckoutPageContent = () => {
               {calculateShipping() === 0 && (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-3">
                   <p className="text-green-700 text-sm font-medium">
-                    🎉 You qualify for free shipping!
+                    🎉 Bạn đủ điều kiện để được miễn phí vận chuyển!
                   </p>
                 </div>
               )}
@@ -578,7 +583,7 @@ const CheckoutPageContent = () => {
               <Separator className="my-4" />
 
               <div className="flex justify-between items-center py-2">
-                <span className="text-lg font-bold text-gray-900">Total</span>
+                <span className="text-lg font-bold text-gray-900">Tổng cộng</span>
                 <PriceFormatter
                   amount={calculateTotal()}
                   className="text-xl font-bold text-gray-900"
@@ -590,27 +595,27 @@ const CheckoutPageContent = () => {
               size="lg"
               onClick={handleStripeCheckout}
               disabled={processing || isCreatingOrder || !selectedAddress}
-              className="w-full mt-6 bg-blue-600 hover:bg-blue-700 text-white rounded-full py-3 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              className="w-full mt-6 bg-primary hover:bg-primary-dark text-white rounded-full py-3 font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             >
               {processing ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                  Processing...
+                  Đang xử lý...
                 </>
               ) : isCreatingOrder ? (
                 <>
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin mr-2" />
-                  Creating Order...
+                  Đang tạo đơn hàng...
                 </>
               ) : !selectedAddress ? (
                 <>
                   <AlertCircle className="w-4 h-4 mr-2" />
-                  Select Address to Continue
+                  Vui lòng chọn địa chỉ để tiếp tục
                 </>
               ) : (
                 <>
                   <Lock className="w-4 h-4 mr-2" />
-                  Pay with Stripe
+                  Thanh toán với Zalopay
                 </>
               )}
             </Button>
@@ -618,14 +623,14 @@ const CheckoutPageContent = () => {
             {!selectedAddress && (
               <div className="mt-2 text-center">
                 <p className="text-sm text-amber-600">
-                  Please select a shipping address to proceed with payment
+                  Vui lòng chọn địa chỉ giao hàng để tiếp tục
                 </p>
               </div>
             )}
 
             <div className="mt-4 text-center">
               <p className="text-xs text-gray-500">
-                Secure checkout • SSL encrypted • Powered by Stripe
+                Thanh toán an toàn • Mã hóa SSL • Hỗ trợ bởi Zalopay
               </p>
             </div>
           </div>

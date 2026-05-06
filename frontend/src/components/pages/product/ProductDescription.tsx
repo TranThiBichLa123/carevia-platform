@@ -14,7 +14,7 @@ export default function ProductDescription({ product }: ProductDescriptionProps)
     { id: 'description' as const, label: 'MÔ TẢ SẢN PHẨM' },
     { id: 'brand' as const, label: 'THÔNG TIN SHOP' },
     { id: 'reviews' as const, label: 'ĐÁNH GIÁ (128)' },
-    { id: 'questions' as const, label: 'HỎI ĐÁP' },
+    // { id: 'questions' as const, label: 'HỎI ĐÁP' },
   ];
 
   const mockReviews = [
@@ -48,7 +48,7 @@ export default function ProductDescription({ product }: ProductDescriptionProps)
   ];
 
   return (
-    <div className="w-full">
+    <div className="w-full font-vietnam bg-white">
       {/* Tab Navigation */}
       <div className="flex gap-1 border-b-2 border-border bg-card overflow-x-auto scrollbar-hide ">
         {tabs.map((tab) => (
@@ -76,7 +76,7 @@ export default function ProductDescription({ product }: ProductDescriptionProps)
         {activeTab === 'description' && (
           <div className="space-y-6 p-6">
             {/* Product Specifications */}
-            <div className="bg-muted/30 rounded-xl p-6 space-y-4">
+            <div className="bg-white rounded-xl p-6 space-y-4">
               <h3 className="text-lg font-bold text-foreground flex items-center gap-2">
                 <Package size={20} className="text-primary" />
                 Chi tiết sản phẩm
@@ -243,18 +243,18 @@ export default function ProductDescription({ product }: ProductDescriptionProps)
         )}
 
         {/* Questions Tab */}
-        {activeTab === 'questions' && (
+        {/* {activeTab === 'questions' && (
           <div className="p-16 text-center space-y-4">
             <MessageSquare size={64} className="mx-auto text-muted-foreground/30" />
             <div>
               <h3 className="text-xl font-bold text-foreground mb-2">Chưa có câu hỏi nào</h3>
               <p className="text-muted-foreground">Hãy là người đầu tiên đặt câu hỏi về sản phẩm này!</p>
             </div>
-            <button className="mt-4 px-6 py-3 bg-primary text-primary-foreground font-bold rounded-lg hover:bg-primary/90 hoverEffect shadow-md">
+            <button className="mt-4 px-6 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 hoverEffect shadow-md">
               Đặt câu hỏi ngay
             </button>
           </div>
-        )}
+        )} */}
       </div>
     </div>
   );

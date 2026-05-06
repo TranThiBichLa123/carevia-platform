@@ -88,20 +88,20 @@ const CartPageClient = () => {
     }
     try {
       await updateCartItemQuantity(itemId, newQuantity);
-      toast.success("Quantity updated");
+      toast.success("Số lượng đã được cập nhật");
     } catch (error) {
       console.error("Failed to update quantity:", error);
-      toast.error("Failed to update quantity");
+      toast.error("Không thể cập nhật số lượng");
     }
   };
 
   const handleRemoveItem = async (itemId: string) => {
     try {
       await removeFromCart(itemId);
-      toast.success("Item removed from cart");
+      toast.success("Đã xóa sản phẩm khỏi giỏ hàng");
     } catch (error) {
       console.error("Failed to remove item:", error);
-      toast.error("Failed to remove item from cart");
+      toast.error("Không thể xóa sản phẩm khỏi giỏ hàng");
     }
   };
 
@@ -113,10 +113,10 @@ const CartPageClient = () => {
     try {
       await clearCart();
       setShowClearDialog(false);
-      toast.success("Cart cleared");
+      toast.success("Đã xóa tất cả sản phẩm khỏi giỏ hàng");
     } catch (error) {
       console.error("Failed to clear cart:", error);
-      toast.error("Failed to clear cart");
+      toast.error("Không thể xóa tất cả sản phẩm khỏi giỏ hàng");
     }
   };
 
@@ -124,17 +124,18 @@ const CartPageClient = () => {
     setIsCheckingOut(true);
     try {
       if (!auth_token) {
-        toast.error("You must be logged in to place an order.");
+        toast.error("Bạn phải đăng nhập để đặt hàng.");
         setIsCheckingOut(false);
         return;
       }
 
       // Redirect to checkout page with cart items
       router.push(`/client/user/checkout`);
-      toast.success("Redirecting to checkout...");
+      toast.success("Đang chuyển đến trang thanh toán...");
     } catch (error) {
       console.error("Error navigating to checkout:", error);
-      toast.error("Failed to navigate to checkout. Please try again.");
+      toast.error("Không thể chuyển đến trang thanh toán. Vui lòng thử lại.");
+
     } finally {
       setIsCheckingOut(false);
     }

@@ -85,21 +85,7 @@ const PageBreadcrumb: React.FC<PageBreadcrumbProps> = ({
         </span>
       </nav>
 
-      {/* Phần Share tối giản */}
-      {/* {showSocialShare && shareData && (
-        <div className="flex items-center gap-1">
-          <span className="text-[11px] font-medium text-gray-400 mr-1 uppercase tracking-wider">Share:</span>
-          <Button variant="ghost" size="icon" onClick={() => handleShare("facebook")} className="h-8 w-8 text-gray-400 hover:text-blue-600 hover:bg-blue-50">
-            <Facebook className="w-4 h-4" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => handleShare("twitter")} className="h-8 w-8 text-gray-400 hover:text-sky-500 hover:bg-sky-50">
-            <Twitter className="w-4 h-4" />
-          </Button>
-          <Button variant="ghost" size="icon" onClick={() => handleShare("copy")} className="h-8 w-8 text-gray-400 hover:text-primary hover:bg-gray-100">
-            <LinkIcon className="w-4 h-4" />
-          </Button>
-        </div>
-      )} */}
+     
     </div>
   );
 };

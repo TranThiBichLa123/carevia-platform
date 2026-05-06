@@ -21,6 +21,7 @@ import {
   ShoppingBag,
   CreditCard,
   Info,
+  LogOut,
 } from "lucide-react";
 import {
   Dialog,
@@ -35,6 +36,7 @@ import authApi from "@/lib/authApi";
 const SettingsTab = () => {
   const { authUser, logoutUser } = useUserStore();
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isLogoutDialogOpen, setIsLogoutDialogOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
 
   // Notification preferences (local state, could be persisted to API)
@@ -87,7 +89,7 @@ const SettingsTab = () => {
   }) => (
     <div className="flex items-center justify-between py-3 border-b border-gray-50 last:border-0">
       <div className="flex items-center gap-3">
-        <div className="w-8 h-8 rounded-lg bg-gray-50 flex items-center justify-center text-gray-500">
+        <div className="w-8 h-8 rounded-lg bg-primary-light flex items-center justify-center text-primary">
           {icon}
         </div>
         <div>
@@ -100,19 +102,19 @@ const SettingsTab = () => {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-vietnam">
       {/* Account Security */}
-      <Card className="border shadow-sm">
+      <Card className="border-0 shadow-sm rounded-2xl">
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-sm font-bold">
-            <Shield size={16} className="text-teal-600" /> Bảo mật tài khoản
+          <CardTitle className="flex items-center gap-2 text-sm font-bold text-gray-700">
+            <Shield size={16} className="text-primary" /> Bảo mật tài khoản
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center justify-between py-3 border-b border-gray-50">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center">
-                <Lock size={14} className="text-blue-600" />
+              <div className="w-8 h-8 rounded-lg bg-primary-light flex items-center justify-center">
+                <Lock size={14} className="text-primary" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-800">Phương thức xác thực</p>
@@ -121,28 +123,28 @@ const SettingsTab = () => {
                 </p>
               </div>
             </div>
-            <Badge className="bg-green-100 text-green-700 border-green-200">
+            <Badge className="bg-primary-light text-primary border-primary/20">
               {authUser.auth_provider === "google" ? "OAuth" : "Email"}
             </Badge>
           </div>
 
           <div className="flex items-center justify-between py-3 border-b border-gray-50">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-purple-50 flex items-center justify-center">
-                <Mail size={14} className="text-purple-600" />
+              <div className="w-8 h-8 rounded-lg bg-primary-light flex items-center justify-center">
+                <Mail size={14} className="text-primary" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-800">Email</p>
                 <p className="text-xs text-gray-400">{authUser.email}</p>
               </div>
             </div>
-            <Badge className="bg-green-100 text-green-700 border-green-200">Đã xác minh</Badge>
+            <Badge className="bg-emerald-50 text-emerald-600 border-emerald-200">Đã xác minh</Badge>
           </div>
 
           <div className="flex items-center justify-between py-3">
             <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-orange-50 flex items-center justify-center">
-                <Smartphone size={14} className="text-orange-600" />
+              <div className="w-8 h-8 rounded-lg bg-primary-light flex items-center justify-center">
+                <Smartphone size={14} className="text-primary" />
               </div>
               <div>
                 <p className="text-sm font-medium text-gray-800">Xác thực 2 lớp (2FA)</p>
@@ -157,10 +159,10 @@ const SettingsTab = () => {
       </Card>
 
       {/* Notification Preferences */}
-      <Card className="border shadow-sm">
+      <Card className="border-0 shadow-sm rounded-2xl">
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-sm font-bold">
-            <Bell size={16} className="text-teal-600" /> Cấu hình thông báo
+          <CardTitle className="flex items-center gap-2 text-sm font-bold text-gray-700">
+            <Bell size={16} className="text-primary" /> Cấu hình thông báo
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -243,10 +245,10 @@ const SettingsTab = () => {
       </Card>
 
       {/* Display Preferences */}
-      <Card className="border shadow-sm">
+      <Card className="border-0 shadow-sm rounded-2xl">
         <CardHeader className="pb-3">
-          <CardTitle className="flex items-center gap-2 text-sm font-bold">
-            <Globe size={16} className="text-teal-600" /> Tùy chọn hiển thị
+          <CardTitle className="flex items-center gap-2 text-sm font-bold text-gray-700">
+            <Globe size={16} className="text-primary" /> Tùy chọn hiển thị
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -255,17 +257,29 @@ const SettingsTab = () => {
               <p className="text-sm font-medium text-gray-800">Ngôn ngữ</p>
               <p className="text-xs text-gray-400">Chọn ngôn ngữ giao diện</p>
             </div>
-            <select
-              value={language}
-              onChange={(e) => {
-                setLanguage(e.target.value);
-                toast.success("Language updated");
-              }}
-              className="px-3 py-1.5 border rounded-lg text-sm bg-white"
-            >
-              <option value="vi">Tiếng Việt</option>
-              <option value="en">English</option>
-            </select>
+            <div className="relative group min-w-35">
+              <div className="flex items-center justify-between px-3 py-2 bg-white border border-gray-200 rounded-md cursor-pointer hover:border-gray-300 transition-all">
+                <span className="text-[13px] font-medium text-gray-700 font-vietnam whitespace-nowrap">
+                  {language === "vi" ? "Tiếng Việt" : "English"}
+                </span>
+                <svg className="w-4 h-4 text-gray-400 group-hover:rotate-180 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+              <div className="absolute top-full right-0 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                <div className="flex flex-col whitespace-nowrap">
+                  {[{ value: "vi", label: "Tiếng Việt" }, { value: "en", label: "English" }].map((opt) => (
+                    <div
+                      key={opt.value}
+                      onClick={() => { setLanguage(opt.value); toast.success("Cập nhật ngôn ngữ thành công"); }}
+                      className={`px-3 py-2.5 text-[13px] cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors font-vietnam ${language === opt.value ? "text-primary font-bold bg-gray-50" : "text-gray-700 hover:bg-gray-50"}`}
+                    >
+                      {opt.label}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
 
           <div className="flex items-center justify-between py-3">
@@ -273,42 +287,76 @@ const SettingsTab = () => {
               <p className="text-sm font-medium text-gray-800">Đơn vị tiền tệ</p>
               <p className="text-xs text-gray-400">Đơn vị hiển thị giá sản phẩm</p>
             </div>
-            <select
-              value={currency}
-              onChange={(e) => {
-                setCurrency(e.target.value);
-                toast.success("Currency updated");
-              }}
-              className="px-3 py-1.5 border rounded-lg text-sm bg-white"
-            >
-              <option value="USD">USD ($)</option>
-              <option value="VND">VND (₫)</option>
-            </select>
+            <div className="relative group min-w-35">
+              <div className="flex items-center justify-between px-3 py-2 bg-white border border-gray-200 rounded-md cursor-pointer hover:border-gray-300 transition-all">
+                <span className="text-[13px] font-medium text-gray-700 font-vietnam whitespace-nowrap">
+                  {currency === "USD" ? "USD ($)" : "VND (₫)"}
+                </span>
+                <svg className="w-4 h-4 text-gray-400 group-hover:rotate-180 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                </svg>
+              </div>
+              <div className="absolute top-full right-0 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                <div className="flex flex-col whitespace-nowrap">
+                  {[{ value: "USD", label: "USD ($)" }, { value: "VND", label: "VND (₫)" }].map((opt) => (
+                    <div
+                      key={opt.value}
+                      onClick={() => { setCurrency(opt.value); toast.success("Cập nhật tiền tệ thành công"); }}
+                      className={`px-3 py-2.5 text-[13px] cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors font-vietnam ${currency === opt.value ? "text-primary font-bold bg-gray-50" : "text-gray-700 hover:bg-gray-50"}`}
+                    >
+                      {opt.label}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
 
       {/* Danger Zone */}
-      <Card className="border border-red-200 shadow-sm">
+      <Card className="border border-red-200 shadow-sm rounded-2xl">
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center gap-2 text-sm font-bold text-red-600">
-            <Trash2 size={16} /> Vùng nguy hiểm
+            <LogOut size={16} /> Vùng nguy hiểm
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center justify-between">
+        <CardContent className="space-y-4">
+          {/* Logout row */}
+          <div className="flex items-center justify-between py-3 border-b border-gray-50">
             <div>
-              <p className="text-sm font-medium text-gray-800">Xóa tài khoản</p>
-              <p className="text-xs text-gray-400">
-                Toàn bộ dữ liệu sẽ bị xóa vĩnh viễn sau 30 ngày
-              </p>
+              <p className="text-sm font-medium text-gray-800">Đăng xuất khỏi tài khoản của bạn</p>
+              <p className="text-xs text-gray-400">Bạn sẽ cần đăng nhập lại để truy cập vào tài khoản của mình.</p>
             </div>
             <Button
               variant="outline"
-              className="border-red-300 text-red-600 hover:bg-red-50"
+              className="relative group overflow-hidden border-red-300 text-red-600 transition-colors duration-500"
+              onClick={() => setIsLogoutDialogOpen(true)}
+            >
+              <span className="absolute inset-y-0 left-0 w-0 bg-red-500 transition-all duration-500 ease-out group-hover:w-full" />
+              <span className="relative z-10 flex items-center transition-colors duration-500 group-hover:text-white">
+                <LogOut size={14} className="mr-2" />
+                Đăng xuất
+              </span>
+            </Button>
+          </div>
+
+          {/* Delete account row */}
+          <div className="flex items-center justify-between py-3">
+            <div>
+              <p className="text-sm font-medium text-gray-800">Xóa tài khoản</p>
+              <p className="text-xs text-gray-400">Toàn bộ dữ liệu sẽ bị xóa vĩnh viễn sau 30 ngày</p>
+            </div>
+            <Button
+              variant="outline"
+              className="relative group overflow-hidden border-red-300 text-red-600 transition-colors duration-500"
               onClick={() => setIsDeleteDialogOpen(true)}
             >
-              <Trash2 size={14} className="mr-1" /> Xóa tài khoản
+              <span className="absolute inset-y-0 left-0 w-0 bg-red-500 transition-all duration-500 ease-out group-hover:w-full" />
+              <span className="relative z-10 flex items-center transition-colors duration-500 group-hover:text-white">
+                <Trash2 size={14} className="mr-2" />
+                Xóa tài khoản
+              </span>
             </Button>
           </div>
         </CardContent>
@@ -341,6 +389,29 @@ const SettingsTab = () => {
               className="bg-red-600 hover:bg-red-700 text-white"
             >
               {isLoading ? "Đang xử lý..." : "Xác nhận xóa"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Logout Confirmation Dialog */}
+      <Dialog open={isLogoutDialogOpen} onOpenChange={setIsLogoutDialogOpen}>
+        <DialogContent className="sm:max-w-sm">
+          <DialogHeader>
+            <DialogTitle className="text-red-600">Đăng xuất</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-gray-600">
+            Bạn có chắc chắn muốn đăng xuất khỏi tài khoản này không?
+          </p>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsLogoutDialogOpen(false)}>
+              Hủy
+            </Button>
+            <Button
+              onClick={() => { setIsLogoutDialogOpen(false); logoutUser(); }}
+              className="bg-red-600 hover:bg-red-700 text-white"
+            >
+              Đăng xuất
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -468,7 +468,7 @@ export default function LoginPage() {
                 className="font-medium transition-colors duration-200"
                 style={{ color: "var(--purple)" }}
               >
-                Sign up
+                Đăng ký ngay
               </a>
             </p>
           </motion.div>

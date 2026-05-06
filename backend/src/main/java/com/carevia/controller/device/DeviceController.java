@@ -13,6 +13,7 @@ import com.carevia.shared.constant.BehaviorType;
 import com.carevia.shared.dto.request.device.CreateDeviceRequest;
 import com.carevia.shared.dto.request.device.UpdateDeviceRequest;
 import com.carevia.shared.dto.response.device.DeviceResponse;
+import com.carevia.shared.dto.response.device.ExperienceStepResponse;
 import com.carevia.shared.util.SecurityUtils;
 
 import jakarta.validation.Valid;
@@ -75,6 +76,18 @@ public class DeviceController {
     public ResponseEntity<?> getSimilarDevices(@PathVariable("id") Long id, 
         @RequestParam(value = "limit", defaultValue = "4") int limit) {
         return ResponseEntity.ok(deviceService.getSimilarDevices(id, limit));
+    }
+
+    @GetMapping("/{id}/experience-steps")
+    @Operation(summary = "Get experience steps for a device")
+    public ResponseEntity<?> getExperienceSteps(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(deviceService.getExperienceSteps(id));
+    }
+
+    @GetMapping("/{id}/specifications")
+    @Operation(summary = "Get specifications for a device")
+    public ResponseEntity<?> getSpecifications(@PathVariable("id") Long id) {
+        return ResponseEntity.ok(deviceService.getSpecifications(id));
     }
 
     @GetMapping("/categories")

@@ -14,19 +14,24 @@ const ProductCard = ({ product }: { product: Product }) => {
     /* 1. Đổi hover:border thành primary-light (hoặc primary nếu muốn đậm hơn) */
     <div className="border border-gray-200 rounded-xl group overflow-hidden w-full relative bg-white hover:border-primary hover:shadow-lg transition-all duration-300">
       <Link
-        href={`/client/devices/${safeId}`} // Sử dụng safeId ở đây
-        className="overflow-hidden relative block"
+        href={`/client/devices/${safeId}`}
+        className="relative block w-full aspect-square flex items-center justify-center bg-white p-4 overflow-hidden"
       >
+        {/* Tạo hiệu ứng quầng sáng màu nhẹ phía sau để tăng chiều sâu thay vì dùng blur ảnh gốc */}
+        <div className="absolute inset-0 bg-radial-gradient from-gray-50 to-transparent opacity-50" />
+
         <Image
           src={product?.image}
-          width={500}
-          height={500}
+          width={200}
+          height={200}
           alt="productImage"
-          className="w-full h-40 object-cover group-hover:scale-110 transition-transform duration-500"
+          className="relative z-10 w-full h-full object-contain mix-blend-multiply group-hover:scale-105 transition-transform duration-700 ease-out"
         />
 
         {product?.discountPercentage > 0 && (
-          <DiscountBadge discountPercentage={product.discountPercentage} />
+          <div className="absolute top-0 right-0 z-20">
+            <DiscountBadge discountPercentage={product.discountPercentage} />
+          </div>
         )}
       </Link>
 
@@ -41,7 +46,7 @@ const ProductCard = ({ product }: { product: Product }) => {
       <hr className="border-gray-50" />
 
       <div className="px-4 py-3 space-y-1">
-        <p className="uppercase text-[10px] tracking-wider font-vietnam  font-semibold text-gray-400">
+        <p className="uppercase text-[10px] tracking-wider font-vietnam  font-semibold text-primary">
           {product?.category?.name}
         </p>
 

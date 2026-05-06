@@ -11,6 +11,7 @@ import com.carevia.shared.dto.PageResponse;
 import com.carevia.shared.dto.request.device.CreateDeviceRequest;
 import com.carevia.shared.dto.request.device.UpdateDeviceRequest;
 import com.carevia.shared.dto.response.device.DeviceResponse;
+import com.carevia.shared.dto.response.device.ExperienceStepResponse;
 import com.carevia.shared.exception.ResourceNotFoundException;
 
 import java.util.List;
@@ -22,11 +23,18 @@ public class DeviceService {
     private final DeviceRepository deviceRepository;
     private final CategoryRepository categoryRepository;
     private final BrandRepository brandRepository;
+    private final DeviceExperienceStepRepository experienceStepRepository;
 
-    public DeviceService(DeviceRepository deviceRepository, CategoryRepository categoryRepository, BrandRepository brandRepository) {
+    private final WishlistRepository wishlistRepository;
+
+    public DeviceService(DeviceRepository deviceRepository, CategoryRepository categoryRepository,
+            BrandRepository brandRepository, DeviceExperienceStepRepository experienceStepRepository,
+            WishlistRepository wishlistRepository) {
         this.deviceRepository = deviceRepository;
         this.categoryRepository = categoryRepository;
         this.brandRepository = brandRepository;
+        this.experienceStepRepository = experienceStepRepository;
+        this.wishlistRepository = wishlistRepository;
     }
 
     public PageResponse<DeviceResponse> getAllDevices(Pageable pageable) {
@@ -50,11 +58,23 @@ public class DeviceService {
     }
 
     public DeviceResponse getDeviceById(Long id) {
+        // 1. Tìm device
         Device device = deviceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Device not found with id: " + id));
+
+        // 2. Tăng view count (như cũ)
         device.incrementViewCount();
         deviceRepository.save(device);
-        return toResponse(device);
+
+        // 3. Chuyển sang DTO
+        DeviceResponse response = toResponse(device);
+
+        // 4. Đếm số lượt thích từ bảng wishlist và gán vào DTO (không lưu vào bảng
+        // devices)
+        long count = wishlistRepository.countByDeviceId(id);
+        response.setWishlistCount(count);
+
+        return response;
     }
 
     public DeviceResponse getDeviceBySlug(String slug) {
@@ -116,27 +136,48 @@ public class DeviceService {
         Device device = deviceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Device not found"));
 
-        if (request.getName() != null) device.setName(request.getName());
-        if (request.getDescription() != null) device.setDescription(request.getDescription());
-        if (request.getContent() != null) device.setContent(request.getContent());
-        if (request.getPrice() != null) device.setPrice(request.getPrice());
-        if (request.getOriginalPrice() != null) device.setOriginalPrice(request.getOriginalPrice());
-        if (request.getDiscountPercentage() != null) device.setDiscountPercentage(request.getDiscountPercentage());
-        if (request.getStock() != null) device.setStock(request.getStock());
-        if (request.getImage() != null) device.setImage(request.getImage());
-        if (request.getImages() != null) device.setImages(request.getImages());
-        if (request.getSku() != null) device.setSku(request.getSku());
-        if (request.getWarrantyPeriod() != null) device.setWarrantyPeriod(request.getWarrantyPeriod());
-        if (request.getWarrantyPolicy() != null) device.setWarrantyPolicy(request.getWarrantyPolicy());
-        if (request.getOrigin() != null) device.setOrigin(request.getOrigin());
-        if (request.getDeviceCondition() != null) device.setDeviceCondition(request.getDeviceCondition());
-        if (request.getSkinType() != null) device.setSkinType(request.getSkinType());
-        if (request.getSkinConcerns() != null) device.setSkinConcerns(request.getSkinConcerns());
-        if (request.getIsBookingAvailable() != null) device.setIsBookingAvailable(request.getIsBookingAvailable());
-        if (request.getBookingPrice() != null) device.setBookingPrice(request.getBookingPrice());
-        if (request.getTags() != null) device.setTags(request.getTags());
-        if (request.getVideoUrl() != null) device.setVideoUrl(request.getVideoUrl());
-        if (request.getStatus() != null) device.setStatus(DeviceStatus.valueOf(request.getStatus()));
+        if (request.getName() != null)
+            device.setName(request.getName());
+        if (request.getDescription() != null)
+            device.setDescription(request.getDescription());
+        if (request.getContent() != null)
+            device.setContent(request.getContent());
+        if (request.getPrice() != null)
+            device.setPrice(request.getPrice());
+        if (request.getOriginalPrice() != null)
+            device.setOriginalPrice(request.getOriginalPrice());
+        if (request.getDiscountPercentage() != null)
+            device.setDiscountPercentage(request.getDiscountPercentage());
+        if (request.getStock() != null)
+            device.setStock(request.getStock());
+        if (request.getImage() != null)
+            device.setImage(request.getImage());
+        if (request.getImages() != null)
+            device.setImages(request.getImages());
+        if (request.getSku() != null)
+            device.setSku(request.getSku());
+        if (request.getWarrantyPeriod() != null)
+            device.setWarrantyPeriod(request.getWarrantyPeriod());
+        if (request.getWarrantyPolicy() != null)
+            device.setWarrantyPolicy(request.getWarrantyPolicy());
+        if (request.getOrigin() != null)
+            device.setOrigin(request.getOrigin());
+        if (request.getDeviceCondition() != null)
+            device.setDeviceCondition(request.getDeviceCondition());
+        if (request.getSkinType() != null)
+            device.setSkinType(request.getSkinType());
+        if (request.getSkinConcerns() != null)
+            device.setSkinConcerns(request.getSkinConcerns());
+        if (request.getIsBookingAvailable() != null)
+            device.setIsBookingAvailable(request.getIsBookingAvailable());
+        if (request.getBookingPrice() != null)
+            device.setBookingPrice(request.getBookingPrice());
+        if (request.getTags() != null)
+            device.setTags(request.getTags());
+        if (request.getVideoUrl() != null)
+            device.setVideoUrl(request.getVideoUrl());
+        if (request.getStatus() != null)
+            device.setStatus(DeviceStatus.valueOf(request.getStatus()));
         if (request.getCategoryId() != null) {
             Category category = categoryRepository.findById(request.getCategoryId())
                     .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
@@ -173,9 +214,35 @@ public class DeviceService {
         Device device = deviceRepository.findById(deviceId)
                 .orElseThrow(() -> new ResourceNotFoundException("Device not found"));
         Long categoryId = device.getCategory() != null ? device.getCategory().getId() : null;
-        if (categoryId == null) return List.of();
+        if (categoryId == null)
+            return List.of();
         return deviceRepository.findSimilarDevices(categoryId, deviceId, Pageable.ofSize(limit)).stream()
                 .map(this::toResponse).collect(Collectors.toList());
+    }
+
+    public List<ExperienceStepResponse> getExperienceSteps(Long deviceId) {
+        return experienceStepRepository.findByDeviceIdOrderByStepNumberAsc(deviceId).stream()
+                .map(s -> ExperienceStepResponse.builder()
+                        .id(s.getId())
+                        .stepNumber(s.getStepNumber())
+                        .stepTitle(s.getStepTitle())
+                        .stepContent(s.getStepContent())
+                        .iconUrl(s.getIconUrl())
+                        .durationMinutes(s.getDurationMinutes())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
+    public List<DeviceResponse.SpecificationInfo> getSpecifications(Long deviceId) {
+        Device device = deviceRepository.findById(deviceId)
+                .orElseThrow(() -> new ResourceNotFoundException("Device not found with id: " + deviceId));
+        if (device.getSpecifications() == null) return List.of();
+        return device.getSpecifications().stream()
+                .map(s -> DeviceResponse.SpecificationInfo.builder()
+                        .label(s.getLabel())
+                        .value(s.getValue())
+                        .build())
+                .collect(Collectors.toList());
     }
 
     // Categories
@@ -185,7 +252,8 @@ public class DeviceService {
 
     @Transactional
     public Category createCategory(Category category) {
-        if (category.getSlug() == null) category.setSlug(generateSlug(category.getName()));
+        if (category.getSlug() == null)
+            category.setSlug(generateSlug(category.getName()));
         return categoryRepository.save(category);
     }
 
@@ -200,7 +268,8 @@ public class DeviceService {
 
     @Transactional
     public Brand createBrand(Brand brand) {
-        if (brand.getSlug() == null) brand.setSlug(generateSlug(brand.getName()));
+        if (brand.getSlug() == null)
+            brand.setSlug(generateSlug(brand.getName()));
         return brandRepository.save(brand);
     }
 

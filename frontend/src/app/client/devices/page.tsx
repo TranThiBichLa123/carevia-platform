@@ -7,6 +7,7 @@ import Link from "next/link";
 import Container from "@/components/common/Container";
 import { deviceApi, DevicePageResponse, BrandData } from "@/lib/deviceApi";
 import { mapDeviceToProduct } from "@/lib/mappers";
+import PageBreadcrumb from "@/components/common/PageBreadcrumb";
 
 type SortOption = "newest" | "price_asc" | "price_desc" | "best_selling";
 
@@ -107,19 +108,15 @@ const AllProductsPage = () => {
     };
 
     return (
-        <Container className="bg-white min-h-screen pb-20 font-vietnam">
+        <Container className="bg-white min-h-screen pb-20 font-vietnam py-4">
             {/* Breadcrumb - Style Watsons tối giản */}
-            <div className="">
-                <div className="container mx-auto px-4 py-3">
-                    <nav className="text-[13px]  tracking-wider text-gray-500 flex items-center gap-2">
-                        <Link href="/client" className="hover:text-primary transition-colors">
-                            Trang chủ
-                        </Link>
-                        <span className="text-gray-300">/</span>
-                        <span className="text-gray-900 ">Tất cả sản phẩm</span>
-                    </nav>
-                </div>
-            </div>
+            <PageBreadcrumb
+                items={[
+                    // { label: "Dịch vụ", href: "/client/services" },
+                ]}
+                currentPage="Tất cả sản phẩm"
+            />
+
 
             <div className="container mx-auto ">
 

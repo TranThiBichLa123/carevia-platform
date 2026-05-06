@@ -46,7 +46,7 @@ const NotificationsTab = () => {
           message: "Lịch hẹn trải nghiệm SkinPro Gen 2 của bạn đã được xác nhận cho ngày 15/04/2026.",
           notificationType: "BOOKING_CONFIRMED",
           status: "UNREAD",
-          referenceId: "bk-888",
+          referenceId: 888,
           referenceType: "BOOKING",
           actionUrl: "/client/my-bookings",
           createdAt: new Date(Date.now() - 3600000).toISOString(),
@@ -57,9 +57,9 @@ const NotificationsTab = () => {
           message: "Đơn hàng #ORD-2026 của bạn đang được chuẩn bị giao hàng.",
           notificationType: "ORDER_PROCESSING",
           status: "UNREAD",
-          referenceId: "ord-123",
+          referenceId: 123,
           referenceType: "ORDER",
-          actionUrl: "/client/user/orders",
+          actionUrl: "/client/account?tab=orders",
           createdAt: new Date(Date.now() - 7200000).toISOString(),
         },
         {
@@ -68,9 +68,9 @@ const NotificationsTab = () => {
           message: "Thanh toán $45.00 cho đơn hàng #ORD-2025 đã hoàn tất.",
           notificationType: "PAYMENT_SUCCESS",
           status: "READ",
-          referenceId: "ord-122",
+          referenceId: 122,
           referenceType: "ORDER",
-          actionUrl: "/client/user/orders",
+          actionUrl: "/client/account?tab=orders",
           createdAt: new Date(Date.now() - 86400000).toISOString(),
         },
         {
@@ -79,7 +79,7 @@ const NotificationsTab = () => {
           message: "Bạn có lịch hẹn trải nghiệm AquaSteam Luxury vào ngày mai lúc 09:30.",
           notificationType: "BOOKING_REMINDER",
           status: "READ",
-          referenceId: "bk-890",
+          referenceId: 890,
           referenceType: "BOOKING",
           actionUrl: "/client/my-bookings",
           createdAt: new Date(Date.now() - 172800000).toISOString(),
@@ -138,10 +138,10 @@ const NotificationsTab = () => {
   };
 
   const getTypeIcon = (type: string) => {
-    if (type.includes("BOOKING")) return <Calendar size={16} className="text-blue-600" />;
-    if (type.includes("ORDER")) return <ShoppingBag size={16} className="text-green-600" />;
-    if (type.includes("PAYMENT")) return <CreditCard size={16} className="text-orange-600" />;
-    return <Info size={16} className="text-gray-600" />;
+    if (type.includes("BOOKING")) return <Calendar size={16} className="text-primary" />;
+    if (type.includes("ORDER")) return <ShoppingBag size={16} className="text-primary" />;
+    if (type.includes("PAYMENT")) return <CreditCard size={16} className="text-primary" />;
+    return <Info size={16} className="text-primary" />;
   };
 
   const getTypeLabel = (type: string) => {
@@ -160,13 +160,13 @@ const NotificationsTab = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="animate-spin text-teal-600" size={24} />
+        <Loader2 className="animate-spin text-primary" size={32} />
       </div>
     );
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-vietnam">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
@@ -191,7 +191,7 @@ const NotificationsTab = () => {
         <button
           onClick={() => setFilter("all")}
           className={`px-4 py-2 rounded-full text-xs font-medium ${
-            filter === "all" ? "bg-teal-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            filter === "all" ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
           }`}
         >
           Tất cả
@@ -199,7 +199,7 @@ const NotificationsTab = () => {
         <button
           onClick={() => setFilter("unread")}
           className={`px-4 py-2 rounded-full text-xs font-medium ${
-            filter === "unread" ? "bg-teal-600 text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+            filter === "unread" ? "bg-primary text-white" : "bg-gray-100 text-gray-600 hover:bg-gray-200"
           }`}
         >
           Chưa đọc ({unreadCount})
@@ -220,12 +220,12 @@ const NotificationsTab = () => {
               onClick={() => handleClick(notification)}
               className={`p-4 rounded-xl border cursor-pointer transition-all hover:shadow-sm ${
                 notification.status === "UNREAD"
-                  ? "bg-teal-50/50 border-teal-200"
+                ? "bg-primary-light/50 border-primary/30"
                   : "bg-white border-gray-100 hover:bg-gray-50"
               }`}
             >
               <div className="flex items-start gap-3">
-                <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center flex-shrink-0">
+                <div className="w-10 h-10 rounded-full bg-primary-light flex items-center justify-center shrink-0">
                   {getTypeIcon(notification.notificationType)}
                 </div>
                 <div className="flex-1 min-w-0">
@@ -234,13 +234,13 @@ const NotificationsTab = () => {
                       {getTypeLabel(notification.notificationType)}
                     </span>
                     {notification.status === "UNREAD" && (
-                      <span className="w-2 h-2 rounded-full bg-teal-500" />
+                      <span className="w-2 h-2 rounded-full bg-primary" />
                     )}
                   </div>
                   <h4 className="text-sm font-semibold text-gray-800">{notification.title}</h4>
                   <p className="text-sm text-gray-500 mt-0.5">{notification.message}</p>
                 </div>
-                <div className="flex flex-col items-end gap-2 flex-shrink-0">
+                <div className="flex flex-col items-end gap-2 shrink-0">
                   <span className="text-[11px] text-gray-400">{formatDate(notification.createdAt)}</span>
                   {notification.status === "UNREAD" && (
                     <button
@@ -248,7 +248,7 @@ const NotificationsTab = () => {
                         e.stopPropagation();
                         handleMarkAsRead(notification.id);
                       }}
-                      className="text-[11px] text-teal-600 hover:underline flex items-center gap-1"
+                      className="text-[11px] text-primary hover:underline flex items-center gap-1"
                     >
                       <Check size={12} /> Đã đọc
                     </button>

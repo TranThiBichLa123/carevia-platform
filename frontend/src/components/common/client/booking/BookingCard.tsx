@@ -34,7 +34,7 @@ const BookingCard = ({ device, onSelect }: Props) => {
         <p className="uppercase text-[10px] tracking-wider font-semibold text-gray-400">
           {device?.category?.name || "Clinic Tech"}
         </p>
-        
+
         {/* Tên thiết bị - Style tương tự ProductCard */}
         <h3 className="line-clamp-2 text-sm h-10 font-bold text-gray-800 group-hover:text-primary transition-colors uppercase leading-tight">
           {device?.name}
@@ -53,13 +53,16 @@ const BookingCard = ({ device, onSelect }: Props) => {
             <div>
               <p className="text-[9px] text-gray-400 uppercase font-bold tracking-tight">Giá trải nghiệm</p>
               <p className="text-base font-black text-primary">
-                {device?.bookingPrice > 0 ? `${device?.bookingPrice} USD` : 'MIỄN PHÍ'}
+                {device?.bookingPrice > 0
+                  ? `${Number(device?.bookingPrice).toLocaleString('vi-VN')} đ`
+                  : 'MIỄN PHÍ'}
               </p>
+
             </div>
-            
+
             {/* Icon phụ trợ */}
             <div className="text-gray-300 group-hover:text-primary transition-colors">
-                <CalendarCheck size={18} />
+              <CalendarCheck size={18} />
             </div>
           </div>
 

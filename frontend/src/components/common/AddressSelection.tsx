@@ -321,7 +321,7 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
                   <div
                     key={address._id}
                     className={`relative p-4 border-2 rounded-xl transition-all duration-200 hover:shadow-md ${selectedAddress?._id === address._id
-                      ? "border-blue-500 bg-blue-50/50 ring-2 ring-blue-500/20"
+                      ? "border-primary bg-primary/10 ring-2 ring-primary/20"
                       : "border-gray-200 hover:border-gray-300"
                       }`}
                   >

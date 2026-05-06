@@ -103,7 +103,7 @@ public class Staff extends PersonBase implements BaseProfile {
 
     @Column(name = "is_available")
     @Builder.Default
-    private boolean isAvailable = true; // Nhân viên có sẵn sàng để khách đặt lịch hay không
+    private Boolean isAvailable = true; // Nhân viên có sẵn sàng để khách đặt lịch hay không
 
     @Column(columnDefinition = "TEXT")
     private String bio; // Giới thiệu ngắn để khách hàng tin tưởng khi đặt lịch

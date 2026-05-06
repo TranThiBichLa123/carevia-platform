@@ -38,6 +38,8 @@ const ProductActions: React.FC<ProductActionsProps> = ({ product }) => {
   const router = useRouter();
   const safeProductId = getProductId(product as ProductWithLegacyId);
   const isOutOfStock = product.stock <= 0;
+  const canBook = product.isBookingAvailable && (product.sessionIds?.length ?? 0) > 0;
+
 
   const updateQuantity = (nextQuantity: number) => {
     const maxQuantity = Math.max(1, product.stock || 1);
@@ -173,28 +175,40 @@ const ProductActions: React.FC<ProductActionsProps> = ({ product }) => {
         </div>
 
         {/* Booking Experience Button */}
-        {product.isBookingAvailable && (
-          <>
-            <button
-              onClick={handleBooking}
-              className="w-full h-14 flex items-center justify-center gap-2 bg-linear-to-r from-primary to-primary/80 text-white font-bold rounded-xl hover:shadow-lg hoverEffect border-2 border-primary/20"
-            >
-              <CalendarCheck size={20} />
-              Đặt Lịch Trải Nghiệm Sản Phẩm (Miễn Phí)
-            </button>
-            <p className="text-xs text-center text-muted-foreground italic">
-              ✨ Xem và trải nghiệm sản phẩm thực tế tại cửa hàng trước khi
-              quyết định mua
-            </p>
-          </>
-        )}
+        {/* Booking Experience Button - Luôn hiển thị để khách biết có dịch vụ này */}
+        <div className="space-y-2 pt-4">
+          <button
+            onClick={handleBooking}
+            disabled={!canBook} // Chặn click khi canBook = false
+            className={`
+      w-full h-14 flex items-center justify-center gap-2 font-bold rounded-xl transition-all duration-300
+      ${canBook
+                ? "bg-linear-to-r from-primary to-primary/80 text-white hover:shadow-lg hover:scale-[1.02] active:scale-95 border-2 border-primary/20 cursor-pointer"
+                : "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200 shadow-none scale-100"
+              }
+    `}
+          >
+            <CalendarCheck size={20} className={canBook ? "text-white" : "text-gray-300"} />
+            <span>
+              {canBook ? "Đặt Lịch Trải Nghiệm (Miễn Phí)" : "Hiện Đã Hết Lịch Trải Nghiệm"}
+            </span>
+          </button>
+
+          <p className="text-[11px] text-center text-muted-foreground italic px-4 leading-tight">
+            {canBook
+              ? "✨ Xem và trải nghiệm sản phẩm thực tế tại cửa hàng trước khi quyết định mua"
+              : "Hệ thống đang cập nhật thêm lịch mới, vui lòng quay lại sau"
+            }
+          </p>
+        </div>
+
       </div>
 
       {/* Mini Cart Popup */}
       {showMiniCart && cartItemsWithQuantities.length > 0 && (
         <div className="fixed top-20 right-4 z-50 w-80 bg-white border border-gray-200 rounded-xl shadow-2xl animate-in slide-in-from-right-5 fade-in duration-300">
           {/* Header */}
-          <div className="flex items-center justify-between p-4 border-b bg-green-50 rounded-t-xl">
+          <div className="flex items-center justify-between p-4 border-b border-gray-200 bg-green-50 rounded-t-xl">
             <div className="flex items-center gap-2 text-green-700">
               <Check size={16} className="bg-green-600 text-white rounded-full p-0.5" />
               <span className="text-sm font-bold">Đã thêm vào giỏ hàng</span>
@@ -219,30 +233,31 @@ const ProductActions: React.FC<ProductActionsProps> = ({ product }) => {
                   <div className="w-12 h-12 bg-gray-100 rounded-lg overflow-hidden shrink-0">
                     {item.product.image ? (
                       <img
-                      src={item.product.image}
-                      alt={item.product.name}
-                      className="w-full h-full object-cover"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center text-gray-300">
-                      <Package size={16} />
-                    </div>
-                  )}
+                        src={item.product.image}
+                        alt={item.product.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-300">
+                        <Package size={16} />
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-gray-800 truncate">
+                      {item.product.name}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      x{item.quantity} · ${item.product.price.toFixed(2)}
+                    </p>
+                  </div>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs font-semibold text-gray-800 truncate">
-                    {item.product.name}
-                  </p>
-                  <p className="text-xs text-gray-500">
-                    x{item.quantity} · ${item.product.price.toFixed(2)}
-                  </p>
-                </div>
-              </div>
-            )})}
+              )
+            })}
           </div>
 
           {/* Footer */}
-          <div className="p-3 border-t space-y-2">
+          <div className="p-3  border-gray-200 space-y-2">
             <div className="flex justify-between text-sm">
               <span className="text-gray-500">
                 {cartItemsWithQuantities.length} sản phẩm trong giỏ
@@ -264,7 +279,7 @@ const ProductActions: React.FC<ProductActionsProps> = ({ product }) => {
                 </button>
               </Link>
               <Link href="/client/user/checkout" className="flex-1">
-                <button className="w-full py-2.5 text-xs font-bold bg-primary text-primary-foreground rounded-lg hover:bg-primary/90 transition-all">
+                <button className="w-full py-2.5 text-xs font-bold bg-primary text-white rounded-lg hover:bg-primary/90 transition-all">
                   Thanh toán
                 </button>
               </Link>

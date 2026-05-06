@@ -49,25 +49,25 @@ export function mapDeviceToProduct(device: DeviceData): Product {
     images: device.images || [device.image],
     category: device.category
       ? {
-          id: String(device.category.id),
-          _id: String(device.category.id),
-          name: device.category.name,
-          slug: device.category.slug,
-          image: device.category.image,
-          categoryType: device.category.categoryType,
-        }
+        id: String(device.category.id),
+        _id: String(device.category.id),
+        name: device.category.name,
+        slug: device.category.slug,
+        image: device.category.image,
+        categoryType: device.category.categoryType,
+      }
       : { id: "", _id: "", name: "", slug: "", image: "", categoryType: "" },
     brand: device.brand
       ? {
-          id: String(device.brand.id),
-          _id: String(device.brand.id),
-          name: device.brand.name,
-          slug: device.brand.slug,
-          image: device.brand.image,
-        }
+        id: String(device.brand.id),
+        _id: String(device.brand.id),
+        name: device.brand.name,
+        slug: device.brand.slug,
+        image: device.brand.image,
+      }
       : { id: "", _id: "", name: "", slug: "", image: "" },
     ratings: [],
-    sku: device.sku || String(device.id),
+    sku: (device as DeviceData & { sku?: string }).sku || String(device.id),
     warranty: device.warranty || { period: 0, policy: "" },
     origin: device.origin || "",
     condition: mapDeviceCondition(device.deviceCondition),
@@ -80,6 +80,7 @@ export function mapDeviceToProduct(device: DeviceData): Product {
     tags: device.tags || [],
     videoUrl: device.videoUrl,
     quantity: 1,
+    wishlistCount: (device as DeviceData & { wishlistCount?: number }).wishlistCount || 0,
     createdAt: device.createdAt,
   };
 }
@@ -111,7 +112,7 @@ export function mapApiSession(session: ApiSession): ExperienceSession {
     endTime: endISO,
     maxSlots: session.maxSlots || 0,
     availableSlots: session.availableSlots || 0,
-    status: mapSessionStatus(session.status),
+    status: mapSessionStatus(session.status ?? ""),
   };
 }
 

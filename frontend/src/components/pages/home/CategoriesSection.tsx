@@ -16,7 +16,7 @@ const CategoriesSection = () => {
     { id: '2', name: 'Ưu đãi trong ngày', emoji: '⭐', color: '#4FC3F7', type: 'featured', path: '/daily-deals' },
     { id: '3', name: 'Bán chạy nhất', emoji: '🌟', color: '#FFD54F', type: 'featured', path: '/bestsellers' },
     { id: '4', name: 'Ý tưởng quà tặng', emoji: '🎁', color: '#FF8A65', type: 'featured', path: '/gift-ideas' },
-    { id: '5', name: 'Dưới 2 triệu', emoji: '💝', color: '#BA68C8', type: 'featured', path: '/under-2m' },
+    { id: '5', name: 'Dưới 2 trăm', emoji: '💝', color: '#BA68C8', type: 'featured', path: '/under-200' },
   ];
 
   // Danh mục hot

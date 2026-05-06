@@ -61,6 +61,7 @@ export interface Product {
   // --- DÙNG CHO FRONTEND ---
   quantity?: number;          // Phục vụ logic giỏ hàng
   createdAt: string;          // Để lọc sản phẩm mới nhất
+  wishlistCount: number;
 }
 
 export interface Address {

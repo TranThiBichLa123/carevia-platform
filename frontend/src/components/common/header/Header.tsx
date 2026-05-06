@@ -8,7 +8,7 @@ import UserButton from "./UserButton";
 import CartIcon from "./CartIcon";
 import Sidebar from "./Sidebar";
 import Logo from "../Logo";
-import OrdersIcon from "./OrdersIcon";
+import NotificationIcon from "./NotificationIcon";
 import WishlistIcon from "./WishlistIcon";
 import CategoriesSection from "@/components/pages/home/CategoriesSection";
 
@@ -38,14 +38,14 @@ const Header = () => {
           <Sidebar />
           <Logo />
           <div className="md:hidden flex items-center gap-3">
-            <OrdersIcon />
+            <NotificationIcon />
             <WishlistIcon />
             <CartIcon />
           </div>
           <SearchInput />
         </div>
         <div className="hidden md:inline-flex items-center gap-5">
-          <OrdersIcon />
+          <NotificationIcon />
           <WishlistIcon />
           <CartIcon />
           <UserButton />

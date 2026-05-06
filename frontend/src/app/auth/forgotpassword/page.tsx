@@ -69,7 +69,7 @@ export default function ForgotPasswordPage() {
   };
 
   return (
-    <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-cyan-50 via-teal-50 to-blue-50 p-4 overflow-hidden">
+    <div className="min-h-screen w-full flex items-center justify-center bg-blue-50 p-4 overflow-hidden">
       {/* Animated Background Blobs */}
       {/* <motion.div
         className="fixed top-[10%] left-[15%] w-72 h-72 rounded-full opacity-60"
@@ -118,10 +118,8 @@ export default function ForgotPasswordPage() {
           {/* Icon and Header */}
           <motion.div className="flex flex-col items-center mb-8" variants={itemVariants}>
             <motion.div
-              className="w-20 h-20 rounded-full bg-gradient-to-br from-[#ecf284] via-[#eff299] to-[#f2f2a5] flex items-center justify-center mb-6"
-              style={{
-                boxShadow: "0 8px 25px rgba(236, 242, 132, 0.45), inset 0 2px 10px rgba(255, 255, 255, 0.5)"
-              }}
+              className="w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center mb-6"
+             
               animate={{
                 y: [0, -8, 0],
                 rotate: [0, 5, -5, 0],
@@ -132,7 +130,7 @@ export default function ForgotPasswordPage() {
                 ease: "easeInOut",
               }}
             >
-              <Mail className="w-10 h-10 text-[#20afb2]" strokeWidth={2.5} />
+              <Mail className="w-10 h-10 text-[var(--primary)]" strokeWidth={2.5} />
             </motion.div>
 
             {!isSubmitted ? (
@@ -140,10 +138,10 @@ export default function ForgotPasswordPage() {
                 <motion.h2
                   className="text-4xl text-gray-700 font-medium mb-3 text-center"
                 >
-                  Forgot Password?
+                  Quên mật khẩu?
                 </motion.h2>
                 <motion.p className="text-base text-gray-600 text-center">
-                  No worries! Enter your email and we'll send you reset instructions.
+                  Không sao! Nhập email của bạn và chúng tôi sẽ gửi hướng dẫn đặt lại mật khẩu.
                 </motion.p>
               </>
             ) : (
@@ -161,7 +159,7 @@ export default function ForgotPasswordPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
                 >
-                  Check Your Email
+                  Kiểm tra email của bạn!
                 </motion.h2>
                 <motion.p
                   className="text-base text-gray-600 text-center"
@@ -180,7 +178,7 @@ export default function ForgotPasswordPage() {
             <form onSubmit={handleSubmit} className="space-y-6">
               <motion.div variants={itemVariants}>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Email Address
+                Địa chỉ email
                 </label>
                 <motion.div
                   className="relative"
@@ -207,7 +205,7 @@ export default function ForgotPasswordPage() {
                   type="submit"
                   className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-lg text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#20afb2] transition-all duration-200"
                   style={{
-                    background: "linear-gradient(135deg, #20afb2 0%, #18adb0 50%, #10aeb2 100%)",
+                    background: "var(--primary)",
                     boxShadow: "0 8px 20px rgba(32, 175, 178, 0.3), 0 2px 8px rgba(0, 0, 0, 0.1)"
                   }}
                   variants={buttonHoverVariants}
@@ -215,7 +213,7 @@ export default function ForgotPasswordPage() {
                   whileHover="hover"
                   whileTap="tap"
                 >
-                  Send Reset Link
+                  Gửi lại email
                   <motion.svg
                     xmlns="http://www.w3.org/2000/svg"
                     className="h-6 w-6 ml-2"
@@ -247,7 +245,7 @@ export default function ForgotPasswordPage() {
                 onClick={() => setIsSubmitted(false)}
                 className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-lg text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#20afb2] transition-all duration-200"
                 style={{
-                  background: "linear-gradient(135deg, #20afb2 0%, #18adb0 50%, #10aeb2 100%)",
+                  background: "var(--primary)",
                   boxShadow: "0 8px 20px rgba(32, 175, 178, 0.3), 0 2px 8px rgba(0, 0, 0, 0.1)"
                 }}
                 variants={buttonHoverVariants}
@@ -255,11 +253,11 @@ export default function ForgotPasswordPage() {
                 whileHover="hover"
                 whileTap="tap"
               >
-                Resend Email
+                Gửi lại email
               </motion.button>
 
               <motion.p className="text-sm text-gray-600 text-center">
-                Didn't receive the email? Check your spam folder or try another email address.
+                Không nhận được email? Kiểm tra thư mục spam hoặc thử một địa chỉ email khác.
               </motion.p>
             </motion.div>
           )}
@@ -275,8 +273,8 @@ export default function ForgotPasswordPage() {
               className="inline-flex items-center text-gray-700 transition-colors duration-200 group"
               whileHover={{ x: -3 }}
             >
-              <ArrowLeft className="w-4 h-4 mr-2 text-[#20afb2] group-hover:text-[#18adb0] transition-colors" />
-              <span className="group-hover:text-[#20afb2]">Back to Login</span>
+              <ArrowLeft className="w-4 h-4 mr-2 text-[var(--primary)] group-hover:text-[var(--primary-hover)] transition-colors" />
+              <span className="group-hover:text-[var(--primary-hover)]">Quay lại đăng nhập</span>
             </motion.a>
           </motion.div>
         </motion.div>

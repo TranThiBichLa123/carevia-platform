@@ -9,25 +9,25 @@ import Image from "next/image";
 import { payment } from "../../../assets/image";
 
 const informationTab = [
-  { title: "About Us", href: "/about" },
-  { title: "Top Searches", href: "/search" },
-  { title: "Privacy Policy", href: "/privacy" },
-  { title: "Terms and Conditions", href: "/terms" },
-  { title: "Testimonials", href: "/testimonials" },
+  { title: "Về chúng tôi", href: "/about" },
+  { title: "Tìm kiếm hàng đầu", href: "/search" },
+  { title: "Chính sách bảo mật", href: "/privacy" },
+  { title: "Điều khoản và điều kiện", href: "/terms" },
+  { title: "Lời chứng thực", href: "/testimonials" },
 ];
 const CustomerTab = [
-  { title: "My Account", href: "/client/user/profile" },
-  { title: "Track Order", href: "/client/user/orders" },
-  { title: "Shop", href: "/shop" },
-  { title: "Wishlist", href: "/client/user/wishlist" },
-  { title: "Returns/Exchange", href: "/returns" },
+  { title: "Tài khoản của tôi", href: "/client/user/profile" },
+  { title: "Theo dõi đơn hàng", href: "/client/user/orders" },
+  { title: "Cửa hàng", href: "/shop" },
+  { title: "Danh sách yêu thích", href: "/client/user/wishlist" },
+  { title: "Trả hàng/Đổi hàng", href: "/returns" },
 ];
 const OthersTab = [
-  { title: "Partnership Programs", href: "/programs" },
-  { title: "Associate Program", href: "/programs" },
-  { title: "Wholesale Socks", href: "/programs" },
-  { title: "Wholesale Funny Socks", href: "/programs" },
-  { title: "Others", href: "/others" },
+  { title: "Chương trình đối tác", href: "/programs" },
+  { title: "Chương trình cộng tác", href: "/programs" },
+  { title: "Bán buôn tất", href: "/programs" },
+  { title: "Bán buôn tất hài hước", href: "/programs" },
+  { title: "Khác", href: "/others" },
 ];
 
 const Footer = () => {
@@ -39,7 +39,7 @@ const Footer = () => {
       <Container className="py-4 hidden md:grid grid-cols-2 lg:grid-cols-4 gap-5">
         <div>
           {/* Title text-[15px] khớp với TopFooter */}
-          <Title className="text-[15px] font-semibold font-vietnam mb-3">Information</Title>
+          <Title className="text-[15px] font-semibold font-vietnam mb-3">Thông tin</Title>
           <div className="flex flex-col gap-2">
             {informationTab?.map((item) => (
               <Link
@@ -53,7 +53,7 @@ const Footer = () => {
           </div>
         </div>
         <div>
-          <Title className="text-[15px] font-semibold font-vietnam mb-3">Customer Care</Title>
+          <Title className="text-[15px] font-semibold font-vietnam mb-3">Chăm sóc khách hàng</Title>
           <div className="flex flex-col gap-2">
             {CustomerTab?.map((item) => (
               <Link
@@ -67,7 +67,7 @@ const Footer = () => {
           </div>
         </div>{" "}
         <div>
-          <Title className="text-[15px] font-semibold font-vietnam mb-3">Other Business</Title>
+          <Title className="text-[15px] font-semibold font-vietnam mb-3">Doanh nghiệp khác</Title>
           <div className="flex flex-col gap-2">
             {OthersTab?.map((item) => (
               <Link
@@ -81,12 +81,12 @@ const Footer = () => {
           </div>
         </div>
         <div>
-          <Title className="text-[15px] font-semibold font-vietnam mb-3">Newsletter</Title>
+          <Title className="text-[15px] font-semibold font-vietnam mb-3">Bản tin</Title>
           <div className="flex flex-col gap-2 relative">
             {/* Thu nhỏ chiều cao input từ h-14 xuống h-12 cho cân đối */}
             <input
               type="email"
-              placeholder="Enter your email"
+              placeholder="Nhập email của bạn"
               className="border border-gray-200 focus:border-[#159fd8] outline-none rounded-full pl-4 pr-14 h-12 placeholder:text-black/40 text-[13px] transition-all"
             />
             <button className="bg-[#159fd8] text-white w-12 h-12 rounded-full flex items-center justify-center absolute top-0 right-0 hover:bg-[#1a8e91] transition-colors">
@@ -98,9 +98,9 @@ const Footer = () => {
       <HrLine />
       {/* FooterBottom - Giảm khoảng cách dọc */}
       <Container className="py-4 flex flex-col md:flex-row md:items-center justify-between gap-3 text-black/60">
-        <p className="font-vietnam">© 2024 Babyshop Theme. All rights reserved.</p>
+        <p className="font-vietnam">© 2026 Carevia. Tất cả quyền được bảo lưu.</p>
         <div className="flex items-center gap-3">
-          <p className="font-vietnam">We using safe payment for</p>
+          <p className="font-vietnam">Chúng tôi sử dụng phương thức thanh toán an toàn cho</p>
           <Image src={payment} alt="paymentImage" className="h-5 w-auto object-contain" />
         </div>
       </Container>

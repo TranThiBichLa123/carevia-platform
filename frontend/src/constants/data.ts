@@ -6,7 +6,7 @@ import { ShieldCheck, Tags, Truck, LifeBuoy } from "lucide-react";
 const topHelpCenter = [
   { title: "Trung tâm trợ giúp", href: "/help" },
   { title: "Danh sách yêu thích", href: "/client/user/wishlist" },
-  { title: "Theo dõi đơn hàng", href: "/client/user/orders" },
+  { title: "Theo dõi đơn hàng", href: "/client/account?tab=orders" },
 ];
 
 

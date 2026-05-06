@@ -3,6 +3,7 @@ package com.carevia.core.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import com.carevia.shared.entity.BaseEntity;
+
 @Entity
 @Table(name = "notifications") // Nên để số nhiều cho chuẩn DB
 @Getter
@@ -24,7 +25,7 @@ public class Notification extends BaseEntity {
     // THÊM MỚI: Trạng thái đọc/chưa đọc
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private com.carevia.shared.constant.NotificationStatus status; 
+    private com.carevia.shared.constant.NotificationStatus status;
 
     @Column(nullable = false, length = 255)
     private String title;
@@ -49,4 +50,8 @@ public class Notification extends BaseEntity {
 
     @Column(name = "reference_id")
     private Long referenceId;
+    // Cần thêm trường này để khớp với SQL
+    @Column(name = "notification_type", length = 100)
+    private String notificationType;
+
 }

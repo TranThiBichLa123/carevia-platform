@@ -45,8 +45,12 @@ public class DeviceResponse {
     private String videoUrl;
     private List<SpecificationInfo> specifications;
     private Instant createdAt;
+    private long wishlistCount;
 
-    @Data @Builder @NoArgsConstructor @AllArgsConstructor
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class CategoryInfo {
         private Long id;
         private String name;
@@ -55,7 +59,10 @@ public class DeviceResponse {
         private String categoryType;
     }
 
-    @Data @Builder @NoArgsConstructor @AllArgsConstructor
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class BrandInfo {
         private Long id;
         private String name;
@@ -63,13 +70,19 @@ public class DeviceResponse {
         private String image;
     }
 
-    @Data @Builder @NoArgsConstructor @AllArgsConstructor
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class WarrantyInfo {
         private Integer period;
         private String policy;
     }
 
-    @Data @Builder @NoArgsConstructor @AllArgsConstructor
+    @Data
+    @Builder
+    @NoArgsConstructor
+    @AllArgsConstructor
     public static class SpecificationInfo {
         private String label;
         private String value;
