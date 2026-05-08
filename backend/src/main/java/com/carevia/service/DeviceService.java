@@ -2,6 +2,7 @@ package com.carevia.service;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.carevia.core.domain.*;
@@ -10,11 +11,15 @@ import com.carevia.shared.constant.DeviceStatus;
 import com.carevia.shared.dto.PageResponse;
 import com.carevia.shared.dto.request.device.CreateDeviceRequest;
 import com.carevia.shared.dto.request.device.UpdateDeviceRequest;
+import com.carevia.shared.dto.response.device.BrandResponse;
 import com.carevia.shared.dto.response.device.DeviceResponse;
 import com.carevia.shared.dto.response.device.ExperienceStepResponse;
 import com.carevia.shared.exception.ResourceNotFoundException;
 
+import java.math.BigDecimal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,6 +59,54 @@ public class DeviceService {
 
     public PageResponse<DeviceResponse> searchDevices(String keyword, Pageable pageable) {
         Page<Device> page = deviceRepository.searchByKeyword(keyword, pageable);
+        return toPageResponse(page);
+    }
+
+    public List<String> getSkinTypes() {
+        return deviceRepository.findDistinctSkinTypes();
+    }
+
+    public PageResponse<DeviceResponse> getFilteredDevices(
+            String search, Long categoryId, Long brandId,
+            BigDecimal minPrice, BigDecimal maxPrice, Boolean bookingAvailable,
+            String skinType, Boolean onlyDiscounted, Pageable pageable) {
+
+        Specification<Device> spec = (root, query, cb) -> cb.and(
+                cb.equal(root.get("status"), DeviceStatus.AVAILABLE),
+                cb.isNull(root.get("deletedAt"))
+        );
+
+        if (search != null && !search.isBlank()) {
+            String like = "%" + search.toLowerCase() + "%";
+            spec = spec.and((root, query, cb) -> cb.or(
+                    cb.like(cb.lower(root.get("name")), like),
+                    cb.like(cb.lower(root.get("description")), like)
+            ));
+        }
+        if (categoryId != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("category").get("id"), categoryId));
+        }
+        if (brandId != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("brand").get("id"), brandId));
+        }
+        if (minPrice != null) {
+            spec = spec.and((root, query, cb) -> cb.greaterThanOrEqualTo(root.get("price"), minPrice));
+        }
+        if (maxPrice != null) {
+            spec = spec.and((root, query, cb) -> cb.lessThanOrEqualTo(root.get("price"), maxPrice));
+        }
+        if (bookingAvailable != null) {
+            spec = spec.and((root, query, cb) -> cb.equal(root.get("isBookingAvailable"), bookingAvailable));
+        }
+        if (skinType != null && !skinType.isBlank()) {
+            String like = "%" + skinType.toLowerCase() + "%";
+            spec = spec.and((root, query, cb) -> cb.like(cb.lower(root.get("skinType")), like));
+        }
+        if (Boolean.TRUE.equals(onlyDiscounted)) {
+            spec = spec.and((root, query, cb) -> cb.greaterThan(root.get("discountPercentage"), 0.0));
+        }
+
+        Page<Device> page = deviceRepository.findAll(spec, pageable);
         return toPageResponse(page);
     }
 
@@ -258,12 +311,41 @@ public class DeviceService {
     }
 
     // Brands
-    public List<Brand> getAllBrands() {
-        return brandRepository.findAll();
+    public List<BrandResponse> getAllBrands() {
+        Map<Long, Double> discountMap = buildMaxDiscountMap();
+        return brandRepository.findAll().stream()
+                .map(b -> toBrandResponse(b, discountMap))
+                .collect(Collectors.toList());
     }
 
-    public List<Brand> getFeaturedBrands() {
-        return brandRepository.findByIsFeaturedTrue();
+    public List<BrandResponse> getFeaturedBrands() {
+        Map<Long, Double> discountMap = buildMaxDiscountMap();
+        return brandRepository.findByIsFeaturedTrue().stream()
+                .map(b -> toBrandResponse(b, discountMap))
+                .collect(Collectors.toList());
+    }
+
+    private Map<Long, Double> buildMaxDiscountMap() {
+        Map<Long, Double> map = new HashMap<>();
+        for (Object[] row : deviceRepository.findMaxDiscountPerBrand()) {
+            Long brandId = ((Number) row[0]).longValue();
+            Double maxDiscount = row[1] != null ? ((Number) row[1]).doubleValue() : 0.0;
+            map.put(brandId, maxDiscount);
+        }
+        return map;
+    }
+
+    private BrandResponse toBrandResponse(Brand b, Map<Long, Double> discountMap) {
+        return BrandResponse.builder()
+                .id(b.getId())
+                .name(b.getName())
+                .slug(b.getSlug())
+                .image(b.getImage())
+                .description(b.getDescription())
+                .isFeatured(b.getIsFeatured())
+                .isActive(b.getIsActive())
+                .maxDiscountPercentage(discountMap.getOrDefault(b.getId(), 0.0))
+                .build();
     }
 
     @Transactional

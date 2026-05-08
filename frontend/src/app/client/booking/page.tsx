@@ -1,41 +1,67 @@
 "use client";
 import { Product } from '@/types_enum/devices';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import Container from '@/components/common/Container';
 import BookingCard from '@/components/common/client/booking/BookingCard';
-import { deviceApi } from '@/lib/deviceApi';
+import { deviceApi, CategoryData } from '@/lib/deviceApi';
 import { mapDeviceToProduct } from '@/lib/mappers';
 import PageBreadcrumb from '@/components/common/PageBreadcrumb';
+
+const priceOptions = [
+    { label: "Dưới 200.000đ", id: "p1", minPrice: undefined as number | undefined, maxPrice: 200000 },
+    { label: "200.000đ - 500.000đ", id: "p2", minPrice: 200000, maxPrice: 500000 },
+    { label: "Trên 500.000đ", id: "p3", minPrice: 500000, maxPrice: undefined as number | undefined },
+];
 
 const BookingPage = () => {
     const router = useRouter();
 
     const [bookingDevices, setBookingDevices] = useState<Product[]>([]);
+    const [totalItems, setTotalItems] = useState(0);
     const [loadingDevices, setLoadingDevices] = useState(true);
 
-    // Fetch booking-available devices from API
+    // Filter states
+    const [categories, setCategories] = useState<CategoryData[]>([]);
+    const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+    const [priceRange, setPriceRange] = useState<string | null>(null);
+
+    // Fetch categories on mount
     useEffect(() => {
-        const fetchDevices = async () => {
-            setLoadingDevices(true);
-            try {
-                const data = await deviceApi.getAll({ size: 50 });
-                const mapped = data.items
-                    .map(mapDeviceToProduct)
-                    .filter(p => p.isBookingAvailable);
-                setBookingDevices(mapped);
-            } catch (error) {
-                console.error("Failed to fetch booking devices:", error);
-            } finally {
-                setLoadingDevices(false);
-            }
-        };
-        fetchDevices();
+        deviceApi.getCategories().then(setCategories).catch(console.error);
     }, []);
 
+    const fetchDevices = useCallback(async () => {
+        setLoadingDevices(true);
+        try {
+            const selectedPrice = priceOptions.find(p => p.id === priceRange);
+            const params: Record<string, any> = {
+                size: 50,
+                bookingAvailable: true,
+            };
+            if (selectedCategoryId) params.categoryId = selectedCategoryId;
+            if (selectedPrice?.minPrice !== undefined) params.minPrice = selectedPrice.minPrice;
+            if (selectedPrice?.maxPrice !== undefined) params.maxPrice = selectedPrice.maxPrice;
 
+            const data = await deviceApi.getAll(params);
+            const mapped = data.items.map(mapDeviceToProduct);
+            setBookingDevices(mapped);
+            setTotalItems(data.totalItems);
+        } catch (error) {
+            console.error("Failed to fetch booking devices:", error);
+        } finally {
+            setLoadingDevices(false);
+        }
+    }, [selectedCategoryId, priceRange]);
 
+    useEffect(() => {
+        fetchDevices();
+    }, [fetchDevices]);
 
+    const handleClearFilters = () => {
+        setSelectedCategoryId(null);
+        setPriceRange(null);
+    };
 
     return (
         <Container className="bg-white text-gray-900 pb-10 py-3 font-vietnam">
@@ -47,57 +73,59 @@ const BookingPage = () => {
                     <div className="bg-white border border-gray-200 sticky top-24 rounded-2xl">
                         <div className="p-4 border-b border-gray-100 rounded-t-2xl flex justify-between items-center bg-gray-50">
                             <h3 className="font-vietnam font-bold text-[13px] uppercase tracking-tight">Bộ lọc tìm kiếm</h3>
-                            <button className="text-[13px] text-primary underline font-bold">Xóa tất cả</button>
+                            <button onClick={handleClearFilters} className="text-[13px] text-primary underline font-bold">Xóa tất cả</button>
                         </div>
 
                         <div className="p-4 space-y-8">
                             <div>
                                 <h4 className="font-vietnam font-bold text-[13px] mb-4 flex items-center uppercase">
-                                    Loại dịch vụ <span className="text-gray-400 font-light">+</span>
+                                    Danh mục <span className="text-gray-400 font-light ml-1">+</span>
                                 </h4>
                                 <div className="space-y-3 max-h-64 overflow-y-auto pr-2 custom-scrollbar">
-                                    {[
-                                        "Điều trị da mặt",
-                                        "Nâng cơ & Trẻ hóa",
-                                        "Giảm béo công nghệ cao",
-                                        "Triệt lông Laser",
-                                        "Trị sẹo & Sắc tố",
-                                        "Thư giãn & Wellness"
-                                    ].map((category) => (
-                                        <label key={category} className="flex items-center group cursor-pointer">
-                                            <div className="relative flex items-center">
-                                                <input
-                                                    type="checkbox"
-                                                    className="peer appearance-none w-4 h-4 border border-gray-300 checked:bg-black checked:border-black transition-all mr-3 rounded-sm"
-                                                />
-                                                <svg
-                                                    className="absolute w-2.5 h-2.5 text-white left-0.75 opacity-0 peer-checked:opacity-100 pointer-events-none"
-                                                    fill="none"
-                                                    viewBox="0 0 24 24"
-                                                    stroke="currentColor"
-                                                    strokeWidth="4"
-                                                >
-                                                    <path d="M5 13l4 4L19 7" />
-                                                </svg>
-                                            </div>
-                                            <span className="text-[13px] font-medium text-gray-600 group-hover:text-black transition-colors">
-                                                {category}
-                                            </span>
-                                        </label>
-                                    ))}
+                                    {categories.length === 0 ? (
+                                        <p className="text-xs text-gray-400 italic">Đang tải...</p>
+                                    ) : (
+                                        categories.map((cat) => (
+                                            <label key={cat.id} className="flex items-center group cursor-pointer">
+                                                <div className="relative flex items-center">
+                                                    <input
+                                                        type="radio"
+                                                        name="category"
+                                                        checked={selectedCategoryId === cat.id}
+                                                        onChange={() => setSelectedCategoryId(selectedCategoryId === cat.id ? null : cat.id)}
+                                                        className="peer appearance-none w-4 h-4 border border-gray-300 checked:bg-black checked:border-black transition-all mr-3 rounded-full"
+                                                    />
+                                                    <svg
+                                                        className="absolute w-2.5 h-2.5 text-white left-0.75 opacity-0 peer-checked:opacity-100 pointer-events-none"
+                                                        fill="none"
+                                                        viewBox="0 0 24 24"
+                                                        stroke="currentColor"
+                                                        strokeWidth="4"
+                                                    >
+                                                        <path d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                </div>
+                                                <span className="text-[13px] font-medium text-gray-600 group-hover:text-black transition-colors">
+                                                    {cat.name}
+                                                </span>
+                                            </label>
+                                        ))
+                                    )}
                                 </div>
                             </div>
 
                             <div>
                                 <h4 className="font-vietnam font-bold text-[13px] mb-4">KHOẢNG GIÁ</h4>
                                 <div className="space-y-3">
-                                    {[
-                                        { label: "Dưới 200.000đ", id: "p1" },
-                                        { label: "200.000đ - 500.000đ", id: "p2" },
-                                        { label: "Trên 500.000đ", id: "p3" }
-                                    ].map((price) => (
+                                    {priceOptions.map((price) => (
                                         <label key={price.id} className="flex items-center cursor-pointer group">
-                                            <input type="radio" name="price" id={price.id} className="w-4 h-4 text-primary border-gray-300 focus:ring-0" />
+                                            <input
+                                                type="radio"
+                                                name="price"
+                                                checked={priceRange === price.id}
+                                                onChange={() => setPriceRange(price.id)}
+                                                className="w-4 h-4 text-primary border-gray-300 focus:ring-0"
+                                            />
                                             <span className="ml-3 text-[13px] text-gray-700 group-hover:text-primary">{price.label}</span>
                                         </label>
                                     ))}
@@ -106,7 +134,7 @@ const BookingPage = () => {
                         </div>
 
                         <div className="p-4 border-t border-gray-100">
-                            <button className="w-full py-3 bg-primary text-white font-bold text-xs font-vietnam uppercase tracking-widest hover:bg-primary-dark rounded-lg transition-all">
+                            <button onClick={fetchDevices} className="w-full py-3 bg-primary text-white font-bold text-xs font-vietnam uppercase tracking-widest hover:bg-primary-dark rounded-lg transition-all">
                                 Áp dụng bộ lọc
                             </button>
                         </div>
@@ -117,7 +145,7 @@ const BookingPage = () => {
                 <main className="flex-1 bg-white">
                     <div className="flex flex-wrap justify-between items-end mb-6 pb-4 border-b border-gray-200 gap-4">
                         <p className="text-[13px] text-gray-500 font-medium">
-                            Tìm thấy <span className="text-gray-900 font-bold">{bookingDevices.length}</span> sản phẩm
+                            Tìm thấy <span className="text-gray-900 font-bold">{totalItems}</span> sản phẩm
                         </p>
 
                         <div className="flex items-center gap-3">

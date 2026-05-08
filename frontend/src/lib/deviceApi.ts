@@ -75,6 +75,7 @@ export interface BrandData {
   description: string;
   isFeatured: boolean;
   isActive: boolean;
+  maxDiscountPercentage?: number;
 }
 
 export interface SpecificationData {
@@ -97,6 +98,10 @@ export const deviceApi = {
     categoryId?: number;
     brandId?: number;
     skinType?: string;
+    minPrice?: number;
+    maxPrice?: number;
+    bookingAvailable?: boolean;
+    onlyDiscounted?: boolean;
     page?: number;
     size?: number;
     sort?: string;
@@ -106,6 +111,10 @@ export const deviceApi = {
     if (params?.categoryId) searchParams.append("categoryId", String(params.categoryId));
     if (params?.brandId) searchParams.append("brandId", String(params.brandId));
     if (params?.skinType) searchParams.append("skinType", params.skinType);
+    if (params?.minPrice !== undefined) searchParams.append("minPrice", String(params.minPrice));
+    if (params?.maxPrice !== undefined) searchParams.append("maxPrice", String(params.maxPrice));
+    if (params?.bookingAvailable !== undefined) searchParams.append("bookingAvailable", String(params.bookingAvailable));
+    if (params?.onlyDiscounted !== undefined) searchParams.append("onlyDiscounted", String(params.onlyDiscounted));
     if (params?.page !== undefined) searchParams.append("page", String(params.page));
     if (params?.size) searchParams.append("size", String(params.size));
     if (params?.sort) searchParams.append("sort", params.sort);
@@ -156,6 +165,48 @@ export const deviceApi = {
 
   getFeaturedBrands: async (): Promise<BrandData[]> => {
     const res = await apiClient.get("/devices/brands/featured");
+    return res.data;
+  },
+
+  getSkinTypes: async (): Promise<string[]> => {
+    const res = await apiClient.get("/devices/skin-types");
+    return res.data;
+  },
+};
+
+export interface ReviewData {
+  id: number;
+  accountId: number;
+  accountName: string;
+  accountAvatar: string | null;
+  rating: number;
+  comment: string | null;
+  isVerifiedPurchase: boolean;
+  adminReply: string | null;
+  createdAt: string;
+}
+
+export interface ReviewPageResponse {
+  items: ReviewData[];
+  page: number;
+  size: number;
+  totalItems: number;
+  totalPages: number;
+  hasNext: boolean;
+  hasPrevious: boolean;
+}
+
+export const reviewApi = {
+  getByDevice: async (deviceId: number | string, params?: { page?: number; size?: number }): Promise<ReviewPageResponse> => {
+    const sp = new URLSearchParams();
+    if (params?.page !== undefined) sp.append("page", String(params.page));
+    if (params?.size) sp.append("size", String(params.size));
+    const res = await apiClient.get(`/devices/${deviceId}/reviews?${sp}`);
+    return res.data;
+  },
+
+  create: async (deviceId: number | string, data: { rating: number; comment: string }): Promise<ReviewData> => {
+    const res = await apiClient.post(`/devices/${deviceId}/reviews`, data);
     return res.data;
   },
 };

@@ -89,8 +89,12 @@ const ProductActions: React.FC<ProductActionsProps> = ({ product }) => {
 
     setBuyNowLoading(true);
     try {
-      await addToCart(product, quantity);
-      router.push("/client/user/checkout");
+      // Don't add to cart — store only this item for checkout
+      sessionStorage.setItem(
+        "buyNowItem",
+        JSON.stringify({ product, quantity })
+      );
+      router.push("/client/user/checkout?buyNow=true");
     } catch (error) {
       console.error("Buy now error:", error);
       toast.error("Có lỗi xảy ra, vui lòng thử lại.");

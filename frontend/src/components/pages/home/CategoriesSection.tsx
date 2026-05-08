@@ -1,4 +1,6 @@
 import { ChevronDown, Menu } from "lucide-react";
+import { useEffect, useState } from "react";
+import { deviceApi, type CategoryData } from "@/lib/deviceApi";
 
 interface Category {
   id: string;
@@ -10,35 +12,56 @@ interface Category {
 }
 
 const CategoriesSection = () => {
+  const [apiCategories, setApiCategories] = useState<CategoryData[]>([]);
+  const [apiSkinTypes, setApiSkinTypes] = useState<string[]>([]);
+
+  useEffect(() => {
+    deviceApi.getCategories()
+      .then(setApiCategories)
+      .catch(console.error);
+    deviceApi.getSkinTypes()
+      .then(setApiSkinTypes)
+      .catch(console.error);
+  }, []);
+
+  const categoryEmojis: Record<string, string> = {
+    'da mặt': '💆', 'chăm sóc da': '🧴', 'làm sạch': '🫧',
+    'nâng cơ': '✨', 'trẻ hóa': '🌟', 'giảm béo': '⚡',
+    'triệt lông': '🔆', 'sắc tố': '🎯', 'trị nám': '☀️',
+    'massage': '💆', 'mắt': '👁️', 'tóc': '💇', 'body': '🧖',
+    'công nghệ': '🔬', 'laser': '💡', 'sẹo': '🩹',
+  };
+  const categoryFallbacks = ['🌸', '💜', '🌿', '💫', '🎀', '🌺', '💎', '🦋'];
+
+  const hotCategories = apiCategories.map((cat, index) => {
+    const lower = cat.name.toLowerCase();
+    const matchedKey = Object.keys(categoryEmojis).find(key => lower.includes(key));
+    const emoji = matchedKey ? categoryEmojis[matchedKey] : categoryFallbacks[index % categoryFallbacks.length];
+    return {
+      id: String(cat.id),
+      name: cat.name,
+      emoji,
+      path: `/client/devices?categoryId=${cat.id}&categoryName=${encodeURIComponent(cat.name)}`,
+    };
+  });
+
+  // Danh mục hot - loaded from API (see apiCategories above)
   // Danh mục nổi bật
   const featuredCategories: Category[] = [
     { id: '1', name: 'Ưu đãi Carevia', emoji: '💎', color: '#E91E63', type: 'featured', path: '/deals' },
     { id: '2', name: 'Ưu đãi trong ngày', emoji: '⭐', color: '#4FC3F7', type: 'featured', path: '/daily-deals' },
     { id: '3', name: 'Bán chạy nhất', emoji: '🌟', color: '#FFD54F', type: 'featured', path: '/bestsellers' },
     { id: '4', name: 'Ý tưởng quà tặng', emoji: '🎁', color: '#FF8A65', type: 'featured', path: '/gift-ideas' },
-    { id: '5', name: 'Dưới 2 trăm', emoji: '💝', color: '#BA68C8', type: 'featured', path: '/under-200' },
+    { id: '5', name: 'Dưới 2 triệu', emoji: '💝', color: '#BA68C8', type: 'featured', path: '/under-200' },
   ];
 
-  // Danh mục hot
-  const hotCategories: Category[] = [
-    { id: '6', name: 'Thiết bị làm sạch', emoji: '💧', color: '#4FC3F7', type: 'hot', path: '/devices/cleansing' },
-    { id: '7', name: 'Máy massage mặt', emoji: '✨', color: '#BA68C8', type: 'hot', path: '/devices/massage' },
-    { id: '8', name: 'Chống lão hóa', emoji: '🌸', color: '#FF6B9D', type: 'hot', path: '/devices/anti-aging' },
-    { id: '9', name: 'Công nghệ ánh sáng', emoji: '💡', color: '#FFB74D', type: 'hot', path: '/devices/light-therapy' },
-    { id: '10', name: 'Máy đắp mặt nạ', emoji: '🧴', color: '#FF8A65', type: 'hot', path: '/devices/mask' },
-    { id: '11', name: 'Dưỡng ẩm da', emoji: '💦', color: '#4DB6AC', type: 'hot', path: '/devices/hydration' },
-    { id: '12', name: 'Chăm sóc ban đêm', emoji: '🌙', color: '#7986CB', type: 'hot', path: '/devices/night-care' },
-    { id: '13', name: 'Chăm sóc mắt & môi', emoji: '👁️', color: '#F06292', type: 'hot', path: '/devices/eye-lip' },
-    { id: '14', name: 'Thiết bị làm mát da', emoji: '❄️', color: '#81D4FA', type: 'hot', path: '/devices/cooling' },
-    { id: '15', name: 'Thiết bị làm ấm', emoji: '🔥', color: '#FFAB91', type: 'hot', path: '/devices/warming' },
-  ];
-
+  // Danh mục hot - loaded from API (see apiCategories above)
   // Quick Links
   const quickLinks = [
     { id: 'q1', name: 'Tất cả sản phẩm', emoji: '🛍️', color: '#4FC3F7', path: '/devices' },
     { id: 'q2', name: 'Sản phẩm mới', emoji: '🆕', color: '#66BB6A', path: '/new-arrivals' },
     { id: 'q3', name: 'Dưới 1 triệu', emoji: '💰', color: '#FFA726', path: '/under-1m' },
-    { id: 'q4', name: 'Đơn hàng của tôi', emoji: '📦', color: '#AB47BC', path: '/my-orders' },
+    { id: 'q4', name: 'Đơn hàng của tôi', emoji: '📦', color: '#AB47BC', path: '/account?tab=orders' },
   ];
 
   // Customer Support
@@ -49,13 +72,24 @@ const CategoriesSection = () => {
     { id: 's4', name: 'Liên hệ', emoji: '📞', color: '#EC407A', path: '/contact' },
   ];
 
-  // Skin Types
-  const skinTypes = [
-    { id: 'st1', name: 'Da dầu', emoji: '💧', color: '#4FC3F7', path: '/skin-type/oily' },
-    { id: 'st2', name: 'Da khô', emoji: '🏜️', color: '#FFAB91', path: '/skin-type/dry' },
-    { id: 'st3', name: 'Da hỗn hợp', emoji: '⚖️', color: '#FFD54F', path: '/skin-type/combination' },
-    { id: 'st4', name: 'Da nhạy cảm', emoji: '🌸', color: '#F06292', path: '/skin-type/sensitive' },
-  ];
+  // Skin Types - loaded from API
+  const skinTypeEmojis: Record<string, string> = {
+    'da dầu': '💧', 'da khô': '🌵', 'da hỗn hợp': '⚖️',
+    'da nhạy cảm': '🛡️', 'da thường': '✨', 'mọi loại da': '🌟',
+  };
+
+  const skinTypes = apiSkinTypes.map((st, index) => {
+    const lower = st.toLowerCase();
+    const matchedKey = Object.keys(skinTypeEmojis).find(key => lower.includes(key));
+    const emoji = matchedKey ? skinTypeEmojis[matchedKey] : '🌿';
+    return {
+      id: `st${index}`,
+      name: st,
+      emoji,
+      path: `/client/devices?skinType=${encodeURIComponent(st)}&skinTypeName=${encodeURIComponent(st)}`,
+    };
+  });
+
 
   // Helper component cho từng Menu Item có Dropdown
   const NavItem = ({ title, items, path }: { title: string, items?: any[], path?: string }) => (
@@ -104,9 +138,9 @@ const CategoriesSection = () => {
       {/* 4. TRUY CẬP NHANH */}
       <NavItem title="Truy cập nhanh" items={[
         { name: 'Tất cả sản phẩm', emoji: '🛍️', path: '/client/devices' },
-        { name: 'Sản phẩm mới', emoji: '🆕', path: '/new-arrivals' },
-        { name: 'Dưới 1 triệu', emoji: '💰', path: '/under-1m' },
-        { name: 'Đơn hàng của tôi', emoji: '📦', path: '/my-orders' }
+        { name: 'Sản phẩm mới', emoji: '🆕', path: '/client/new-arrivals' },
+        { name: 'Dưới 1 triệu', emoji: '💰', path: '/client/under-1m' },
+        { name: 'Đơn hàng của tôi', emoji: '📦', path: '/client/account?tab=orders' }
       ]} />
 
       {/* 5. ĐẶT LỊCH TRẢI NGHIỆM (Đã thêm Dropdown) */}

@@ -5,6 +5,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
+import java.util.List;
 import com.carevia.service.DeviceService;
 import com.carevia.service.UserBehaviorService;
 import com.carevia.shared.annotation.AdminOnly;
@@ -32,21 +35,24 @@ public class DeviceController {
     }
 
     @GetMapping
-    @Operation(summary = "Get all devices with pagination and search")
+    @Operation(summary = "Get all devices with pagination and filtering")
     public ResponseEntity<?> getAllDevices(
             @RequestParam(value = "search", required = false) String search,
             @RequestParam(value = "categoryId", required = false) Long categoryId,
             @RequestParam(value = "brandId", required = false) Long brandId,
             @RequestParam(value = "skinType", required = false) String skinType,
+            @RequestParam(value = "minPrice", required = false) BigDecimal minPrice,
+            @RequestParam(value = "maxPrice", required = false) BigDecimal maxPrice,
+            @RequestParam(value = "bookingAvailable", required = false) Boolean bookingAvailable,
+            @RequestParam(value = "onlyDiscounted", required = false) Boolean onlyDiscounted,
             Pageable pageable) {
-        if (search != null && !search.isBlank()) {
-            return ResponseEntity.ok(deviceService.searchDevices(search, pageable));
-        } else if (categoryId != null) {
-            return ResponseEntity.ok(deviceService.getDevicesByCategory(categoryId, pageable));
-        } else if (brandId != null) {
-            return ResponseEntity.ok(deviceService.getDevicesByBrand(brandId, pageable));
-        }
-        return ResponseEntity.ok(deviceService.getAllDevices(pageable));
+        return ResponseEntity.ok(deviceService.getFilteredDevices(search, categoryId, brandId, minPrice, maxPrice, bookingAvailable, skinType, onlyDiscounted, pageable));
+    }
+
+    @GetMapping("/skin-types")
+    @Operation(summary = "Get distinct skin types from available devices")
+    public ResponseEntity<List<String>> getSkinTypes() {
+        return ResponseEntity.ok(deviceService.getSkinTypes());
     }
 
     @GetMapping("/{id}")

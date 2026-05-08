@@ -72,18 +72,18 @@ export default function SignUpForm() {
         role: data.role,
       };
       await register(registerData);
-      toast.success("Registration successful", {
-        description: "Your account has been created",
+      toast.success("Đăng ký thành công", {
+        description: "Tài khoản của bạn đã được tạo thành công. Vui lòng đăng nhập để tiếp tục.",
         className: "bg-green-50 text-green-800 border-green-200",
       });
       router.push("/auth/signin");
     } catch (error: unknown) {
-      console.error("Failed to register:", error);
-      let message = "Failed to register new user. Please try again.";
+      console.error("Đăng ký thất bại:", error);
+      let message = "Đăng ký thất bại. Vui lòng thử lại.";
       if (error instanceof Error) {
         message = error.message;
       }
-      toast.error("Registration failed", {
+      toast.error("Đăng ký thất bại", {
         description: message,
         className: "bg-red-50 text-red-800 border-red-200",
       });
@@ -114,7 +114,7 @@ export default function SignUpForm() {
                     render={({ field }) => (
                       <FormItem className="flex-1">
                         <FormLabel className="text-sm font-medium text-gray-700">
-                          First Name
+                          Họ
                         </FormLabel>
                         <FormControl>
                           <motion.div
@@ -122,7 +122,7 @@ export default function SignUpForm() {
                             transition={{ duration: 0.2 }}
                           >
                             <Input
-                              placeholder="First name"
+                              placeholder="Họ"
                               disabled={isLoading}
                               className="border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
                               {...field}
@@ -139,7 +139,7 @@ export default function SignUpForm() {
                     render={({ field }) => (
                       <FormItem className="flex-1">
                         <FormLabel className="text-sm font-medium text-gray-700">
-                          Last Name
+                          Tên
                         </FormLabel>
                         <FormControl>
                           <motion.div
@@ -147,7 +147,7 @@ export default function SignUpForm() {
                             transition={{ duration: 0.2 }}
                           >
                             <Input
-                              placeholder="Last name"
+                              placeholder="Tên"
                               disabled={isLoading}
                               className="border-gray-300 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-200"
                               {...field}
@@ -191,7 +191,7 @@ export default function SignUpForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-medium text-gray-700">
-                        Password
+                        Mật khẩu
                       </FormLabel>
                       <FormControl>
                         <motion.div
@@ -217,7 +217,7 @@ export default function SignUpForm() {
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel className="text-sm font-medium text-gray-700">
-                        Confirm Password
+                        Xác nhận mật khẩu
                       </FormLabel>
                       <FormControl>
                         <motion.div
@@ -243,11 +243,11 @@ export default function SignUpForm() {
                   render={() => (
                     <FormItem>
                       <FormLabel className="text-sm font-medium text-gray-700">
-                        Role
+                        Vai trò
                       </FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="User"
+                          placeholder="Người dùng"
                           type="text"
                           disabled
                           className="border-gray-300 bg-gray-100 text-gray-500 cursor-not-allowed"
@@ -272,19 +272,20 @@ export default function SignUpForm() {
                         />
                       </FormControl>
                       <FormLabel className="text-sm text-gray-500 font-normal">
-                        I agree with the{" "}
+                        Tôi đồng ý với{" "}
                         <Link
                           href="/privacy"
                           className="text-indigo-600 hover:text-indigo-800 hover:underline"
                         >
-                          Privacy Policy
+                          Chính sách bảo mật
+
                         </Link>{" "}
-                        and{" "}
+                        và{" "}
                         <Link
                           href="/terms"
                           className="text-indigo-600 hover:text-indigo-800 hover:underline"
                         >
-                          Terms of Use
+                          Điều khoản sử dụng
                         </Link>
                       </FormLabel>
                       <FormMessage className="text-red-500 text-xs" />
@@ -323,12 +324,12 @@ export default function SignUpForm() {
                             d="M4 12a8 8 0 018-8v8H4z"
                           />
                         </svg>
-                        Creating account...
+                        Đang tạo tài khoản...
                       </span>
                     ) : (
                       <span className="flex items-center gap-2">
                         <UserPlus size={16} />
-                        Sign Up
+                        Đăng ký
                       </span>
                     )}
                   </Button>
@@ -338,12 +339,12 @@ export default function SignUpForm() {
           </CardContent>
           <CardFooter className="justify-center">
             <p className="text-sm text-gray-500">
-              Already have an account?{" "}
+              Bạn đã có tài khoản?{" "}
               <Link
                 href="/auth/signin"
                 className="text-indigo-600 hover:text-indigo-800 hover:underline transition-all duration-200"
               >
-                Sign in
+                Đăng nhập
               </Link>
             </p>
           </CardFooter>

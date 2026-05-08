@@ -45,4 +45,10 @@ public interface DeviceRepository extends JpaRepository<Device, Long>, JpaSpecif
     List<Device> findSimilarDevices(@Param("categoryId") Long categoryId, @Param("deviceId") Long deviceId, Pageable pageable);
 
     boolean existsBySlug(String slug);
+
+    @Query("SELECT DISTINCT d.skinType FROM Device d WHERE d.skinType IS NOT NULL AND d.skinType <> '' AND d.status = 'AVAILABLE' AND d.deletedAt IS NULL ORDER BY d.skinType ASC")
+    List<String> findDistinctSkinTypes();
+
+    @Query("SELECT d.brand.id, MAX(d.discountPercentage) FROM Device d WHERE d.brand IS NOT NULL AND d.status = 'AVAILABLE' AND d.deletedAt IS NULL GROUP BY d.brand.id")
+    List<Object[]> findMaxDiscountPerBrand();
 }

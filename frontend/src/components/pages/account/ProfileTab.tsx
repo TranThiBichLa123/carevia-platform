@@ -352,7 +352,7 @@ const ProfileTab = () => {
           <div className="space-y-5 font-vietnam">
             <InfoField label="Số điện thoại" value={authUser.phone} placeholder="Chưa cập nhật" />
             <InfoField label="Địa chỉ chính" value={authUser.address} placeholder="Chưa cập nhật" />
-            <InfoField label="Ngày sinh" value={authUser.birth_date} placeholder="-- / -- / ----" />
+            {/* <InfoField label="Ngày sinh" value={authUser.birth_date} placeholder="-- / -- / ----" /> */}
           </div>
         </div>
 

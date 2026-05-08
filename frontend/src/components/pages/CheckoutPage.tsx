@@ -37,6 +37,7 @@ const CheckoutPageContent = () => {
   const { cartItemsWithQuantities, clearCart } = useCartStore();
 
   const orderId = searchParams.get("orderId");
+  const isBuyNow = searchParams.get("buyNow") === "true";
 
   // Verify authentication on component mount
   useEffect(() => {
@@ -111,6 +112,55 @@ const CheckoutPageContent = () => {
             toast.error("Order not found");
             router.push("/client/user/cart");
           }
+        } else if (isBuyNow) {
+          // Buy Now: use only the single item stored in sessionStorage
+          const raw = sessionStorage.getItem("buyNowItem");
+          if (!raw) {
+            toast.error("Không tìm thấy sản phẩm. Vui lòng thử lại.");
+            router.push("/client/devices");
+            return;
+          }
+          const { product, quantity } = JSON.parse(raw) as { product: { id?: string; _id?: string; name: string; image: string; price: number }; quantity: number };
+          const rawId = getProductId(product);
+          const tempOrder: Order = {
+            _id: "temp",
+            id: 0,
+            orderCode: `TEMP-${Date.now()}`,
+            accountId: 0,
+            userId: Number(authUser._id),
+            items: [{
+              id: 0,
+              deviceId: Number(rawId),
+              deviceName: product.name,
+              deviceImage: product.image,
+              productId: String(rawId),
+              name: product.name,
+              image: product.image,
+              price: product.price,
+              unitPrice: product.price,
+              quantity,
+              subtotal: product.price * quantity,
+            }],
+            shippingAddress: "",
+            shippingCity: "",
+            shippingCountry: "",
+            shippingPostalCode: "",
+            subtotal: product.price * quantity,
+            total: product.price * quantity,
+            totalAmount: product.price * quantity,
+            discountAmount: 0,
+            shippingFee: 0,
+            taxAmount: 0,
+            status: "PENDING_PAYMENT" as OrderStatus,
+            paymentStatus: "PENDING" as PaymentStatus,
+            paymentMethod: "STRIPE",
+            paymentTransactionId: "",
+            voucherCode: "",
+            customerNote: "",
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString(),
+          };
+          setOrder(tempOrder);
         } else {
           // If no orderId, check if we have cart items
           if (cartItemsWithQuantities.length === 0) {
@@ -130,21 +180,16 @@ const CheckoutPageContent = () => {
             items: cartItemsWithQuantities.map((item) => {
               const price = item.product.price;
               const quantity = item.quantity;
-              const rawId = getProductId(item.product); // Giả sử hàm này trả về string
+              const rawId = getProductId(item.product);
 
               return {
                 id: 0,
-                // DeviceId yêu cầu number
                 deviceId: Number(rawId),
                 deviceName: item.product.name,
                 deviceImage: item.product.image,
-
-                // ProductId yêu cầu string (Lỗi của bạn nằm ở đây)
                 productId: String(rawId),
                 name: item.product.name,
                 image: item.product.image,
-
-                // Pricing fields
                 price: price,
                 unitPrice: price,
                 quantity: quantity,
@@ -152,13 +197,11 @@ const CheckoutPageContent = () => {
               };
             }),
 
-            // Flat address fields
             shippingAddress: "",
             shippingCity: "",
             shippingCountry: "",
             shippingPostalCode: "",
 
-            // Totals
             subtotal: cartItemsWithQuantities.reduce((sum, item) => sum + (item.product.price * item.quantity), 0),
             total: cartItemsWithQuantities.reduce((sum, item) => sum + (item.product.price * item.quantity), 0),
             totalAmount: cartItemsWithQuantities.reduce((sum, item) => sum + (item.product.price * item.quantity), 0),
@@ -177,8 +220,6 @@ const CheckoutPageContent = () => {
             updatedAt: new Date().toISOString(),
           };
 
-
-
           setOrder(tempOrder);
         }
       } catch (error) {
@@ -193,6 +234,7 @@ const CheckoutPageContent = () => {
     initializeCheckout();
   }, [
     orderId,
+    isBuyNow,
     auth_token,
     router,
     isAuthenticated,
@@ -260,16 +302,33 @@ const CheckoutPageContent = () => {
     try {
       let finalOrder = order;
 
-      // If this is a temporary order (from cart), create the actual order first
+      // If this is a temporary order (from cart or buy-now), create the actual order first
       if (order._id === "temp") {
         setIsCreatingOrder(true);
-        const orderItems = cartItemsWithQuantities.map((item) => ({
-          _id: getProductId(item.product),
-          name: item.product.name,
-          price: item.product.price,
-          quantity: item.quantity,
-          image: item.product.image,
-        }));
+
+        let orderItems;
+        if (isBuyNow) {
+          // Buy Now: use sessionStorage item
+          const raw = sessionStorage.getItem("buyNowItem");
+          if (!raw) throw new Error("Buy now item not found");
+          const { product, quantity } = JSON.parse(raw) as { product: { id?: string; _id?: string; name: string; price: number; image: string }; quantity: number };
+          orderItems = [{
+            _id: getProductId(product),
+            name: product.name,
+            price: product.price,
+            quantity,
+            image: product.image,
+          }];
+        } else {
+          // Cart checkout
+          orderItems = cartItemsWithQuantities.map((item) => ({
+            _id: getProductId(item.product),
+            name: item.product.name,
+            price: item.product.price,
+            quantity: item.quantity,
+            image: item.product.image,
+          }));
+        }
 
         const response = await createOrderFromCart(
           auth_token!,
@@ -288,8 +347,12 @@ const CheckoutPageContent = () => {
         finalOrder = response.order;
         setOrder(finalOrder);
 
-        // Clear cart after successful order creation
-        await clearCart();
+        // Clear cart (or buy-now item) after successful order creation
+        if (isBuyNow) {
+          sessionStorage.removeItem("buyNowItem");
+        } else {
+          await clearCart();
+        }
         setIsCreatingOrder(false);
       }
 
@@ -443,7 +506,7 @@ const CheckoutPageContent = () => {
     <Container className="py-8">
       {/* Breadcrumb */}
       <PageBreadcrumb
-        items={[{ label: "Đơn hàng của bạn", href: "/client/user/orders" }]}
+        items={[{ label: "Đơn hàng của bạn", href: "/client/account?tab=orders" }]}
         currentPage="Thanh toán"
         showSocialShare={false}
       />

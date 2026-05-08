@@ -1,6 +1,7 @@
 "use client";
 
-import React, { useCallback, useEffect, useState } from "react";
+import React, { Suspense, useCallback, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import ProductCard from "@/components/common/products/ProductCard";
 import { Product } from "@/types_enum/devices";
 import Link from "next/link";
@@ -11,7 +12,13 @@ import PageBreadcrumb from "@/components/common/PageBreadcrumb";
 
 type SortOption = "newest" | "price_asc" | "price_desc" | "best_selling";
 
-const AllProductsPage = () => {
+const AllProductsContent = () => {
+    const searchParams = useSearchParams();
+    const categoryIdParam = searchParams.get('categoryId');
+    const categoryNameParam = searchParams.get('categoryName');
+    const skinTypeParam = searchParams.get('skinType');
+    const skinTypeNameParam = searchParams.get('skinTypeName');
+
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [page, setPage] = useState(0);
@@ -20,9 +27,22 @@ const AllProductsPage = () => {
     const [loadingMore, setLoadingMore] = useState(false);
 
     // Filters
+    const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
+        categoryIdParam ? Number(categoryIdParam) : null
+    );
+    const [selectedCategoryName, setSelectedCategoryName] = useState<string | null>(categoryNameParam);
+    const [selectedSkinType, setSelectedSkinType] = useState<string | null>(skinTypeParam);
+    const [selectedSkinTypeName, setSelectedSkinTypeName] = useState<string | null>(skinTypeNameParam);
     const [selectedBrandIds, setSelectedBrandIds] = useState<number[]>([]);
     const [priceRange, setPriceRange] = useState<string | null>(null);
     const [sortBy, setSortBy] = useState<SortOption>("newest");
+
+    const priceOptions = [
+        { label: "Dưới 200.000đ", id: "p1", minPrice: undefined as number | undefined, maxPrice: 200000 },
+        { label: "200.000đ - 500.000đ", id: "p2", minPrice: 200000, maxPrice: 500000 },
+        { label: "Trên 500.000đ", id: "p3", minPrice: 500000, maxPrice: undefined as number | undefined },
+    ];
+    const selectedPriceOption = priceOptions.find(p => p.id === priceRange);
 
     // Filter options from API
     const [brands, setBrands] = useState<BrandData[]>([]);
@@ -46,12 +66,17 @@ const AllProductsPage = () => {
         else setLoadingMore(true);
 
         try {
+            const selectedPrice = priceOptions.find(p => p.id === priceRange);
             const params: Record<string, any> = {
                 page: pageNum,
                 size: 12,
                 sort: getSortParam(sortBy),
             };
+            if (selectedCategoryId) params.categoryId = selectedCategoryId;
             if (selectedBrandIds.length === 1) params.brandId = selectedBrandIds[0];
+            if (selectedPrice?.minPrice !== undefined) params.minPrice = selectedPrice.minPrice;
+            if (selectedPrice?.maxPrice !== undefined) params.maxPrice = selectedPrice.maxPrice;
+            if (selectedSkinType) params.skinType = selectedSkinType;
 
             const data: DevicePageResponse = await deviceApi.getAll(params);
             const mapped = data.items.map(mapDeviceToProduct);
@@ -70,7 +95,7 @@ const AllProductsPage = () => {
             setLoading(false);
             setLoadingMore(false);
         }
-    }, [sortBy, selectedBrandIds]);
+    }, [sortBy, selectedBrandIds, selectedCategoryId, priceRange, selectedSkinType]);
 
     useEffect(() => {
         fetchProducts(0);
@@ -98,6 +123,10 @@ const AllProductsPage = () => {
         setSelectedBrandIds([]);
         setPriceRange(null);
         setSortBy("newest");
+        setSelectedCategoryId(null);
+        setSelectedCategoryName(null);
+        setSelectedSkinType(null);
+        setSelectedSkinTypeName(null);
     };
 
     const sortLabel: Record<SortOption, string> = {
@@ -112,9 +141,9 @@ const AllProductsPage = () => {
             {/* Breadcrumb - Style Watsons tối giản */}
             <PageBreadcrumb
                 items={[
-                    // { label: "Dịch vụ", href: "/client/services" },
+                    ...((selectedCategoryName || selectedSkinTypeName) ? [{ label: "Tất cả sản phẩm", href: "/client/devices" }] : []),
                 ]}
-                currentPage="Tất cả sản phẩm"
+                currentPage={selectedSkinTypeName || selectedCategoryName || "Tất cả sản phẩm"}
             />
 
 
@@ -182,13 +211,16 @@ const AllProductsPage = () => {
                                 <div>
                                     <h4 className="font-bold font-vietnam text-[13px] mb-4">KHOẢNG GIÁ</h4>
                                     <div className="space-y-3">
-                                        {[
-                                            { label: "Dưới 200.000đ", id: "p1" },
-                                            { label: "200.000đ - 500.000đ", id: "p2" },
-                                            { label: "Trên 500.000đ", id: "p3" }
-                                        ].map((price) => (
+                                        {priceOptions.map((price) => (
                                             <label key={price.id} className="flex items-center cursor-pointer group">
-                                                <input type="radio" name="price" id={price.id} className="w-4 h-4 text-primary border-gray-300 focus:ring-0" />
+                                                <input
+                                                    type="radio"
+                                                    name="price"
+                                                    id={price.id}
+                                                    checked={priceRange === price.id}
+                                                    onChange={() => setPriceRange(price.id)}
+                                                    className="w-4 h-4 text-primary border-gray-300 focus:ring-0"
+                                                />
                                                 <span className="ml-3 text-[13px] text-gray-700 group-hover:text-primary font-vietnam">{price.label}</span>
                                             </label>
                                         ))}
@@ -306,5 +338,11 @@ const AllProductsPage = () => {
     );
 
 };
+
+const AllProductsPage = () => (
+    <Suspense fallback={null}>
+        <AllProductsContent />
+    </Suspense>
+);
 
 export default AllProductsPage;

@@ -46,6 +46,22 @@ VALUES
   (6, 'client_cuong','cuong.le@gmail.com',     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhu0', 'CLIENT', 'ACTIVE', NULL, 'vi', NOW(), NOW(), 'seed', 'seed')
 ON CONFLICT (id) DO NOTHING;
 
+-- 1. Thêm Admin (nếu chưa có ID 1) hoặc thêm một Admin thứ hai (ID 7)
+INSERT INTO accounts (id, username, email, password_hash, role, status, lang_key, created_at, updated_at, created_by, updated_by)
+OVERRIDING SYSTEM VALUE VALUES 
+(7, 'admin', 'admin@carevia.vn', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhu0', 'ADMIN', 'ACTIVE', 'vi', NOW(), NOW(), 'seed', 'seed')
+ON CONFLICT (id) DO UPDATE SET 
+    role = 'ADMIN', 
+    status = 'ACTIVE';
+
+-- 2. RESET bộ đếm để khi đăng ký mới không bị trùng ID
+SELECT setval(pg_get_serial_sequence('accounts', 'id'), (SELECT MAX(id) FROM accounts));
+
+
+
+
+
+
 -- =============================================================
 -- 4. STAFFS
 -- =============================================================
@@ -68,6 +84,12 @@ ON CONFLICT (id) DO NOTHING;
 -- =============================================================
 -- 6. CLIENT_ADDRESSES
 -- =============================================================
+TRUNCATE TABLE client_addresses RESTART IDENTITY CASCADE;
+
+-- 1. Ép mã hóa UTF8 cho phiên làm việc này
+SET client_encoding = 'UTF8';
+
+
 INSERT INTO client_addresses (id, client_id, street, ward, district, city, is_default, created_at, updated_at, created_by, updated_by)
 VALUES
   (1, 1, '123 Nguyễn Trãi',     'Phường 3',      'Quận 5',      'TP. Hồ Chí Minh', true,  NOW(), NOW(), 'seed', 'seed'),
@@ -79,6 +101,13 @@ ON CONFLICT (id) DO NOTHING;
 -- =============================================================
 -- 7. DEVICES
 -- =============================================================
+
+-- 1. Ép mã hóa UTF8 để hiển thị tiếng Việt chuẩn
+SET client_encoding = 'UTF8';
+
+-- 2. Xóa dữ liệu cũ (Nếu bạn muốn nạp lại hoàn toàn mới)
+-- TRUNCATE TABLE devices CASCADE; 
+
 INSERT INTO devices (id, name, slug, description, content, price, original_price, discount_percentage, stock, average_rating, image, category_id, brand_id, sku, warranty_period, warranty_policy, origin, device_condition, skin_type, skin_concerns, status, sold, review_count, view_count, is_booking_available, booking_price, video_url, created_at, updated_at, created_by, updated_by)
 VALUES
   (1,  'Foreo LUNA 4 - Máy rửa mặt siêu âm',
@@ -171,6 +200,17 @@ VALUES
        'Mọi loại da', 'Lão hóa, Nếp nhăn sâu', 'AVAILABLE', 8, 3, 320,
        true, 600000, NULL, NOW(), NOW(), 'seed', 'seed')
 ON CONFLICT (id) DO NOTHING;
+
+UPDATE devices
+SET 
+    skin_type = CASE 
+        WHEN id IN (1, 4, 9) THEN 'Da dầu'
+        WHEN id IN (5)       THEN 'Da khô'
+        WHEN id IN (6, 7)    THEN 'Da hỗn hợp'
+        WHEN id IN (10)      THEN 'Da nhạy cảm'
+        ELSE 'Da thường'
+    END
+
 
 -- =============================================================
 -- 8. DEVICE_IMAGES (element collection)
@@ -344,16 +384,18 @@ ON CONFLICT DO NOTHING;
 -- =============================================================
 -- 19. EXPERIENCE_SESSIONS
 -- =============================================================
+TRUNCATE TABLE experience_sessions CASCADE;
+
 INSERT INTO experience_sessions (id, service_id, device_id, branch_name, location_detail, session_date, start_time, end_time, max_slots, available_slots, booked_slots, status, price_per_slot, created_by_admin_id, staff_id, created_at, updated_at, created_by, updated_by)
 VALUES
-  (1, 1, 1, 'Carevia Chi nhánh Q1',   'Tầng 3, 25 Nguyễn Huệ, Quận 1, TP.HCM', NOW()::DATE + 3, '09:00', '10:00', 5, 3, 2, 'OPEN',   350000, 1, 1, NOW(), NOW(), 'seed', 'seed'),
-  (2, 2, 2, 'Carevia Chi nhánh Q1',   'Tầng 3, 25 Nguyễn Huệ, Quận 1, TP.HCM', NOW()::DATE + 3, '10:30', '11:15', 5, 4, 1, 'OPEN',   500000, 1, 1, NOW(), NOW(), 'seed', 'seed'),
-  (3, 3, 3, 'Carevia Chi nhánh Q3',   'Tầng 2, 88 Võ Văn Tần, Quận 3, TP.HCM', NOW()::DATE + 5, '14:00', '14:30', 8, 5, 3, 'OPEN',   450000, 1, 2, NOW(), NOW(), 'seed', 'seed'),
-  (4, 4, 5, 'Carevia Chi nhánh Q7',   'Tầng 1, 45 Nguyễn Thị Thập, Quận 7',    NOW()::DATE + 7, '09:00', '09:45', 6, 6, 0, 'OPEN',   300000, 1, 2, NOW(), NOW(), 'seed', 'seed'),
-  (5, 5, 9, 'Carevia Chi nhánh Q1',   'Tầng 3, 25 Nguyễn Huệ, Quận 1, TP.HCM', NOW()::DATE + 10,'13:00','14:00', 4, 2, 2, 'OPEN',   400000, 1, 1, NOW(), NOW(), 'seed', 'seed'),
-  (6, 6, 10,'Carevia Chi nhánh Q3',   'Tầng 2, 88 Võ Văn Tần, Quận 3, TP.HCM', NOW()::DATE + 14,'15:00','16:00', 3, 3, 0, 'OPEN',   700000, 1, 2, NOW(), NOW(), 'seed', 'seed'),
-  (7, 1, 6, 'Carevia Chi nhánh Q7',   'Tầng 1, 45 Nguyễn Thị Thập, Quận 7',    NOW()::DATE + 1, '08:00', '09:00', 5, 5, 0, 'OPEN',   350000, 1, 1, NOW(), NOW(), 'seed', 'seed'),
-  (8, 2, 7, 'Carevia Chi nhánh Q1',   'Tầng 3, 25 Nguyễn Huệ, Quận 1, TP.HCM', NOW()::DATE - 3, '10:00','10:45', 5, 0, 5, 'FULL',   500000, 1, 1, NOW(), NOW(), 'seed', 'seed')
+  (1, 1, 1, 'Carevia Chi nhánh Q1',   'Tầng 3, 25 Nguyễn Huệ, Quận 1, TP.HCM', NOW()::DATE + 3, '09:00', '10:00', 5, 3, 2, 'OPEN',   350000, 7, 2, NOW(), NOW(), 'seed', 'seed'),
+  (2, 2, 2, 'Carevia Chi nhánh Q1',   'Tầng 3, 25 Nguyễn Huệ, Quận 1, TP.HCM', NOW()::DATE + 3, '10:30', '11:15', 5, 4, 1, 'OPEN',   500000, 7, 2, NOW(), NOW(), 'seed', 'seed'),
+  (3, 3, 3, 'Carevia Chi nhánh Q3',   'Tầng 2, 88 Võ Văn Tần, Quận 3, TP.HCM', NOW()::DATE + 5, '14:00', '14:30', 8, 5, 3, 'OPEN',   450000, 7, 2, NOW(), NOW(), 'seed', 'seed'),
+  (4, 4, 5, 'Carevia Chi nhánh Q7',   'Tầng 1, 45 Nguyễn Thị Thập, Quận 7',    NOW()::DATE + 7, '09:00', '09:45', 6, 6, 0, 'OPEN',   300000, 7, 2, NOW(), NOW(), 'seed', 'seed'),
+  (5, 5, 9, 'Carevia Chi nhánh Q1',   'Tầng 3, 25 Nguyễn Huệ, Quận 1, TP.HCM', NOW()::DATE + 10,'13:00','14:00', 4, 2, 2, 'OPEN',   400000, 7, 2, NOW(), NOW(), 'seed', 'seed'),
+  (6, 6, 10,'Carevia Chi nhánh Q3',   'Tầng 2, 88 Võ Văn Tần, Quận 3, TP.HCM', NOW()::DATE + 14,'15:00','16:00', 3, 3, 0, 'OPEN',   700000, 7, 2, NOW(), NOW(), 'seed', 'seed'),
+  (7, 1, 6, 'Carevia Chi nhánh Q7',   'Tầng 1, 45 Nguyễn Thị Thập, Quận 7',    NOW()::DATE + 1, '08:00', '09:00', 5, 5, 0, 'OPEN',   350000, 7, 2, NOW(), NOW(), 'seed', 'seed'),
+  (8, 2, 7, 'Carevia Chi nhánh Q1',   'Tầng 3, 25 Nguyễn Huệ, Quận 1, TP.HCM', NOW()::DATE - 3, '10:00','10:45', 5, 0, 5, 'FULL',   500000, 7, 2, NOW(), NOW(), 'seed', 'seed')
 ON CONFLICT (id) DO NOTHING;
 
 -- =============================================================

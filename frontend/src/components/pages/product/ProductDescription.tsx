@@ -1,51 +1,100 @@
-"use client";
-import { Star, MessageSquare, Store, ChevronRight, Package, MapPin, Award } from 'lucide-react';
-import { useState } from 'react';
+﻿"use client";
+import { Star, MessageSquare, Store, Package, MapPin, Award, Send, Loader2 } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
 import { Product } from '@/types_enum/devices';
+import { reviewApi, ReviewData } from '@/lib/deviceApi';
+import { useUserStore } from '@/lib/store';
 
 interface ProductDescriptionProps {
   product?: Product;
 }
 
 export default function ProductDescription({ product }: ProductDescriptionProps) {
-  const [activeTab, setActiveTab] = useState<'description' | 'brand' | 'reviews' | 'questions'>('description');
+  const [activeTab, setActiveTab] = useState<'description' | 'brand' | 'reviews'>('description');
+
+  // Reviews state
+  const [reviews, setReviews] = useState<ReviewData[]>([]);
+  const [totalReviews, setTotalReviews] = useState(0);
+  const [averageRating, setAverageRating] = useState(product?.averageRating ?? 0);
+  const [loadingReviews, setLoadingReviews] = useState(false);
+  const [reviewPage, setReviewPage] = useState(0);
+  const [hasNextReviews, setHasNextReviews] = useState(false);
+
+  // Review form state
+  const [rating, setRating] = useState(5);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [comment, setComment] = useState('');
+  const [submitting, setSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState('');
+  const [submitSuccess, setSubmitSuccess] = useState(false);
+
+  const user = useUserStore((s) => s.authUser);
+
+  const fetchReviews = useCallback(async (page: number, append = false) => {
+    if (!product?.id) return;
+    setLoadingReviews(true);
+    try {
+      const data = await reviewApi.getByDevice(product.id, { page, size: 5 });
+      setReviews(prev => append ? [...prev, ...data.items] : data.items);
+      setTotalReviews(data.totalItems);
+      setHasNextReviews(data.hasNext);
+      setReviewPage(page);
+    } catch {
+      // ignore
+    } finally {
+      setLoadingReviews(false);
+    }
+  }, [product?.id]);
+
+  useEffect(() => {
+    if (activeTab === 'reviews') {
+      fetchReviews(0);
+    }
+  }, [activeTab, fetchReviews]);
+
+  const handleSubmitReview = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!product?.id) return;
+    setSubmitting(true);
+    setSubmitError('');
+    try {
+      const newReview = await reviewApi.create(product.id, { rating, comment });
+      setReviews(prev => [newReview, ...prev]);
+      const newTotal = totalReviews + 1;
+      setAverageRating((averageRating * totalReviews + rating) / newTotal);
+      setTotalReviews(newTotal);
+      setComment('');
+      setRating(5);
+      setSubmitSuccess(true);
+      setTimeout(() => setSubmitSuccess(false), 3000);
+    } catch (err: any) {
+      setSubmitError(err?.response?.data?.message || 'Gửi đánh giá thất bại. Vui lòng thử lại.');
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
   const tabs = [
-    { id: 'description' as const, label: 'MÔ TẢ SẢN PHẨM' },
-    { id: 'brand' as const, label: 'THÔNG TIN SHOP' },
-    { id: 'reviews' as const, label: 'ĐÁNH GIÁ (128)' },
-    // { id: 'questions' as const, label: 'HỎI ĐÁP' },
+    {
+      id: 'description' as const,
+      label: 'MÔ TẢ SẢN PHẨM'
+    },
+    {
+      id: 'brand' as const,
+      label: 'THÔNG TIN THƯƠNG HIỆU'
+    },
+    {
+      id: 'reviews' as const,
+      label: `ĐÁNH GIÁ (${totalReviews || product?.reviewCount || 0})`
+    },
   ];
 
-  const mockReviews = [
-    {
-      id: 1,
-      user: 'Nguyễn Văn A',
-      rating: 5,
-      date: '15/03/2024',
-      variant: 'Màu Xanh, Size L',
-      comment: 'Sản phẩm rất tốt, chất lượng vượt mong đợi! Đóng gói cẩn thận, giao hàng nhanh. Sẽ ủng hộ shop lần sau.',
-      avatar: 'https://ui-avatars.com/api/?name=Nguyen+Van+A&background=159fd8&color=fff'
-    },
-    {
-      id: 2,
-      user: 'Trần Thị B',
-      rating: 5,
-      date: '14/03/2024',
-      variant: 'Màu Đỏ, Size M',
-      comment: 'Rất hài lòng với sản phẩm, đúng như mô tả. Shop tư vấn nhiệt tình. Recommend!',
-      avatar: 'https://ui-avatars.com/api/?name=Tran+Thi+B&background=ef4444&color=fff'
-    },
-    {
-      id: 3,
-      user: 'Lê Văn C',
-      rating: 4,
-      date: '13/03/2024',
-      variant: 'Màu Đen, Size XL',
-      comment: 'Sản phẩm tốt, giá hợp lý. Chỉ có điều giao hàng hơi lâu một chút.',
-      avatar: 'https://ui-avatars.com/api/?name=Le+Van+C&background=fbbf24&color=000'
-    }
-  ];
+
+  const formatDate = (iso: string) => {
+    try { return new Date(iso).toLocaleDateString('vi-VN'); } catch { return iso; }
+  };
+
+  const ratingLabels = ['', 'Rất tệ', 'Tệ', 'Bình thường', 'Tốt', 'Xuất sắc'];
 
   return (
     <div className="w-full font-vietnam bg-white">
@@ -55,11 +104,10 @@ export default function ProductDescription({ product }: ProductDescriptionProps)
           <button
             key={tab.id}
             onClick={() => setActiveTab(tab.id)}
-            className={`px-6 py-4 text-sm font-bold whitespace-nowrap transition-all relative ${
-              activeTab === tab.id
+            className={`px-6 py-4 text-sm font-bold whitespace-nowrap transition-all relative ${activeTab === tab.id
                 ? 'text-primary'
                 : 'text-muted-foreground hover:text-foreground'
-            }`}
+              }`}
           >
             {tab.label}
             {activeTab === tab.id && (
@@ -71,7 +119,7 @@ export default function ProductDescription({ product }: ProductDescriptionProps)
 
       {/* Tab Content */}
       <div className="bg-card">
-        
+
         {/* Description Tab */}
         {activeTab === 'description' && (
           <div className="space-y-6 p-6">
@@ -81,28 +129,49 @@ export default function ProductDescription({ product }: ProductDescriptionProps)
                 <Package size={20} className="text-primary" />
                 Chi tiết sản phẩm
               </h3>
-              <div className="grid grid-cols-1 gap-4 text-sm">
-                <div className="grid grid-cols-3 py-3 border-b border-border">
-                  <span className="text-muted-foreground font-medium">Danh mục</span>
-                  <span className="col-span-2 text-foreground font-medium">
-                    Túi xách <ChevronRight size={14} className="inline" /> Túi xách nữ <ChevronRight size={14} className="inline" /> Túi xách cao cấp
-                  </span>
-                </div>
-                <div className="grid grid-cols-3 py-3 border-b border-border">
-                  <span className="text-muted-foreground font-medium">Thương hiệu</span>
-                  <span className="col-span-2 text-primary font-bold">{product?.brand?.name || 'Premium Brand'}</span>
-                </div>
-                <div className="grid grid-cols-3 py-3 border-b border-border">
-                  <span className="text-muted-foreground font-medium">Kho hàng</span>
-                  <span className="col-span-2 text-foreground font-medium">1,254 sản phẩm</span>
-                </div>
+              <div className="grid grid-cols-1 gap-0 text-sm divide-y divide-border">
+                {product?.category?.name && (
+                  <div className="grid grid-cols-3 py-3">
+                    <span className="text-muted-foreground font-medium">Danh mục</span>
+                    <span className="col-span-2 text-foreground font-medium">{product.category.name}</span>
+                  </div>
+                )}
+                {product?.brand?.name && (
+                  <div className="grid grid-cols-3 py-3">
+                    <span className="text-muted-foreground font-medium">Thương hiệu</span>
+                    <span className="col-span-2 text-primary font-bold">{product.brand.name}</span>
+                  </div>
+                )}
+                {product?.origin && (
+                  <div className="grid grid-cols-3 py-3">
+                    <span className="text-muted-foreground font-medium">Xuất xứ</span>
+                    <span className="col-span-2 text-foreground font-medium flex items-center gap-2">
+                      <MapPin size={14} className="text-accent" />
+                      {product.origin}
+                    </span>
+                  </div>
+                )}
                 <div className="grid grid-cols-3 py-3">
-                  <span className="text-muted-foreground font-medium">Gửi từ</span>
-                  <span className="col-span-2 text-foreground font-medium flex items-center gap-2">
-                    <MapPin size={16} className="text-accent" />
-                    Quận Tân Bình, TP. Hồ Chí Minh
+                  <span className="text-muted-foreground font-medium">Kho hàng</span>
+                  <span className={`col-span-2 font-medium ${product?.stock === 0 ? 'text-red-500' : 'text-foreground'}`}>
+                    {product?.stock === 0 ? 'Hết hàng' : `${product?.stock ?? 0} sản phẩm`}
                   </span>
                 </div>
+                {product?.warranty && product.warranty.period !== undefined && (
+                  <div className="grid grid-cols-3 py-3">
+                    <span className="text-muted-foreground font-medium">Bảo hành</span>
+                    <span className="col-span-2 text-foreground font-medium">
+                      {product.warranty.period > 0 ? `${product.warranty.period} tháng` : 'Liên hệ tư vấn'}
+                      {product.warranty.policy ? ` â€” ${product.warranty.policy}` : ''}
+                    </span>
+                  </div>
+                )}
+                {product?.specifications?.map((spec, i) => (
+                  <div key={i} className="grid grid-cols-3 py-3">
+                    <span className="text-muted-foreground font-medium">{spec.label}</span>
+                    <span className="col-span-2 text-foreground font-medium">{spec.value}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
@@ -110,26 +179,16 @@ export default function ProductDescription({ product }: ProductDescriptionProps)
             <div className="space-y-4">
               <h3 className="text-lg font-bold text-foreground">Mô tả sản phẩm</h3>
               <div className="text-sm leading-relaxed text-muted-foreground space-y-4">
-                <p>
-                  {product?.description || 
-                    'Túi xách cao cấp dành cho mẹ và bé được thiết kế với chất liệu da PU cao cấp, bền đẹp và thân thiện với môi trường. Sản phẩm có nhiều ngăn tiện dụng giúp bạn sắp xếp đồ dùng cho bé một cách khoa học và gọn gàng.'}
-                </p>
-                <div className="bg-primary/5 border-l-4 border-primary p-4 rounded-r-lg">
-                  <h4 className="font-bold text-foreground mb-2">✨ Đặc điểm nổi bật:</h4>
-                  <ul className="space-y-2 text-sm text-foreground">
-                    <li>• Chất liệu da PU cao cấp, chống thấm nước</li>
-                    <li>• Thiết kế nhiều ngăn tiện dụng</li>
-                    <li>• Dây đeo chắc chắn, có thể điều chỉnh độ dài</li>
-                    <li>• Phù hợp cho cả mẹ bầu và mẹ sau sinh</li>
-                    <li>• Dễ dàng vệ sinh và bảo quản</li>
-                  </ul>
-                </div>
-                <p className="text-foreground">
-                  <strong>Kích thước:</strong> 35cm x 28cm x 15cm (Rộng x Cao x Sâu)
-                </p>
-                <p className="text-foreground">
-                  <strong>Trọng lượng:</strong> 650g
-                </p>
+                {product?.description && <p>{product.description}</p>}
+                {product?.content && (
+                  <div
+                    className="prose prose-sm max-w-none text-foreground"
+                    dangerouslySetInnerHTML={{ __html: product.content }}
+                  />
+                )}
+                {!product?.description && !product?.content && (
+                  <p className="italic text-muted-foreground">Chưa có mô tả cho sản phẩm này.</p>
+                )}
               </div>
             </div>
           </div>
@@ -140,38 +199,39 @@ export default function ProductDescription({ product }: ProductDescriptionProps)
           <div className="p-6">
             <div className="flex flex-col md:flex-row gap-6 border-2 border-border p-8 rounded-xl items-center shadow-sm bg-linear-to-br from-muted/20 to-background">
               <div className="relative w-24 h-24 rounded-full border-4 border-primary overflow-hidden bg-muted shrink-0 shadow-lg">
-                <img 
-                  src={product?.image || 'https://ui-avatars.com/api/?name=BabyShop&background=159fd8&color=fff&size=200'} 
-                  alt="brand" 
+                <img
+                  src={product?.brand?.image || `https://ui-avatars.com/api/?name=${encodeURIComponent(product?.brand?.name || 'Brand')}&background=159fd8&color=fff&size=200`}
+                  alt={product?.brand?.name || 'Brand'}
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="flex-1 space-y-4 text-center md:text-left">
                 <div>
                   <h4 className="font-bold text-2xl text-foreground flex items-center gap-2 justify-center md:justify-start">
-                    BabyShop Official Store
+                    {product?.brand?.name || 'Thương hiệu'}
                     <Award size={20} className="text-primary" />
                   </h4>
                   <div className="flex items-center justify-center md:justify-start gap-4 text-sm text-muted-foreground mt-2">
                     <span className="flex items-center gap-1">
                       <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse" />
-                      Online 2 giờ trước
+                      Thương hiệu chính hãng
                     </span>
-                    <span className="flex items-center gap-1 text-secondary font-bold">
-                      <Star size={14} fill="currentColor" />
-                      4.9 (15k đánh giá)
-                    </span>
+                    {(averageRating > 0 || (product?.averageRating ?? 0) > 0) && (
+                      <span className="flex items-center gap-1 text-secondary font-bold">
+                        <Star size={14} fill="currentColor" />
+                        {averageRating.toFixed(1)} ({totalReviews || product?.reviewCount || 0} đánh giá)
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className="flex gap-3 justify-center md:justify-start pt-2">
-                  <button className="flex items-center gap-2 border-2 border-accent text-accent px-6 py-2.5 rounded-lg bg-accent/5 font-bold hover:bg-accent/10 hoverEffect shadow-sm">
-                    <MessageSquare size={18} />
-                    Chat ngay
-                  </button>
-                  <button className="flex items-center gap-2 border-2 border-primary text-primary px-6 py-2.5 rounded-lg font-bold hover:bg-primary/5 hoverEffect shadow-sm">
+                  <a
+                    href={`/client/devices?brandId=${product?.brand?.id}`}
+                    className="flex items-center gap-2 border-2 border-primary text-primary px-6 py-2.5 rounded-lg font-bold hover:bg-primary/5 transition-colors shadow-sm"
+                  >
                     <Store size={18} />
-                    Xem Shop
-                  </button>
+                    Xem sản phẩm của {product?.brand?.name || 'thương hiệu'}
+                  </a>
                 </div>
               </div>
             </div>
@@ -180,81 +240,158 @@ export default function ProductDescription({ product }: ProductDescriptionProps)
 
         {/* Reviews Tab */}
         {activeTab === 'reviews' && (
-          <div className="space-y-6">
-            {/* Review Summary */}
-            <div className="bg-linear-to-r from-accent/5 to-secondary/10 border-2 border-accent/20 p-8 flex flex-col md:flex-row items-center gap-8">
+          <div className="space-y-0">
+            {/* Summary */}
+            <div className="bg-linear-to-r from-accent/5 to-secondary/10 border-b border-accent/20 p-8 flex flex-col md:flex-row items-center gap-8">
               <div className="text-center md:border-r-2 md:border-border md:pr-8">
-                <div className="text-accent text-5xl font-bold">4.8</div>
+                <div className="text-accent text-5xl font-bold">{averageRating.toFixed(1)}</div>
                 <div className="text-sm text-muted-foreground mt-1">trên 5</div>
                 <div className="flex text-secondary mt-2 justify-center">
                   {[...Array(5)].map((_, i) => (
-                    <Star key={i} fill="currentColor" size={20} />
+                    <Star key={i} fill={i < Math.round(averageRating) ? 'currentColor' : 'none'} size={20} />
                   ))}
                 </div>
-                <div className="text-sm text-muted-foreground mt-2">128 đánh giá</div>
+                <div className="text-sm text-muted-foreground mt-2">{totalReviews || product?.reviewCount || 0} đánh giá</div>
               </div>
-              <div className="flex flex-wrap gap-2 justify-center">
-                {['Tất Cả', '5 Sao (95)', '4 Sao (25)', '3 Sao (5)', 'Có Hình Ảnh (80)', 'Có Bình Luận (120)'].map((btn, idx) => (
+              {/* Star breakdown */}
+              <div className="flex flex-col gap-1.5 w-full max-w-xs">
+                {[5, 4, 3, 2, 1].map(star => {
+                  const count = reviews.filter(r => r.rating === star).length;
+                  const pct = reviews.length > 0 ? (count / reviews.length) * 100 : 0;
+                  return (
+                    <div key={star} className="flex items-center gap-2 text-xs">
+                      <span className="w-8 text-right text-muted-foreground">{star} ★</span>
+                      <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div className="h-full bg-secondary rounded-full transition-all" style={{ width: `${pct}%` }} />
+                      </div>
+                      <span className="w-6 text-muted-foreground">{count}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Review Form */}
+            <div className="p-6 border-b border-border bg-muted/20">
+              <h4 className="font-bold text-foreground mb-4 flex items-center gap-2">
+                <MessageSquare size={18} className="text-primary" />
+                Viết đánh giá của bạn
+              </h4>
+              {!user ? (
+                <p className="text-sm text-muted-foreground">
+                  Vui lòng{' '}
+                  <a href="/auth/sign-in" className="text-primary font-bold underline">đăng nhập</a>
+                  {' '}để gửi đánh giá.
+                </p>
+              ) : (
+                <form onSubmit={handleSubmitReview} className="space-y-4">
+                  <div className="flex items-center gap-1">
+                    {[1, 2, 3, 4, 5].map(s => (
+                      <button
+                        type="button"
+                        key={s}
+                        onClick={() => setRating(s)}
+                        onMouseEnter={() => setHoverRating(s)}
+                        onMouseLeave={() => setHoverRating(0)}
+                        className="text-secondary transition-transform hover:scale-125"
+                      >
+                        <Star
+                          size={28}
+                          fill={s <= (hoverRating || rating) ? 'currentColor' : 'none'}
+                          strokeWidth={1.5}
+                        />
+                      </button>
+                    ))}
+                    <span className="ml-2 text-sm text-muted-foreground">
+                      {ratingLabels[hoverRating || rating]}
+                    </span>
+                  </div>
+                  <textarea
+                    value={comment}
+                    onChange={e => setComment(e.target.value)}
+                    placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm này..."
+                    rows={4}
+                    className="w-full border border-border rounded-lg p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-primary/30 bg-white"
+                  />
+                  {submitError && <p className="text-sm text-red-500">{submitError}</p>}
+                  {submitSuccess && <p className="text-sm text-emerald-600 font-medium">✓ Đánh giá của bạn đã được gửi!</p>}
                   <button
-                    key={idx}
-                    className={`px-5 py-2.5 text-sm font-medium border-2 rounded-lg hoverEffect ${
-                      idx === 0
-                        ? 'border-primary text-primary bg-primary/5 shadow-sm'
-                        : 'border-border bg-background hover:border-primary/50'
-                    }`}
+                    type="submit"
+                    disabled={submitting}
+                    className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white font-bold text-sm rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
                   >
-                    {btn}
+                    {submitting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                    {submitting ? 'Đang gửi...' : 'Gửi đánh giá'}
                   </button>
-                ))}
-              </div>
+                </form>
+              )}
             </div>
 
             {/* Reviews List */}
-            <div className="divide-y divide-border">
-              {mockReviews.map((review) => (
-                <div key={review.id} className="p-6 hover:bg-muted/30 hoverEffect">
-                  <div className="flex gap-4">
-                    <img
-                      src={review.avatar}
-                      alt={review.user}
-                      className="w-12 h-12 rounded-full shrink-0 border-2 border-border shadow-sm"
-                    />
-                    <div className="flex-1 space-y-2">
-                      <div>
-                        <p className="font-bold text-foreground">{review.user}</p>
-                        <div className="flex text-secondary my-1">
-                          {[...Array(review.rating)].map((_, i) => (
-                            <Star key={i} fill="currentColor" size={14} />
-                          ))}
+            {loadingReviews && reviews.length === 0 ? (
+              <div className="p-12 text-center text-muted-foreground text-sm">Đang tải đánh giá...</div>
+            ) : reviews.length === 0 ? (
+              <div className="p-12 text-center space-y-2">
+                <Star size={40} className="mx-auto text-muted-foreground/30" />
+                <p className="text-muted-foreground">Chưa có đánh giá nào. Hãy là người đầu tiên!</p>
+              </div>
+            ) : (
+              <>
+                <div className="divide-y divide-border">
+                  {reviews.map((review) => (
+                    <div key={review.id} className="p-6 hover:bg-muted/30 transition-colors">
+                      <div className="flex gap-4">
+                        <img
+                          src={review.accountAvatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(review.accountName)}&background=159fd8&color=fff`}
+                          alt={review.accountName}
+                          className="w-12 h-12 rounded-full shrink-0 border-2 border-border shadow-sm"
+                        />
+                        <div className="flex-1 space-y-2">
+                          <div>
+                            <p className="font-bold text-foreground">{review.accountName}</p>
+                            <div className="flex items-center gap-1 text-secondary my-1">
+                              {[...Array(5)].map((_, i) => (
+                                <Star key={i} fill={i < review.rating ? 'currentColor' : 'none'} size={14} strokeWidth={1.5} />
+                              ))}
+                            </div>
+                            <p className="text-xs text-muted-foreground">
+                              {formatDate(review.createdAt)}
+                              {review.isVerifiedPurchase && (
+                                <span className="ml-2 text-emerald-600 font-medium">✓ Đã mua hàng</span>
+                              )}
+                            </p>
+                          </div>
+                          {review.comment && (
+                            <p className="text-sm text-foreground leading-relaxed bg-muted/20 p-4 rounded-lg border border-border">
+                              {review.comment}
+                            </p>
+                          )}
+                          {review.adminReply && (
+                            <div className="bg-primary/5 border-l-4 border-primary p-3 rounded-r-lg text-sm">
+                              <p className="font-bold text-primary text-xs mb-1">Phản hồi từ Carevia:</p>
+                              <p className="text-foreground">{review.adminReply}</p>
+                            </div>
+                          )}
                         </div>
-                        <p className="text-xs text-muted-foreground">
-                          {review.date} | Phân loại: {review.variant}
-                        </p>
                       </div>
-                      <p className="text-sm text-foreground leading-relaxed bg-muted/20 p-4 rounded-lg border border-border">
-                        {review.comment}
-                      </p>
                     </div>
-                  </div>
+                  ))}
                 </div>
-              ))}
-            </div>
+                {hasNextReviews && (
+                  <div className="p-4 text-center">
+                    <button
+                      onClick={() => fetchReviews(reviewPage + 1, true)}
+                      disabled={loadingReviews}
+                      className="px-6 py-2 border border-border text-sm font-medium rounded-lg hover:bg-muted transition-colors disabled:opacity-50"
+                    >
+                      {loadingReviews ? 'Đang tải...' : 'Xem thêm đánh giá'}
+                    </button>
+                  </div>
+                )}
+              </>
+            )}
           </div>
         )}
-
-        {/* Questions Tab */}
-        {/* {activeTab === 'questions' && (
-          <div className="p-16 text-center space-y-4">
-            <MessageSquare size={64} className="mx-auto text-muted-foreground/30" />
-            <div>
-              <h3 className="text-xl font-bold text-foreground mb-2">Chưa có câu hỏi nào</h3>
-              <p className="text-muted-foreground">Hãy là người đầu tiên đặt câu hỏi về sản phẩm này!</p>
-            </div>
-            <button className="mt-4 px-6 py-3 bg-primary text-white font-bold rounded-lg hover:bg-primary/90 hoverEffect shadow-md">
-              Đặt câu hỏi ngay
-            </button>
-          </div>
-        )} */}
       </div>
     </div>
   );

@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import Link from 'next/link';
+import { QRCodeSVG } from 'qrcode.react';
+
 import {
   MapPin, Calendar, Clock, User, Phone,
   ChevronLeft, QrCode, PhoneCall, Navigation,
@@ -37,7 +39,18 @@ const BookingDetail = () => {
       try {
         const data = await bookingService.getById(bookingId);
         if (data) {
-          setBooking(data);
+          const note = data.customerNote || '';
+          const nameMatch = note.match(/Khách:\s*([^,]+)/);
+          const phoneMatch = note.match(/SĐT:\s*(\S+)/);
+          setBooking({
+            ...data,
+            deviceName: data.device?.name || '',
+            image: data.device?.image || '',
+            branchName: data.session?.branchName || '',
+            address: data.session?.locationDetail || '',
+            customerName: nameMatch ? nameMatch[1].trim() : (data.accountName || ''),
+            customerPhone: phoneMatch ? phoneMatch[1].trim() : '',
+          });
           setLoading(false);
           return;
         }
@@ -101,12 +114,16 @@ const BookingDetail = () => {
     upcoming: { label: 'Sắp diễn ra', color: 'text-blue-600', bg: 'bg-blue-50' },
     pending: { label: 'Chờ xác nhận', color: 'text-yellow-600', bg: 'bg-yellow-50' },
     Pending: { label: 'Chờ xác nhận', color: 'text-yellow-600', bg: 'bg-yellow-50' },
+    PENDING_CONFIRM: { label: 'Chờ xác nhận', color: 'text-yellow-600', bg: 'bg-yellow-50' },
     confirmed: { label: 'Đã xác nhận', color: 'text-green-600', bg: 'bg-green-50' },
     Confirmed: { label: 'Đã xác nhận', color: 'text-green-600', bg: 'bg-green-50' },
+    CONFIRMED: { label: 'Đã xác nhận', color: 'text-green-600', bg: 'bg-green-50' },
     completed: { label: 'Đã hoàn thành', color: 'text-green-600', bg: 'bg-green-50' },
     Completed: { label: 'Đã hoàn thành', color: 'text-green-600', bg: 'bg-green-50' },
+    COMPLETED: { label: 'Đã hoàn thành', color: 'text-green-600', bg: 'bg-green-50' },
     cancelled: { label: 'Đã hủy', color: 'text-red-600', bg: 'bg-red-50' },
     Cancelled: { label: 'Đã hủy', color: 'text-red-600', bg: 'bg-red-50' },
+    CANCELLED: { label: 'Đã hủy', color: 'text-red-600', bg: 'bg-red-50' },
   };
 
   if (loading) {
@@ -129,7 +146,7 @@ const BookingDetail = () => {
   }
 
   const currentStatus = statusMap[booking.status] || statusMap.pending;
-  const canCancel = ['upcoming', 'pending', 'Pending', 'confirmed', 'Confirmed'].includes(booking.status);
+  const canCancel = ['upcoming', 'pending', 'Pending', 'PENDING_CONFIRM', 'confirmed', 'Confirmed', 'CONFIRMED'].includes(booking.status);
 
   return (
     <Container className="min-h-screen bg-white  font-vietnam py-4">
@@ -153,8 +170,16 @@ const BookingDetail = () => {
 
           <div className="flex justify-center py-4">
             <div className="p-3 border-2 border-gray-100 rounded-xl bg-white shadow-sm">
-              <QrCode size={160} strokeWidth={1.5} className="text-gray-800" />
-              <p className="text-[10px] font-bold text-gray-400 mt-2 tracking-[0.3em]">ID: {booking.id}</p>
+              {/* Dữ liệu quét ra sẽ là ID của booking hoặc Link check-in */}
+              <QRCodeSVG
+                value={`BOOKING_ID:${booking.id}`}
+                size={160}
+                level="H" // Độ phân giải cao để dễ quét
+                includeMargin={false}
+              />
+              {/* <p className="text-[10px] font-bold text-gray-400 mt-2 tracking-[0.3em]">
+                ID: {booking.id}
+              </p> */}
             </div>
           </div>
           <p className="text-[11px] text-gray-500 italic">Vui lòng đưa mã này cho nhân viên lễ tân khi đến chi nhánh</p>
@@ -162,19 +187,19 @@ const BookingDetail = () => {
 
         {/* THÔNG TIN DỊCH VỤ */}
         <div className="bg-white border border-gray-200 overflow-hidden">
-          <div className="aspect-video w-full bg-gray-100">
+          {/* <div className="aspect-video w-full bg-gray-100">
             <img src={booking.image} className="w-full h-full object-cover" alt="" />
-          </div>
+          </div> */}
           <div className="p-6">
             <h2 className="text-lg font-black uppercase tracking-tight text-gray-900">{booking.deviceName}</h2>
             <div className="mt-4 grid grid-cols-2 gap-6">
               <div className="space-y-1">
                 <p className="text-[10px] font-bold text-gray-400 uppercase">Ngày hẹn</p>
-                <p className="text-sm font-bold flex items-center gap-2"><Calendar size={14} className="text-[#00b2bd]" /> 20/05/2024</p>
+                <p className="text-sm font-bold flex items-center gap-2"><Calendar size={14} className="text-[#00b2bd]" /> {booking.appointmentDate ? new Date(booking.appointmentDate).toLocaleDateString('vi-VN') : ''}</p>
               </div>
               <div className="space-y-1">
                 <p className="text-[10px] font-bold text-gray-400 uppercase">Giờ hẹn</p>
-                <p className="text-sm font-bold flex items-center gap-2"><Clock size={14} className="text-[#00b2bd]" /> 09:00 - 10:30</p>
+                <p className="text-sm font-bold flex items-center gap-2"><Clock size={14} className="text-[#00b2bd]" /> {String(booking.startTime || '').slice(0, 5)} - {String(booking.endTime || '').slice(0, 5)}</p>
               </div>
             </div>
           </div>

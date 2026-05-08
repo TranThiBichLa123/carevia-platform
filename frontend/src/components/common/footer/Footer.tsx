@@ -17,7 +17,7 @@ const informationTab = [
 ];
 const CustomerTab = [
   { title: "Tài khoản của tôi", href: "/client/user/profile" },
-  { title: "Theo dõi đơn hàng", href: "/client/user/orders" },
+  { title: "Theo dõi đơn hàng", href: "/client/account?tab=orders" },
   { title: "Cửa hàng", href: "/shop" },
   { title: "Danh sách yêu thích", href: "/client/user/wishlist" },
   { title: "Trả hàng/Đổi hàng", href: "/returns" },

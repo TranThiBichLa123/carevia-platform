@@ -38,54 +38,8 @@ const NotificationsTab = () => {
       setUnreadCount(count);
     } catch (error) {
       console.error("Failed to load notifications:", error);
-      // Use mock data as fallback
-      setNotifications([
-        {
-          id: 1,
-          title: "Booking đã được xác nhận",
-          message: "Lịch hẹn trải nghiệm SkinPro Gen 2 của bạn đã được xác nhận cho ngày 15/04/2026.",
-          notificationType: "BOOKING_CONFIRMED",
-          status: "UNREAD",
-          referenceId: 888,
-          referenceType: "BOOKING",
-          actionUrl: "/client/my-bookings",
-          createdAt: new Date(Date.now() - 3600000).toISOString(),
-        },
-        {
-          id: 2,
-          title: "Đơn hàng đang xử lý",
-          message: "Đơn hàng #ORD-2026 của bạn đang được chuẩn bị giao hàng.",
-          notificationType: "ORDER_PROCESSING",
-          status: "UNREAD",
-          referenceId: 123,
-          referenceType: "ORDER",
-          actionUrl: "/client/account?tab=orders",
-          createdAt: new Date(Date.now() - 7200000).toISOString(),
-        },
-        {
-          id: 3,
-          title: "Thanh toán thành công",
-          message: "Thanh toán $45.00 cho đơn hàng #ORD-2025 đã hoàn tất.",
-          notificationType: "PAYMENT_SUCCESS",
-          status: "READ",
-          referenceId: 122,
-          referenceType: "ORDER",
-          actionUrl: "/client/account?tab=orders",
-          createdAt: new Date(Date.now() - 86400000).toISOString(),
-        },
-        {
-          id: 4,
-          title: "Nhắc nhở lịch hẹn",
-          message: "Bạn có lịch hẹn trải nghiệm AquaSteam Luxury vào ngày mai lúc 09:30.",
-          notificationType: "BOOKING_REMINDER",
-          status: "READ",
-          referenceId: 890,
-          referenceType: "BOOKING",
-          actionUrl: "/client/my-bookings",
-          createdAt: new Date(Date.now() - 172800000).toISOString(),
-        },
-      ]);
-      setUnreadCount(2);
+      setNotifications([]);
+      setUnreadCount(0);
     } finally {
       setLoading(false);
     }

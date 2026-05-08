@@ -1,8 +1,7 @@
-import OrdersPage from "@/components/pages/OrdersPage";
-import React from "react";
+import { redirect } from "next/navigation";
 
 const Orders = () => {
-  return <OrdersPage />;
+  redirect("/client/account?tab=orders");
 };
 
 export default Orders;

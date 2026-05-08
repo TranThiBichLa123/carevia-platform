@@ -58,7 +58,7 @@ const SuccessPageClient = () => {
     }
 
     if (!orderId) {
-      router.push("/client/user/orders");
+      router.push("/client/account?tab=orders");
       return;
     }
 
@@ -317,7 +317,7 @@ const SuccessPageClient = () => {
 
           {/* Action Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 justify-center animate-fade-in delay-300">
-            <Link href="/client/user/orders">
+            <Link href="/client/account?tab=orders">
               <Button
                 size="lg"
                 className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-3 rounded-full shadow-lg transition-all transform hover:scale-105"

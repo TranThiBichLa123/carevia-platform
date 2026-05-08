@@ -718,7 +718,7 @@ const ProfilePage = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <Link href={"/client/user/orders"}>
+            <Link href={"/client/account?tab=orders"}>
               <Button variant={"outline"}>View all orders</Button>
             </Link>
           </CardContent>

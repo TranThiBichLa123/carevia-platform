@@ -119,25 +119,25 @@ const SkinConcernSection = () => {
                 title: "Da khô thiếu ẩm",
                 desc: "Thiết bị dưỡng ẩm chuyên sâu",
                 img: "https://file.hstatic.net/1000041114/article/dull-skin_57004436aa1b45208777c428192e0ac4_1024x1024.png",
-                link: "/shop?search=dry-skin"
+                link: "/client/devices?skinType=Da%20kh%C3%B4&skinTypeName=Da%20kh%C3%B4%20thi%E1%BA%BFu%20%E1%BA%A9m"
               },
               {
                 title: "Chống lão hóa",
                 desc: "Công nghệ nâng cơ xóa nhăn",
                 img: "https://citrinedermaclinic.vn/wp-content/uploads/2025/12/Nang-Co-Xoa-Nhan-Toan-Dien-So-Sanh-Tac-Dong-Cua-2-Cong-Nghe-HIFU-RF.jpg",
-                link: "/shop?search=anti-aging"
+                link: "/client/devices?skinType=Da%20lão%20hóa&skinTypeName=Da%20lão%20hóa"
               },
               {
                 title: "Trị mụn, thâm",
                 desc: "Ánh sáng blue light & LED",
                 img: "https://dalieudhyd.vn/wp-content/uploads/2020/12/Blue-Light-Therapy.jpg",
-                link: "/shop?search=acne"
+                link: "/client/devices?skinType=Da%20mụn&skinTypeName=Da%20mụn"
               },
               {
                 title: "Sáng da đều màu",
                 desc: "Thiết bị làm sáng da hiệu quả",
                 img: "https://media.vov.vn/sites/default/files/styles/large/public/2026-03/da_sam_mau.jpg",
-                link: "/shop?search=brightening"
+                link: "/client/devices?skinType=Da%20sáng%20da&skinTypeName=Da%20sáng%20da"
               }
             ].map((item, index) => (
               <Card key={index} className="flex flex-col group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-gray-200 hover:border-primary/50 p-0 h-full">

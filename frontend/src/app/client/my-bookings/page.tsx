@@ -119,11 +119,10 @@ const MyBookings = () => {
                             <button
                                 key={tab.key}
                                 onClick={() => setFilter(tab.key)}
-                                className={`flex items-center gap-2 px-5 py-3 text-sm font-medium rounded-t-lg transition-all ${
-                                    isActive
+                                className={`flex items-center gap-2 px-5 py-3 text-sm font-medium rounded-t-lg transition-all ${isActive
                                         ? 'bg-primary text-white shadow-md'
                                         : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                                }`}
+                                    }`}
                             >
                                 <Icon size={16} />
                                 <span className="font-vietnam">{tab.label}</span>
@@ -179,8 +178,16 @@ const MyBookings = () => {
                                 {/* Footer action */}
                                 <div className="bg-gray-50 px-5 py-3 border-t border-gray-100 flex justify-between items-center">
                                     <div className="text-[12px] font-bold text-gray-900">
-                                        Phí: {booking.price > 0 ? `${booking.price} USD` : <span className="text-primary">MIỄN PHÍ</span>}
+                                        Phí: {booking.price > 0 ? (
+                                            <span>
+                                                {Number(booking.price).toLocaleString('vi-VN')}
+                                                <span className="text-[10px] ml-0.5 font-medium underline">đ</span>
+                                            </span>
+                                        ) : (
+                                            <span className="text-primary">MIỄN PHÍ</span>
+                                        )}
                                     </div>
+
                                     <div className="flex gap-4">
                                         {/* Chỉ hiện nút hủy nếu lịch đang là 'upcoming' */}
                                         {booking.status === 'upcoming' && (

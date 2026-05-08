@@ -97,7 +97,7 @@ const OrderDetailsPage = () => {
     const fetchOrder = async () => {
       if (!orderId || !auth_token) {
         toast.error("Order ID or authentication token missing");
-        router.push("/client/user/orders");
+        router.push("/client/account?tab=orders");
         return;
       }
       setLoading(true);
@@ -110,12 +110,12 @@ const OrderDetailsPage = () => {
           }
         } else {
           toast.error("Order not found");
-          router.push("/client/user/orders");
+          router.push("/client/account?tab=orders");
         }
       } catch (error) {
         console.error("Error fetching order:", error);
         toast.error("Failed to load order details");
-        router.push("/client/user/orders");
+        router.push("/client/account?tab=orders");
       } finally {
         setLoading(false);
       }
@@ -170,7 +170,7 @@ const OrderDetailsPage = () => {
     return (
       <Container>
         <PageBreadcrumb
-          items={[{ label: "Orders", href: "/client/user/orders" }]}
+          items={[{ label: "Orders", href: "/client/account?tab=orders" }]}
           currentPage="Order Details"
         />
         <div className="space-y-6">
@@ -202,7 +202,7 @@ const OrderDetailsPage = () => {
           <h1 className="text-2xl font-bold text-gray-900 mb-4">
             Không tìm thấy đơn hàng
           </h1>
-          <Button onClick={() => router.push("/client/user/orders")}>
+          <Button onClick={() => router.push("/client/account?tab=orders")}>
             Quay lại danh sách đơn hàng
           </Button>
         </div>
@@ -230,7 +230,7 @@ const OrderDetailsPage = () => {
   return (
     <Container className="pt-5">
       <PageBreadcrumb
-        items={[{ label: "Đơn hàng của bạn", href: "/client/user/orders" }]}
+        items={[{ label: "Đơn hàng của bạn", href: "/client/account?tab=orders" }]}
         currentPage="Chi tiết đơn hàng"
       />
 

@@ -91,7 +91,7 @@ export default function NotificationsPage() {
   if (!isAuthenticated) {
     return (
       <div className="flex items-center justify-center min-h-[400px]">
-        <p className="text-muted-foreground">Please sign in to view notifications.</p>
+        <p className="text-muted-foreground">Đăng nhập để xem thông báo.</p>
       </div>
     );
   }
@@ -101,15 +101,15 @@ export default function NotificationsPage() {
       <div className="flex items-center justify-between mb-6">
         <div className="flex items-center gap-3">
           <Bell className="w-6 h-6 text-primary" />
-          <h1 className="text-2xl font-bold">Notifications</h1>
+          <h1 className="text-2xl font-bold">Thông báo</h1>
           {unreadCount > 0 && (
-            <Badge variant="destructive">{unreadCount} new</Badge>
+            <Badge variant="destructive">{unreadCount} mới</Badge>
           )}
         </div>
         {unreadCount > 0 && (
           <Button variant="outline" size="sm" onClick={handleMarkAllAsRead}>
             <CheckCheck className="w-4 h-4 mr-2" />
-            Mark all as read
+            Đánh dấu tất cả là đã đọc
           </Button>
         )}
       </div>
@@ -121,7 +121,7 @@ export default function NotificationsPage() {
       ) : notifications.length === 0 ? (
         <div className="text-center py-12">
           <Bell className="w-12 h-12 mx-auto text-muted-foreground/40 mb-4" />
-          <p className="text-muted-foreground">No notifications yet.</p>
+          <p className="text-muted-foreground">Chưa có thông báo nào.</p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -161,7 +161,7 @@ export default function NotificationsPage() {
                       className="text-xs text-primary hover:underline flex items-center gap-1"
                     >
                       <Check className="w-3 h-3" />
-                      Read
+                      Đã đọc
                     </button>
                   )}
                 </div>

@@ -61,10 +61,10 @@ const Banner = async () => {
             {imageOne?.title}
           </h2>
           <Link
-            href={"/shop"}
+            href={"/client/booking"}
             className="bg-white rounded-full font-medium text-gray-900 px-6 py-2.5 text-base hover:bg-transparent hover:text-white hover:border-white border border-gray-200 hoverEffect"
           >
-            Book Now
+            Đặt lịch ngay
           </Link>
         </div>
       </div>
@@ -82,10 +82,10 @@ const Banner = async () => {
             {imageTwo?.title}
           </h2>
           <Link
-            href={"/shop"}
+            href={"/client/devices"}
             className="bg-white rounded-full font-medium text-gray-900 px-6 py-2.5 text-base hover:bg-transparent hover:text-white hover:border-white border border-gray-300 hoverEffect"
           >
-            Shop Now
+           Mua ngay
           </Link>
         </div>
       </div>

@@ -29,37 +29,40 @@ public class NotificationService {
 
         switch (eventType) {
             case "BOOKING_CREATED" -> {
-                title = "Booking Created";
-                message = "Your booking " + booking.getBookingCode()
-                        + " has been created successfully. Waiting for confirmation.";
+                title = "Booking đã được tạo";
+                message = "Booking của bạn " + booking.getBookingCode()
+                        + " đã được tạo thành công. Đang chờ xác nhận.";
                 type = NotificationType.BOOKING_CREATED;
             }
             case "BOOKING_CONFIRMED" -> {
-                title = "Booking Confirmed";
-                message = "Your booking " + booking.getBookingCode() + " has been confirmed!";
+                title = "Booking đã được xác nhận";
+                message = "Booking của bạn " + booking.getBookingCode() + " đã được xác nhận!";
                 type = NotificationType.BOOKING_CONFIRMED;
             }
             case "BOOKING_CANCELLED" -> {
-                title = "Booking Cancelled";
-                message = "Your booking " + booking.getBookingCode() + " has been cancelled.";
+                title = "Booking đã bị hủy";
+                message = "Booking của bạn " + booking.getBookingCode() + " đã bị hủy.";
                 type = NotificationType.BOOKING_CANCELLED;
             }
             case "BOOKING_COMPLETED" -> {
-                title = "Booking Completed";
-                message = "Your booking " + booking.getBookingCode() + " has been completed. Thank you!";
+                title = "Booking đã hoàn tất";
+                message = "Booking của bạn " + booking.getBookingCode() + " đã hoàn tất. Cảm ơn bạn!";
                 type = NotificationType.BOOKING_COMPLETED;
             }
             default -> {
-                title = "Booking Update";
-                message = "Your booking " + booking.getBookingCode() + " has been updated.";
+                title = "Cập nhật Booking";
+                message = "Booking của bạn " + booking.getBookingCode() + " đã được cập nhật.";
                 type = NotificationType.SYSTEM;
             }
         }
 
         Notification notification = Notification.builder()
+                .account(account)
+                .status(NotificationStatus.UNREAD)
                 .title(title)
                 .content(message)
                 .type(type.name())
+                .notificationType(type.name())
                 .referenceId(booking.getId())
                 .referenceType("BOOKING")
                 .targetUrl("/client/my-bookings")
@@ -75,44 +78,47 @@ public class NotificationService {
 
         switch (eventType) {
             case "ORDER_CREATED" -> {
-                title = "Order Created";
-                message = "Your order " + order.getOrderCode() + " has been created. Please complete payment.";
+                title = "Order đã được tạo";
+                message = "Order của bạn " + order.getOrderCode() + " đã được tạo. Vui lòng hoàn tất thanh toán.";
                 type = NotificationType.ORDER_CREATED;
             }
             case "ORDER_PAID" -> {
-                title = "Payment Successful";
-                message = "Payment for order " + order.getOrderCode() + " was successful!";
+                title = "Thanh toán thành công";
+                message = "Thanh toán cho order " + order.getOrderCode() + " đã thành công!";
                 type = NotificationType.ORDER_PAID;
             }
             case "ORDER_PROCESSING" -> {
-                title = "Order Processing";
-                message = "Your order " + order.getOrderCode() + " is being processed.";
+                title = "Order đang được xử lý";
+                message = "Order của bạn " + order.getOrderCode() + " đang được xử lý.";
                 type = NotificationType.ORDER_PROCESSING;
             }
             case "ORDER_COMPLETED" -> {
-                title = "Order Completed";
-                message = "Your order " + order.getOrderCode() + " has been completed!";
+                title = "Order đã hoàn tất";
+                message = "Order của bạn " + order.getOrderCode() + " đã hoàn tất!";
                 type = NotificationType.ORDER_COMPLETED;
             }
             case "ORDER_CANCELLED" -> {
-                title = "Order Cancelled";
-                message = "Your order " + order.getOrderCode() + " has been cancelled.";
+                title = "Order đã bị hủy";
+                message = "Order của bạn " + order.getOrderCode() + " đã bị hủy.";
                 type = NotificationType.ORDER_CANCELLED;
             }
             default -> {
-                title = "Order Update";
-                message = "Your order " + order.getOrderCode() + " has been updated.";
+                title = "Cập nhật Order";
+                message = "Order của bạn " + order.getOrderCode() + " đã được cập nhật.";
                 type = NotificationType.SYSTEM;
             }
         }
 
         Notification notification = Notification.builder()
+                .account(account)
+                .status(NotificationStatus.UNREAD)
                 .title(title)
                 .content(message)
                 .type(type.name())
+                .notificationType(type.name())
                 .referenceId(order.getId())
                 .referenceType("ORDER")
-                .targetUrl("/client/user/orders")
+                .targetUrl("/client/account?tab=orders")
                 .build();
 
         notificationRepository.save(notification);
@@ -120,9 +126,12 @@ public class NotificationService {
 
     public void createSystemNotification(Account account, String title, String message) {
         Notification notification = Notification.builder()
+                .account(account)
+                .status(NotificationStatus.UNREAD)
                 .title(title)
                 .content(message)
                 .type("SYSTEM")
+                .notificationType("SYSTEM")
                 .build();
         notificationRepository.save(notification);
     }
@@ -161,16 +170,18 @@ public class NotificationService {
     }
 
     private NotificationResponse toResponse(Notification n) {
+        NotificationType nType;
+        try {
+            nType = (n.getType() != null) ? NotificationType.valueOf(n.getType()) : NotificationType.SYSTEM;
+        } catch (IllegalArgumentException e) {
+            nType = NotificationType.SYSTEM;
+        }
         return NotificationResponse.builder()
                 .id(n.getId())
                 .title(n.getTitle())
                 .message(n.getContent())
-                // Nếu getType() trả về String -> Dùng valueOf là đúng
-                .notificationType(NotificationType.valueOf(n.getType()))
-
-                // SỬA TẠI ĐÂY: n.getStatus() đã là Enum rồi, nên truyền thẳng vào luôn
+                .notificationType(nType)
                 .status(n.getStatus())
-
                 .referenceId(n.getReferenceId())
                 .referenceType(n.getReferenceType())
                 .actionUrl(n.getTargetUrl())

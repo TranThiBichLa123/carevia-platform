@@ -24,7 +24,6 @@ const BookingSchedulePage = () => {
     const [step, setStep] = useState(1);
     const [device, setDevice] = useState<Product | null>(null);
     const [loadingDevice, setLoadingDevice] = useState(true);
-    const [tempCode] = useState(() => Math.floor(Math.random() * 1000).toString().padStart(3, '0'));
 
     const [selectedDate, setSelectedDate] = useState('');
     const [selectedSession, setSelectedSession] = useState<ExperienceSession | null>(null);
@@ -342,7 +341,6 @@ const BookingSchedulePage = () => {
                         <div className="bg-white border border-gray-200 shadow-sm overflow-hidden">
                             <div className="bg-gray-50 px-6 py-4 border-b border-gray-100 flex justify-between items-center">
                                 <h2 className="text-sm font-vietnam font-bold uppercase tracking-widest text-gray-700">Xác nhận thông tin đặt lịch</h2>
-                                <span className="text-[10px] bg-black text-white px-2 py-1 font-vietnam font-bold">MÃ: #TEMP_{tempCode}</span>
                             </div>
 
                             <div className="p-6 md:p-10">

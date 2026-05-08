@@ -1,13 +1,13 @@
 "use client"; // Bắt buộc vì có dùng hooks
 
 import SectionView from "@/components/common/SectionView";
-import { Brand } from "@/types_enum/devices";
+import { BrandData } from "@/lib/deviceApi";
 import Image from "next/image";
 import Link from "next/link";
 import React, { useState, useEffect } from "react";
 
 interface Props {
-  brands: Brand[];
+  brands: BrandData[];
 }
 
 const HomeBrand = ({ brands }: Props) => {
@@ -47,8 +47,8 @@ const HomeBrand = ({ brands }: Props) => {
           const color = bgColors[(currentIndex + index) % bgColors.length];
           return (
             <Link
-              key={`${brand?._id}-${index}`}
-              href={`/client/shop?brand=${brand?._id}`}
+              key={`${brand?.id}-${index}`}
+              href={`/client/brand/${brand?.id}`}
               className={`${color} rounded-4xl overflow-hidden relative h-52 group hover:scale-[1.03] transition-all duration-500 shadow-xl`}
             >
               {/* Background Image Overlay */}
@@ -68,21 +68,27 @@ const HomeBrand = ({ brands }: Props) => {
                 <div className="flex items-center gap-4">
                   {/* <!-- Bỏ p-2 và đổi thành object-cover --> */}
                   <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center overflow-hidden shrink-0 shadow-2xl transform group-hover:rotate-3 transition-transform">
-                    <Image
-                      src={brand?.image || ""}
-                      alt={brand?.name || ""}
-                      width={80}
-                      height={80}
-                      className="w-full h-full object-cover"
-                    />
+                    {brand?.image ? (
+                      <Image
+                        src={brand.image}
+                        alt={brand?.name || ""}
+                        width={80}
+                        height={80}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span className="text-gray-400 text-xs font-bold">{brand?.name?.[0]}</span>
+                    )}
                   </div>
                   <span className="text-white font-bold text-lg">{brand?.name}</span>
                 </div>
 
                 <div className="mt-auto">
-                  <div className="inline-block bg-yellow-400 text-gray-900 px-3 py-1 rounded-lg font-black text-xs mb-2 shadow-lg">
-                    UP TO 80% OFF
-                  </div>
+                  {brand?.maxDiscountPercentage != null && brand.maxDiscountPercentage > 0 && (
+                    <div className="inline-block bg-yellow-400 text-gray-900 px-3 py-1 rounded-lg font-black text-xs mb-2 shadow-lg">
+                      UP TO {Math.round(brand.maxDiscountPercentage)}% OFF
+                    </div>
+                  )}
                   <p className="text-white/80 text-xs font-medium uppercase tracking-wider">Khám phá ngay</p>
                 </div>
               </div>
