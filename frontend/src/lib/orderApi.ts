@@ -162,12 +162,13 @@ export const createOrderFromCart = async (
   shippingAddress: ShippingAddress
 ): Promise<CreateOrderResponse> => {
   try {
-    const res = await apiClient.post("/orders/from-cart", {
+    const res = await apiClient.post("/orders", {
       items: cartItems.map(item => ({ deviceId: Number(item._id ?? item.id), quantity: item.quantity })),
       shippingAddress: [shippingAddress.street, shippingAddress.ward, shippingAddress.district].filter(Boolean).join(', '),
       shippingCity: shippingAddress.city,
       shippingCountry: "",
       shippingPostalCode: "",
+      paymentMethod: "ZALOPAY",
     }, { headers: authHeaders() });
     return { success: true, order: normalizeOrder(res.data) };
   } catch (error: unknown) {

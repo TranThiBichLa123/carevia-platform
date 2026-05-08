@@ -59,10 +59,11 @@ minio:
 
 # Cấu hình ZaloPay
 zalopay:
-  app-id: ${ZALOPAY_APP_ID:2553}
-  key1: ${ZALOPAY_KEY1:9ph31jnse3ke2urj1u939as6p02m5ba8}
-  key2: ${ZALOPAY_KEY2:Iyz2habByrTH08sS79ESt7nnEnu9u788}
-  endpoint: ${ZALOPAY_ENDPOINT:https://zalopay.vn}
+  app-id: ${ZALOPAY_APP_ID:2554}
+  key1: ${ZALOPAY_KEY1:sdngKKJmqEMzvh5QQcdD2A9XBSKUNaYn}
+  key2: ${ZALOPAY_KEY2:trMrHtvjo6myautxDUiAcYsVtaeQ8nhf}
+  endpoint: ${ZALOPAY_ENDPOINT:https://sb-openapi.zalopay.vn}
+  callback-url: ${ZALOPAY_CALLBACK_URL:http://localhost:8081/api/v1/payments/zalopay/callback}
 
 # Cấu hình App (Avatar & Websocket)
 app:

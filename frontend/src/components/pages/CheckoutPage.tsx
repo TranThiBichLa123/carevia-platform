@@ -11,11 +11,7 @@ import PriceFormatter from "@/components/common/PriceFormatter";
 import { CreditCard, Lock, CheckCircle, AlertCircle } from "lucide-react";
 import Image from "next/image";
 import { getOrderById, type Order, createOrderFromCart, OrderStatus, PaymentStatus } from "@/lib/orderApi";
-import {
-  createCheckoutSession,
-  redirectToCheckout,
-  type StripeCheckoutItem,
-} from "@/lib/stripe";
+import { createZaloPayOrder } from "@/lib/zaloPayApi";
 import { useUserStore, useCartStore } from "@/lib/store";
 import { toast } from "sonner";
 import { Address } from "@/types_enum/devices";
@@ -308,7 +304,6 @@ const CheckoutPageContent = () => {
 
         let orderItems;
         if (isBuyNow) {
-          // Buy Now: use sessionStorage item
           const raw = sessionStorage.getItem("buyNowItem");
           if (!raw) throw new Error("Buy now item not found");
           const { product, quantity } = JSON.parse(raw) as { product: { id?: string; _id?: string; name: string; price: number; image: string }; quantity: number };
@@ -320,7 +315,6 @@ const CheckoutPageContent = () => {
             image: product.image,
           }];
         } else {
-          // Cart checkout
           orderItems = cartItemsWithQuantities.map((item) => ({
             _id: getProductId(item.product),
             name: item.product.name,
@@ -347,7 +341,6 @@ const CheckoutPageContent = () => {
         finalOrder = response.order;
         setOrder(finalOrder);
 
-        // Clear cart (or buy-now item) after successful order creation
         if (isBuyNow) {
           sessionStorage.removeItem("buyNowItem");
         } else {
@@ -356,67 +349,16 @@ const CheckoutPageContent = () => {
         setIsCreatingOrder(false);
       }
 
-      // Convert order items to Stripe format
-      const stripeItems: StripeCheckoutItem[] = finalOrder.items.map(
-        (item) => ({
-          name: item.name,
-          description: `Quantity: ${item.quantity}`,
-          amount: Math.round(item.price * 100), // Convert to cents
-          currency: "usd",
-          quantity: item.quantity,
-          images: item.image ? [item.image] : undefined,
-        })
-      );
+      // Create ZaloPay order and redirect
+      const successUrl = `${window.location.origin}/client/success?orderId=${finalOrder._id}`;
+      const result = await createZaloPayOrder(finalOrder._id, auth_token!, successUrl);
 
-      // Add shipping and tax as separate line items if applicable
-      const shipping = calculateShipping();
-      const tax = calculateTax();
-
-      if (shipping > 0) {
-        stripeItems.push({
-          name: "Shipping",
-          description: "Standard shipping",
-          amount: Math.round(shipping * 100),
-          currency: "usd",
-          quantity: 1,
-        });
-      }
-
-      if (tax > 0) {
-        stripeItems.push({
-          name: "Tax",
-          description: "Sales tax",
-          amount: Math.round(tax * 100),
-          currency: "usd",
-          quantity: 1,
-        });
-      }
-
-      // Create checkout session
-      console.log(
-        "Checkout: Creating session with origin:",
-        window.location.origin
-      );
-      const result = await createCheckoutSession({
-        items: stripeItems,
-        customerEmail: authUser?.email,
-        successUrl: `${window.location.origin}/client/success?orderId=${finalOrder._id}&session_id={CHECKOUT_SESSION_ID}`,
-        cancelUrl: `${window.location.origin}/client/user/checkout?orderId=${finalOrder._id}`,
-        metadata: {
-          orderId: finalOrder._id,
-          shippingAddress: JSON.stringify(selectedAddress),
-        },
-      });
-
-      if ("sessionId" in result) {
-        // Redirect to Stripe Checkout
-        await redirectToCheckout(result.sessionId);
-      } else {
-        throw new Error(result.error);
-      }
+      // Redirect to ZaloPay payment page
+      window.location.href = result.orderUrl;
     } catch (error) {
       console.error("Error processing payment:", error);
-      toast.error("Payment failed. Please try again.");
+      const msg = error instanceof Error ? error.message : "Không thể tạo thanh toán. Vui lòng thử lại.";
+      toast.error(msg);
     } finally {
       setProcessing(false);
       setIsCreatingOrder(false);
@@ -583,7 +525,7 @@ const CheckoutPageContent = () => {
                 <div className="flex-1">
                   <h3 className="font-medium text-gray-900">Zalopay Checkout</h3>
                   <p className="text-sm text-gray-600">
-                    Thanh toán an toàn với Zalopay, được bảo mật bởi Stripe
+                    Thanh toán an toàn với ZaloPay (ví điện tử, thẻ ATM, thẻ quốc tế)
                   </p>
                 </div>
                 <CheckCircle className="w-5 h-5 text-primary" />
@@ -693,7 +635,7 @@ const CheckoutPageContent = () => {
 
             <div className="mt-4 text-center">
               <p className="text-xs text-gray-500">
-                Thanh toán an toàn • Mã hóa SSL • Hỗ trợ bởi Zalopay
+                Thanh toán an toàn • Mã hóa SSL • Hỗ trợ bởi ZaloPay
               </p>
             </div>
           </div>

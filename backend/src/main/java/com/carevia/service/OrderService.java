@@ -199,6 +199,21 @@ public class OrderService {
         return toPageResponse(page);
     }
 
+    @Transactional
+    public void confirmZaloPayPayment(Long orderId, String zpTransId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+        if (order.getStatus() == com.carevia.shared.constant.OrderStatus.PENDING_PAYMENT) {
+            order.markPaid(zpTransId);
+            for (OrderItem item : order.getItems()) {
+                item.getDevice().incrementSold(item.getQuantity());
+                deviceRepository.save(item.getDevice());
+            }
+            orderRepository.save(order);
+            notificationService.createOrderNotification(order.getAccount(), order, "ORDER_PAID");
+        }
+    }
+
     private OrderResponse toResponse(Order o) {
         return OrderResponse.builder()
                 .id(o.getId())
