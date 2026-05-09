@@ -31,13 +31,14 @@ public class BookingService {
     private final VoucherRepository voucherRepository;
     private final UserBehaviorRepository userBehaviorRepository;
     private final NotificationService notificationService;
+    private final RefundService refundService;
 
     private static final int MAX_BOOKINGS_PER_DAY = 3;
 
     public BookingService(BookingRepository bookingRepository, ExperienceSessionRepository sessionRepository,
             DeviceRepository deviceRepository, AccountRepository accountRepository,
             VoucherRepository voucherRepository, UserBehaviorRepository userBehaviorRepository,
-            NotificationService notificationService) {
+            NotificationService notificationService, RefundService refundService) {
         this.bookingRepository = bookingRepository;
         this.sessionRepository = sessionRepository;
         this.deviceRepository = deviceRepository;
@@ -45,6 +46,7 @@ public class BookingService {
         this.voucherRepository = voucherRepository;
         this.userBehaviorRepository = userBehaviorRepository;
         this.notificationService = notificationService;
+        this.refundService = refundService;
     }
 
     @Transactional
@@ -153,11 +155,17 @@ public class BookingService {
             throw new InvalidRequestException("You can only cancel your own bookings");
         }
 
+        boolean wasConfirmed = booking.getStatus() == BookingStatus.CONFIRMED;
         booking.cancel(reason, "USER");
         booking = bookingRepository.save(booking);
         sessionRepository.save(booking.getSession());
         if (booking.getVoucher() != null)
             voucherRepository.save(booking.getVoucher());
+
+        // Auto-create refund if booking was confirmed (payment was received)
+        if (wasConfirmed) {
+            refundService.createBookingCancelRefund(booking);
+        }
 
         notificationService.createBookingNotification(booking.getAccount(), booking, "BOOKING_CANCELLED");
         return toResponse(booking);

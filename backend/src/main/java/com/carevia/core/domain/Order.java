@@ -97,6 +97,9 @@ public class Order extends BaseEntity {
     @Column(name = "customer_note", length = 500)
     private String customerNote;
 
+    @Column(name = "cancel_reason", length = 500)
+    private String cancelReason;
+
     public void addItem(OrderItem item) {
         items.add(item);
         item.setOrder(this);
@@ -136,10 +139,21 @@ public class Order extends BaseEntity {
     }
 
     public void cancel() {
+        cancel(null);
+    }
+
+    public void cancel(String reason) {
         if (this.status == OrderStatus.COMPLETED) {
             throw new InvalidStatusException("Cannot cancel completed orders");
         }
+        if (this.status == OrderStatus.CANCELLED) {
+            throw new InvalidStatusException("Order is already cancelled");
+        }
+        if (this.status == OrderStatus.PROCESSING) {
+            throw new InvalidStatusException("Cannot cancel order that is already being shipped. Please contact support.");
+        }
         this.status = OrderStatus.CANCELLED;
+        this.cancelReason = reason;
         if (this.voucher != null && this.paymentStatus == PaymentStatus.SUCCESS) {
             this.voucher.returnVoucher();
         }

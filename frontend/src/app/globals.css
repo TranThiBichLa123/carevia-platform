@@ -14,7 +14,7 @@
   /* màu xanh nhạt nhất có thể ở trang signin dbeafe */
 
   --secondary: #fbbf24;
-  --accent: red;
+  --cancel: red;
   --purple: #A96BDE;
 
   /* Neutral */
@@ -33,7 +33,7 @@
   --color-primary-light: var(--primary-light);
 
   --color-secondary: var(--secondary);
-  --color-accent: var(--accent);
+  --color-cancel: var(--cancel);
 
   --color-muted: var(--muted);
   --color-muted-foreground: var(--muted-foreground);

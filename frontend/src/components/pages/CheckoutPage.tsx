@@ -15,6 +15,7 @@ import { createZaloPayOrder } from "@/lib/zaloPayApi";
 import { useUserStore, useCartStore } from "@/lib/store";
 import { toast } from "sonner";
 import { Address } from "@/types_enum/devices";
+import { deviceApi } from "@/lib/deviceApi";
 
 const getProductId = (product: { id?: string; _id?: string }) =>
   product.id || product._id || "";
@@ -445,13 +446,18 @@ const CheckoutPageContent = () => {
   }
 
   return (
-    <Container className="py-8">
+    <Container className="">
       {/* Breadcrumb */}
-      <PageBreadcrumb
-        items={[{ label: "Đơn hàng của bạn", href: "/client/account?tab=orders" }]}
-        currentPage="Thanh toán"
-        showSocialShare={false}
-      />
+      <div className="my-4">
+        <PageBreadcrumb
+          items={[
+            { label: "Tất cả sản phẩm", href: "/client/devices" },
+            { label: order.items[0]?.name ?? "Sản phẩm", href: `/client/devices/${order.items[0]?.productId}` },
+          ]}
+          currentPage="Thanh toán"
+          showSocialShare={false}
+        />
+      </div>
 
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">

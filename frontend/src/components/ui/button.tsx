@@ -25,8 +25,8 @@ const buttonVariants = cva(
         ghost: "hover:bg-slate-100 hover:text-slate-900 dark:hover:bg-slate-800 dark:hover:text-slate-50",
 
         // 6. Link: Giữ nguyên
-        link: "text-sky-600 underline-offset-4 hover:underline",
-
+        // link: "text-sky-600 underline-offset-4 hover:underline",
+        none: " shadow-none  p-0 h-auto",
         // 7. THÊM MỚI - "pure": Dành riêng cho nút xóa nhỏ trong giỏ hàng bạn đang làm
         pure: "p-0 h-auto bg-transparent hover:bg-transparent hover:text-red-600 transition-colors",
 

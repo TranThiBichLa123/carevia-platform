@@ -62,35 +62,38 @@ const ServiceDetailPage = () => {
 
   return (
     <div className="min-h-screen bg-white pb-20 font-vietnam">
-      <Container className="py-6">
-        <PageBreadcrumb
-          items={[
-            { label: "Đặt lịch trải nghiệm", href: "/client/booking" },
-          ]}
-          currentPage="Chi tiết đặt lịch"
-        />
+      <Container className="">
+        <div className="my-4">
+          <PageBreadcrumb
+            items={[
+              { label: "Đặt lịch trải nghiệm", href: "/client/booking" },
+            ]}
+            currentPage={device?.name || "Thiết bị"}
+          />
+        </div>
 
-        <div className="grid lg:grid-cols-2 gap-10 mt-4">
+
+        <div className="grid lg:grid-cols-2 gap-10">
 
           {/* CỘT TRÁI: HÌNH ẢNH */}
           <div className="space-y-4">
             <div className="aspect-4/3 relative rounded-2xl overflow-hidden shadow-md">
-              <Image
-                src={device.image}
-                fill
-                className="object-cover"
-                alt={device.name}
-              />
-              <div className="absolute top-4 left-4 bg-white/90 backdrop-blur px-3 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-wider shadow-sm flex items-center gap-2">
-                <ShieldCheck size={12} className="text-primary" />
-                Công nghệ chính hãng
+              <Image src={device.image} fill className="object-cover" alt={device.name} />
+
+              {/* Badge ôm sát border góc trên bên trái */}
+              <div className="absolute top-0 left-0 bg-white/95 backdrop-blur px-3 py-2 rounded-br-2xl text-[10px] font-bold uppercase tracking-wider shadow-sm flex items-center gap-2 border-r border-b border-gray-100/50">
+                <ShieldCheck size={14} className="text-primary" />
+                <span>Công nghệ chính hãng</span>
               </div>
+
+              {/* Badge MIỄN PHÍ ôm sát border góc trên bên phải */}
               {device.bookingPrice === 0 && (
-                <div className="absolute top-4 right-4 bg-primary text-white text-[10px] px-3 py-1.5 rounded-full font-bold shadow-sm animate-pulse">
+                <div className="absolute top-0 right-0 bg-primary text-white text-[10px] px-4 py-2 rounded-bl-2xl font-bold shadow-sm animate-pulse">
                   MIỄN PHÍ
                 </div>
               )}
             </div>
+
 
             {/* Cam kết */}
             <div className="grid grid-cols-3 gap-3">

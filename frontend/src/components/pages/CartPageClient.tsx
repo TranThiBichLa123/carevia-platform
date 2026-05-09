@@ -359,19 +359,21 @@ const CartPageClient = () => {
   }
 
   return (
-    <Container className="py-5">
+    <Container className="">
       {/* Breadcrumb */}
-      <PageBreadcrumb
-        items={[]}
-        currentPage="Giỏ hàng"
-        showSocialShare={true}
-        shareData={{
-          title: "Giỏ hàng của tôi",
-          text: `Xem giỏ hàng của tôi với ${cartItemsWithQuantities.length} sản phẩm${cartItemsWithQuantities.length !== 1 ? "s" : ""
-            } từ Carevia!`,
-          url: typeof window !== "undefined" ? window.location.href : "",
-        }}
-      />
+      <div className="py-4">
+        <PageBreadcrumb
+          items={[]}
+          currentPage="Giỏ hàng"
+          showSocialShare={true}
+          shareData={{
+            title: "Giỏ hàng của tôi",
+            text: `Xem giỏ hàng của tôi với ${cartItemsWithQuantities.length} sản phẩm${cartItemsWithQuantities.length !== 1 ? "s" : ""
+              } từ Carevia!`,
+            url: typeof window !== "undefined" ? window.location.href : "",
+          }}
+        />
+      </div>
 
 
 

@@ -22,6 +22,7 @@ import {
   pollOrderStatus,
   needsPaymentUpdate,
 } from "@/lib/paymentUtils";
+import { verifyZaloPayPayment } from "@/lib/zaloPayApi";
 import PriceFormatter from "@/components/common/PriceFormatter";
 import Cookies from "js-cookie";
 import Container from "@/components/common/Container";
@@ -37,6 +38,8 @@ const SuccessPageClient = () => {
 
   const orderId = searchParams.get("orderId");
   const sessionId = searchParams.get("session_id"); // Stripe adds this parameter
+  const appTransId = searchParams.get("apptransid"); // ZaloPay adds this on redirect
+  const isZaloPay = !!appTransId && !sessionId;
 
   // Verify authentication on component mount
   useEffect(() => {
@@ -89,8 +92,22 @@ const SuccessPageClient = () => {
           setOrder(orderData);
           console.log("Success: Order fetched:", orderData);
 
-          // Handle payment status update
-          if (
+          // ZaloPay: actively verify payment via backend (avoids callback-not-reachable issue)
+          if (isZaloPay && orderData.status !== "PAID" && !statusUpdated) {
+            console.log("Success: ZaloPay redirect detected, verifying payment...");
+            try {
+              const verifyResult = await verifyZaloPayPayment(orderId, token);
+              console.log("Success: ZaloPay verify result:", verifyResult);
+              if (verifyResult.status === "PAID") {
+                const updatedOrder = await getOrderById(orderId, token);
+                if (updatedOrder) setOrder(updatedOrder);
+                setStatusUpdated(true);
+                toast.success("Thanh toán thành công! Đơn hàng đã được xác nhận.");
+              }
+            } catch (error) {
+              console.error("Success: ZaloPay verify error:", error);
+            }
+          } else if (
             sessionId &&
             needsPaymentUpdate(orderData, sessionId) &&
             !statusUpdated
@@ -119,10 +136,8 @@ const SuccessPageClient = () => {
             } catch (error) {
               console.error("Success: Error in payment status update:", error);
             }
-          } else if (orderData.status === "PAID" && sessionId) {
-            // Order is already paid, probably updated by webhook
+          } else if (orderData.status === "PAID") {
             console.log("Success: Order already marked as paid");
-            toast.success("Payment confirmed!");
             setStatusUpdated(true);
           } else {
             console.log("Success: No payment update needed", {
@@ -141,18 +156,22 @@ const SuccessPageClient = () => {
     };
 
     fetchOrder();
-  }, [orderId, auth_token, router, authLoading, sessionId, statusUpdated]);
+  }, [orderId, auth_token, router, authLoading, sessionId, statusUpdated, isZaloPay]);
 
   useEffect(() => {
-    // Show success toast when component mounts
+    // Show success toast when loading completes
     if (!authLoading && !loading) {
-      toast.success("Payment completed successfully!");
+      toast.success("Thanh toán thành công!");
     }
   }, [authLoading, loading]);
 
-  // Periodically check if order status needs updating (fallback mechanism)
+  // Poll for order status — for ZaloPay without sessionId, or Stripe fallback
   useEffect(() => {
-    if (!order || !sessionId || statusUpdated || order.status !== "PENDING_PAYMENT") {
+    if (!order || statusUpdated || order.status === "PAID") {
+      return;
+    }
+    // Only poll if it's a ZaloPay or Stripe redirect (not a random page load)
+    if (!isZaloPay && !sessionId) {
       return;
     }
 
@@ -184,7 +203,7 @@ const SuccessPageClient = () => {
     };
 
     startPolling();
-  }, [order, sessionId, statusUpdated, orderId, auth_token]);
+  }, [order, sessionId, isZaloPay, statusUpdated, orderId, auth_token]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString("en-US", {
@@ -198,10 +217,10 @@ const SuccessPageClient = () => {
 
   if (loading || authLoading) {
     return (
-      <Container className="py-8">
+      <Container className="">
         <PageBreadcrumb
           items={[{ label: "Checkout", href: "/checkout" }]}
-          currentPage="Success"
+          currentPage="Thành công"
           showSocialShare={false}
         />
 
@@ -220,12 +239,15 @@ const SuccessPageClient = () => {
   }
 
   return (
-    <Container className="py-8">
-      <PageBreadcrumb
-        items={[{ label: "Checkout", href: "/checkout" }]}
-        currentPage="Success"
-        showSocialShare={false}
-      />
+    <Container className="">
+      <div className="my-4">
+        <PageBreadcrumb
+          items={[{ label: "Checkout", href: "/checkout" }]}
+          currentPage="Thành công"
+          showSocialShare={false}
+        />
+      </div>
+
 
       <div className="max-w-4xl mx-auto">
         {/* Success Animation */}
@@ -246,12 +268,12 @@ const SuccessPageClient = () => {
           </div>
 
           <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 animate-fade-in">
-            Payment Successful! 🎉
+            Thanh toán thành công! 🎉
           </h1>
 
           <p className="text-xl text-gray-600 mb-8 animate-fade-in delay-100">
-            Thank you for your purchase. Your order has been confirmed and is
-            being processed.
+            Cảm ơn bạn đã mua hàng. Đơn hàng của bạn đã được xác nhận và đang
+            được xử lý.
           </p>
 
           {order && (
@@ -260,7 +282,7 @@ const SuccessPageClient = () => {
                 <div className="space-y-2">
                   <div className="flex items-center justify-center gap-2 text-green-700">
                     <Package className="w-5 h-5" />
-                    <span className="font-medium">Order ID</span>
+                    <span className="font-medium">Mã đơn hàng</span>
                   </div>
                   <p className="font-mono text-lg font-bold text-gray-900">
                     #{order._id.slice(-8).toUpperCase()}
@@ -270,7 +292,7 @@ const SuccessPageClient = () => {
                 <div className="space-y-2">
                   <div className="flex items-center justify-center gap-2 text-green-700">
                     <Calendar className="w-5 h-5" />
-                    <span className="font-medium">Order Date</span>
+                    <span className="font-medium">Ngày đặt hàng</span>
                   </div>
                   <p className="text-gray-900 font-semibold">
                     {formatDate(order.createdAt)}
@@ -280,21 +302,21 @@ const SuccessPageClient = () => {
                 <div className="space-y-2">
                   <div className="flex items-center justify-center gap-2 text-green-700">
                     <CreditCard className="w-5 h-5" />
-                    <span className="font-medium">Payment Status</span>
+                    <span className="font-medium">Trạng thái thanh toán</span>
                   </div>
                   <div className="flex items-center justify-center gap-2">
                     {order.status === "PAID" ? (
                       <>
                         <CheckCircle className="w-5 h-5 text-green-500" />
                         <span className="font-semibold text-green-600">
-                          Paid
+                          Đã thanh toán
                         </span>
                       </>
                     ) : (
                       <>
                         <div className="w-5 h-5 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" />
                         <span className="font-semibold text-yellow-600">
-                          Processing
+                          Đang xử lý
                         </span>
                       </>
                     )}
@@ -304,7 +326,7 @@ const SuccessPageClient = () => {
                 <div className="space-y-2">
                   <div className="flex items-center justify-center gap-2 text-green-700">
                     <CreditCard className="w-5 h-5" />
-                    <span className="font-medium">Total Paid</span>
+                    <span className="font-medium">Tổng thanh toán</span>
                   </div>
                   <PriceFormatter
                     amount={order.total}
@@ -323,7 +345,7 @@ const SuccessPageClient = () => {
                 className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-3 rounded-full shadow-lg transition-all transform hover:scale-105"
               >
                 <Package className="w-5 h-5 mr-2" />
-                View My Orders
+                Xem đơn hàng của tôi
                 <ArrowRight className="w-4 h-4 ml-2" />
               </Button>
             </Link>
@@ -335,7 +357,7 @@ const SuccessPageClient = () => {
                 className="border-2 border-gray-300 hover:border-gray-400 px-8 py-3 rounded-full transition-all transform hover:scale-105"
               >
                 <ShoppingBag className="w-5 h-5 mr-2" />
-                Continue Shopping
+                Tiếp tục mua sắm
               </Button>
             </Link>
 
@@ -346,7 +368,7 @@ const SuccessPageClient = () => {
                 className="hover:bg-gray-100 px-8 py-3 rounded-full transition-all"
               >
                 <Home className="w-5 h-5 mr-2" />
-                Go Home
+                Về trang chủ
               </Button>
             </Link>
           </div>
@@ -356,7 +378,7 @@ const SuccessPageClient = () => {
         {order && (
           <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 md:p-8 animate-fade-in delay-400">
             <h2 className="text-2xl font-bold text-gray-900 mb-6">
-              Order Summary
+              Tóm tắt đơn hàng
             </h2>
 
             <div className="space-y-4">
@@ -384,7 +406,7 @@ const SuccessPageClient = () => {
                       {item.name}
                     </h3>
                     <p className="text-sm text-gray-600">
-                      Quantity: {item.quantity} ×{" "}
+                      Số lượng: {item.quantity} ×{" "}
                       <PriceFormatter amount={item.price} />
                     </p>
                   </div>
@@ -403,7 +425,7 @@ const SuccessPageClient = () => {
               <div className="bg-gray-50 rounded-lg p-4">
                 <div className="flex justify-between items-center">
                   <span className="text-xl font-bold text-gray-900">
-                    Total Paid:
+                    Tổng thanh toán:
                   </span>
                   <PriceFormatter
                     amount={order.total}
@@ -415,10 +437,10 @@ const SuccessPageClient = () => {
           </div>
         )}
 
-        {/* What&apos;s Next Section */}
+        {/* Tiếp theo */}
         <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100 p-6 md:p-8 mt-8 animate-fade-in delay-500">
           <h3 className="text-xl font-bold text-gray-900 mb-4">
-            What happens next?
+            Tiếp theo
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
@@ -429,8 +451,7 @@ const SuccessPageClient = () => {
                 Order Confirmation
               </h4>
               <p className="text-sm text-gray-600">
-                You&apos;ll receive an email confirmation with your order
-                details
+                Bạn sẽ nhận được email xác nhận với chi tiết đơn hàng của mình
               </p>
             </div>
 
@@ -438,9 +459,9 @@ const SuccessPageClient = () => {
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
                 <span className="text-blue-600 font-bold">2</span>
               </div>
-              <h4 className="font-semibold text-gray-900 mb-2">Processing</h4>
+              <h4 className="font-semibold text-gray-900 mb-2">Đang xử lý</h4>
               <p className="text-sm text-gray-600">
-                Our team will carefully prepare your order for shipping
+                Nhóm của chúng tôi sẽ chuẩn bị đơn hàng của bạn cẩn thận để vận chuyển
               </p>
             </div>
 
@@ -448,9 +469,9 @@ const SuccessPageClient = () => {
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
                 <span className="text-blue-600 font-bold">3</span>
               </div>
-              <h4 className="font-semibold text-gray-900 mb-2">Shipping</h4>
+              <h4 className="font-semibold text-gray-900 mb-2">Vận chuyển</h4>
               <p className="text-sm text-gray-600">
-                Track your package as it makes its way to your door
+                Theo dõi đơn hàng của bạn khi nó di chuyển đến cửa nhà bạn
               </p>
             </div>
           </div>

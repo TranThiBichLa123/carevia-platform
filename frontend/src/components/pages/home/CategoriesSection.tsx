@@ -122,12 +122,14 @@ const CategoriesSection = () => {
   return (
     <nav className="hidden md:flex items-center bg-white h-12 border-t border-gray-100">
       {/* 1. DANH MỤC SẢN PHẨM */}
-      <div className="flex items-center gap-2 px-4 py-3 cursor-pointer hover:text-primary transition-colors border-r border-gray-100">
+      {/* 1. DANH MỤC SẢN PHẨM */}
+      <div className="flex items-center gap-2 py-3 pr-2 cursor-pointer hover:text-primary transition-colors border-r border-gray-100">
         <Menu size={18} />
-        <span className="text-[13px]  font-vietnam font-semibold uppercase whitespace-nowrap">
+        <span className="text-[13px] font-vietnam font-semibold uppercase whitespace-nowrap">
           Danh mục sản phẩm
         </span>
       </div>
+
 
       {/* 2. DANH MỤC NỔI BẬT */}
       <NavItem title="Danh mục nổi bật" items={hotCategories} />
@@ -148,7 +150,7 @@ const CategoriesSection = () => {
         title="Đặt lịch trải nghiệm"
         items={[
           { name: 'Đặt lịch ngay', emoji: '📅', path: '/client/booking' },
-          { name: 'Lịch của tôi', emoji: '📋', path: '/client/my-bookings' }
+          { name: 'Lịch hẹn của tôi', emoji: '📋', path: '/client/my-bookings' }
         ]}
       />
       {/* 6. MUA THEO LOẠI DA */}
@@ -159,7 +161,7 @@ const CategoriesSection = () => {
         items={[
           { name: 'Trung tâm hỗ trợ', emoji: '❓', path: '/help-center' },
           { name: 'Thông tin giao hàng', emoji: '🚚', path: '/shipping-policy' },
-          { name: 'Đổi trả & Hoàn tiền', emoji: '🔄', path: '/returns-refunds' },
+          { name: 'Đổi trả & Hoàn tiền', emoji: '🔄', path: '/returns' },
           { name: 'Liên hệ', emoji: '📞', path: '/contact' }
         ]}
       />

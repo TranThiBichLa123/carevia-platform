@@ -20,6 +20,7 @@ import {
 import Image from "next/image";
 import React from "react";
 import FavoriteBadge from "@/components/common/FavoriteBadge";
+import PageBreadcrumb from "@/components/common/PageBreadcrumb";
 
 const ProductDetails = async ({
   params,
@@ -64,9 +65,19 @@ const ProductDetails = async ({
   const displayProducts = relatedProducts;
 
   return (
-    <div className=" bg-muted py-8 ">
+    <div className=" bg-white ">
+
       <Container>
+        {/* Breadcrumb */}
+        <div className="my-4">
+          <PageBreadcrumb
+            items={[{ label: "Tất cả sản phẩm", href: "/client/devices" }]}
+            currentPage={product.name}
+
+          />
+        </div>
         <div className=" mx-auto bg-white rounded-2xl shadow-xl font-vietnam overflow-hidden border border-border">
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 md:p-8">
 
             {/* Left: Image Section */}
@@ -244,7 +255,7 @@ const ProductDetails = async ({
 
 
       </Container>
-    </div>
+    </div >
   );
 };
 

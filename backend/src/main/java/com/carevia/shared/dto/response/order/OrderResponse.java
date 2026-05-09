@@ -2,6 +2,7 @@ package com.carevia.shared.dto.response.order;
 
 import com.carevia.shared.constant.OrderStatus;
 import com.carevia.shared.constant.PaymentStatus;
+import com.carevia.shared.constant.RefundStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -35,6 +36,8 @@ public class OrderResponse {
     private String shippingCountry;
     private String shippingPostalCode;
     private String customerNote;
+    private String cancelReason;
+    private RefundStatus refundStatus;
     private Instant createdAt;
 
     @Data @Builder @NoArgsConstructor @AllArgsConstructor

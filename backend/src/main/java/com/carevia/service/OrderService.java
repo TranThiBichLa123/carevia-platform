@@ -12,6 +12,9 @@ import com.carevia.shared.dto.request.order.CreateOrderRequest;
 import com.carevia.shared.dto.response.order.OrderResponse;
 import com.carevia.shared.exception.InvalidRequestException;
 import com.carevia.shared.exception.ResourceNotFoundException;
+import com.carevia.service.RefundService;
+import com.carevia.core.repository.RefundRepository;
+import com.carevia.core.domain.Refund;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -29,11 +32,14 @@ public class OrderService {
     private final CartRepository cartRepository;
     private final UserBehaviorRepository userBehaviorRepository;
     private final NotificationService notificationService;
+    private final RefundService refundService;
+    private final RefundRepository refundRepository;
 
     public OrderService(OrderRepository orderRepository, DeviceRepository deviceRepository,
             AccountRepository accountRepository, VoucherRepository voucherRepository,
             CartRepository cartRepository, UserBehaviorRepository userBehaviorRepository,
-            NotificationService notificationService) {
+            NotificationService notificationService, RefundService refundService,
+            RefundRepository refundRepository) {
         this.orderRepository = orderRepository;
         this.deviceRepository = deviceRepository;
         this.accountRepository = accountRepository;
@@ -41,6 +47,8 @@ public class OrderService {
         this.cartRepository = cartRepository;
         this.userBehaviorRepository = userBehaviorRepository;
         this.notificationService = notificationService;
+        this.refundService = refundService;
+        this.refundRepository = refundRepository;
     }
 
     @Transactional
@@ -185,6 +193,22 @@ public class OrderService {
     }
 
     @Transactional
+    public OrderResponse cancelOrderByUser(Long orderId, Long accountId, String reason) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+        if (!order.getAccount().getId().equals(accountId)) {
+            throw new InvalidRequestException("Cannot cancel another user's order");
+        }
+        // Precondition check is inside order.cancel(reason) — throws InvalidStatusException if not allowed
+        order.cancel(reason);
+        Order saved = orderRepository.save(order);
+        // Auto-create refund if order was paid
+        refundService.createOrderCancelRefund(saved);
+        notificationService.createOrderNotification(saved.getAccount(), saved, "ORDER_CANCELLED");
+        return toResponse(saved);
+    }
+
+    @Transactional
     public void deleteOrder(Long orderId, Long accountId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
@@ -243,6 +267,9 @@ public class OrderService {
                 .shippingCountry(o.getShippingCountry())
                 .shippingPostalCode(o.getShippingPostalCode())
                 .customerNote(o.getCustomerNote())
+                .cancelReason(o.getCancelReason())
+                .refundStatus(refundRepository.findTopByOrderIdOrderByRequestedAtDesc(o.getId())
+                        .map(Refund::getStatus).orElse(null))
                 .createdAt(o.getCreatedAt())
                 .build();
     }

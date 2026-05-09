@@ -96,14 +96,17 @@ const MyBookings = () => {
     return (
         <Container className="min-h-screen bg-white font-vietnam ">
             {/* Header */}
-            <div className="sticky top-0 z-10 bg-white py-4">
+            <div className="sticky top-0 z-10 bg-white ">
                 {/* Breadcrumb - Hiển thị đúng chữ TRANG CHỦ thay vì Icon */}
-                <PageBreadcrumb
-                    items={[
-                        // { label: "Dịch vụ", href: "/client/services" },
-                    ]}
-                    currentPage="Lịch hẹn của tôi"
-                />
+                <div className='py-4'>
+                    <PageBreadcrumb
+                        items={[
+                            // { label: "Dịch vụ", href: "/client/services" },
+                        ]}
+                        currentPage="Lịch hẹn của tôi"
+                    />
+                </div>
+
 
                 {/* tab phân loại */}
                 <div className="flex flex-wrap border-b border-gray-200">
@@ -120,8 +123,8 @@ const MyBookings = () => {
                                 key={tab.key}
                                 onClick={() => setFilter(tab.key)}
                                 className={`flex items-center gap-2 px-5 py-3 text-sm font-medium rounded-t-lg transition-all ${isActive
-                                        ? 'bg-primary text-white shadow-md'
-                                        : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                                    ? 'bg-primary text-white shadow-md'
+                                    : 'text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                                     }`}
                             >
                                 <Icon size={16} />

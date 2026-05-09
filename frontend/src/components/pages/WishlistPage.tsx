@@ -129,13 +129,15 @@ const WishlistPage = () => {
 
 
   return (
-    <Container className="py-5">
-      <PageBreadcrumb
+    <Container className="">
+      <div className="my-4"><PageBreadcrumb
         // items={[{ label: "User", href: "/user/profile" }]}
         items={[]}
         currentPage="Wishlist"
         showSocialShare={false}
       />
+      </div>
+
 
       <div className="space-y-6">
         {/* Header */}
@@ -202,14 +204,18 @@ const WishlistPage = () => {
             {/* Nút bấm với hiệu ứng trượt nền (như đã làm ở trên) */}
             <Button
               asChild
-              className="group relative overflow-hidden bg-primary px-10 py-6 rounded-full transition-all duration-300 hover:shadow-lg hover:shadow-primary/25"
+              className="group relative overflow-hidden bg-primary hover:bg-primary px-10 py-6 rounded-full transition-all border-none shadow-none"
             >
-              <Link href="/shop" className="flex items-center text-white">
-                <span className="absolute inset-0 w-0 bg-white/10 transition-all duration-300 group-hover:w-full" />
-                <ShoppingBag size={18} className="mr-2 group-hover:animate-bounce" />
-                <span className="font-semibold tracking-wide">Khám phá cửa hàng</span>
+              <Link href="/client/devices" className="flex items-center text-white">
+
+                {/* Nội dung phải nằm trên lớp trượt */}
+                <div className="relative z-10 flex items-center">
+                  <ShoppingBag size={18} className="mr-2 group-hover:animate-bounce" />
+                  <span className="font-semibold tracking-wide">Khám phá sản phẩm</span>
+                </div>
               </Link>
             </Button>
+
           </motion.div>
         )
           : (

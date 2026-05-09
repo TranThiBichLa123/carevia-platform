@@ -81,6 +81,8 @@ export interface Order {
   shippingCountry: string;
   shippingPostalCode: string;
   customerNote: string;
+  cancelReason?: string;
+  refundStatus?: 'REQUESTED' | 'APPROVED' | 'PROCESSING' | 'SUCCESS' | 'FAILED' | 'CANCELLED';
   createdAt: string;
   updatedAt: string;
 }
@@ -217,5 +219,22 @@ export const updateOrderStatus = async (
     return { success: true, order: normalizeOrder(res.data) };
   } catch (error: unknown) {
     return { success: false, message: getErrorMessage(error, "Failed to update order status") };
+  }
+};
+
+export const cancelOrder = async (
+  orderId: string,
+  reason: string,
+  _token: string
+): Promise<{ success: boolean; order?: Order; message?: string }> => {
+  try {
+    const res = await apiClient.put(
+      `/orders/${orderId}/cancel?reason=${encodeURIComponent(reason)}`,
+      null,
+      { headers: authHeaders() }
+    );
+    return { success: true, order: normalizeOrder(res.data) };
+  } catch (error: unknown) {
+    return { success: false, message: getErrorMessage(error, "Failed to cancel order") };
   }
 };

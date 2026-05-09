@@ -57,12 +57,15 @@ const NotificationIcon = () => {
       title="Thông báo"
     >
       <Bell size={24} />
+
       {unreadCount > 0 && (
-        <span className="absolute -right-2 -top-2 bg-primary text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center">
+        <span className="absolute -right-2 -top-2 bg-primary text-white text-[10px] font-bold w-4 h-4 rounded-full flex items-center justify-center leading-none pt-[1.9px]">
           {unreadCount > 99 ? "99+" : unreadCount}
         </span>
+
       )}
     </Link>
+
   );
 };
 

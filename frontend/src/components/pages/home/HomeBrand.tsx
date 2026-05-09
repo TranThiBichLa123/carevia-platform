@@ -37,7 +37,7 @@ const HomeBrand = ({ brands }: Props) => {
   }
 
   return (
-    <div className="mt-1">
+    <div className="mt-1 font-vietnam">
       {/* <SectionView title="Thương hiệu nổi bật" href="/client/brand" hrefTitle="Xem tất cả" /> */}
       <SectionView title="Thương hiệu nổi bật" href="/client/brand" hrefTitle="Xem tất cả" />
 
@@ -67,7 +67,7 @@ const HomeBrand = ({ brands }: Props) => {
                 {/* gap là khoảng cách của tên brand và hình của brand */}
                 <div className="flex items-center gap-4">
                   {/* <!-- Bỏ p-2 và đổi thành object-cover --> */}
-                  <div className="w-20 h-20 bg-white rounded-2xl flex items-center justify-center overflow-hidden shrink-0 shadow-2xl transform group-hover:rotate-3 transition-transform">
+                  <div className="w-20 h-20  rounded-2xl flex items-center justify-center overflow-hidden shrink-0 shadow-2xl transform group-hover:rotate-3 transition-transform">
                     {brand?.image ? (
                       <Image
                         src={brand.image}

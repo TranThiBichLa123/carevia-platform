@@ -211,6 +211,76 @@ public class ZaloPayService {
     }
 
     // ----------------------------------------------------------------
+    // Verify ZaloPay payment status by querying ZaloPay API
+    // Used when server-to-server callback cannot reach localhost (dev)
+    // ----------------------------------------------------------------
+    @Transactional
+    public Map<String, Object> verifyAndConfirmPayment(Long orderId) throws Exception {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new ResourceNotFoundException("Order not found: " + orderId));
+
+        // If already paid, return immediately
+        if (order.getStatus() == com.carevia.shared.constant.OrderStatus.PAID) {
+            return Map.of("status", "PAID", "message", "Order already paid");
+        }
+
+        // Find the PaymentTransaction to get appTransId
+        PaymentTransaction tx = paymentTransactionRepository
+                .findTopByOrderIdOrderByTransactionAtDesc(orderId)
+                .orElse(null);
+
+        if (tx == null) {
+            return Map.of("status", "NO_TRANSACTION", "message", "No payment transaction found");
+        }
+
+        String appTransId = tx.getExternalTransactionId();
+
+        // Query ZaloPay for payment status
+        String appId = config.getAppId();
+        String macData = appId + "|" + appTransId + "|" + config.getKey1();
+        String mac = computeHmac(macData, config.getKey1());
+
+        MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+        params.add("app_id", appId);
+        params.add("app_trans_id", appTransId);
+        params.add("mac", mac);
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+        HttpEntity<MultiValueMap<String, String>> entity = new HttpEntity<>(params, headers);
+
+        RestTemplate restTemplate = new RestTemplate();
+        String queryUrl = config.getEndpoint() + "/v2/query";
+        log.info("Querying ZaloPay status: POST {} for appTransId={}", queryUrl, appTransId);
+
+        @SuppressWarnings("unchecked")
+        ResponseEntity<Map<String, Object>> response =
+                (ResponseEntity<Map<String, Object>>) (ResponseEntity<?>) restTemplate.postForEntity(queryUrl, entity, Map.class);
+
+        Map<String, Object> body = response.getBody();
+        log.info("ZaloPay query response: {}", body);
+
+        if (body == null) {
+            return Map.of("status", "ERROR", "message", "ZaloPay returned empty response");
+        }
+
+        int returnCode = Integer.parseInt(body.getOrDefault("return_code", -1).toString());
+
+        if (returnCode == 1) {
+            // Payment confirmed — mark order as PAID
+            String zpTransId = body.getOrDefault("zp_trans_id", "").toString();
+            orderService.confirmZaloPayPayment(orderId, zpTransId);
+            log.info("Order {} confirmed PAID via verify endpoint", orderId);
+            return Map.of("status", "PAID", "message", "Payment verified and confirmed");
+        } else if (returnCode == 2) {
+            return Map.of("status", "PENDING", "message", "Payment is still pending");
+        } else {
+            return Map.of("status", "FAILED", "message",
+                    body.getOrDefault("return_message", "Payment failed").toString());
+        }
+    }
+
+    // ----------------------------------------------------------------
     // Handle callback from ZaloPay (server-to-server)
     // ----------------------------------------------------------------
     @Transactional

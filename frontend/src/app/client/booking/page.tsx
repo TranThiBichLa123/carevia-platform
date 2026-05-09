@@ -64,8 +64,12 @@ const BookingPage = () => {
     };
 
     return (
-        <Container className="bg-white text-gray-900 pb-10 py-3 font-vietnam">
-            <PageBreadcrumb items={[]} currentPage="Đặt lịch trải nghiệm" />
+        <Container className="bg-white text-gray-900 pb-10  font-vietnam">
+
+            <div className="my-4 " >
+                <PageBreadcrumb items={[]} currentPage="Đặt lịch trải nghiệm" />
+
+            </div>
 
             <div className="flex flex-col lg:flex-row gap-8">
                 {/* Sidebar filter */}

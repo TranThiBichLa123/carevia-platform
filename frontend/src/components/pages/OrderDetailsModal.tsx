@@ -80,10 +80,10 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-lg sm:text-xl">
             <Package className="h-5 w-5" />
-            Order Details
+            Chi tiết đơn hàng
           </DialogTitle>
           <DialogDescription className="text-sm break-all sm:break-normal">
-            Order ID: {order._id}
+            Mã đơn hàng: {order._id}
           </DialogDescription>
         </DialogHeader>
 
@@ -93,7 +93,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-600 flex items-center gap-2">
                 <CreditCard className="h-4 w-4" />
-                Status
+                Trạng thái
               </label>
               <Badge
                 variant="outline"
@@ -106,14 +106,14 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
             <div className="space-y-2">
               <label className="text-sm font-medium text-gray-600 flex items-center gap-2">
                 <Calendar className="h-4 w-4" />
-                Order Date
+                Ngày tạo
               </label>
               <p className="text-sm">{formatDate(order.createdAt)}</p>
             </div>
 
             <div className="space-y-2 sm:col-span-2 lg:col-span-1">
               <label className="text-sm font-medium text-gray-600">
-                Total Amount
+                Tổng tiền
               </label>
               <p className="text-lg font-bold text-green-600">
                 {formatPrice(order.total)}
@@ -125,10 +125,10 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
               <div className="flex items-center gap-2 text-green-700">
                 <CreditCard className="h-4 w-4" />
-                <span className="font-medium">Payment Completed</span>
+                <span className="font-medium">Thanh toán hoàn tất</span>
               </div>
               <p className="text-sm text-green-600 mt-1">
-                Paid on {formatDate(order.paidAt)}
+                Đã thanh toán vào {formatDate(order.paidAt)}
               </p>
             </div>
           )}
@@ -137,7 +137,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
 
           {/* Order Items */}
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold">Order Items</h3>
+            <h3 className="text-lg font-semibold">Sản phẩm trong đơn hàng</h3>
             <div className="space-y-4">
               {order.items.map((item, index) => (
                 <div
@@ -163,8 +163,8 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                   <div className="flex-1 min-w-0">
                     <h4 className="font-medium text-gray-900">{item.name}</h4>
                     <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 mt-1 text-sm text-gray-600">
-                      <span>Qty: {item.quantity}</span>
-                      <span>Price: {formatPrice(item.price)}</span>
+                      <span>Số lượng: {item.quantity}</span>
+                      <span>Giá: {formatPrice(item.price)}</span>
                     </div>
                   </div>
 
@@ -182,23 +182,23 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
 
           {/* Order Summary */}
           <div className="space-y-3">
-            <h3 className="text-lg font-semibold">Order Summary</h3>
+            <h3 className="text-lg font-semibold">Tóm tắt đơn hàng</h3>
             <div className="bg-gray-50 rounded-lg p-4 space-y-2">
               <div className="flex justify-between text-sm">
-                <span>Subtotal</span>
+                <span>Tạm tính</span>
                 <span>{formatPrice(order.total)}</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span>Shipping</span>
-                <span>Free</span>
+                <span>Phí vận chuyển</span>
+                <span>Miễn phí</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span>Tax</span>
-                <span>Included</span>
+                <span>Thuế</span>
+                <span>Đã bao gồm</span>
               </div>
               <Separator className="my-2" />
               <div className="flex justify-between font-semibold">
-                <span>Total</span>
+                <span>Tổng cộng</span>
                 <span className="text-green-600">
                   {formatPrice(order.total)}
                 </span>
@@ -209,14 +209,14 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
           {/* Payment Information */}
           {order.paymentIntentId && (
             <div className="space-y-2">
-              <h3 className="text-lg font-semibold">Payment Information</h3>
+              <h3 className="text-lg font-semibold">Thông tin thanh toán</h3>
               <div className="bg-gray-50 rounded-lg p-4">
                 <p className="text-sm text-gray-600">
-                  Payment ID: {order.paymentIntentId}
+                  Mã thanh toán: {order.paymentIntentId}
                 </p>
                 {order.stripeSessionId && (
                   <p className="text-sm text-gray-600">
-                    Session ID: {order.stripeSessionId}
+                    Mã phiên: {order.stripeSessionId}
                   </p>
                 )}
               </div>

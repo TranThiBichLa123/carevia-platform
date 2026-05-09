@@ -137,13 +137,15 @@ const AccountPage = () => {
   };
 
   return (
-    <Container className="py-3">
+    <Container className="">
+      <div className="py-4">
+        <PageBreadcrumb
+          // items={[{ label: "Tài khoản", href: "/user" }]}
+          items={[]}
+          currentPage={tabTitles[activeTab] || "Tài khoản"}
+        />
+      </div>
 
-      <PageBreadcrumb
-        // items={[{ label: "Tài khoản", href: "/user" }]}
-        items={[]}
-        currentPage={tabTitles[activeTab] || "Tài khoản"}
-      />
 
 
       {/* Tab Navigation */}

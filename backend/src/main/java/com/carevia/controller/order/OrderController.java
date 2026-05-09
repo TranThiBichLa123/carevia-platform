@@ -77,6 +77,17 @@ public class OrderController {
         return ResponseEntity.noContent().build();
     }
 
+    @PutMapping("/{id}/cancel")
+    @Authenticated
+    @Operation(summary = "Cancel an order (User)")
+    public ResponseEntity<?> cancelOrder(
+            @PathVariable Long id,
+            @RequestParam(required = false, defaultValue = "") String reason) {
+        Long accountId = SecurityUtils.getCurrentUserId()
+                .orElseThrow(() -> new UnauthorizedException("Authentication required"));
+        return ResponseEntity.ok(orderService.cancelOrderByUser(id, accountId, reason));
+    }
+
     // Staff/Admin endpoints
     @PutMapping("/{id}/status")
     @StaffOnly

@@ -102,8 +102,8 @@ const OrdersPageContent = () => {
       const fetchedOrders = await getUserOrders(auth_token);
       setOrders(fetchedOrders);
     } catch (error) {
-      console.error("Error fetching orders:", error);
-      toast.error("Failed to fetch orders");
+      console.error("Lỗi khi lấy đơn hàng:", error);
+      toast.error("Không thể lấy đơn hàng");
     } finally {
       setLoading(false);
     }
@@ -112,7 +112,7 @@ const OrdersPageContent = () => {
   useEffect(() => {
     if (success === "true") {
       toast.success(
-        "Payment completed successfully! Your order has been placed."
+        "Thanh toán thành công! Đơn hàng của bạn đã được đặt."
       );
       const newSearchParams = new URLSearchParams(searchParams);
       newSearchParams.delete("success");
@@ -168,14 +168,14 @@ const OrdersPageContent = () => {
       const result = await deleteOrder(orderIdToDelete, auth_token);
 
       if (result.success) {
-        toast.success("Order deleted successfully");
+        toast.success("Xóa đơn hàng thành công");
         setOrders(orders.filter((order) => order._id !== orderIdToDelete));
       } else {
-        toast.error(result.message || "Failed to delete order");
+        toast.error(result.message || "Không thể xóa đơn hàng");
       }
     } catch (error) {
-      console.error("Error deleting order:", error);
-      toast.error("Failed to delete order");
+      console.error("Lỗi khi xóa đơn hàng:", error);
+      toast.error("Không thể xóa đơn hàng");
     } finally {
       setDeletingOrder(null);
     }
@@ -288,12 +288,12 @@ const OrdersPageContent = () => {
               </div>
 
               <p className="text-gray-700 mb-8 text-base sm:text-lg max-w-md mx-auto">
-                Thank you for your purchase. Your order has been received and is
-                being processed.
+                Cảm ơn bạn đã mua hàng. Đơn hàng của bạn đã được nhận và đang
+                được xử lý.
               </p>
 
               <div className="bg-white/80 backdrop-blur-sm rounded-2xl p-6 mb-8 border border-emerald-200/50 shadow-md">
-                <p className="text-sm text-gray-600 mb-2 font-medium">Order ID</p>
+                <p className="text-sm text-gray-600 mb-2 font-medium">Mã đơn hàng</p>
                 <p className="font-mono text-lg sm:text-xl font-bold text-gray-900 break-all">
                   {orderId}
                 </p>
@@ -301,8 +301,7 @@ const OrdersPageContent = () => {
 
               <div className="space-y-4">
                 <p className="text-gray-700 text-sm sm:text-base">
-                  You will receive an email confirmation shortly with your order
-                  details and tracking information.
+                  Bạn sẽ nhận được email xác nhận trong thời gian ngắn với chi tiết đơn hàng và thông tin theo dõi.
                 </p>
 
                 <div className="flex flex-col sm:flex-row gap-3 justify-center pt-4">
@@ -313,7 +312,7 @@ const OrdersPageContent = () => {
                       className="w-full group hover:bg-emerald-50 hover:border-emerald-300 transition-all"
                     >
                       <ShoppingBag className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
-                      Continue Shopping
+                      Tiếp tục mua sắm
                     </Button>
                   </Link>
 
@@ -323,7 +322,7 @@ const OrdersPageContent = () => {
                       className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 shadow-lg group"
                     >
                       <Home className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
-                      Go to Homepage
+                      Về trang chủ
                       <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
                     </Button>
                   </Link>
@@ -341,7 +340,7 @@ const OrdersPageContent = () => {
       <Container className="py-8">
         <PageBreadcrumb
           items={[{ label: "User", href: "/user" }]}
-          currentPage="Orders"
+          currentPage="Đơn hàng của bạn"
           showSocialShare={false}
         />
         <OrderTableSkeleton />
@@ -354,7 +353,7 @@ const OrdersPageContent = () => {
       <Container className="py-8">
         <PageBreadcrumb
           items={[{ label: "User", href: "/user" }]}
-          currentPage="Orders"
+          currentPage="Đơn hàng của bạn"
           showSocialShare={false}
         />
 
@@ -367,14 +366,14 @@ const OrdersPageContent = () => {
                 <Package className="w-10 h-10 text-sky-600" />
               </div>
               <h2 className="text-2xl font-bold text-gray-900 mb-3">
-                Please Sign In
+                Vui lòng đăng nhập
               </h2>
               <p className="text-gray-600 mb-8 max-w-sm mx-auto">
-                You need to sign in to view your orders and track your purchases.
+                Bạn cần đăng nhập để xem đơn hàng của mình và theo dõi các giao dịch.
               </p>
               <Link href="/auth/signin">
                 <Button size="lg" className="bg-gradient-to-r from-sky-500 to-blue-600 hover:from-sky-600 hover:to-blue-700 shadow-lg">
-                  Sign In to Continue
+                  Đăng nhập để tiếp tục
                   <ArrowRight className="w-4 h-4 ml-2" />
                 </Button>
               </Link>

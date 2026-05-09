@@ -77,23 +77,9 @@ const BrandDetailPage = () => {
   return (
     <Container className="bg-white font-vietnam min-h-screen pb-20 ">
       {/* Breadcrumb */}
-      {/* <div className="container mx-auto px-4 py-3">
-        <nav className="text-[13px] tracking-wider text-gray-500 flex items-center gap-2">
-          <Link href="/client" className="hover:text-teal-600 transition-colors">
-            Trang chủ
-          </Link>
-          <ChevronRight size={12} />
-          <Link href="/client/brand" className="hover:text-teal-600 transition-colors">
-            Thương hiệu
-          </Link>
-          <ChevronRight size={12} />
-
-          <span className="text-gray-900">{brand?.name || "Thương hiệu"}</span>
-        </nav>
-      </div> */}
       <div className="my-4 " >
         <PageBreadcrumb
-          items={[{ label: "Thương hiệu", href: "/client/brand" }]}
+          items={[{ label: " Tất cả thương hiệu", href: "/client/brand" }]}
           currentPage={brand?.name || "Thương hiệu"}
           showSocialShare={false}
         />
@@ -101,7 +87,7 @@ const BrandDetailPage = () => {
 
       {/* Brand Hero */}
       {brand && (
-        <div className="container mx-auto px-4 mb-6">
+        <div className="container mx-auto mb-6">
           <div className="bg-white border border-gray-200 overflow-hidden">
             <div className="relative bg-blue-50 p-8 md:p-12">
               <div className="flex flex-col md:flex-row items-center gap-8">
@@ -152,7 +138,7 @@ const BrandDetailPage = () => {
       )}
 
       {/* Products Section */}
-      <div className="container mx-auto px-4">
+      <div className="container mx-auto">
         <div className="bg-white border border-gray-200 p-6">
           {/* Toolbar */}
           <div className="flex flex-wrap justify-between items-end mb-6 pb-4 border-b border-gray-200 gap-4">
@@ -180,7 +166,7 @@ const BrandDetailPage = () => {
 
                 <div className="relative group min-w-[160px]">
                   {/* Hiển thị giá trị đang chọn */}
-                  <div className="flex items-center justify-between px-3 py-2 bg-white border border-gray-200 rounded-md cursor-pointer hover:border-teal-400 transition-all">
+                  <div className="flex items-center justify-between px-3 py-2 bg-white border border-gray-200 rounded-md cursor-pointer hover:border-primary transition-all">
                     <span className="text-[13px] font-vietnam font-medium text-gray-700">
                       {sortBy === 'popular' && "Phổ biến nhất"}
                       {sortBy === 'newest' && "Mới nhất"}
@@ -222,7 +208,7 @@ const BrandDetailPage = () => {
 
           {loading ? (
             <div className="flex items-center justify-center py-16">
-              <Loader2 className="animate-spin text-teal-600" size={32} />
+              <Loader2 className="animate-spin text-primary" size={32} />
             </div>
           ) : devices.length === 0 ? (
             <div className="text-center py-16">
@@ -238,13 +224,13 @@ const BrandDetailPage = () => {
               {onlyDiscounted ? (
                 <button
                   onClick={() => setOnlyDiscounted(false)}
-                  className="mt-6 px-6 py-3 bg-teal-600 text-white text-xs font-bold uppercase tracking-widest hover:bg-teal-700 transition-all"
+                  className="mt-6 px-6 py-3 bg-primary text-white text-xs font-bold uppercase tracking-widest hover:bg-primary-dark transition-all"
                 >
                   Xem tất cả sản phẩm
                 </button>
               ) : (
                 <Link href="/client/devices">
-                  <button className="mt-6 px-6 py-3 bg-teal-600 text-white text-xs font-bold uppercase tracking-widest hover:bg-teal-700 transition-all">
+                  <button className="mt-6 px-6 py-3 bg-primary text-white text-xs font-bold uppercase tracking-widest hover:bg-primary-dark transition-all">
                     Xem tất cả sản phẩm
                   </button>
                 </Link>
@@ -262,7 +248,7 @@ const BrandDetailPage = () => {
                   <button
                     onClick={() => setPage((p) => Math.max(0, p - 1))}
                     disabled={page === 0}
-                    className="p-2 border border-gray-200 hover:border-teal-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    className="p-2 border border-gray-200 hover:border-primary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                   >
                     <ChevronLeft size={16} />
                   </button>
@@ -271,8 +257,8 @@ const BrandDetailPage = () => {
                       key={i}
                       onClick={() => setPage(i)}
                       className={`w-9 h-9 text-[13px] font-bold border transition-colors ${i === page
-                        ? "bg-teal-600 text-white border-teal-600"
-                        : "border-gray-200 hover:border-teal-400 text-gray-700"
+                        ? "bg-primary text-white border-primary"
+                        : "border-gray-200 hover:border-primary text-gray-700"
                         }`}
                     >
                       {i + 1}
@@ -281,7 +267,7 @@ const BrandDetailPage = () => {
                   <button
                     onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
                     disabled={page === totalPages - 1}
-                    className="p-2 border border-gray-200 hover:border-teal-400 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+                    className="p-2 border border-gray-200 hover:border-primary disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
                   >
                     <ChevronRight size={16} />
                   </button>

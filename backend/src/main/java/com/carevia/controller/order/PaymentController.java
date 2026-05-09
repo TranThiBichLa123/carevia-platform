@@ -54,4 +54,21 @@ public class PaymentController {
         Map<String, Object> result = zaloPayService.handleCallback(callbackData);
         return ResponseEntity.ok(result);
     }
+
+    /**
+     * Verify ZaloPay payment status by querying ZaloPay API directly.
+     * Used as fallback when server-to-server callback cannot reach the server (e.g. localhost dev).
+     */
+    @GetMapping("/zalopay/verify/{orderId}")
+    @Authenticated
+    @Operation(summary = "Verify ZaloPay payment status for an order")
+    public ResponseEntity<?> verifyZaloPayPayment(@PathVariable Long orderId) {
+        try {
+            Map<String, Object> result = zaloPayService.verifyAndConfirmPayment(orderId);
+            return ResponseEntity.ok(result);
+        } catch (Exception e) {
+            String msg = e.getMessage() != null ? e.getMessage() : e.getClass().getSimpleName();
+            return ResponseEntity.badRequest().body(Map.of("message", msg));
+        }
+    }
 }

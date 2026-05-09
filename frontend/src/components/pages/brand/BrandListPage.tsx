@@ -20,9 +20,9 @@ const BrandListPage = ({ brands }: Props) => {
     );
 
     return (
-        <Container className="min-h-screen bg-white font-vietnam pb-20">
+        <Container className="bg-white font-vietnam min-h-screen pb-20 ">
             {/* Breadcrum */}
-            <div className="mt-4 px-4">
+            <div className="my-4 mb-2.5">
                 <PageBreadcrumb
 
                     items={[]}
@@ -30,11 +30,9 @@ const BrandListPage = ({ brands }: Props) => {
                 />
             </div>
             {/* Header */}
-            <div className=" mx-auto px-4 ">
-                <h1 className="text-2xl font-black uppercase tracking-tight text-gray-900">
-                    Thương hiệu
-                </h1>
-                <p className="text-sm text-gray-500 mt-1">
+            <div >
+                
+                <p className="text-sm text-gray-500">
                     {brands.length} thương hiệu đang có mặt tại Carevia
                 </p>
 
@@ -52,7 +50,7 @@ const BrandListPage = ({ brands }: Props) => {
             </div>
 
             {/* Brand grid */}
-            <div className="container mx-auto px-4 mt-4">
+            <div className="container mx-auto mt-6">
                 {filtered.length === 0 ? (
                     <p className="text-center text-gray-400 py-16 text-sm">Không tìm thấy thương hiệu nào.</p>
                 ) : (
@@ -61,7 +59,7 @@ const BrandListPage = ({ brands }: Props) => {
                             <Link
                                 key={brand.id}
                                 href={`/client/brand/${brand.id}`}
-                                className="bg-white border border-gray-200 hover:border-primary  hover:shadow-md transition-all group overflow-hidden flex flex-col"
+                                className="bg-white border border-white hover:border-primary rounded-lg hover:shadow-md transition-all group overflow-hidden flex flex-col relative"
                             >
                                 {/* Logo */}
                                 <div className="aspect-square bg-gray-50 flex items-center justify-center p-6 overflow-hidden relative">
@@ -74,20 +72,15 @@ const BrandListPage = ({ brands }: Props) => {
                                             className="object-contain w-full h-full group-hover:scale-105 transition-transform duration-300"
                                         />
                                     ) : (
-                                        <span className="text-3xl font-black text-gray-300">
-                                            {brand.name[0]}
-                                        </span>
+                                        <span className="text-3xl font-black text-gray-300">{brand.name[0]}</span>
                                     )}
+
+                                    {/* Discount Badge ôm vào góc */}
                                     {brand.maxDiscountPercentage != null && brand.maxDiscountPercentage > 0 && (
-                                        <span className="absolute top-2 right-2 bg-yellow-400 text-gray-900 text-[10px] font-black px-2 py-0.5 rounded">
+                                        <span className="absolute top-0 right-0 bg-yellow-400 text-white text-[10px] font-black px-2 py-1 rounded-bl-lg shadow-sm">
                                             -{Math.round(brand.maxDiscountPercentage)}%
                                         </span>
                                     )}
-                                    {/* {brand.isFeatured && (
-                                        <span className="absolute top-2 left-2 bg-primary text-white text-[9px] font-bold px-2 py-0.5 rounded">
-                                            NỔI BẬT
-                                        </span>
-                                    )} */}
                                 </div>
 
                                 {/* Name */}
@@ -99,6 +92,7 @@ const BrandListPage = ({ brands }: Props) => {
                             </Link>
                         ))}
                     </div>
+
                 )}
             </div>
         </Container>

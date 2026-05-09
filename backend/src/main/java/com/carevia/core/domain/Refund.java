@@ -21,12 +21,21 @@ public class Refund {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "transaction_id", nullable = false)
+    @JoinColumn(name = "transaction_id")
     private PaymentTransaction transaction;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "order_id", nullable = false)
+    @JoinColumn(name = "order_id")
     private Order order;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "booking_id")
+    private Booking booking;
+
+    /** ORDER_CANCEL | BOOKING_CANCEL | ORDER_RETURN */
+    @Column(name = "refund_type", nullable = false, length = 30)
+    @Builder.Default
+    private String refundType = "ORDER_CANCEL";
 
     @Column(name = "external_refund_id", unique = true, length = 255)
     private String externalRefundId;

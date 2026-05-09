@@ -18,7 +18,7 @@ const BookingSchedulePage = () => {
     const params = useParams();
     const deviceId = params.id as string;
     const router = useRouter();
-    const { isAuthenticated } = useUserStore();
+    const { isAuthenticated, authUser } = useUserStore();
 
     // 1 = booking form, 2 = confirmation
     const [step, setStep] = useState(1);
@@ -74,6 +74,14 @@ const BookingSchedulePage = () => {
     useEffect(() => {
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }, [step]);
+
+    // Auto-fill from authenticated user
+    useEffect(() => {
+        if (authUser) {
+            if (authUser.phone) setCustomerPhone(authUser.phone);
+            if (authUser.full_name) setCustomerName(authUser.full_name);
+        }
+    }, [authUser]);
 
     const availableBranches = useMemo(() => {
         if (!device) return [];
@@ -172,18 +180,21 @@ const BookingSchedulePage = () => {
     const visualStep = step + 1;
 
     return (
-        <Container className="bg-white text-gray-900 pb-10 py-3 font-vietnam">
-            <PageBreadcrumb
-                items={[
-                    { label: "Đặt lịch trải nghiệm", href: "/client/booking" },
-                    { label: "Chi tiết đặt lịch", href: `/client/booking/${deviceId}` },
-                ]}
-                currentPage="Thông tin đặt lịch"
-            />
+        <Container className="bg-white text-gray-900 pb-10  font-vietnam">
+            <div className='py-4'>
+                <PageBreadcrumb
+                    items={[
+                        { label: "Đặt lịch trải nghiệm", href: "/client/booking" },
+                        { label: device?.name || "Thiết bị", href: `/client/booking/${deviceId}` },
+                    ]}
+                    currentPage="Thông tin đặt lịch"
+                />
+            </div>
+
 
             <main className="flex-1 bg-white">
                 {/* Step indicator */}
-                <div className="flex justify-center gap-8 mb-3 border-b border-gray-100">
+                <div className="flex justify-center gap-8 mb-3 ">
                     {['Chọn thiết bị trải nghiệm', 'Thông tin đặt lịch', 'Xác nhận'].map((label, i) => (
                         <div key={i} className={`flex items-center gap-2 transition-all ${visualStep >= i + 1 ? 'opacity-100' : 'opacity-40'}`}>
                             <span className={`w-6 h-6 rounded-full flex items-center justify-center text-[10px] font-vietnam ${visualStep === i + 1 ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500'}`}>
@@ -199,7 +210,7 @@ const BookingSchedulePage = () => {
 
                 {/* Step 1: Booking form */}
                 {step === 1 && (
-                    <div className="bg-[#f0f2f5] p-2 space-y-4 animate-in fade-in duration-500">
+                    <div className=" space-y-4 animate-in fade-in duration-500">
 
                         <div className="bg-white p-6 shadow-sm">
                             <h4 className="text-sm font-vietnam font-bold mb-4 text-gray-800">Thông Tin Đặt Hẹn <span className="text-red-500">*</span></h4>

@@ -271,43 +271,86 @@ const BookingDetail = () => {
 
       {/* Cancel Dialog */}
       <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="text-red-600 flex items-center gap-2">
-              <XCircle size={18} /> Hủy lịch hẹn
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p className="text-sm text-gray-600">
-              Bạn có chắc chắn muốn hủy lịch hẹn <strong>{booking.deviceName}</strong>?
+        <DialogContent className="sm:max-w-[420px] rounded-2xl border-none shadow-2xl p-0 overflow-hidden">
+          {/* Header với nền nhẹ để tạo điểm nhấn */}
+          <div className="bg-red-50/50 px-6 py-5">
+            <DialogHeader>
+              <DialogTitle className="text-cancel flex items-center gap-2.5 text-lg font-bold">
+                <div className="p-2 bg-red-100 rounded-full">
+                  <XCircle size={20} className="text-cancel" />
+                </div>
+                Hủy lịch hẹn
+              </DialogTitle>
+            </DialogHeader>
+          </div>
+
+          <div className="px-6  space-y-1">
+            <p className="text-[14px] leading-relaxed text-gray-500">
+              Bạn đang thực hiện thao tác hủy lịch hẹn cho thiết bị:
+              <span className="block mt-1 font-semibold text-gray-800 text-[15px]">
+                {booking.deviceName}
+              </span>
             </p>
-            <div>
-              <label className="text-sm font-medium text-gray-700 block mb-1">
-                Lý do hủy (không bắt buộc)
+
+            <div className="space-y-2">
+              <label className="text-[14px] leading-relaxed text-gray-500 flex items-center justify-between">
+                Lý do hủy
+                <span className="text-[11px] font-normal text-gray-400 italic">(Không bắt buộc)</span>
               </label>
               <textarea
                 value={cancelReason}
                 onChange={(e) => setCancelReason(e.target.value)}
-                className="w-full p-3 border rounded-lg text-sm resize-none"
+                className="w-full p-4 border border-gray-100 bg-gray-50/50 rounded-xl text-sm resize-none 
+                     focus:ring-2 focus:ring-red-100 focus:border-red-200 focus:bg-white 
+                     transition-all duration-200 outline-none placeholder:text-gray-300"
                 rows={3}
-                placeholder="Nhập lý do hủy..."
+                placeholder="Chia sẻ lý do để chúng tôi cải thiện dịch vụ..."
               />
             </div>
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsCancelDialogOpen(false)}>
-              Giữ lịch
-            </Button>
+
+          <DialogFooter className="px-6 py-5 bg-gray-50/50 flex gap-3 sm:gap-3 justify-end">
+            {/* Nút Giữ lịch - Trượt nền xám, đổi màu chữ */}
             <Button
+              variant="ghost"
+              onClick={() => setIsCancelDialogOpen(false)}
+              className="relative overflow-hidden font-medium text-gray-500 bg-white border border-gray-200 px-6 rounded-xl transition-all duration-300 group"
+            >
+              <span className="relative z-10 group-hover:text-white transition-colors duration-300">
+                Giữ lịch lại
+              </span>
+              {/* Lớp trượt nền xám */}
+              <div className="absolute inset-0 -translate-x-full bg-gray-900  transition-transform duration-300 ease-out group-hover:translate-x-0" />
+            </Button>
+
+            {/* Nút Xác nhận hủy - Trượt nền đỏ, đổi màu chữ trắng */}
+            <Button
+              variant="pure"
               onClick={handleCancelBooking}
               disabled={isCancelling}
-              className="bg-red-600 hover:bg-red-700 text-white"
+              className="relative overflow-hidden bg-white border border-cancel text-cancel font-bold px-6 rounded-xl shadow-lg shadow-cancel/10 transition-all duration-300 group"
             >
-              {isCancelling ? 'Đang hủy...' : 'Xác nhận hủy'}
+              {isCancelling ? (
+                <span className="flex items-center gap-2 relative z-10">
+                  <span className="w-4 h-4 border-2 border-cancel/30 border-t-cancel rounded-full animate-spin" />
+                  Đang xử lý
+                </span>
+              ) : (
+                <>
+                  <span className="relative z-10 group-hover:text-white transition-colors duration-300">
+                    Xác nhận hủy
+                  </span>
+                  {/* Lớp trượt màu đỏ */}
+                  <div className="absolute inset-0 -translate-x-full bg-cancel transition-transform duration-300 ease-out group-hover:translate-x-0" />
+                </>
+              )}
             </Button>
           </DialogFooter>
+
+
         </DialogContent>
       </Dialog>
+
     </Container>
   );
 };

@@ -108,7 +108,7 @@ const ProfileTab = () => {
   const updateForm = useForm<FormData>({
     resolver: zodResolver(updateSchema),
     defaultValues: {
-      name: authUser?.username || "",
+      name: authUser?.full_name || authUser?.username || "",
       phone: authUser?.phone || "",
       skinType: authUser?.skin_type || "",
       skinConcerns: authUser?.skin_concerns || "",
@@ -123,7 +123,7 @@ const ProfileTab = () => {
   useEffect(() => {
     if (authUser) {
       updateForm.reset({
-        name: authUser.username,
+        name: authUser.full_name || authUser.username,
         phone: authUser.phone,
         skinType: authUser.skin_type,
         skinConcerns: authUser.skin_concerns,
@@ -321,7 +321,7 @@ const ProfileTab = () => {
           </div>
 
           <div className="space-y-5 font-vietnam">
-            <InfoField label="Tên người dùng" value={authUser.username} placeholder="Chưa cập nhật" />
+            <InfoField label="Tên người dùng" value={authUser.full_name} placeholder="Chưa cập nhật" />
 
             <div className="space-y-1.5">
               <p className="text-[10px] font-black font-vietnam text-gray-400 uppercase tracking-widest">Vai trò hệ thống</p>

@@ -137,14 +137,17 @@ const AllProductsContent = () => {
     };
 
     return (
-        <Container className="bg-white min-h-screen pb-20 font-vietnam py-4">
+        <Container className="bg-white min-h-screen pb-20 font-vietnam ">
             {/* Breadcrumb - Style Watsons tối giản */}
-            <PageBreadcrumb
-                items={[
-                    ...((selectedCategoryName || selectedSkinTypeName) ? [{ label: "Tất cả sản phẩm", href: "/client/devices" }] : []),
-                ]}
-                currentPage={selectedSkinTypeName || selectedCategoryName || "Tất cả sản phẩm"}
-            />
+            <div className="my-4 " >
+                <PageBreadcrumb
+                    items={[
+                        ...((selectedCategoryName || selectedSkinTypeName) ? [{ label: "Tất cả sản phẩm", href: "/client/devices" }] : []),
+                    ]}
+                    currentPage={selectedSkinTypeName || selectedCategoryName || "Tất cả sản phẩm"}
+                />
+            </div>
+
 
 
             <div className="container mx-auto ">
