@@ -1,4 +1,4 @@
-import { ChevronDown, Menu } from "lucide-react";
+import { ChevronDown, ChevronRight, Menu } from "lucide-react";
 import { useEffect, useState } from "react";
 import { deviceApi, type CategoryData } from "@/lib/deviceApi";
 
@@ -45,14 +45,14 @@ const CategoriesSection = () => {
     };
   });
 
-  // Danh mục hot - loaded from API (see apiCategories above)
-  // Danh mục nổi bật
-  const featuredCategories: Category[] = [
-    { id: '1', name: 'Ưu đãi Carevia', emoji: '💎', color: '#E91E63', type: 'featured', path: '/deals' },
-    { id: '2', name: 'Ưu đãi trong ngày', emoji: '⭐', color: '#4FC3F7', type: 'featured', path: '/daily-deals' },
-    { id: '3', name: 'Bán chạy nhất', emoji: '🌟', color: '#FFD54F', type: 'featured', path: '/bestsellers' },
-    { id: '4', name: 'Ý tưởng quà tặng', emoji: '🎁', color: '#FF8A65', type: 'featured', path: '/gift-ideas' },
-    { id: '5', name: 'Dưới 2 triệu', emoji: '💝', color: '#BA68C8', type: 'featured', path: '/under-200' },
+  // Gợi ý dành cho bạn — xếp hạng bởi thuật toán Fuzzy TOPSIS
+  // Tiêu chí: phù hợp loại da (BENEFIT), đánh giá (BENEFIT), lượt bán (BENEFIT), giá (COST)
+  const recommendationItems: Category[] = [
+    { id: 'r1', name: 'Phổ biến nhất', emoji: '🔥', color: '#FF8A65', type: 'featured', path: `/client/devices?categoryName=${encodeURIComponent('Phổ biến nhất')}&sortBy=best_selling` },
+    { id: 'r2', name: 'Đánh giá cao nhất', emoji: '⭐', color: '#FFD54F', type: 'featured', path: `/client/devices?categoryName=${encodeURIComponent('Đánh giá cao nhất')}&sortBy=rating_desc` },
+    { id: 'r3', name: 'Giá thấp nhất', emoji: '💰', color: '#2196F3', type: 'featured', path: `/client/devices?categoryName=${encodeURIComponent('Giá thấp nhất')}&sortBy=price_asc` },
+    { id: 'r4', name: 'Sản phẩm mới nhất', emoji: '🌟', color: '#4CAF50', type: 'featured', path: `/client/devices?categoryName=${encodeURIComponent('Sản phẩm mới nhất')}&sortBy=newest` },
+    { id: 'r5', name: 'Đặt lịch phù hợp nhất', emoji: '📅', color: '#9C27B0', type: 'featured', path: '/client/booking' },
   ];
 
   // Danh mục hot - loaded from API (see apiCategories above)
@@ -109,10 +109,11 @@ const CategoriesSection = () => {
             <a
               key={index}
               href={sub.path}
-              className="flex items-center gap-3 px-4 py-2.5 text-[14px] text-gray-600 hover:bg-[#f5fbfc] hover:text-primary transition-colors"
+              className="flex items-center gap-3 px-4 py-2.5 text-[14px] text-gray-600 hover:bg-[#f5fbfc] hover:text-primary transition-colors group/item"
             >
               {sub.emoji && <span>{sub.emoji}</span>}
-              {sub.name}
+              <span className="flex-1">{sub.name}</span>
+              <ChevronRight size={13} className="text-gray-300 group-hover/item:text-primary transition-colors" />
             </a>
           ))}
         </div>
@@ -134,8 +135,8 @@ const CategoriesSection = () => {
       {/* 2. DANH MỤC NỔI BẬT */}
       <NavItem title="Danh mục nổi bật" items={hotCategories} />
 
-      {/* 3. GỢI Ý CHO BẠN */}
-      <NavItem title="Gợi ý cho bạn" items={featuredCategories} />
+      {/* 3. GỢI Ý CHO BẠN — Fuzzy TOPSIS */}
+      <NavItem title="Gợi ý cho bạn" items={recommendationItems} />
 
       {/* 4. TRUY CẬP NHANH */}
       <NavItem title="Truy cập nhanh" items={[

@@ -10,7 +10,7 @@ import { deviceApi, DevicePageResponse, BrandData } from "@/lib/deviceApi";
 import { mapDeviceToProduct } from "@/lib/mappers";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
 
-type SortOption = "newest" | "price_asc" | "price_desc" | "best_selling";
+type SortOption = "newest" | "price_asc" | "price_desc" | "best_selling" | "rating_desc";
 
 const AllProductsContent = () => {
     const searchParams = useSearchParams();
@@ -18,6 +18,7 @@ const AllProductsContent = () => {
     const categoryNameParam = searchParams.get('categoryName');
     const skinTypeParam = searchParams.get('skinType');
     const skinTypeNameParam = searchParams.get('skinTypeName');
+    const sortByParam = searchParams.get('sortBy') as SortOption | null;
 
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
@@ -35,7 +36,7 @@ const AllProductsContent = () => {
     const [selectedSkinTypeName, setSelectedSkinTypeName] = useState<string | null>(skinTypeNameParam);
     const [selectedBrandIds, setSelectedBrandIds] = useState<number[]>([]);
     const [priceRange, setPriceRange] = useState<string | null>(null);
-    const [sortBy, setSortBy] = useState<SortOption>("newest");
+    const [sortBy, setSortBy] = useState<SortOption>(sortByParam ?? "newest");
 
     const priceOptions = [
         { label: "Dưới 200.000đ", id: "p1", minPrice: undefined as number | undefined, maxPrice: 200000 },
@@ -57,6 +58,7 @@ const AllProductsContent = () => {
             case "price_asc": return "price,asc";
             case "price_desc": return "price,desc";
             case "best_selling": return "sold,desc";
+            case "rating_desc": return "averageRating,desc";
             default: return "createdAt,desc";
         }
     };
@@ -134,6 +136,7 @@ const AllProductsContent = () => {
         price_asc: "Giá: Thấp đến Cao",
         price_desc: "Giá: Cao đến Thấp",
         best_selling: "Bán chạy nhất",
+        rating_desc: "Đánh giá cao nhất",
     };
 
     return (

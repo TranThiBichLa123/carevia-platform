@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import com.carevia.service.OrderService;
 import com.carevia.shared.annotation.AdminOnly;
 import com.carevia.shared.annotation.Authenticated;
+import com.carevia.shared.annotation.StaffOrAdmin;
 import com.carevia.shared.annotation.StaffOnly;
 import com.carevia.shared.dto.request.order.CreateOrderRequest;
 import com.carevia.shared.exception.UnauthorizedException;
@@ -97,8 +98,8 @@ public class OrderController {
     }
 
     @GetMapping("/all")
-    @StaffOnly
-    @Operation(summary = "Get all orders (Staff)")
+    @StaffOrAdmin
+    @Operation(summary = "Get all orders (Staff/Admin)")
     public ResponseEntity<?> getAllOrders(Pageable pageable) {
         return ResponseEntity.ok(orderService.getAllOrders(pageable));
     }

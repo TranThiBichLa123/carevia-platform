@@ -212,7 +212,9 @@ public class BookingService {
     public PageResponse<BookingResponse> getAllBookings(BookingStatus status, Pageable pageable) {
         Page<Booking> page;
         if (status != null) {
-            page = bookingRepository.findAll(pageable); // Filter later with specification
+            page = bookingRepository.findAll(
+                    (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("status"), status),
+                    pageable);
         } else {
             page = bookingRepository.findAll(pageable);
         }

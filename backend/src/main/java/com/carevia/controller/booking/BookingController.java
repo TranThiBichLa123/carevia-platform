@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import com.carevia.service.BookingService;
 import com.carevia.service.SessionService;
 import com.carevia.shared.annotation.Authenticated;
+import com.carevia.shared.annotation.StaffOrAdmin;
 import com.carevia.shared.annotation.StaffOnly;
 import com.carevia.shared.dto.request.booking.CreateBookingRequest;
 import com.carevia.shared.dto.request.booking.UpdateBookingStatusRequest;
@@ -84,15 +85,31 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.completeBooking(id));
     }
 
-    @GetMapping("/all")
+    @PutMapping("/{id}/staff-cancel")
     @StaffOnly
-    @Operation(summary = "Get all bookings (Staff)")
+    @Operation(summary = "Cancel a booking (Staff)")
+    public ResponseEntity<?> cancelBookingByStaff(
+            @PathVariable Long id,
+            @RequestParam(required = false, defaultValue = "") String reason) {
+        return ResponseEntity.ok(bookingService.cancelBookingByStaff(id, reason));
+    }
+
+    @GetMapping("/all")
+    @StaffOrAdmin
+    @Operation(summary = "Get all bookings (Staff/Admin)")
     public ResponseEntity<?> getAllBookings(
             @RequestParam(required = false) String status,
             Pageable pageable) {
         com.carevia.shared.constant.BookingStatus bookingStatus = status != null ?
                 com.carevia.shared.constant.BookingStatus.valueOf(status) : null;
         return ResponseEntity.ok(bookingService.getAllBookings(bookingStatus, pageable));
+    }
+
+    @GetMapping("/sessions")
+    @StaffOnly
+    @Operation(summary = "Get sessions by date (Staff)")
+    public ResponseEntity<?> getSessionsByDate(@RequestParam LocalDate date) {
+        return ResponseEntity.ok(sessionService.getSessionsByDate(date));
     }
 
     // Session endpoints

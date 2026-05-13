@@ -6,9 +6,13 @@ import com.carevia.shared.dto.recommendation.BookingRecommendationResponse;
 import com.carevia.shared.dto.recommendation.CriterionBreakdownResponse;
 import com.carevia.shared.dto.recommendation.CriterionConfigurationResponse;
 import com.carevia.shared.dto.recommendation.CriterionPreference;
+import com.carevia.shared.dto.recommendation.DeviceOptionRequest;
+import com.carevia.shared.dto.recommendation.DeviceRecommendationRequest;
+import com.carevia.shared.dto.recommendation.DeviceRecommendationResponse;
 import com.carevia.shared.dto.recommendation.FuzzyValueInput;
 import com.carevia.shared.dto.recommendation.LinguisticTerm;
 import com.carevia.shared.dto.recommendation.RankedBookingOptionResponse;
+import com.carevia.shared.dto.recommendation.RankedDeviceOptionResponse;
 import com.carevia.shared.dto.recommendation.RecommendationCriterionRequest;
 import com.carevia.shared.model.recommendation.TriangularFuzzyNumber;
 import org.springframework.http.HttpStatus;
@@ -353,6 +357,154 @@ public class FuzzyTopsisService {
 
 	private record ScoredAlternative(
 		ResolvedAlternative alternative,
+		double distanceToPositiveIdeal,
+		double distanceToNegativeIdeal,
+		double closenessCoefficient,
+		List<CriterionBreakdownResponse> breakdown
+	) {
+	}
+
+	// ─── Device Recommendation ────────────────────────────────────────────────
+
+	public DeviceRecommendationResponse rankDeviceOptions(DeviceRecommendationRequest request) {
+		if (request.alternatives().size() < 2) {
+			throw badRequest("At least two device options are required for Fuzzy TOPSIS ranking.");
+		}
+
+		List<ResolvedCriterion> criteria = resolveCriteria(request.criteria());
+		List<ResolvedDeviceAlternative> alternatives = resolveDeviceAlternatives(request.alternatives(), criteria);
+		Map<String, Double> benefitDenominators = resolveDeviceBenefitDenominators(criteria, alternatives);
+		Map<String, Double> costDenominators = resolveDeviceCostDenominators(criteria, alternatives);
+
+		List<ScoredDeviceAlternative> scoredAlternatives = new ArrayList<>();
+		for (ResolvedDeviceAlternative alternative : alternatives) {
+			List<CriterionBreakdownResponse> breakdown = new ArrayList<>();
+			double distanceToPositiveIdeal = 0.0;
+			double distanceToNegativeIdeal = 0.0;
+
+			for (ResolvedCriterion criterion : criteria) {
+				TriangularFuzzyNumber rawScore = alternative.rawScores().get(criterion.id());
+				TriangularFuzzyNumber normalizedScore = normalizeScore(
+					rawScore, criterion,
+					benefitDenominators.get(criterion.id()),
+					costDenominators.get(criterion.id())
+				);
+				TriangularFuzzyNumber weightedScore = normalizedScore.multiply(criterion.weight()).round(6);
+				distanceToPositiveIdeal += weightedScore.distanceTo(POSITIVE_IDEAL);
+				distanceToNegativeIdeal += weightedScore.distanceTo(NEGATIVE_IDEAL);
+				breakdown.add(new CriterionBreakdownResponse(
+					criterion.id(), criterion.name(),
+					rawScore.round(6), normalizedScore.round(6), weightedScore
+				));
+			}
+
+			double closenessCoefficient = distanceToNegativeIdeal / (distanceToPositiveIdeal + distanceToNegativeIdeal);
+			scoredAlternatives.add(new ScoredDeviceAlternative(
+				alternative,
+				round(distanceToPositiveIdeal),
+				round(distanceToNegativeIdeal),
+				round(closenessCoefficient),
+				breakdown
+			));
+		}
+
+		scoredAlternatives.sort(Comparator
+			.comparingDouble(ScoredDeviceAlternative::closenessCoefficient).reversed()
+			.thenComparing(Comparator.comparingDouble(ScoredDeviceAlternative::distanceToNegativeIdeal).reversed())
+			.thenComparing(scored -> scored.alternative().optionId()));
+
+		List<RankedDeviceOptionResponse> rankings = new ArrayList<>();
+		for (int index = 0; index < scoredAlternatives.size(); index++) {
+			ScoredDeviceAlternative scored = scoredAlternatives.get(index);
+			ResolvedDeviceAlternative alt = scored.alternative();
+			rankings.add(new RankedDeviceOptionResponse(
+				index + 1,
+				alt.optionId(),
+				alt.deviceId(),
+				alt.name(),
+				scored.closenessCoefficient(),
+				scored.distanceToPositiveIdeal(),
+				scored.distanceToNegativeIdeal(),
+				index == 0,
+				scored.breakdown()
+			));
+		}
+
+		List<CriterionConfigurationResponse> criterionResponses = criteria.stream()
+			.map(c -> new CriterionConfigurationResponse(c.id(), c.name(), c.preference(), c.weight().round(6)))
+			.toList();
+
+		return new DeviceRecommendationResponse(
+			ALGORITHM_NAME, request.scenarioName(),
+			POSITIVE_IDEAL, NEGATIVE_IDEAL,
+			criterionResponses, rankings
+		);
+	}
+
+	private List<ResolvedDeviceAlternative> resolveDeviceAlternatives(
+		List<DeviceOptionRequest> alternatives, List<ResolvedCriterion> criteria
+	) {
+		Set<String> seenIds = new HashSet<>();
+		List<ResolvedDeviceAlternative> resolved = new ArrayList<>();
+		for (DeviceOptionRequest alt : alternatives) {
+			if (!seenIds.add(alt.optionId())) {
+				throw badRequest("Duplicate device option id: " + alt.optionId());
+			}
+			Map<String, TriangularFuzzyNumber> rawScores = new HashMap<>();
+			for (ResolvedCriterion criterion : criteria) {
+				FuzzyValueInput scoreInput = alt.criteriaScores().get(criterion.id());
+				if (scoreInput == null) {
+					throw badRequest("Device option " + alt.optionId() + " is missing score for criterion " + criterion.id());
+				}
+				rawScores.put(criterion.id(), toFuzzyNumber(scoreInput, "Score for " + criterion.id() + " in device " + alt.optionId()));
+			}
+			resolved.add(new ResolvedDeviceAlternative(alt.optionId(), alt.deviceId(), alt.name(), rawScores));
+		}
+		return resolved;
+	}
+
+	private Map<String, Double> resolveDeviceBenefitDenominators(
+		List<ResolvedCriterion> criteria, List<ResolvedDeviceAlternative> alternatives
+	) {
+		Map<String, Double> denominators = new HashMap<>();
+		for (ResolvedCriterion criterion : criteria) {
+			if (criterion.preference() == CriterionPreference.BENEFIT) {
+				double maxUpper = alternatives.stream()
+					.map(alt -> alt.rawScores().get(criterion.id()))
+					.mapToDouble(TriangularFuzzyNumber::upper)
+					.max().orElse(0.0);
+				denominators.put(criterion.id(), maxUpper);
+			}
+		}
+		return denominators;
+	}
+
+	private Map<String, Double> resolveDeviceCostDenominators(
+		List<ResolvedCriterion> criteria, List<ResolvedDeviceAlternative> alternatives
+	) {
+		Map<String, Double> denominators = new HashMap<>();
+		for (ResolvedCriterion criterion : criteria) {
+			if (criterion.preference() == CriterionPreference.COST) {
+				double minLower = alternatives.stream()
+					.map(alt -> alt.rawScores().get(criterion.id()))
+					.mapToDouble(TriangularFuzzyNumber::lower)
+					.min().orElse(0.0);
+				denominators.put(criterion.id(), minLower);
+			}
+		}
+		return denominators;
+	}
+
+	private record ResolvedDeviceAlternative(
+		String optionId,
+		String deviceId,
+		String name,
+		Map<String, TriangularFuzzyNumber> rawScores
+	) {
+	}
+
+	private record ScoredDeviceAlternative(
+		ResolvedDeviceAlternative alternative,
 		double distanceToPositiveIdeal,
 		double distanceToNegativeIdeal,
 		double closenessCoefficient,

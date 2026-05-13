@@ -46,6 +46,16 @@ VALUES
   (6, 'client_cuong','cuong.le@gmail.com',     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhu0', 'CLIENT', 'ACTIVE', NULL, 'vi', NOW(), NOW(), 'seed', 'seed')
 ON CONFLICT (id) DO NOTHING;
 
+
+UPDATE public.accounts
+SET 
+    password_hash = '$2y$10$Nd.TjY1bfkI.hb2zZhGHI.i9uBwNRU0sA.FChj6zH6UBvIkchIQLK',
+    updated_at = NOW(),
+    updated_by = 'admin'
+WHERE id = 2;
+
+-- mật khẩu của lan là Staff@123
+
 -- 1. Thêm Admin (nếu chưa có ID 1) hoặc thêm một Admin thứ hai (ID 7)
 INSERT INTO accounts (id, username, email, password_hash, role, status, lang_key, created_at, updated_at, created_by, updated_by)
 OVERRIDING SYSTEM VALUE VALUES 
@@ -65,6 +75,11 @@ SELECT setval(pg_get_serial_sequence('accounts', 'id'), (SELECT MAX(id) FROM acc
 -- =============================================================
 -- 4. STAFFS
 -- =============================================================
+TRUNCATE TABLE staffs RESTART IDENTITY CASCADE;
+
+-- 1. Ép mã hóa UTF8 cho phiên làm việc này
+SET client_encoding = 'UTF8';
+
 INSERT INTO staffs (id, account_id, staff_code, full_name, birth_date, gender, phone, specialty, degree, approved, approved_by, approved_at, created_at, updated_at, created_by, updated_by)
 VALUES
   (1, 2, 'ST001', 'Trần Thị Lan',   '1992-05-15', 'FEMALE', '0901234567', 'Da liễu thẩm mỹ', 'Cử nhân Điều dưỡng', true, 1, NOW(), NOW(), NOW(), 'seed', 'seed'),

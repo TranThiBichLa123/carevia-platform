@@ -5,7 +5,7 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.carevia.service.VoucherService;
-import com.carevia.shared.annotation.AdminOnly;
+import com.carevia.shared.annotation.StaffOrAdmin;
 import com.carevia.shared.dto.request.voucher.CreateVoucherRequest;
 
 import jakarta.validation.Valid;
@@ -39,24 +39,24 @@ public class VoucherController {
         return ResponseEntity.ok(voucherService.getVouchersForDevice(deviceId));
     }
 
-    // Admin endpoints
+    // Staff/Admin endpoints
     @GetMapping
-    @AdminOnly
-    @Operation(summary = "Get all vouchers (Admin)")
+    @StaffOrAdmin
+    @Operation(summary = "Get all vouchers (Staff/Admin)")
     public ResponseEntity<?> getAllVouchers() {
         return ResponseEntity.ok(voucherService.getAllVouchers());
     }
 
     @PostMapping
-    @AdminOnly
-    @Operation(summary = "Create voucher (Admin)")
+    @StaffOrAdmin
+    @Operation(summary = "Create voucher (Staff/Admin)")
     public ResponseEntity<?> createVoucher(@Valid @RequestBody CreateVoucherRequest request) {
         return ResponseEntity.ok(voucherService.createVoucher(request));
     }
 
     @PutMapping("/{id}/status")
-    @AdminOnly
-    @Operation(summary = "Update voucher status (Admin)")
+    @StaffOrAdmin
+    @Operation(summary = "Update voucher status (Staff/Admin)")
     public ResponseEntity<?> updateVoucherStatus(@PathVariable Long id, @RequestParam String status) {
         return ResponseEntity.ok(voucherService.updateVoucherStatus(id, status));
     }

@@ -14,6 +14,38 @@ import { Product } from "@/types_enum/devices";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
 import Container from "@/components/common/Container";
 
+interface SessionData {
+  id: number;
+  branchName: string;
+  locationDetail: string | null;
+  sessionDate: string;
+  startTime: string;
+  endTime: string;
+  availableSlots: number;
+  pricePerSlot: number | null;
+  staffId: number | null;
+}
+
+interface RankedBookingOption {
+  rank: number;
+  optionId: string;
+  sessionId: string;
+  branchName: string;
+  locationDetail: string;
+  startTime: string;
+  endTime: string;
+  closenessCoefficient: number;
+  distanceToPositiveIdeal: number;
+  distanceToNegativeIdeal: number;
+  isBestOption: boolean;
+}
+
+interface FuzzyRecommendationResponse {
+  algorithm: string;
+  scenarioName: string;
+  rankings: RankedBookingOption[];
+}
+
 const ServiceDetailPage = () => {
   const params = useParams();
   const id = params.id as string;
@@ -21,6 +53,7 @@ const ServiceDetailPage = () => {
   const [loading, setLoading] = useState(true);
   const [experienceSteps, setExperienceSteps] = useState<ExperienceStepData[]>([]);
   const [specifications, setSpecifications] = useState<SpecificationData[]>([]);
+  const [fuzzyRecommendations, setFuzzyRecommendations] = useState<FuzzyRecommendationResponse | null>(null);
 
   useEffect(() => {
     const fetchDevice = async () => {
@@ -41,6 +74,70 @@ const ServiceDetailPage = () => {
     };
     fetchDevice();
   }, [id]);
+
+  useEffect(() => {
+    if (!device) return;
+    const fetchFuzzyRecommendations = async () => {
+      try {
+        const baseUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8081";
+
+        // 1. Lấy danh sách buổi trải nghiệm còn trống từ API
+        const sessionsRes = await fetch(`${baseUrl}/api/v1/bookings/sessions/available?deviceId=${id}`);
+        if (!sessionsRes.ok) return;
+        const sessions: SessionData[] = await sessionsRes.json();
+        if (sessions.length < 2) return; // Fuzzy TOPSIS cần ít nhất 2 phương án
+
+        // 2. Xây dựng tiêu chí Fuzzy TOPSIS từ dữ liệu thực
+        const hasPrice = sessions.some(s => s.pricePerSlot != null && s.pricePerSlot > 0);
+        const criteria: object[] = [
+          { id: "availableSlots", name: "Slot còn trống", preference: "BENEFIT", weight: { linguisticTerm: "HIGH" } },
+          { id: "staffAssigned",  name: "Có nhân viên phụ trách", preference: "BENEFIT", weight: { linguisticTerm: "MEDIUM_HIGH" } },
+        ];
+        if (hasPrice) {
+          criteria.unshift({ id: "bookingPrice", name: "Giá đặt lịch", preference: "COST", weight: { linguisticTerm: "VERY_HIGH" } });
+        }
+
+        // 3. Ánh xạ từng buổi thành alternative với điểm số từ dữ liệu thực
+        const alternatives = sessions.map(s => {
+          const scores: Record<string, object> = {
+            availableSlots: { value: s.availableSlots },
+            staffAssigned:  s.staffId != null ? { linguisticTerm: "HIGH" } : { linguisticTerm: "MEDIUM_LOW" },
+          };
+          if (hasPrice) {
+            scores.bookingPrice = { value: s.pricePerSlot != null && s.pricePerSlot > 0 ? s.pricePerSlot : 1 };
+          }
+          return {
+            optionId: `session-${s.id}`,
+            sessionId: String(s.id),
+            branchName: s.branchName,
+            locationDetail: s.locationDetail || "",
+            startTime: `${s.sessionDate}T${s.startTime}`,
+            endTime:   `${s.sessionDate}T${s.endTime}`,
+            criteriaScores: scores,
+          };
+        });
+
+        // 4. Gọi endpoint xếp hạng với dữ liệu thực
+        const rankRes = await fetch(`${baseUrl}/api/v1/recommendations/bookings/fuzzy-topsis/rank`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            scenarioName: `Gợi ý buổi trải nghiệm cho ${device.name}`,
+            serviceId: id,
+            criteria,
+            alternatives,
+          }),
+        });
+        if (rankRes.ok) {
+          const data: FuzzyRecommendationResponse = await rankRes.json();
+          setFuzzyRecommendations(data);
+        }
+      } catch {
+        // silent fail — recommendation is non-critical
+      }
+    };
+    fetchFuzzyRecommendations();
+  }, [device, id]);
 
   if (loading) {
     return (
@@ -232,6 +329,58 @@ const ServiceDetailPage = () => {
             </div>
           </div>
         </div>
+
+        {/* BUỔI TRẢI NGHIỆM PHÙ HỢP NHẤT — Fuzzy TOPSIS */}
+        {fuzzyRecommendations && fuzzyRecommendations.rankings.length > 0 && (
+          <div className="mt-16 max-w-3xl mx-auto">
+            <div className="flex items-center gap-3 mb-6">
+              <h3 className="text-xs font-black uppercase tracking-widest text-gray-700">
+                Buổi trải nghiệm phù hợp nhất
+              </h3>
+              <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wide">
+                Fuzzy TOPSIS
+              </span>
+            </div>
+            <p className="text-[11px] text-gray-400 -mt-4 mb-5">
+              Xếp hạng dựa trên: khoảng cách chi nhánh · giá · slot trống · chất lượng dịch vụ · độ phản hồi
+            </p>
+            <div className="space-y-3">
+              {fuzzyRecommendations.rankings.slice(0, 3).map((option) => (
+                <div
+                  key={option.optionId}
+                  className={`flex items-center gap-4 p-4 rounded-2xl border ${
+                    option.isBestOption
+                      ? "border-primary bg-primary/5 shadow-sm shadow-primary/10"
+                      : "border-gray-100 bg-white"
+                  }`}
+                >
+                  <div
+                    className={`w-9 h-9 rounded-full flex items-center justify-center font-black text-sm shrink-0 ${
+                      option.isBestOption ? "bg-primary text-white" : "bg-gray-100 text-gray-500"
+                    }`}
+                  >
+                    #{option.rank}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-bold text-sm text-gray-800 truncate">{option.branchName}</p>
+                    <p className="text-[11px] text-gray-400 truncate">{option.locationDetail}</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <p className="text-sm font-black text-primary">
+                      {(option.closenessCoefficient * 100).toFixed(1)}%
+                    </p>
+                    <p className="text-[10px] text-gray-400 uppercase font-bold">Phù hợp</p>
+                  </div>
+                  {option.isBestOption && (
+                    <span className="text-[10px] font-black bg-primary text-white px-2 py-1 rounded-lg shrink-0">
+                      Tốt nhất
+                    </span>
+                  )}
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </Container>
     </div>
   );

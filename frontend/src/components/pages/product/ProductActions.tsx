@@ -167,7 +167,7 @@ const ProductActions: React.FC<ProductActionsProps> = ({ product }) => {
           <button
             onClick={handleBuyNow}
             disabled={localLoading || buyNowLoading || isOutOfStock}
-            className="flex-1 h-14 bg-accent text-white font-bold rounded-xl hover:bg-accent/90 hoverEffect shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="flex-1 h-14 bg-cancel text-white font-bold rounded-xl hover:bg-cancel/90 hoverEffect shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
           >
             {buyNowLoading ? (
               <Loader2 size={20} className="animate-spin" />
