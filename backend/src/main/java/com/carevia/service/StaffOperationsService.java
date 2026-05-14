@@ -14,11 +14,13 @@ import com.carevia.shared.constant.InventoryTransactionType;
 import com.carevia.shared.constant.OrderStatus;
 import com.carevia.shared.dto.PageResponse;
 import com.carevia.shared.dto.request.device.CreateDeviceRequest;
+import com.carevia.shared.dto.request.device.UpdateDeviceRequest;
 import com.carevia.shared.dto.request.staff.AdjustInventoryRequest;
 import com.carevia.shared.dto.request.staff.UpdateMaintenanceRequest;
 import com.carevia.shared.dto.response.device.DeviceResponse;
 import com.carevia.shared.dto.response.staff.InventoryTransactionResponse;
 import com.carevia.shared.dto.response.staff.StaffDashboardResponse;
+import com.carevia.shared.dto.response.voucher.VoucherResponse;
 import com.carevia.shared.exception.InvalidRequestException;
 import com.carevia.shared.exception.ResourceNotFoundException;
 import org.springframework.data.domain.Page;
@@ -47,6 +49,7 @@ public class StaffOperationsService {
     private final OrderRepository orderRepository;
     private final VoucherRepository voucherRepository;
     private final DeviceService deviceService;
+    private final VoucherService voucherService;
 
     public StaffOperationsService(
             DeviceRepository deviceRepository,
@@ -54,13 +57,15 @@ public class StaffOperationsService {
             BookingRepository bookingRepository,
             OrderRepository orderRepository,
             VoucherRepository voucherRepository,
-            DeviceService deviceService) {
+            DeviceService deviceService,
+            VoucherService voucherService) {
         this.deviceRepository = deviceRepository;
         this.inventoryTransactionRepository = inventoryTransactionRepository;
         this.bookingRepository = bookingRepository;
         this.orderRepository = orderRepository;
         this.voucherRepository = voucherRepository;
         this.deviceService = deviceService;
+        this.voucherService = voucherService;
     }
 
     public PageResponse<DeviceResponse> getStaffDevices(
@@ -101,9 +106,45 @@ public class StaffOperationsService {
                 .build();
     }
 
+    public List<?> getDeviceCategories() {
+        return deviceService.getAllCategories();
+    }
+
+    public List<?> getDeviceBrands() {
+        return deviceService.getAllBrands();
+    }
+
+    public List<VoucherResponse> getVouchers() {
+        return voucherService.getAllVouchers();
+    }
+
     @Transactional
     public DeviceResponse createDevice(CreateDeviceRequest request) {
         return deviceService.createDevice(request);
+    }
+
+    @Transactional
+    public DeviceResponse updateDevice(Long deviceId, UpdateDeviceRequest request) {
+        return deviceService.updateDevice(deviceId, request);
+    }
+
+    @Transactional
+    public void deleteDevice(Long deviceId) {
+        deviceService.deleteDevice(deviceId);
+    }
+
+    @Transactional
+    public VoucherResponse assignVoucherToDevice(Long deviceId, Long voucherId) {
+        deviceRepository.findById(deviceId)
+                .orElseThrow(() -> new ResourceNotFoundException("Device not found"));
+        return voucherService.assignVoucherToDevice(voucherId, deviceId);
+    }
+
+    @Transactional
+    public VoucherResponse removeVoucherFromDevice(Long deviceId, Long voucherId) {
+        deviceRepository.findById(deviceId)
+                .orElseThrow(() -> new ResourceNotFoundException("Device not found"));
+        return voucherService.removeVoucherFromDevice(voucherId, deviceId);
     }
 
     @Transactional

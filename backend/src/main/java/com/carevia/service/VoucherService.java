@@ -13,6 +13,7 @@ import com.carevia.shared.exception.InvalidRequestException;
 import com.carevia.shared.exception.ResourceNotFoundException;
 
 import java.util.List;
+import java.time.Instant;
 import java.util.stream.Collectors;
 
 @Service
@@ -76,6 +77,36 @@ public class VoucherService {
         Voucher voucher = voucherRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Voucher not found"));
         voucher.setStatus(VoucherStatus.valueOf(status));
+        return toResponse(voucherRepository.save(voucher));
+    }
+
+    @Transactional
+    public VoucherResponse assignVoucherToDevice(Long voucherId, Long deviceId) {
+        Voucher voucher = voucherRepository.findById(voucherId)
+                .orElseThrow(() -> new ResourceNotFoundException("Voucher not found"));
+
+        if (voucher.getStatus() == VoucherStatus.EXPIRED || voucher.getStatus() == VoucherStatus.USED_UP) {
+            throw new InvalidRequestException("Voucher is no longer assignable to a device");
+        }
+        if (voucher.getEndDate() != null && voucher.getEndDate().isBefore(Instant.now())) {
+            throw new InvalidRequestException("Voucher has already expired");
+        }
+
+        voucher.setApplicableDevice(deviceRepository.findById(deviceId)
+                .orElseThrow(() -> new ResourceNotFoundException("Device not found")));
+        return toResponse(voucherRepository.save(voucher));
+    }
+
+    @Transactional
+    public VoucherResponse removeVoucherFromDevice(Long voucherId, Long deviceId) {
+        Voucher voucher = voucherRepository.findById(voucherId)
+                .orElseThrow(() -> new ResourceNotFoundException("Voucher not found"));
+
+        if (voucher.getApplicableDevice() == null || !voucher.getApplicableDevice().getId().equals(deviceId)) {
+            throw new InvalidRequestException("Voucher is not assigned to this device");
+        }
+
+        voucher.setApplicableDevice(null);
         return toResponse(voucherRepository.save(voucher));
     }
 

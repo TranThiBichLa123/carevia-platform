@@ -43,7 +43,7 @@ public class StaffController {
         }
 
         @Operation(summary = "Get staff by ID", description = "Retrieve detailed information about a staff member by their ID. Staff can only view their own profile, clients can view approved staff, and admins can view any staff.")
-        @GetMapping("/{id}")
+        @GetMapping("/{id:\\d+}")
         @ApiMessage("Get staff by ID")
         @Authenticated
         public ResponseEntity<StaffDetailResponse> getStaffById(
@@ -65,7 +65,7 @@ public class StaffController {
         }
 
         @Operation(summary = "Update staff information", description = "Update staff profile information including specialty, degree, and personal details. Staff can only update their own profile, admins can update any staff.")
-        @PutMapping("/{id}")
+        @PutMapping("/{id:\\d+}")
         @ApiMessage("Update staff information")
         @StaffOrAdmin
         public ResponseEntity<StaffDetailResponse> updateStaff(
@@ -77,7 +77,7 @@ public class StaffController {
         }
 
         @Operation(summary = "Upload staff avatar", description = "Upload a new avatar image for a staff member. Staff can only upload their own avatar. Accepts JPG, PNG, and WEBP formats.")
-        @PutMapping(value = "/{id}/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+        @PutMapping(value = "/{id:\\d+}/avatar", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
         @ApiMessage("Upload staff avatar")
         @StaffOrAdmin
         public ResponseEntity<UploadAvatarResponse> uploadAvatar(
@@ -89,7 +89,7 @@ public class StaffController {
         }
 
         @Operation(summary = "Request staff approval", description = "Staff requests approval from admin to start working. Can only be called by the staff themselves.")
-        @PostMapping("/{id}/request-approval")
+        @PostMapping("/{id:\\d+}/request-approval")
         @ApiMessage("Request staff approval")
         @StaffOnly
         public ResponseEntity<StaffDetailResponse> requestApproval(
@@ -100,7 +100,7 @@ public class StaffController {
         }
 
         @Operation(summary = "Approve staff", description = "Admin approves a staff member to allow them to start working. Only accessible by admins.")
-        @PostMapping("/{id}/approve")
+        @PostMapping("/{id:\\d+}/approve")
         @ApiMessage("Approve staff")
         @AdminOnly
         public ResponseEntity<StaffDetailResponse> approveStaff(
@@ -113,7 +113,7 @@ public class StaffController {
         }
 
         @Operation(summary = "Reject staff", description = "Admin rejects a staff application with a reason. Only accessible by admins.")
-        @PostMapping("/{id}/reject")
+        @PostMapping("/{id:\\d+}/reject")
         @ApiMessage("Reject staff")
         @AdminOnly
         public ResponseEntity<StaffDetailResponse> rejectStaff(
@@ -129,7 +129,7 @@ public class StaffController {
        
 
         @Operation(summary = "Get staff's revenue statistics", description = "Retrieve revenue statistics including total revenue, monthly revenue, and breakdown by course. Staff can only view their own revenue, admins can view any staff's revenue.")
-        @GetMapping("/{id}/revenue")
+        @GetMapping("/{id:\\d+}/revenue")
         @ApiMessage("Get staff's revenue")
         @StaffOrAdmin
         public ResponseEntity<StaffRevenueResponse> getStaffRevenue(
@@ -140,7 +140,7 @@ public class StaffController {
         }
 
         @Operation(summary = "Get staff's statistics", description = "Retrieve overall statistics including course count, student count, average rating, and total reviews. Staff can view their own stats, admins can view any staff's stats.")
-        @GetMapping("/{id}/stats")
+        @GetMapping("/{id:\\d+}/stats")
         @ApiMessage("Get staff's statistics")
         @StaffOrAdmin
         public ResponseEntity<StaffStatsResponse> getStaffStats(
@@ -151,7 +151,7 @@ public class StaffController {
         }
 
         @Operation(summary = "Delete staff", description = "Soft delete a staff account by setting it to DEACTIVATED status. Only accessible by admins.")
-        @DeleteMapping("/{id}")
+        @DeleteMapping("/{id:\\d+}")
         @ApiMessage("Delete staff")
         @AdminOnly
         public ResponseEntity<Void> deleteStaff(

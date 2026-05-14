@@ -70,6 +70,7 @@ export type StaffDevice = {
   name: string;
   slug: string;
   description: string | null;
+  skinType?: string | null;
   price: number;
   originalPrice: number | null;
   stock: number;
@@ -302,6 +303,44 @@ export type AdminAccountProfile = {
   };
 };
 
+export type AdminReview = {
+  id: number;
+  deviceId: number | null;
+  deviceName: string | null;
+  accountId: number;
+  accountName: string;
+  accountAvatar: string | null;
+  rating: number;
+  comment: string | null;
+  isVerifiedPurchase: boolean;
+  adminReply: string | null;
+  isHidden: boolean;
+  createdAt: string;
+  updatedAt: string;
+};
+
+export type BusinessSettings = {
+  businessName: string;
+  hotline: string;
+  supportEmail: string;
+  storeAddress: string;
+  storeHours: string;
+  supportNote: string;
+};
+
+export type AuditLogEntry = {
+  id: number;
+  tableName: string;
+  recordId: string;
+  action: string;
+  changedData: string | null;
+  userAccountId: number | null;
+  username: string | null;
+  email: string | null;
+  ipAddress: string | null;
+  createdAt: string;
+};
+
 type WrappedResponse<T> = {
   data: T;
 };
@@ -438,6 +477,7 @@ export const backofficeApi = {
     description?: string;
     price: number;
     stock: number;
+    skinType?: string;
     categoryId?: number;
     brandId?: number;
     sku?: string;
@@ -449,15 +489,56 @@ export const backofficeApi = {
     return res.data;
   },
 
+  async updateStaffDevice(
+    deviceId: number,
+    payload: {
+      name?: string;
+      description?: string;
+      price?: number;
+      stock?: number;
+      skinType?: string;
+      status?: StaffDeviceStatus;
+      categoryId?: number;
+      brandId?: number;
+      sku?: string;
+      image?: string;
+    }
+  ): Promise<StaffDevice> {
+    const res = await apiClient.put(`/staff/devices/${deviceId}`, payload, {
+      headers: authHeaders(),
+    });
+    return res.data;
+  },
+
+  async deleteStaffDevice(deviceId: number): Promise<void> {
+    await apiClient.delete(`/staff/devices/${deviceId}`, {
+      headers: authHeaders(),
+    });
+  },
+
+  async assignVoucherToStaffDevice(deviceId: number, voucherId: number): Promise<BackofficeVoucher> {
+    const res = await apiClient.put(`/staff/devices/${deviceId}/vouchers/${voucherId}`, null, {
+      headers: authHeaders(),
+    });
+    return res.data;
+  },
+
+  async removeVoucherFromStaffDevice(deviceId: number, voucherId: number): Promise<BackofficeVoucher> {
+    const res = await apiClient.delete(`/staff/devices/${deviceId}/vouchers/${voucherId}`, {
+      headers: authHeaders(),
+    });
+    return res.data;
+  },
+
   async getStaffDeviceCategories(): Promise<StaffDeviceCategory[]> {
-    const res = await apiClient.get("/devices/categories", {
+    const res = await apiClient.get("/staff/device-categories", {
       headers: authHeaders(),
     });
     return res.data;
   },
 
   async getStaffDeviceBrands(): Promise<StaffDeviceBrand[]> {
-    const res = await apiClient.get("/devices/brands", {
+    const res = await apiClient.get("/staff/device-brands", {
       headers: authHeaders(),
     });
     return res.data;
@@ -595,7 +676,7 @@ export const backofficeApi = {
   },
 
   async getAllVouchers(): Promise<BackofficeVoucher[]> {
-    const res = await apiClient.get("/vouchers", {
+    const res = await apiClient.get("/staff/vouchers", {
       headers: authHeaders(),
     });
     return res.data;
@@ -691,5 +772,84 @@ export const backofficeApi = {
       }
     );
     return res.data.data;
+  },
+
+  async getAdminReviews(params?: {
+    search?: string;
+    hidden?: boolean;
+    deviceId?: number;
+    page?: number;
+    size?: number;
+  }): Promise<BackofficePageResponse<AdminReview>> {
+    const searchParams = new URLSearchParams();
+
+    if (params?.search) {
+      searchParams.append("search", params.search);
+    }
+    if (params?.hidden !== undefined) {
+      searchParams.append("hidden", String(params.hidden));
+    }
+    if (params?.deviceId) {
+      searchParams.append("deviceId", String(params.deviceId));
+    }
+    searchParams.append("page", String(params?.page ?? 0));
+    searchParams.append("size", String(params?.size ?? 100));
+
+    const res = await apiClient.get(`/admin/reviews?${searchParams.toString()}`, {
+      headers: authHeaders(),
+    });
+    return res.data;
+  },
+
+  async moderateAdminReview(
+    reviewId: number,
+    payload: {
+      adminReply?: string;
+      hidden?: boolean;
+    }
+  ): Promise<AdminReview> {
+    const res = await apiClient.patch(`/admin/reviews/${reviewId}`, payload, {
+      headers: authHeaders(),
+    });
+    return res.data;
+  },
+
+  async getBusinessSettings(): Promise<BusinessSettings> {
+    const res = await apiClient.get("/system-settings/business-info");
+    return res.data;
+  },
+
+  async updateBusinessSettings(payload: BusinessSettings): Promise<BusinessSettings> {
+    const res = await apiClient.put("/admin/system-settings/business-info", payload, {
+      headers: authHeaders(),
+    });
+    return res.data;
+  },
+
+  async getAuditLogs(params?: {
+    search?: string;
+    action?: string;
+    tableName?: string;
+    page?: number;
+    size?: number;
+  }): Promise<BackofficePageResponse<AuditLogEntry>> {
+    const searchParams = new URLSearchParams();
+
+    if (params?.search) {
+      searchParams.append("search", params.search);
+    }
+    if (params?.action) {
+      searchParams.append("action", params.action);
+    }
+    if (params?.tableName) {
+      searchParams.append("tableName", params.tableName);
+    }
+    searchParams.append("page", String(params?.page ?? 0));
+    searchParams.append("size", String(params?.size ?? 100));
+
+    const res = await apiClient.get(`/admin/audit-logs?${searchParams.toString()}`, {
+      headers: authHeaders(),
+    });
+    return res.data;
   },
 };

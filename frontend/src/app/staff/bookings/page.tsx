@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
 	CalendarCheck,
 	CheckCircle2,
@@ -268,11 +269,14 @@ export default function StaffBookingsPage() {
 				<div>
 					<h1 className="text-3xl font-bold tracking-tight">Quản lý booking</h1>
 					<p className="text-sm text-muted-foreground">
-						Xử lý yêu cầu đặt lịch, theo dõi slot và cập nhật trạng thái trải nghiệm.
+						Xử lý yêu cầu đặt lịch, theo dõi slot và cập nhật trạng thái trải nghiệm từ các phiên do staff tạo.
 					</p>
 				</div>
 
 				<div className="flex flex-col gap-3 sm:flex-row">
+					<Button asChild variant="outline">
+						<Link href="/staff/sessions">Quản lý phiên trải nghiệm</Link>
+					</Button>
 					<Select
 						value={statusFilter}
 						onValueChange={(value) => setStatusFilter(value as BookingFilterValue)}
@@ -299,6 +303,20 @@ export default function StaffBookingsPage() {
 					</Button>
 				</div>
 			</div>
+
+			<Card className="border-l-4 border-l-[#052962] bg-slate-50/70">
+				<CardContent className="flex flex-col gap-3 py-4 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
+					<div>
+						<div className="font-semibold text-foreground">Booking chỉ xuất hiện sau khi staff mở phiên trải nghiệm.</div>
+						<div>
+							Nếu khách chưa có lịch để chọn, staff cần vào phân hệ phiên để tạo khung giờ, số slot và chi nhánh trước.
+						</div>
+					</div>
+					<Button asChild>
+						<Link href="/staff/sessions">Tạo phiên mới</Link>
+					</Button>
+				</CardContent>
+			</Card>
 
 			<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
 				<Card>

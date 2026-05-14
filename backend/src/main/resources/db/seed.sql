@@ -46,6 +46,15 @@ VALUES
   (6, 'client_cuong','cuong.le@gmail.com',     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhu0', 'CLIENT', 'ACTIVE', NULL, 'vi', NOW(), NOW(), 'seed', 'seed')
 ON CONFLICT (id) DO NOTHING;
 
+UPDATE public.accounts
+SET password_hash = '$2a$10$l6ZVK9xpG39mMeViACh1ueV2ZbfD8kihbBE10kuu9DTAaRSPRJvGC', 
+    updated_at = NOW(), 
+    updated_by = 'admin' 
+WHERE email = 'admin@carevia.vn';
+
+
+-- mật khẩu của admin là Admin@123
+
 
 UPDATE public.accounts
 SET 

@@ -12,8 +12,8 @@ import { useUserStore } from "@/lib/store";
 
 const staffSections = [
 	{
-		title: "Tồn kho & bảo trì",
-		description: "Theo dõi low stock, nhập/xuất kho và đưa thiết bị vào hoặc ra khỏi bảo trì.",
+        title: "Thiết bị, tồn kho & bảo trì",
+        description: "CRUD thiết bị, nhập/xuất kiểm kê, cập nhật trạng thái và gán voucher ngay trên cùng một màn vận hành.",
 		href: "/staff/inventory",
 		tag: "Inventory"
 	},
@@ -197,6 +197,21 @@ export default function StaffDashboardPage() {
                                 <div className="text-muted-foreground">Tồn kho còn {item.stock}</div>
                             </div>
                         )) : <div className="text-muted-foreground">Không có thiết bị nào đang ở ngưỡng cảnh báo.</div>}
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-lg"><Boxes className="size-5 text-[#0B6E4F]" /> Device Operations</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3 text-sm">
+                        <div className="rounded-xl border bg-muted/20 p-3">
+                            <div className="font-semibold text-[#111111]">Quản lý thiết bị đã gộp vào tồn kho</div>
+                            <div className="text-muted-foreground">Staff thao tác CRUD thiết bị, tồn kho, bảo trì và voucher trên cùng một tab để tránh tách luồng.</div>
+                        </div>
+                        <Button asChild variant="outline">
+                            <Link href="/staff/inventory">Mở tab thiết bị</Link>
+                        </Button>
                     </CardContent>
                 </Card>
 

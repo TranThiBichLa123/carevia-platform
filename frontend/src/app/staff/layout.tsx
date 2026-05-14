@@ -21,7 +21,7 @@ import { useUserStore } from "@/lib/store";
 
 const staffSections = [
   { title: "Dashboard tổng quan", href: "/staff", icon: LayoutDashboard },
-  { title: "Tồn kho & bảo trì", href: "/staff/inventory", icon: Boxes },
+  { title: "Thiết bị, tồn kho & bảo trì", href: "/staff/inventory", icon: Boxes },
   { title: "Quản lý Booking", href: "/staff/bookings", icon: CalendarCheck2 },
   { title: "Quản lý Đơn Hàng", href: "/staff/orders", icon: ClipboardList },
   { title: "Quản lý Phiên", href: "/staff/sessions", icon: Layers3 },

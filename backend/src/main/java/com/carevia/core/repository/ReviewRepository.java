@@ -3,6 +3,7 @@ package com.carevia.core.repository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -11,7 +12,7 @@ import com.carevia.core.domain.Review;
 import java.util.Optional;
 
 @Repository
-public interface ReviewRepository extends JpaRepository<Review, Long> {
+public interface ReviewRepository extends JpaRepository<Review, Long>, JpaSpecificationExecutor<Review> {
 
     Page<Review> findByDeviceIdAndIsHiddenFalse(Long deviceId, Pageable pageable);
 
@@ -19,6 +20,8 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Optional<Double> findAverageRatingByDeviceId(@Param("deviceId") Long deviceId);
 
     long countByDeviceIdAndIsHiddenFalse(Long deviceId);
+
+    long countByDeviceId(Long deviceId);
 
     boolean existsByAccountIdAndDeviceId(Long accountId, Long deviceId);
 }

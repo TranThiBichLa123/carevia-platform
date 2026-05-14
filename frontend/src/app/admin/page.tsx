@@ -3,7 +3,11 @@
 import Link from "next/link";
 import {
 	BellRing,
+	Boxes,
 	ChartColumnBig,
+	ClipboardList,
+	MessageSquareMore,
+	Settings2,
 	Shield,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -30,10 +34,34 @@ const adminSections = [
 		icon: Shield,
 	},
 	{
+		title: "CRM & Đánh Giá",
+		description: "Duyệt, ẩn và phản hồi đánh giá của khách hàng theo từng thiết bị.",
+		href: "/admin/reviews",
+		icon: MessageSquareMore,
+	},
+	{
+		title: "Cấu Hình Hệ Thống",
+		description: "Cập nhật hotline, email, địa chỉ showroom và nội dung hỗ trợ hiển thị ngoài website.",
+		href: "/admin/settings",
+		icon: Settings2,
+	},
+	{
+		title: "Lịch Sử Thao Tác",
+		description: "Theo dõi ai đã sửa hồ sơ, duyệt tài khoản hay cập nhật dữ liệu nghiệp vụ trong hệ thống.",
+		href: "/admin/audit-logs",
+		icon: ClipboardList,
+	},
+	{
 		title: "Thông Báo Hệ Thống",
 		description: "Theo dõi các sự kiện nghiệp vụ và cập nhật trạng thái đã đọc.",
 		href: "/admin/notifications",
 		icon: BellRing,
+	},
+	{
+		title: "Điều Phối Vận Hành",
+		description: "Đi thẳng sang khu vận hành để kiểm soát tồn kho, phiên trải nghiệm và đơn hàng.",
+		href: "/staff/inventory",
+		icon: Boxes,
 	},
 ];
 
@@ -67,14 +95,14 @@ export default function AdminDashboardPage() {
 						Trung tâm điều hành Carevia
 					</h1>
 					<p className="mt-3 max-w-2xl text-sm text-white/80 md:text-base">
-						Đi vào các module quản trị để theo dõi dữ liệu hệ thống, người dùng và luồng thông báo nghiệp vụ.
+						Đi vào các module quản trị để kiểm soát người dùng, CRM, cấu hình hiển thị website và điều phối vận hành O2O.
 					</p>
 					<div className="mt-6 flex flex-wrap gap-3">
 						<Button asChild className="bg-white text-slate-900 hover:bg-slate-100">
-							<Link href="/admin/statistics">Mở thống kê</Link>
+							<Link href="/admin/reviews">Mở CRM & đánh giá</Link>
 						</Button>
 						<Button asChild variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white">
-							<Link href="/admin/users">Quản lý người dùng</Link>
+							<Link href="/admin/settings">Chỉnh cấu hình doanh nghiệp</Link>
 						</Button>
 					</div>
 				</section>

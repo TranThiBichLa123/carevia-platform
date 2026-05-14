@@ -14,6 +14,7 @@ import com.carevia.shared.dto.request.device.UpdateDeviceRequest;
 import com.carevia.shared.dto.response.device.BrandResponse;
 import com.carevia.shared.dto.response.device.DeviceResponse;
 import com.carevia.shared.dto.response.device.ExperienceStepResponse;
+import com.carevia.shared.exception.InvalidRequestException;
 import com.carevia.shared.exception.ResourceNotFoundException;
 
 import java.math.BigDecimal;
@@ -140,6 +141,8 @@ public class DeviceService {
 
     @Transactional
     public DeviceResponse createDevice(CreateDeviceRequest request) {
+        validateDeviceRequest(request.getPrice(), request.getStock(), request.getBookingPrice(), request.getImage(), true);
+
         Device device = Device.builder()
                 .name(request.getName())
                 .slug(request.getSlug() != null ? request.getSlug() : generateSlug(request.getName()))
@@ -246,6 +249,8 @@ public class DeviceService {
                     .map(s -> DeviceSpecification.builder().label(s.getLabel()).value(s.getValue()).build())
                     .collect(Collectors.toList()));
         }
+
+        validateDeviceRequest(device.getPrice(), device.getStock(), device.getBookingPrice(), device.getImage(), false);
 
         return toResponse(deviceRepository.save(device));
     }
@@ -357,6 +362,29 @@ public class DeviceService {
 
     private String generateSlug(String name) {
         return name.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
+    }
+
+    private void validateDeviceRequest(
+            BigDecimal price,
+            Integer stock,
+            BigDecimal bookingPrice,
+            String image,
+            boolean imageRequired) {
+        if (price == null || price.compareTo(BigDecimal.ZERO) < 0) {
+            throw new InvalidRequestException("Device price must be zero or greater");
+        }
+        if (stock != null && stock < 0) {
+            throw new InvalidRequestException("Device stock must be zero or greater");
+        }
+        if (bookingPrice != null && bookingPrice.compareTo(BigDecimal.ZERO) < 0) {
+            throw new InvalidRequestException("Booking price must be zero or greater");
+        }
+        if (imageRequired && (image == null || image.isBlank())) {
+            throw new InvalidRequestException("Device image is required");
+        }
+        if (!imageRequired && (image == null || image.isBlank())) {
+            throw new InvalidRequestException("Device image cannot be empty");
+        }
     }
 
     public DeviceResponse toResponse(Device d) {

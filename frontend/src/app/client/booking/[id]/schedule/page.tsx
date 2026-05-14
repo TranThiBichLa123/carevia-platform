@@ -98,6 +98,11 @@ const BookingSchedulePage = () => {
         return Array.from(new Set(dates)).sort();
     }, [device, apiSessions]);
 
+    const deviceSessions = useMemo(() => {
+        if (!device) return [];
+        return apiSessions.filter((session) => session.serviceId === device.id);
+    }, [device, apiSessions]);
+
     useEffect(() => {
         if (availableDates.length > 0) {
             setSelectedDate(availableDates[0]);
@@ -284,44 +289,59 @@ const BookingSchedulePage = () => {
                                 </div>
                             </div>
 
-                            <div className="flex border-b overflow-x-auto bg-gray-50">
-                                {availableDates.map((dateStr) => (
-                                    <button
-                                        key={dateStr}
-                                        onClick={() => { setSelectedDate(dateStr); setSelectedSession(null); }}
-                                        className={`flex-1 min-w-30 py-3 px-2 border-r transition-all flex flex-col items-center ${selectedDate === dateStr ? 'bg-orange-500 text-white' : 'bg-white text-gray-500'}`}
-                                    >
-                                        <span className="text-[10px] uppercase font-vietnam font-bold">{getDayName(dateStr)}</span>
-                                        <span className="text-xs font-vietnam font-black">{new Date(dateStr).getDate()}/{new Date(dateStr).getMonth() + 1}</span>
-                                    </button>
-                                ))}
-                            </div>
+                            {loadingSessions ? (
+                                <div className="flex justify-center py-8">
+                                    <Loader2 className="animate-spin text-primary" size={24} />
+                                </div>
+                            ) : deviceSessions.length === 0 ? (
+                                <div className="p-6 text-center border-t bg-gray-50/60">
+                                    <p className="text-sm font-vietnam font-bold text-gray-700 uppercase">Thiết bị này chưa có phiên trải nghiệm</p>
+                                    <p className="mt-2 text-xs font-vietnam text-gray-500 leading-relaxed">
+                                        Khách chỉ chọn được lịch sau khi nhân viên tạo phiên trải nghiệm và mở slot cho thiết bị này.
+                                    </p>
+                                </div>
+                            ) : (
+                                <>
+                                    <div className="flex border-b overflow-x-auto bg-gray-50">
+                                        {availableDates.map((dateStr) => (
+                                            <button
+                                                key={dateStr}
+                                                onClick={() => { setSelectedDate(dateStr); setSelectedSession(null); }}
+                                                className={`flex-1 min-w-30 py-3 px-2 border-r transition-all flex flex-col items-center ${selectedDate === dateStr ? 'bg-orange-500 text-white' : 'bg-white text-gray-500'}`}
+                                            >
+                                                <span className="text-[10px] uppercase font-vietnam font-bold">{getDayName(dateStr)}</span>
+                                                <span className="text-xs font-vietnam font-black">{new Date(dateStr).getDate()}/{new Date(dateStr).getMonth() + 1}</span>
+                                            </button>
+                                        ))}
+                                    </div>
 
-                            <div className="p-4">
-                                {loadingSessions ? (
-                                    <div className="flex justify-center py-8">
-                                        <Loader2 className="animate-spin text-primary" size={24} />
+                                    <div className="p-4">
+                                        <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-px bg-gray-200 border border-gray-200">
+                                            {availableSessions.map((session) => {
+                                                const isSelected = selectedSession?.id === session.id;
+                                                const isFull = session.availableSlots <= 0;
+                                                if (selectedBranch && session.branchName !== selectedBranch) return null;
+                                                return (
+                                                    <button
+                                                        key={session.id}
+                                                        disabled={isFull}
+                                                        onClick={() => setSelectedSession(session)}
+                                                        className={`py-4 text-xs font-bold transition-all ${isSelected ? 'bg-orange-500 text-white' : isFull ? 'bg-gray-100 text-gray-300' : 'bg-[#e6f4f1] text-gray-700 hover:bg-[#d5ebe7]'}`}
+                                                    >
+                                                        {formatSessionTime(session.startTime)}
+                                                    </button>
+                                                );
+                                            })}
+                                        </div>
+
+                                        {selectedBranch && availableSessions.filter((session) => session.branchName === selectedBranch).length === 0 ? (
+                                            <p className="mt-4 text-[11px] font-vietnam text-gray-500 italic">
+                                                Chi nhánh đã chọn hiện chưa có khung giờ mở trong ngày này. Vui lòng đổi ngày hoặc chi nhánh khác.
+                                            </p>
+                                        ) : null}
                                     </div>
-                                ) : (
-                                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-7 gap-px bg-gray-200 border border-gray-200">
-                                        {availableSessions.map((session) => {
-                                            const isSelected = selectedSession?.id === session.id;
-                                            const isFull = session.availableSlots <= 0;
-                                            if (selectedBranch && session.branchName !== selectedBranch) return null;
-                                            return (
-                                                <button
-                                                    key={session.id}
-                                                    disabled={isFull}
-                                                    onClick={() => setSelectedSession(session)}
-                                                    className={`py-4 text-xs font-bold transition-all ${isSelected ? 'bg-orange-500 text-white' : isFull ? 'bg-gray-100 text-gray-300' : 'bg-[#e6f4f1] text-gray-700 hover:bg-[#d5ebe7]'}`}
-                                                >
-                                                    {formatSessionTime(session.startTime)}
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                )}
-                            </div>
+                                </>
+                            )}
                         </div>
 
                         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 border-t border-gray-200 mt-8">
