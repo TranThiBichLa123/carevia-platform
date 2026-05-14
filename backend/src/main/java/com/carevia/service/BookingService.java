@@ -209,6 +209,34 @@ public class BookingService {
         return toResponse(booking);
     }
 
+    @Transactional
+    public BookingResponse checkInBooking(Long bookingId, String staffNote) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
+        booking.checkIn();
+        if (staffNote != null) {
+            booking.setStaffNote(staffNote);
+        }
+        booking = bookingRepository.save(booking);
+
+        notificationService.createBookingNotification(booking.getAccount(), booking, "BOOKING_CHECKED_IN");
+        return toResponse(booking);
+    }
+
+    @Transactional
+    public BookingResponse markBookingNoShow(Long bookingId, String staffNote) {
+        Booking booking = bookingRepository.findById(bookingId)
+                .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
+        booking.markNoShow();
+        if (staffNote != null) {
+            booking.setStaffNote(staffNote);
+        }
+        booking = bookingRepository.save(booking);
+
+        notificationService.createBookingNotification(booking.getAccount(), booking, "BOOKING_NO_SHOW");
+        return toResponse(booking);
+    }
+
     public PageResponse<BookingResponse> getAllBookings(BookingStatus status, Pageable pageable) {
         Page<Booking> page;
         if (status != null) {

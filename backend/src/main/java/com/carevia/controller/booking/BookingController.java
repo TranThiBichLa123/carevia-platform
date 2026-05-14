@@ -85,6 +85,24 @@ public class BookingController {
         return ResponseEntity.ok(bookingService.completeBooking(id));
     }
 
+    @PutMapping("/{id}/check-in")
+    @StaffOnly
+    @Operation(summary = "Check in a booking (Staff)")
+    public ResponseEntity<?> checkInBooking(
+            @PathVariable Long id,
+            @RequestParam(required = false) String staffNote) {
+        return ResponseEntity.ok(bookingService.checkInBooking(id, staffNote));
+    }
+
+    @PutMapping("/{id}/no-show")
+    @StaffOnly
+    @Operation(summary = "Mark a booking as no-show (Staff)")
+    public ResponseEntity<?> markBookingNoShow(
+            @PathVariable Long id,
+            @RequestParam(required = false) String staffNote) {
+        return ResponseEntity.ok(bookingService.markBookingNoShow(id, staffNote));
+    }
+
     @PutMapping("/{id}/staff-cancel")
     @StaffOnly
     @Operation(summary = "Cancel a booking (Staff)")

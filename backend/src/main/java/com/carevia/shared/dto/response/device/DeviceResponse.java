@@ -8,6 +8,7 @@ import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 @Data
@@ -43,6 +44,10 @@ public class DeviceResponse {
     private BigDecimal bookingPrice;
     private List<String> tags;
     private String videoUrl;
+    private String maintenanceReason;
+    private LocalDate maintenanceStartDate;
+    private LocalDate maintenanceEndDate;
+    private BigDecimal maintenanceCost;
     private List<SpecificationInfo> specifications;
     private Instant createdAt;
     private long wishlistCount;

@@ -40,4 +40,10 @@ public interface BookingRepository extends JpaRepository<Booking, Long>, JpaSpec
 
     @Query("SELECT b FROM Booking b WHERE b.appointmentDate BETWEEN :startDate AND :endDate")
     List<Booking> findByDateRange(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
+
+    @Query("SELECT COUNT(b) FROM Booking b WHERE b.appointmentDate = :date AND b.status NOT IN ('CANCELLED', 'EXPIRED')")
+    long countOperationalBookingsByDate(@Param("date") LocalDate date);
+
+    @Query("SELECT COUNT(b) FROM Booking b WHERE b.appointmentDate = :date AND b.status = :status")
+    long countByAppointmentDateAndStatus(@Param("date") LocalDate date, @Param("status") BookingStatus status);
 }

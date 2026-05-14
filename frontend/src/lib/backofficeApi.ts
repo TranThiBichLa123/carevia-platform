@@ -13,10 +13,22 @@ export type BackofficePageResponse<T> = {
 export type StaffBookingStatus =
   | "PENDING_CONFIRM"
   | "CONFIRMED"
+  | "CHECKED_IN"
   | "COMPLETED"
   | "CANCELLED"
   | "NO_SHOW"
   | "EXPIRED";
+
+export type StaffDeviceStatus =
+  | "AVAILABLE"
+  | "OUT_OF_STOCK"
+  | "MAINTENANCE"
+  | "INACTIVE";
+
+export type InventoryTransactionType =
+  | "IMPORT"
+  | "EXPORT"
+  | "AUDIT_ADJUSTMENT";
 
 export type StaffBooking = {
   id: number;
@@ -51,6 +63,103 @@ export type StaffBooking = {
   cancelReason: string | null;
   cancelledBy: string | null;
   createdAt: string;
+};
+
+export type StaffDevice = {
+  id: number;
+  name: string;
+  slug: string;
+  description: string | null;
+  price: number;
+  originalPrice: number | null;
+  stock: number;
+  image: string | null;
+  sku: string | null;
+  status: StaffDeviceStatus;
+  sold: number;
+  bookingPrice: number | null;
+  maintenanceReason: string | null;
+  maintenanceStartDate: string | null;
+  maintenanceEndDate: string | null;
+  maintenanceCost: number | null;
+  category: {
+    id: number;
+    name: string;
+    slug: string;
+    image: string | null;
+    categoryType: string | null;
+  } | null;
+  brand: {
+    id: number;
+    name: string;
+    slug: string;
+    image: string | null;
+  } | null;
+  createdAt: string;
+};
+
+export type StaffInventoryTransaction = {
+  id: number;
+  deviceId: number;
+  deviceName: string;
+  transactionType: InventoryTransactionType;
+  quantityChange: number;
+  previousStock: number;
+  newStock: number;
+  reason: string;
+  note: string | null;
+  createdBy: string | null;
+  createdAt: string;
+};
+
+export type StaffDashboard = {
+  date: string;
+  bookingsToday: number;
+  pendingBookings: number;
+  checkedInToday: number;
+  pendingOrders: number;
+  lowStockDevices: number;
+  maintenanceDevices: number;
+  vouchersExpiringSoon: number;
+  lowStockAlerts: Array<{
+    deviceId: number;
+    deviceName: string;
+    stock: number;
+    status: StaffDeviceStatus;
+    maintenanceReason: string | null;
+  }>;
+  maintenanceAlerts: Array<{
+    deviceId: number;
+    deviceName: string;
+    stock: number;
+    status: StaffDeviceStatus;
+    maintenanceReason: string | null;
+  }>;
+  voucherAlerts: Array<{
+    voucherId: number;
+    code: string;
+    endDate: string;
+    remainingQuantity: number;
+  }>;
+};
+
+export type StaffDeviceCategory = {
+  id: number;
+  name: string;
+  slug: string;
+  image: string | null;
+  categoryType: string | null;
+  description?: string | null;
+};
+
+export type StaffDeviceBrand = {
+  id: number;
+  name: string;
+  slug: string;
+  image: string | null;
+  description?: string | null;
+  isFeatured?: boolean;
+  isActive?: boolean;
 };
 
 export type BackofficeOrderStatus =
@@ -263,6 +372,150 @@ export const backofficeApi = {
     const res = await apiClient.put(`/bookings/${id}/complete`, null, {
       headers: authHeaders(),
     });
+    return res.data;
+  },
+
+  async checkInStaffBooking(id: number, staffNote?: string): Promise<StaffBooking> {
+    const query = staffNote
+      ? `?staffNote=${encodeURIComponent(staffNote)}`
+      : "";
+    const res = await apiClient.put(`/bookings/${id}/check-in${query}`, null, {
+      headers: authHeaders(),
+    });
+    return res.data;
+  },
+
+  async markStaffBookingNoShow(id: number, staffNote?: string): Promise<StaffBooking> {
+    const query = staffNote
+      ? `?staffNote=${encodeURIComponent(staffNote)}`
+      : "";
+    const res = await apiClient.put(`/bookings/${id}/no-show${query}`, null, {
+      headers: authHeaders(),
+    });
+    return res.data;
+  },
+
+  async getStaffDashboard(): Promise<StaffDashboard> {
+    const res = await apiClient.get("/staff/dashboard", {
+      headers: authHeaders(),
+    });
+    return res.data;
+  },
+
+  async getStaffDevices(params?: {
+    search?: string;
+    status?: StaffDeviceStatus;
+    lowStockOnly?: boolean;
+    maintenanceOnly?: boolean;
+    page?: number;
+    size?: number;
+  }): Promise<BackofficePageResponse<StaffDevice>> {
+    const searchParams = new URLSearchParams();
+
+    if (params?.search) {
+      searchParams.append("search", params.search);
+    }
+    if (params?.status) {
+      searchParams.append("status", params.status);
+    }
+    if (params?.lowStockOnly !== undefined) {
+      searchParams.append("lowStockOnly", String(params.lowStockOnly));
+    }
+    if (params?.maintenanceOnly !== undefined) {
+      searchParams.append("maintenanceOnly", String(params.maintenanceOnly));
+    }
+    searchParams.append("page", String(params?.page ?? 0));
+    searchParams.append("size", String(params?.size ?? 50));
+
+    const res = await apiClient.get(`/staff/devices?${searchParams.toString()}`, {
+      headers: authHeaders(),
+    });
+    return res.data;
+  },
+
+  async createStaffDevice(payload: {
+    name: string;
+    description?: string;
+    price: number;
+    stock: number;
+    categoryId?: number;
+    brandId?: number;
+    sku?: string;
+    image?: string;
+  }): Promise<StaffDevice> {
+    const res = await apiClient.post("/staff/devices", payload, {
+      headers: authHeaders(),
+    });
+    return res.data;
+  },
+
+  async getStaffDeviceCategories(): Promise<StaffDeviceCategory[]> {
+    const res = await apiClient.get("/devices/categories", {
+      headers: authHeaders(),
+    });
+    return res.data;
+  },
+
+  async getStaffDeviceBrands(): Promise<StaffDeviceBrand[]> {
+    const res = await apiClient.get("/devices/brands", {
+      headers: authHeaders(),
+    });
+    return res.data;
+  },
+
+  async adjustStaffInventory(
+    deviceId: number,
+    payload: {
+      transactionType: InventoryTransactionType;
+      quantity: number;
+      reason: string;
+      note?: string;
+    }
+  ): Promise<StaffDevice> {
+    const res = await apiClient.post(
+      `/staff/devices/${deviceId}/inventory-adjustments`,
+      payload,
+      {
+        headers: authHeaders(),
+      }
+    );
+    return res.data;
+  },
+
+  async updateStaffDeviceMaintenance(
+    deviceId: number,
+    payload: {
+      maintenanceReason?: string;
+      maintenanceStartDate?: string;
+      maintenanceEndDate?: string;
+      maintenanceCost?: number;
+      markCompleted?: boolean;
+    }
+  ): Promise<StaffDevice> {
+    const res = await apiClient.put(`/staff/devices/${deviceId}/maintenance`, payload, {
+      headers: authHeaders(),
+    });
+    return res.data;
+  },
+
+  async getInventoryTransactions(params?: {
+    deviceId?: number;
+    page?: number;
+    size?: number;
+  }): Promise<BackofficePageResponse<StaffInventoryTransaction>> {
+    const searchParams = new URLSearchParams();
+    if (params?.deviceId) {
+      searchParams.append("deviceId", String(params.deviceId));
+    }
+    searchParams.append("page", String(params?.page ?? 0));
+    searchParams.append("size", String(params?.size ?? 20));
+
+    const res = await apiClient.get(
+      `/staff/inventory-transactions?${searchParams.toString()}`,
+      {
+        headers: authHeaders(),
+      }
+    );
     return res.data;
   },
 

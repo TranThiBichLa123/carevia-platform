@@ -49,7 +49,9 @@ const STATUS_OPTIONS: Array<{
 	{ value: "ALL", label: "Tất cả trạng thái" },
 	{ value: "PENDING_CONFIRM", label: "Chờ xác nhận" },
 	{ value: "CONFIRMED", label: "Đã xác nhận" },
+	{ value: "CHECKED_IN", label: "Đã check-in" },
 	{ value: "COMPLETED", label: "Hoàn tất" },
+	{ value: "NO_SHOW", label: "Không đến" },
 	{ value: "CANCELLED", label: "Đã hủy" },
 	{ value: "EXPIRED", label: "Hết hạn" },
 ];
@@ -57,6 +59,7 @@ const STATUS_OPTIONS: Array<{
 const STATUS_LABELS: Record<StaffBookingStatus, string> = {
 	PENDING_CONFIRM: "Chờ xác nhận",
 	CONFIRMED: "Đã xác nhận",
+	CHECKED_IN: "Đã check-in",
 	COMPLETED: "Hoàn tất",
 	CANCELLED: "Đã hủy",
 	NO_SHOW: "Không đến",
@@ -69,6 +72,7 @@ const STATUS_BADGE_VARIANTS: Record<
 > = {
 	PENDING_CONFIRM: "outline",
 	CONFIRMED: "default",
+	CHECKED_IN: "secondary",
 	COMPLETED: "secondary",
 	CANCELLED: "destructive",
 	NO_SHOW: "destructive",
@@ -148,11 +152,11 @@ export default function StaffBookingsPage() {
 	const confirmedCount = bookings.filter(
 		(booking) => booking.status === "CONFIRMED"
 	).length;
-	const completedCount = bookings.filter(
-		(booking) => booking.status === "COMPLETED"
+	const checkedInCount = bookings.filter(
+		(booking) => booking.status === "CHECKED_IN"
 	).length;
-	const cancelledCount = bookings.filter(
-		(booking) => booking.status === "CANCELLED"
+	const issueCount = bookings.filter((booking) =>
+		["CANCELLED", "NO_SHOW", "EXPIRED"].includes(booking.status)
 	).length;
 
 	const handleConfirm = async (bookingId: number) => {
@@ -181,6 +185,42 @@ export default function StaffBookingsPage() {
 			await loadBookings();
 		} catch (error) {
 			toast.error(getErrorMessage(error, "Không thể hoàn tất booking."));
+		} finally {
+			setActionBookingId(null);
+		}
+	};
+
+	const handleCheckIn = async (bookingId: number) => {
+		const staffNote = window.prompt(
+			"Ghi chú check-in cho booking này (có thể bỏ trống)",
+			""
+		);
+
+		try {
+			setActionBookingId(bookingId);
+			await backofficeApi.checkInStaffBooking(bookingId, staffNote ?? undefined);
+			toast.success("Đã check-in booking.");
+			await loadBookings();
+		} catch (error) {
+			toast.error(getErrorMessage(error, "Không thể check-in booking."));
+		} finally {
+			setActionBookingId(null);
+		}
+	};
+
+	const handleNoShow = async (bookingId: number) => {
+		const staffNote = window.prompt(
+			"Nhập ghi chú hoặc lý do no-show",
+			""
+		);
+
+		try {
+			setActionBookingId(bookingId);
+			await backofficeApi.markStaffBookingNoShow(bookingId, staffNote ?? undefined);
+			toast.success("Đã cập nhật booking thành không đến.");
+			await loadBookings();
+		} catch (error) {
+			toast.error(getErrorMessage(error, "Không thể cập nhật no-show."));
 		} finally {
 			setActionBookingId(null);
 		}
@@ -281,19 +321,19 @@ export default function StaffBookingsPage() {
 				</Card>
 				<Card>
 					<CardHeader>
-						<CardDescription>Đã hoàn tất trải nghiệm</CardDescription>
+						<CardDescription>Khách đã check-in</CardDescription>
 						<CardTitle className="flex items-center gap-3 text-3xl">
 							<CheckCircle2 className="size-6 text-indigo-500" />
-							{completedCount}
+							{checkedInCount}
 						</CardTitle>
 					</CardHeader>
 				</Card>
 				<Card>
 					<CardHeader>
-						<CardDescription>Đã hủy hoặc phát sinh lỗi</CardDescription>
+						<CardDescription>No-show, hủy hoặc hết hạn</CardDescription>
 						<CardTitle className="flex items-center gap-3 text-3xl">
 							<CircleSlash className="size-6 text-rose-500" />
-							{cancelledCount}
+							{issueCount}
 						</CardTitle>
 					</CardHeader>
 				</Card>
@@ -394,6 +434,29 @@ export default function StaffBookingsPage() {
 													) : null}
 
 													{booking.status === "CONFIRMED" ? (
+														<>
+															<Button
+																size="sm"
+																variant="outline"
+																onClick={() => void handleCheckIn(booking.id)}
+																disabled={isActing}
+															>
+																{isActing ? <Loader2 className="animate-spin" /> : null}
+																Check-in
+															</Button>
+															<Button
+																size="sm"
+																variant="outline"
+																onClick={() => void handleNoShow(booking.id)}
+																disabled={isActing}
+															>
+																{isActing ? <Loader2 className="animate-spin" /> : null}
+																No-show
+															</Button>
+														</>
+													) : null}
+
+													{booking.status === "CHECKED_IN" ? (
 														<Button
 															size="sm"
 															variant="outline"

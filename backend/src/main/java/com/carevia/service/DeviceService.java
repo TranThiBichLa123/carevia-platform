@@ -359,7 +359,7 @@ public class DeviceService {
         return name.toLowerCase().replaceAll("[^a-z0-9]+", "-").replaceAll("^-|-$", "");
     }
 
-    private DeviceResponse toResponse(Device d) {
+    public DeviceResponse toResponse(Device d) {
         return DeviceResponse.builder()
                 .id(d.getId())
                 .name(d.getName())
@@ -403,6 +403,10 @@ public class DeviceService {
                 .bookingPrice(d.getBookingPrice())
                 .tags(d.getTags())
                 .videoUrl(d.getVideoUrl())
+                .maintenanceReason(d.getMaintenanceReason())
+                .maintenanceStartDate(d.getMaintenanceStartDate())
+                .maintenanceEndDate(d.getMaintenanceEndDate())
+                .maintenanceCost(d.getMaintenanceCost())
                 .specifications(d.getSpecifications() != null ? d.getSpecifications().stream()
                         .map(s -> DeviceResponse.SpecificationInfo.builder()
                                 .label(s.getLabel()).value(s.getValue()).build())

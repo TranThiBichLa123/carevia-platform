@@ -29,6 +29,8 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
 
     List<Order> findByStatus(OrderStatus status);
 
+    long countByStatus(OrderStatus status);
+
     // SỬA QUERY: Đảm bảo sử dụng tên trường trong Entity (totalAmount, status, createdAt)
     // Lưu ý: Trong HQL, Enum phải được viết đầy đủ hoặc dùng tên Enum
     @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.status = com.carevia.shared.constant.OrderStatus.COMPLETED AND o.createdAt BETWEEN :start AND :end")

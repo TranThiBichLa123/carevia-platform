@@ -118,6 +118,7 @@ const BookingDetail = () => {
     confirmed: { label: 'Đã xác nhận', color: 'text-green-600', bg: 'bg-green-50' },
     Confirmed: { label: 'Đã xác nhận', color: 'text-green-600', bg: 'bg-green-50' },
     CONFIRMED: { label: 'Đã xác nhận', color: 'text-green-600', bg: 'bg-green-50' },
+    CHECKED_IN: { label: 'Đã check-in', color: 'text-indigo-600', bg: 'bg-indigo-50' },
     completed: { label: 'Đã hoàn thành', color: 'text-green-600', bg: 'bg-green-50' },
     Completed: { label: 'Đã hoàn thành', color: 'text-green-600', bg: 'bg-green-50' },
     COMPLETED: { label: 'Đã hoàn thành', color: 'text-green-600', bg: 'bg-green-50' },
@@ -271,7 +272,7 @@ const BookingDetail = () => {
 
       {/* Cancel Dialog */}
       <Dialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
-        <DialogContent className="sm:max-w-[420px] rounded-2xl border-none shadow-2xl p-0 overflow-hidden">
+        <DialogContent className="sm:max-w-105 rounded-2xl border-none shadow-2xl p-0 overflow-hidden">
           {/* Header với nền nhẹ để tạo điểm nhấn */}
           <div className="bg-red-50/50 px-6 py-5">
             <DialogHeader>

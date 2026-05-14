@@ -90,10 +90,17 @@ public class Booking extends BaseEntity {
     }
 
     public void complete() {
-        if (this.status != BookingStatus.CONFIRMED) {
-            throw new InvalidStatusException("Can only complete bookings in CONFIRMED status");
+        if (this.status != BookingStatus.CHECKED_IN) {
+            throw new InvalidStatusException("Can only complete bookings in CHECKED_IN status");
         }
         this.status = BookingStatus.COMPLETED;
+    }
+
+    public void checkIn() {
+        if (this.status != BookingStatus.CONFIRMED) {
+            throw new InvalidStatusException("Can only check in bookings in CONFIRMED status");
+        }
+        this.status = BookingStatus.CHECKED_IN;
     }
 
     public void cancel(String reason, String cancelledBy) {

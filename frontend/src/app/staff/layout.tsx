@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { CSSProperties } from "react";
@@ -9,6 +9,7 @@ import {
   ClipboardList, 
   Layers3, 
   TicketPercent, 
+  Boxes,
   Menu, 
   X, 
   LayoutDashboard,
@@ -20,6 +21,7 @@ import { useUserStore } from "@/lib/store";
 
 const staffSections = [
   { title: "Dashboard tổng quan", href: "/staff", icon: LayoutDashboard },
+  { title: "Tồn kho & bảo trì", href: "/staff/inventory", icon: Boxes },
   { title: "Quản lý Booking", href: "/staff/bookings", icon: CalendarCheck2 },
   { title: "Quản lý Đơn Hàng", href: "/staff/orders", icon: ClipboardList },
   { title: "Quản lý Phiên", href: "/staff/sessions", icon: Layers3 },
@@ -27,7 +29,7 @@ const staffSections = [
 ];
 
 export default function StaffLayout({ children }: { children: React.ReactNode }) {
-  const { authUser, isAuthenticated } = useUserStore();
+  const { isAuthenticated } = useUserStore();
   const pathname = usePathname();
   const isMobile = useIsMobile();
   const [isDesktopSidebarOpen, setIsDesktopSidebarOpen] = useState(true);
@@ -44,12 +46,6 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
 
     setIsDesktopSidebarOpen((current) => !current);
   };
-
-  useEffect(() => {
-    if (!isMobile) {
-      setIsMobileSidebarOpen(false);
-    }
-  }, [isMobile]);
 
   if (!isAuthenticated) {
     return (
@@ -78,7 +74,7 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
       <aside 
         className={cn(
           "fixed inset-y-0 left-0 z-50 flex max-w-[85vw] flex-col bg-[#052962] text-white shadow-xl transition-[transform,width] duration-300 ease-out md:sticky md:top-0 md:h-screen md:max-w-none md:shadow-none",
-          isMobile ? "w-72" : "w-[var(--staff-sidebar-width)]",
+          isMobile ? "w-72" : "w-(--staff-sidebar-width)",
           isMobileSidebarOpen || !isMobile ? "translate-x-0" : "-translate-x-full"
         )}
       >

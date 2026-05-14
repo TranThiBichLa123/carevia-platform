@@ -7,6 +7,7 @@ import com.carevia.shared.entity.BaseEntity;
 import org.hibernate.annotations.SQLDelete;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -126,6 +127,18 @@ public class Device extends BaseEntity {
     @Column(name = "video_url", length = 512)
     private String videoUrl;
 
+    @Column(name = "maintenance_reason", length = 500)
+    private String maintenanceReason;
+
+    @Column(name = "maintenance_start_date")
+    private LocalDate maintenanceStartDate;
+
+    @Column(name = "maintenance_end_date")
+    private LocalDate maintenanceEndDate;
+
+    @Column(name = "maintenance_cost", precision = 12, scale = 2)
+    private BigDecimal maintenanceCost;
+
     @ElementCollection
     @CollectionTable(name = "device_specifications", joinColumns = @JoinColumn(name = "device_id"))
     @Builder.Default
@@ -152,5 +165,28 @@ public class Device extends BaseEntity {
         double total = this.averageRating * this.reviewCount;
         this.reviewCount++;
         this.averageRating = (total + newRating) / this.reviewCount;
+    }
+
+    public void updateInventory(int newStock) {
+        this.stock = Math.max(newStock, 0);
+        if (this.status != DeviceStatus.MAINTENANCE) {
+            this.status = this.stock > 0 ? DeviceStatus.AVAILABLE : DeviceStatus.OUT_OF_STOCK;
+        }
+    }
+
+    public void startMaintenance(String reason, LocalDate startDate, LocalDate expectedEndDate, BigDecimal cost) {
+        this.maintenanceReason = reason;
+        this.maintenanceStartDate = startDate;
+        this.maintenanceEndDate = expectedEndDate;
+        this.maintenanceCost = cost;
+        this.status = DeviceStatus.MAINTENANCE;
+    }
+
+    public void completeMaintenance(LocalDate endDate, BigDecimal cost) {
+        this.maintenanceEndDate = endDate;
+        if (cost != null) {
+            this.maintenanceCost = cost;
+        }
+        this.status = this.stock > 0 ? DeviceStatus.AVAILABLE : DeviceStatus.OUT_OF_STOCK;
     }
 }

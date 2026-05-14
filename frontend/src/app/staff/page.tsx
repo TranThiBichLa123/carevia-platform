@@ -1,14 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight } from "lucide-react";
+import { AlertTriangle, Boxes, ChevronRight, Loader2, RefreshCw } from "lucide-react";
+import { useCallback, useEffect, useState } from "react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { backofficeApi, type StaffDashboard } from "@/lib/backofficeApi";
+import { formatDate, getBackofficeErrorMessage } from "@/lib/backofficeUtils";
 import { useUserStore } from "@/lib/store";
 
 const staffSections = [
+	{
+		title: "Tồn kho & bảo trì",
+		description: "Theo dõi low stock, nhập/xuất kho và đưa thiết bị vào hoặc ra khỏi bảo trì.",
+		href: "/staff/inventory",
+		tag: "Inventory"
+	},
     {
         title: "Quản lý Booking",
-        description: "Xác nhận, hoàn tất hoặc hủy lịch trải nghiệm của khách hàng.",
+        description: "Xác nhận, check-in, đánh dấu no-show và hoàn tất lịch trải nghiệm của khách hàng.",
         href: "/staff/bookings",
         tag: "Operational"
     },
@@ -32,12 +43,49 @@ const staffSections = [
     },
 ];
 
+const metricStyles = [
+	"border-[#052962]",
+	"border-[#0B6E4F]",
+	"border-[#B45309]",
+	"border-[#9F1239]",
+	"border-[#1D4ED8]",
+	"border-[#7C3AED]",
+];
+
 export default function StaffDashboardPage() {
     const { authUser } = useUserStore();
+    const [dashboard, setDashboard] = useState<StaffDashboard | null>(null);
+    const [loading, setLoading] = useState(true);
+
+    const loadDashboard = useCallback(async () => {
+        try {
+            setLoading(true);
+            const response = await backofficeApi.getStaffDashboard();
+            setDashboard(response);
+        } catch (error) {
+            toast.error(getBackofficeErrorMessage(error, "Không thể tải dashboard vận hành."));
+        } finally {
+            setLoading(false);
+        }
+    }, []);
+
+    useEffect(() => {
+        void loadDashboard();
+    }, [loadDashboard]);
+
+    const metrics = dashboard
+        ? [
+              { label: "Booking hôm nay", value: dashboard.bookingsToday, hint: `${dashboard.pendingBookings} chờ xác nhận` },
+              { label: "Khách đã check-in", value: dashboard.checkedInToday, hint: "Theo lịch hôm nay" },
+              { label: "Đơn chờ xử lý", value: dashboard.pendingOrders, hint: "PENDING_PAYMENT, PAID, PROCESSING" },
+              { label: "Thiết bị sắp hết", value: dashboard.lowStockDevices, hint: "Ngưỡng cảnh báo <= 5" },
+              { label: "Thiết bị bảo trì", value: dashboard.maintenanceDevices, hint: "Đang khóa vận hành" },
+              { label: "Voucher sắp hết hạn", value: dashboard.vouchersExpiringSoon, hint: "Trong 7 ngày tới" },
+          ]
+        : [];
 
     return (
         <div className="space-y-8">
-            {/* Guardian Editorial Header Section */}
             <div className="border-b-4 border-[#111111] pb-2 mb-8">
                 <div className="text-[11px] font-bold uppercase tracking-wider text-[#C70000] font-sans">
                     Carevia Internal Network / Staff Editorial Workspace
@@ -50,7 +98,6 @@ export default function StaffDashboardPage() {
                 </p>
             </div>
 
-            {/* Quick Stats Summary Line (Guardian Sub-bar style) */}
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 border-b border-[#DCDCDC] pb-6 mb-8 text-xs font-vietnam">
                 <div className="border-l-2 border-[#052962] pl-2">
                     <span className="text-[#666666] block">Phiên làm việc</span>
@@ -70,9 +117,39 @@ export default function StaffDashboardPage() {
                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 inline-block" /> Trực tuyến
                     </span>
                 </div>
+                <div className="border-l-2 border-[#052962] pl-2 col-span-2 md:col-span-1">
+                    <span className="text-[#666666] block">Ngày vận hành</span>
+                    <span className="font-bold text-[#111111]">{dashboard ? formatDate(dashboard.date) : "--/--/----"}</span>
+                </div>
             </div>
 
-            {/* Guardian Layout Grid (Editorial Card Blocks) */}
+            <div className="flex items-center justify-end">
+                <Button variant="outline" onClick={() => void loadDashboard()} disabled={loading}>
+                    <RefreshCw className={loading ? "animate-spin" : ""} />
+                    Làm mới dashboard
+                </Button>
+            </div>
+
+            {loading ? (
+                <div className="flex min-h-40 items-center justify-center text-muted-foreground">
+                    <Loader2 className="size-5 animate-spin" />
+                </div>
+            ) : (
+                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                    {metrics.map((metric, index) => (
+                        <Card key={metric.label} className={`border-l-4 ${metricStyles[index % metricStyles.length]}`}>
+                            <CardHeader>
+                                <CardTitle className="text-base font-semibold">{metric.label}</CardTitle>
+                            </CardHeader>
+                            <CardContent>
+                                <div className="text-4xl font-black text-[#111111]">{metric.value}</div>
+                                <p className="mt-2 text-sm text-muted-foreground">{metric.hint}</p>
+                            </CardContent>
+                        </Card>
+                    ))}
+                </div>
+            )}
+
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-2">
                 {staffSections.map((section) => {
                     return (
@@ -106,6 +183,51 @@ export default function StaffDashboardPage() {
                         </div>
                     );
                 })}
+            </div>
+
+            <div className="grid gap-6 xl:grid-cols-3">
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-lg"><Boxes className="size-5 text-[#052962]" /> Low Stock</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3 text-sm">
+                        {dashboard?.lowStockAlerts.length ? dashboard.lowStockAlerts.map((item) => (
+                            <div key={item.deviceId} className="rounded-xl border bg-muted/20 p-3">
+                                <div className="font-semibold text-[#111111]">{item.deviceName}</div>
+                                <div className="text-muted-foreground">Tồn kho còn {item.stock}</div>
+                            </div>
+                        )) : <div className="text-muted-foreground">Không có thiết bị nào đang ở ngưỡng cảnh báo.</div>}
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="flex items-center gap-2 text-lg"><AlertTriangle className="size-5 text-[#B45309]" /> Maintenance</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3 text-sm">
+                        {dashboard?.maintenanceAlerts.length ? dashboard.maintenanceAlerts.map((item) => (
+                            <div key={item.deviceId} className="rounded-xl border bg-muted/20 p-3">
+                                <div className="font-semibold text-[#111111]">{item.deviceName}</div>
+                                <div className="text-muted-foreground">{item.maintenanceReason || "Đang bảo trì định kỳ"}</div>
+                            </div>
+                        )) : <div className="text-muted-foreground">Hiện không có thiết bị nào trong trạng thái bảo trì.</div>}
+                    </CardContent>
+                </Card>
+
+                <Card>
+                    <CardHeader>
+                        <CardTitle className="text-lg">Voucher Sắp Hết Hạn</CardTitle>
+                    </CardHeader>
+                    <CardContent className="space-y-3 text-sm">
+                        {dashboard?.voucherAlerts.length ? dashboard.voucherAlerts.map((item) => (
+                            <div key={item.voucherId} className="rounded-xl border bg-muted/20 p-3">
+                                <div className="font-semibold text-[#111111]">{item.code}</div>
+                                <div className="text-muted-foreground">Hết hạn: {formatDate(item.endDate)}</div>
+                                <div className="text-muted-foreground">Còn lại: {item.remainingQuantity}</div>
+                            </div>
+                        )) : <div className="text-muted-foreground">Không có voucher nào sắp hết hạn trong 7 ngày tới.</div>}
+                    </CardContent>
+                </Card>
             </div>
         </div>
     );

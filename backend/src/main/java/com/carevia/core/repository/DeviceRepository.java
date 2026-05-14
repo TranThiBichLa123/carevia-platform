@@ -51,4 +51,10 @@ public interface DeviceRepository extends JpaRepository<Device, Long>, JpaSpecif
 
     @Query("SELECT d.brand.id, MAX(d.discountPercentage) FROM Device d WHERE d.brand IS NOT NULL AND d.status = 'AVAILABLE' AND d.deletedAt IS NULL GROUP BY d.brand.id")
     List<Object[]> findMaxDiscountPerBrand();
+
+    @Query("SELECT COUNT(d) FROM Device d WHERE d.deletedAt IS NULL AND d.status <> com.carevia.shared.constant.DeviceStatus.INACTIVE AND d.stock <= :threshold")
+    long countLowStockDevices(@Param("threshold") Integer threshold);
+
+    @Query("SELECT COUNT(d) FROM Device d WHERE d.deletedAt IS NULL AND d.status = com.carevia.shared.constant.DeviceStatus.MAINTENANCE")
+    long countDevicesInMaintenance();
 }

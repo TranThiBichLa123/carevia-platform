@@ -13,6 +13,7 @@ function mapBookingStatus(status: string): string {
         case 'PENDING':
             return 'pending';
         case 'CONFIRMED':
+        case 'CHECKED_IN':
             return 'upcoming';
         case 'COMPLETED':
             return 'completed';
