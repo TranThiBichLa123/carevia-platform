@@ -140,6 +140,7 @@ public class BookingController {
     }
 
     @GetMapping("/sessions/{id}")
+    @StaffOrAdmin
     @Operation(summary = "Get session by ID")
     public ResponseEntity<?> getSessionById(@PathVariable Long id) {
         return ResponseEntity.ok(sessionService.getSessionById(id));

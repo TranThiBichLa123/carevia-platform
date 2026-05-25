@@ -75,6 +75,7 @@ export type StaffDevice = {
   originalPrice: number | null;
   stock: number;
   image: string | null;
+  imagePublicId: string | null;
   sku: string | null;
   status: StaffDeviceStatus;
   sold: number;
@@ -158,9 +159,11 @@ export type StaffDeviceBrand = {
   name: string;
   slug: string;
   image: string | null;
+  imagePublicId?: string | null;
   description?: string | null;
   isFeatured?: boolean;
   isActive?: boolean;
+  maxDiscountPercentage?: number | null;
 };
 
 export type BackofficeOrderStatus =
@@ -272,6 +275,10 @@ export type AdminAccount = {
   avatarUrl: string | null;
   lastLoginAt: string | null;
   createdAt: string;
+  brandId?: number;
+  brandName?: string;
+  requestedBrandName?: string | null;
+  requestedBrandDescription?: string | null;
 };
 
 export type AdminAccountProfile = {
@@ -287,6 +294,10 @@ export type AdminAccountProfile = {
     staffId?: number;
     clientCode?: string;
     staffCode?: string;
+    brandId?: number;
+    brandName?: string;
+    requestedBrandName?: string;
+    requestedBrandDescription?: string;
     fullName?: string;
     phone?: string;
     birthDate?: string;
@@ -337,8 +348,19 @@ export type AuditLogEntry = {
   userAccountId: number | null;
   username: string | null;
   email: string | null;
+  role: AdminRole | null;
   ipAddress: string | null;
   createdAt: string;
+};
+
+export type AuditLogSuggestions = {
+  searchTerms: string[];
+  tableNames: string[];
+};
+
+export type DeviceImageUploadResult = {
+  imageUrl: string;
+  imagePublicId: string;
 };
 
 type WrappedResponse<T> = {
@@ -441,6 +463,36 @@ export const backofficeApi = {
     return res.data;
   },
 
+  async getStaffBrand(): Promise<StaffDeviceBrand> {
+    const res = await apiClient.get("/staff/brand", {
+      headers: authHeaders(),
+    });
+    return res.data;
+  },
+
+  async updateStaffBrand(payload: {
+    name: string;
+    description?: string;
+  }): Promise<StaffDeviceBrand> {
+    const res = await apiClient.put("/staff/brand", payload, {
+      headers: authHeaders(),
+    });
+    return res.data;
+  },
+
+  async uploadStaffBrandImage(file: File): Promise<DeviceImageUploadResult> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const res = await apiClient.post("/staff/brand/image-upload", formData, {
+      headers: {
+        ...authHeaders(),
+        "Content-Type": "multipart/form-data",
+      },
+    });
+    return res.data;
+  },
+
   async getStaffDevices(params?: {
     search?: string;
     status?: StaffDeviceStatus;
@@ -482,6 +534,7 @@ export const backofficeApi = {
     brandId?: number;
     sku?: string;
     image?: string;
+    imagePublicId?: string;
   }): Promise<StaffDevice> {
     const res = await apiClient.post("/staff/devices", payload, {
       headers: authHeaders(),
@@ -502,10 +555,37 @@ export const backofficeApi = {
       brandId?: number;
       sku?: string;
       image?: string;
+      imagePublicId?: string;
     }
   ): Promise<StaffDevice> {
     const res = await apiClient.put(`/staff/devices/${deviceId}`, payload, {
       headers: authHeaders(),
+    });
+    return res.data;
+  },
+
+  async uploadStaffDeviceImage(
+    file: File,
+    params?: {
+      deviceId?: number;
+      currentPublicId?: string;
+    }
+  ): Promise<DeviceImageUploadResult> {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    if (params?.deviceId !== undefined) {
+      formData.append("deviceId", String(params.deviceId));
+    }
+    if (params?.currentPublicId) {
+      formData.append("currentPublicId", params.currentPublicId);
+    }
+
+    const res = await apiClient.post("/staff/devices/image-upload", formData, {
+      headers: {
+        ...authHeaders(),
+        "Content-Type": "multipart/form-data",
+      },
     });
     return res.data;
   },
@@ -749,10 +829,10 @@ export const backofficeApi = {
     return res.data.data;
   },
 
-  async approveStaffAccount(id: number): Promise<AdminAccountProfile> {
+  async approveStaffAccount(id: number, brandId?: number): Promise<AdminAccountProfile> {
     const res = await apiClient.patch<WrappedResponse<AdminAccountProfile>>(
       `/admin/accounts/${id}/approve`,
-      {},
+      brandId ? { brandId } : {},
       {
         headers: authHeaders(),
       }
@@ -829,6 +909,7 @@ export const backofficeApi = {
   async getAuditLogs(params?: {
     search?: string;
     action?: string;
+    role?: string;
     tableName?: string;
     page?: number;
     size?: number;
@@ -841,6 +922,9 @@ export const backofficeApi = {
     if (params?.action) {
       searchParams.append("action", params.action);
     }
+    if (params?.role) {
+      searchParams.append("role", params.role);
+    }
     if (params?.tableName) {
       searchParams.append("tableName", params.tableName);
     }
@@ -848,6 +932,13 @@ export const backofficeApi = {
     searchParams.append("size", String(params?.size ?? 100));
 
     const res = await apiClient.get(`/admin/audit-logs?${searchParams.toString()}`, {
+      headers: authHeaders(),
+    });
+    return res.data;
+  },
+
+  async getAuditLogSuggestions(): Promise<AuditLogSuggestions> {
+    const res = await apiClient.get("/admin/audit-logs/suggestions", {
       headers: authHeaders(),
     });
     return res.data;

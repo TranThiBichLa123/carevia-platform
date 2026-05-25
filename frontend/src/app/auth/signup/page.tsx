@@ -1,7 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import { toast } from "sonner";
 import { authService } from "@/services/auth/auth.service";
@@ -9,12 +10,23 @@ import type { RegisterRequest } from "@/services/auth/auth.types";
 
 export default function SignupPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [username, setUsername] = useState("");
+  const [fullName, setFullName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [role, setRole] = useState<RegisterRequest["role"]>("CLIENT");
+  const [requestedBrandName, setRequestedBrandName] = useState("");
+  const [requestedBrandDescription, setRequestedBrandDescription] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  useEffect(() => {
+    const requestedRole = searchParams.get("role");
+    if (requestedRole === "CLIENT" || requestedRole === "STAFF") {
+      setRole(requestedRole);
+    }
+  }, [searchParams]);
 
   const animationSpeed = 0.8;
 
@@ -30,6 +42,11 @@ export default function SignupPage() {
       return;
     }
 
+    if (role === "STAFF" && !requestedBrandName.trim()) {
+      toast.error("Seller cần khai báo tên brand để gửi hồ sơ duyệt");
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -38,10 +55,17 @@ export default function SignupPage() {
         email: email.trim(),
         password,
         role,
+        fullName: fullName.trim() || undefined,
+        requestedBrandName: role === "STAFF" ? requestedBrandName.trim() : undefined,
+        requestedBrandDescription:
+          role === "STAFF" ? requestedBrandDescription.trim() || undefined : undefined,
       });
 
       toast.success("Đăng ký thành công", {
-        description: "Tài khoản đã được tạo. Vui lòng kiểm tra email để xác thực.",
+        description:
+          role === "STAFF"
+            ? "Tài khoản Brand Staff đã được tạo. Vui lòng kiểm tra email để xác thực rồi tiếp tục seller onboarding."
+            : "Tài khoản đã được tạo. Vui lòng kiểm tra email để xác thực.",
       });
 
       router.push("/auth/signin");
@@ -179,9 +203,18 @@ export default function SignupPage() {
               Tạo tài khoản mới
             </motion.h2>
             <motion.p className="text-lg text-gray-600">
-              Tham gia cộng đồng Carevia
+              Mua sắm, đặt lịch hoặc bắt đầu hành trình bán hàng trên Carevia
 
             </motion.p>
+          </motion.div>
+
+          <motion.div variants={itemVariants} className="mb-5 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900">
+            Muốn bán hàng trên marketplace? Chuẩn bị hồ sơ brand trước khi Platform Admin duyệt quyền vận hành.
+            <div className="mt-2">
+              <Link href="/sell-with-carevia" className="font-semibold underline underline-offset-4">
+                Xem luồng seller onboarding
+              </Link>
+            </div>
           </motion.div>
 
           <form onSubmit={handleSignup} className="space-y-5">
@@ -204,6 +237,28 @@ export default function SignupPage() {
                   placeholder="janedoe"
                   autoComplete="username"
                   required
+                />
+              </motion.div>
+            </motion.div>
+
+            <motion.div variants={itemVariants}>
+              <label className="block text-sm font-medium text-gray-700 mb-1">
+                Tên hiển thị / Người liên hệ
+              </label>
+              <motion.div
+                className="relative"
+                variants={inputHoverVariants}
+                initial="rest"
+                whileHover="hover"
+              >
+                <input
+                  type="text"
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#20afb2] focus:border-transparent transition-all duration-300"
+                  style={{ boxShadow: "0 2px 8px rgba(0, 0, 0, 0.04)" }}
+                  placeholder="Trần Thị Lan"
+                  autoComplete="name"
                 />
               </motion.div>
             </motion.div>
@@ -241,25 +296,68 @@ export default function SignupPage() {
                   onClick={() => setRole("CLIENT")}
                   className={`rounded-lg border px-4 py-3 text-sm font-medium transition-all ${
                     role === "CLIENT"
-                      ? "border-[var(--primary)] bg-[var(--primary)]/10 text-[var(--primary)]"
+                      ? "border-primary bg-primary/10 text-primary"
                       : "border-gray-200 bg-gray-50 text-gray-600"
                   }`}
                 >
-                  Khách hàng
+                  <span className="block">Khách mua hàng</span>
+                  <span className="mt-1 block text-xs font-normal opacity-80">Shopping, booking, review sản phẩm và phiên trải nghiệm</span>
                 </button>
                 <button
                   type="button"
                   onClick={() => setRole("STAFF")}
                   className={`rounded-lg border px-4 py-3 text-sm font-medium transition-all ${
                     role === "STAFF"
-                      ? "border-[var(--primary)] bg-[var(--primary)]/10 text-[var(--primary)]"
+                      ? "border-primary bg-primary/10 text-primary"
                       : "border-gray-200 bg-gray-50 text-gray-600"
                   }`}
                 >
-                  Nhân viên
+                  <span className="block">Brand Staff / Seller</span>
+                  <span className="mt-1 block text-xs font-normal opacity-80">Vận hành catalog, booking, đơn hàng và review của brand đã được duyệt</span>
                 </button>
               </div>
             </motion.div>
+
+            {role === "STAFF" && (
+              <motion.div
+                variants={itemVariants}
+                initial="hidden"
+                animate="visible"
+                className="space-y-4 rounded-2xl border border-sky-200 bg-sky-50 p-4 text-sm text-sky-900"
+              >
+                <p>
+                  Tài khoản Brand Staff không có quyền bán ngay sau khi tạo. Seller cần gửi thông tin brand để Platform Admin duyệt và chỉ được thao tác trong phạm vi brand đã được cấp quyền.
+                </p>
+
+                <div className="space-y-3">
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-sky-950">
+                      Tên brand đăng ký
+                    </label>
+                    <input
+                      type="text"
+                      value={requestedBrandName}
+                      onChange={(e) => setRequestedBrandName(e.target.value)}
+                      className="w-full rounded-lg border border-sky-200 bg-white px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#20afb2]"
+                      placeholder="GlowLab Vietnam"
+                      required={role === "STAFF"}
+                    />
+                  </div>
+
+                  <div>
+                    <label className="mb-1 block text-sm font-medium text-sky-950">
+                      Mô tả brand cho admin duyệt
+                    </label>
+                    <textarea
+                      value={requestedBrandDescription}
+                      onChange={(e) => setRequestedBrandDescription(e.target.value)}
+                      className="min-h-28 w-full rounded-lg border border-sky-200 bg-white px-4 py-3 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-[#20afb2]"
+                      placeholder="Nêu rõ nhóm sản phẩm, định vị thương hiệu và lý do muốn bán trên Carevia."
+                    />
+                  </div>
+                </div>
+              </motion.div>
+            )}
 
             <div className="grid grid-cols-2 gap-4">
               <motion.div variants={itemVariants}>
@@ -317,7 +415,7 @@ export default function SignupPage() {
                   id="terms"
                   name="terms"
                   type="checkbox"
-                  className="h-4 w-4 mt-1 rounded cursor-pointer border-gray-200 bg-gray-50 text-[var(--primary)] focus:ring-[var(--primary)] focus:ring-2 focus:ring-offset-0 transition-all"
+                  className="h-4 w-4 mt-1 rounded cursor-pointer border-gray-200 bg-gray-50 text-primary focus:ring-primary focus:ring-2 focus:ring-offset-0 transition-all"
                   style={{ accentColor: "var(--primary)" }}
                   required
                   whileTap={{ scale: 0.9 }}
@@ -351,7 +449,7 @@ export default function SignupPage() {
               <motion.button
                 type="submit"
                 disabled={isSubmitting}
-                className="w-full flex items-center justify-center py-3 px-4 border border-transparent rounded-lg shadow-lg text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[var(--primary)] transition-all duration-200 disabled:cursor-not-allowed"
+                className="w-full flex items-center justify-center py-3 px-4 border border-transparent rounded-lg shadow-lg text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary transition-all duration-200 disabled:cursor-not-allowed"
                 style={{
                   background: "linear-gradient(135deg, var(--primary) 0%, var(--primary) 50%, var(--primary) 100%)",
                   boxShadow: "0 8px 20px rgba(32, 175, 178, 0.3), 0 2px 8px rgba(0, 0, 0, 0.1)",

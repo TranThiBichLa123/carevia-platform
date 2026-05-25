@@ -302,7 +302,7 @@ const CartPageClient = () => {
             <p className="text-gray-500 text-lg mb-8 max-w-md">
               Bạn có thể xem tất cả các sản phẩm có sẵn và mua một số sản phẩm trong cửa hàng.
             </p>
-            <Link href="/shop">
+            <Link href="/client">
               <Button
                 size="lg"
                 className="bg-black hover:bg-gray-800 text-white px-8 py-3 rounded-full font-medium"

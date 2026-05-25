@@ -1,4 +1,5 @@
 import apiClient from "@/services/apiClient";
+import authApi from "@/lib/authApi";
 
 export interface DeviceData {
   id: number;
@@ -23,6 +24,10 @@ export interface DeviceData {
   bookingPrice: number;
   viewCount: number;
   sold: number;
+  effectivenessScore?: number;
+  safetyScore?: number;
+  ergonomicsScore?: number;
+  durabilityScore?: number;
   origin: string;
   deviceCondition: string;
   videoUrl?: string;
@@ -180,10 +185,29 @@ export interface ReviewData {
   accountName: string;
   accountAvatar: string | null;
   rating: number;
+  effectivenessRating: number;
+  safetyRating: number;
+  ergonomicsRating: number;
+  durabilityRating: number;
+  mediaUrls: string[];
   comment: string | null;
   isVerifiedPurchase: boolean;
   adminReply: string | null;
   createdAt: string;
+}
+
+export interface ReviewImageUploadResult {
+  imageUrl: string;
+  imagePublicId: string;
+}
+
+export interface ReviewEligibilityData {
+  canReview: boolean;
+  alreadyReviewed: boolean;
+  hasCompletedOrder: boolean;
+  completedOrderId: number | null;
+  completedOrderCode: string | null;
+  message: string;
 }
 
 export interface ReviewPageResponse {
@@ -205,8 +229,40 @@ export const reviewApi = {
     return res.data;
   },
 
-  create: async (deviceId: number | string, data: { rating: number; comment: string }): Promise<ReviewData> => {
+  getEligibility: async (deviceId: number | string): Promise<ReviewEligibilityData> => {
+    const response = await authApi.get<ReviewEligibilityData>(`/devices/${deviceId}/reviews/eligibility`);
+    if (!response.success || !response.data) {
+      throw new Error(response.error?.message || "Không thể kiểm tra điều kiện viết đánh giá.");
+    }
+
+    return response.data;
+  },
+
+  create: async (
+    deviceId: number | string,
+    data: {
+      rating: number;
+      effectivenessRating: number;
+      safetyRating: number;
+      ergonomicsRating: number;
+      durabilityRating: number;
+      comment: string;
+      mediaUrls?: string[];
+    }
+  ): Promise<ReviewData> => {
     const res = await apiClient.post(`/devices/${deviceId}/reviews`, data);
     return res.data;
+  },
+
+  uploadImage: async (deviceId: number | string, file: File): Promise<ReviewImageUploadResult> => {
+    const formData = new FormData();
+    formData.append("file", file);
+
+    const response = await authApi.upload<ReviewImageUploadResult>(`/devices/${deviceId}/reviews/images`, formData);
+    if (!response.success || !response.data) {
+      throw new Error(response.error?.message || "Không thể tải ảnh đánh giá lên.");
+    }
+
+    return response.data;
   },
 };

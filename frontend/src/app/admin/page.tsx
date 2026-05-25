@@ -3,7 +3,7 @@
 import Link from "next/link";
 import {
 	BellRing,
-	Boxes,
+	Building2,
 	ChartColumnBig,
 	ClipboardList,
 	MessageSquareMore,
@@ -22,22 +22,28 @@ import { useUserStore } from "@/lib/store";
 
 const adminSections = [
 	{
-		title: "Thống Kê Hệ Thống",
-		description: "Tổng hợp người dùng, booking, doanh thu và thiết bị nổi bật.",
-		href: "/admin/statistics",
-		icon: ChartColumnBig,
+		title: "Quản lý Brand",
+		description: "Duyệt seller onboarding, theo dõi brand đang hoạt động và tách trách nhiệm vận hành shop khỏi platform.",
+		href: "/admin/brands",
+		icon: Building2,
 	},
 	{
-		title: "Quản Lý Người Dùng",
-		description: "Duyệt staff, khóa hoặc mở khóa tài khoản trong hệ thống.",
+		title: "User & Seller Staff",
+		description: "Khóa hoặc mở khóa tài khoản, duyệt seller staff và giám sát hàng đợi xét duyệt.",
 		href: "/admin/users",
 		icon: Shield,
 	},
 	{
-		title: "CRM & Đánh Giá",
-		description: "Duyệt, ẩn và phản hồi đánh giá của khách hàng theo từng thiết bị.",
+		title: "Kiểm duyệt nội dung",
+		description: "Moderation review toàn sàn, xử lý nội dung vi phạm và giám sát trạng thái hiển thị.",
 		href: "/admin/reviews",
 		icon: MessageSquareMore,
+	},
+	{
+		title: "Thống Kê Hệ Thống",
+		description: "Theo dõi GMV, đơn hàng, booking, người dùng hoạt động và các chỉ số cấp platform.",
+		href: "/admin/statistics",
+		icon: ChartColumnBig,
 	},
 	{
 		title: "Cấu Hình Hệ Thống",
@@ -57,12 +63,6 @@ const adminSections = [
 		href: "/admin/notifications",
 		icon: BellRing,
 	},
-	{
-		title: "Điều Phối Vận Hành",
-		description: "Đi thẳng sang khu vận hành để kiểm soát tồn kho, phiên trải nghiệm và đơn hàng.",
-		href: "/staff/inventory",
-		icon: Boxes,
-	},
 ];
 
 export default function AdminDashboardPage() {
@@ -71,7 +71,7 @@ export default function AdminDashboardPage() {
 	if (!isAuthenticated) {
 		return (
 			<div className="flex min-h-[60vh] items-center justify-center px-6 text-sm text-muted-foreground">
-				Đăng nhập bằng tài khoản admin để truy cập khu vực quản trị.
+				Đăng nhập bằng tài khoản Platform Admin để truy cập khu vực quản trị.
 			</div>
 		);
 	}
@@ -79,7 +79,7 @@ export default function AdminDashboardPage() {
 	if (authUser?.role !== "ADMIN") {
 		return (
 			<div className="flex min-h-[60vh] items-center justify-center px-6 text-sm text-muted-foreground">
-				Chỉ admin mới có quyền truy cập dashboard quản trị.
+				Chỉ Platform Admin mới có quyền truy cập dashboard quản trị.
 			</div>
 		);
 	}
@@ -89,20 +89,20 @@ export default function AdminDashboardPage() {
 			<div className="mx-auto max-w-7xl space-y-6">
 				<section className="overflow-hidden rounded-[28px] bg-linear-to-r from-slate-900 via-slate-800 to-sky-900 p-8 text-white shadow-lg">
 					<p className="text-sm uppercase tracking-[0.25em] text-white/60">
-						Admin Console
+						Platform Admin Console
 					</p>
 					<h1 className="mt-3 text-3xl font-bold tracking-tight md:text-4xl">
-						Trung tâm điều hành Carevia
+						Trung tâm quản trị marketplace Carevia
 					</h1>
 					<p className="mt-3 max-w-2xl text-sm text-white/80 md:text-base">
-						Đi vào các module quản trị để kiểm soát người dùng, CRM, cấu hình hiển thị website và điều phối vận hành O2O.
+						Quản trị platform ở cấp hệ thống: brand onboarding, moderation, analytics, audit và cấu hình hiển thị toàn sàn.
 					</p>
 					<div className="mt-6 flex flex-wrap gap-3">
 						<Button asChild className="bg-white text-slate-900 hover:bg-slate-100">
-							<Link href="/admin/reviews">Mở CRM & đánh giá</Link>
+							<Link href="/admin/brands">Mở quản lý brand</Link>
 						</Button>
 						<Button asChild variant="outline" className="border-white/20 bg-white/10 text-white hover:bg-white/20 hover:text-white">
-							<Link href="/admin/settings">Chỉnh cấu hình doanh nghiệp</Link>
+							<Link href="/admin/reviews">Mở moderation review</Link>
 						</Button>
 					</div>
 				</section>

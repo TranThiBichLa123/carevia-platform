@@ -5,6 +5,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import com.carevia.core.domain.*;
 import com.carevia.core.repository.*;
 import com.carevia.shared.constant.DeviceStatus;
@@ -26,17 +28,22 @@ import java.util.stream.Collectors;
 @Service
 public class DeviceService {
 
+    private static final Logger log = LoggerFactory.getLogger(DeviceService.class);
+    private static final DeviceAspectScores ZERO_ASPECT_SCORES = new DeviceAspectScores(0.0, 0.0, 0.0, 0.0);
+
     private final DeviceRepository deviceRepository;
+    private final ReviewRepository reviewRepository;
     private final CategoryRepository categoryRepository;
     private final BrandRepository brandRepository;
     private final DeviceExperienceStepRepository experienceStepRepository;
 
     private final WishlistRepository wishlistRepository;
 
-    public DeviceService(DeviceRepository deviceRepository, CategoryRepository categoryRepository,
+    public DeviceService(DeviceRepository deviceRepository, ReviewRepository reviewRepository, CategoryRepository categoryRepository,
             BrandRepository brandRepository, DeviceExperienceStepRepository experienceStepRepository,
             WishlistRepository wishlistRepository) {
         this.deviceRepository = deviceRepository;
+        this.reviewRepository = reviewRepository;
         this.categoryRepository = categoryRepository;
         this.brandRepository = brandRepository;
         this.experienceStepRepository = experienceStepRepository;
@@ -112,19 +119,14 @@ public class DeviceService {
     }
 
     public DeviceResponse getDeviceById(Long id) {
-        // 1. Tìm device
         Device device = deviceRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Device not found with id: " + id));
 
-        // 2. Tăng view count (như cũ)
         device.incrementViewCount();
         deviceRepository.save(device);
 
-        // 3. Chuyển sang DTO
         DeviceResponse response = toResponse(device);
 
-        // 4. Đếm số lượt thích từ bảng wishlist và gán vào DTO (không lưu vào bảng
-        // devices)
         long count = wishlistRepository.countByDeviceId(id);
         response.setWishlistCount(count);
 
@@ -153,6 +155,7 @@ public class DeviceService {
                 .discountPercentage(request.getDiscountPercentage() != null ? request.getDiscountPercentage() : 0.0)
                 .stock(request.getStock() != null ? request.getStock() : 0)
                 .image(request.getImage())
+                .imagePublicId(request.getImagePublicId())
                 .images(request.getImages() != null ? request.getImages() : List.of())
                 .sku(request.getSku())
                 .warrantyPeriod(request.getWarrantyPeriod())
@@ -208,6 +211,8 @@ public class DeviceService {
             device.setStock(request.getStock());
         if (request.getImage() != null)
             device.setImage(request.getImage());
+        if (request.getImagePublicId() != null)
+            device.setImagePublicId(request.getImagePublicId());
         if (request.getImages() != null)
             device.setImages(request.getImages());
         if (request.getSku() != null)
@@ -264,8 +269,7 @@ public class DeviceService {
     }
 
     public List<DeviceResponse> getPopularDevices(int limit) {
-        return deviceRepository.findPopularDevices(Pageable.ofSize(limit)).stream()
-                .map(this::toResponse).collect(Collectors.toList());
+        return toResponses(deviceRepository.findPopularDevices(Pageable.ofSize(limit)));
     }
 
     public List<DeviceResponse> getSimilarDevices(Long deviceId, int limit) {
@@ -274,8 +278,7 @@ public class DeviceService {
         Long categoryId = device.getCategory() != null ? device.getCategory().getId() : null;
         if (categoryId == null)
             return List.of();
-        return deviceRepository.findSimilarDevices(categoryId, deviceId, Pageable.ofSize(limit)).stream()
-                .map(this::toResponse).collect(Collectors.toList());
+        return toResponses(deviceRepository.findSimilarDevices(categoryId, deviceId, Pageable.ofSize(limit)));
     }
 
     public List<ExperienceStepResponse> getExperienceSteps(Long deviceId) {
@@ -330,6 +333,10 @@ public class DeviceService {
                 .collect(Collectors.toList());
     }
 
+    public BrandResponse toBrandResponse(Brand brand) {
+        return toBrandResponse(brand, buildMaxDiscountMap());
+    }
+
     private Map<Long, Double> buildMaxDiscountMap() {
         Map<Long, Double> map = new HashMap<>();
         for (Object[] row : deviceRepository.findMaxDiscountPerBrand()) {
@@ -346,6 +353,7 @@ public class DeviceService {
                 .name(b.getName())
                 .slug(b.getSlug())
                 .image(b.getImage())
+                .imagePublicId(b.getImagePublicId())
                 .description(b.getDescription())
                 .isFeatured(b.getIsFeatured())
                 .isActive(b.getIsActive())
@@ -388,6 +396,23 @@ public class DeviceService {
     }
 
     public DeviceResponse toResponse(Device d) {
+        return toResponse(d, resolveAspectScores(d.getId()));
+    }
+
+    private List<DeviceResponse> toResponses(List<Device> devices) {
+        if (devices.isEmpty()) {
+            return List.of();
+        }
+
+        Map<Long, DeviceAspectScores> aspectScoresByDeviceId = resolveAspectScoresByDeviceIds(
+                devices.stream().map(Device::getId).toList());
+        return devices.stream()
+                .map(device -> toResponse(device, aspectScoresByDeviceId.getOrDefault(device.getId(), ZERO_ASPECT_SCORES)))
+                .collect(Collectors.toList());
+    }
+
+    private DeviceResponse toResponse(Device d, DeviceAspectScores aspectScores) {
+
         return DeviceResponse.builder()
                 .id(d.getId())
                 .name(d.getName())
@@ -400,6 +425,7 @@ public class DeviceService {
                 .stock(d.getStock())
                 .averageRating(d.getAverageRating())
                 .image(d.getImage())
+                .imagePublicId(d.getImagePublicId())
                 .images(d.getImages())
                 .category(d.getCategory() != null ? DeviceResponse.CategoryInfo.builder()
                         .id(d.getCategory().getId())
@@ -426,6 +452,10 @@ public class DeviceService {
                 .status(d.getStatus())
                 .sold(d.getSold())
                 .reviewCount(d.getReviewCount())
+                .effectivenessScore(aspectScores.effectivenessScore())
+                .safetyScore(aspectScores.safetyScore())
+                .ergonomicsScore(aspectScores.ergonomicsScore())
+                .durabilityScore(aspectScores.durabilityScore())
                 .viewCount(d.getViewCount())
                 .isBookingAvailable(d.getIsBookingAvailable())
                 .bookingPrice(d.getBookingPrice())
@@ -444,8 +474,9 @@ public class DeviceService {
     }
 
     private PageResponse<DeviceResponse> toPageResponse(Page<Device> page) {
+        List<DeviceResponse> items = toResponses(page.getContent());
         return PageResponse.<DeviceResponse>builder()
-                .items(page.getContent().stream().map(this::toResponse).collect(Collectors.toList()))
+                .items(items)
                 .page(page.getNumber())
                 .size(page.getSize())
                 .totalItems(page.getTotalElements())
@@ -453,5 +484,48 @@ public class DeviceService {
                 .hasNext(page.hasNext())
                 .hasPrevious(page.hasPrevious())
                 .build();
+    }
+
+    private DeviceAspectScores resolveAspectScores(Long deviceId) {
+        return resolveAspectScoresByDeviceIds(List.of(deviceId)).getOrDefault(deviceId, ZERO_ASPECT_SCORES);
+    }
+
+    private Map<Long, DeviceAspectScores> resolveAspectScoresByDeviceIds(List<Long> deviceIds) {
+        if (deviceIds.isEmpty()) {
+            return Map.of();
+        }
+
+        try {
+            Map<Long, DeviceAspectScores> aspectScoresByDeviceId = new HashMap<>();
+            for (Long deviceId : deviceIds) {
+                aspectScoresByDeviceId.put(deviceId, ZERO_ASPECT_SCORES);
+            }
+
+            for (ReviewRepository.DeviceAspectAverageRow averages : reviewRepository.findAspectAveragesByDeviceIds(deviceIds)) {
+                aspectScoresByDeviceId.put(
+                        averages.getDeviceId(),
+                        new DeviceAspectScores(
+                                averages.getEffectivenessScore() != null ? averages.getEffectivenessScore() : 0.0,
+                                averages.getSafetyScore() != null ? averages.getSafetyScore() : 0.0,
+                                averages.getErgonomicsScore() != null ? averages.getErgonomicsScore() : 0.0,
+                                averages.getDurabilityScore() != null ? averages.getDurabilityScore() : 0.0));
+            }
+
+            return aspectScoresByDeviceId;
+        } catch (RuntimeException exception) {
+            log.warn("Failed to resolve aspect scores for devices {}. Falling back to zeros.", deviceIds, exception);
+            Map<Long, DeviceAspectScores> fallback = new HashMap<>();
+            for (Long deviceId : deviceIds) {
+                fallback.put(deviceId, ZERO_ASPECT_SCORES);
+            }
+            return fallback;
+        }
+    }
+
+    private record DeviceAspectScores(
+            double effectivenessScore,
+            double safetyScore,
+            double ergonomicsScore,
+            double durabilityScore) {
     }
 }

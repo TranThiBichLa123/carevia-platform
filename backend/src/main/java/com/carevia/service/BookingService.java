@@ -32,13 +32,15 @@ public class BookingService {
     private final UserBehaviorRepository userBehaviorRepository;
     private final NotificationService notificationService;
     private final RefundService refundService;
+    private final StaffBrandAccessService staffBrandAccessService;
 
     private static final int MAX_BOOKINGS_PER_DAY = 3;
 
     public BookingService(BookingRepository bookingRepository, ExperienceSessionRepository sessionRepository,
             DeviceRepository deviceRepository, AccountRepository accountRepository,
             VoucherRepository voucherRepository, UserBehaviorRepository userBehaviorRepository,
-            NotificationService notificationService, RefundService refundService) {
+            NotificationService notificationService, RefundService refundService,
+            StaffBrandAccessService staffBrandAccessService) {
         this.bookingRepository = bookingRepository;
         this.sessionRepository = sessionRepository;
         this.deviceRepository = deviceRepository;
@@ -47,6 +49,7 @@ public class BookingService {
         this.userBehaviorRepository = userBehaviorRepository;
         this.notificationService = notificationService;
         this.refundService = refundService;
+        this.staffBrandAccessService = staffBrandAccessService;
     }
 
     @Transactional
@@ -176,6 +179,7 @@ public class BookingService {
     public BookingResponse confirmBooking(Long bookingId, String staffNote) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
+        staffBrandAccessService.requireManageableBooking(booking);
         booking.confirm();
         booking.setStaffNote(staffNote);
         booking = bookingRepository.save(booking);
@@ -188,6 +192,7 @@ public class BookingService {
     public BookingResponse cancelBookingByStaff(Long bookingId, String reason) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
+        staffBrandAccessService.requireManageableBooking(booking);
         booking.cancel(reason, "STAFF");
         booking = bookingRepository.save(booking);
         sessionRepository.save(booking.getSession());
@@ -202,6 +207,7 @@ public class BookingService {
     public BookingResponse completeBooking(Long bookingId) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
+        staffBrandAccessService.requireManageableBooking(booking);
         booking.complete();
         booking = bookingRepository.save(booking);
 
@@ -213,6 +219,7 @@ public class BookingService {
     public BookingResponse checkInBooking(Long bookingId, String staffNote) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
+        staffBrandAccessService.requireManageableBooking(booking);
         booking.checkIn();
         if (staffNote != null) {
             booking.setStaffNote(staffNote);
@@ -227,6 +234,7 @@ public class BookingService {
     public BookingResponse markBookingNoShow(Long bookingId, String staffNote) {
         Booking booking = bookingRepository.findById(bookingId)
                 .orElseThrow(() -> new ResourceNotFoundException("Booking not found"));
+        staffBrandAccessService.requireManageableBooking(booking);
         booking.markNoShow();
         if (staffNote != null) {
             booking.setStaffNote(staffNote);
@@ -238,14 +246,12 @@ public class BookingService {
     }
 
     public PageResponse<BookingResponse> getAllBookings(BookingStatus status, Pageable pageable) {
-        Page<Booking> page;
-        if (status != null) {
-            page = bookingRepository.findAll(
-                    (root, query, criteriaBuilder) -> criteriaBuilder.equal(root.get("status"), status),
-                    pageable);
-        } else {
-            page = bookingRepository.findAll(pageable);
-        }
+        Long scopedBrandId = staffBrandAccessService.getScopedBrandIdOrNull();
+        Page<Booking> page = bookingRepository.findAll(
+                (root, query, cb) -> cb.and(
+                        status != null ? cb.equal(root.get("status"), status) : cb.conjunction(),
+                        scopedBrandId != null ? cb.equal(root.get("device").get("brand").get("id"), scopedBrandId) : cb.conjunction()),
+                pageable);
         return toPageResponse(page);
     }
 

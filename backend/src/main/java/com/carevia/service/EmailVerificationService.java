@@ -35,6 +35,7 @@ public class EmailVerificationService {
     private final StaffRepository staffRepository;
     private final ClientRepository clientRepository;
     private final AccountRepository accountRepository;
+    private final DatabaseSequenceSyncService databaseSequenceSyncService;
     private final ApplicationEventPublisher eventPublisher;
 
     public EmailVerificationService(EmailVerificationRepository emailVerificationRepository,
@@ -43,6 +44,7 @@ public class EmailVerificationService {
                                     StaffRepository staffRepository,
                                     ClientRepository clientRepository,
                                     AccountRepository accountRepository,
+                                    DatabaseSequenceSyncService databaseSequenceSyncService,
                                     ApplicationEventPublisher eventPublisher) {
         this.emailVerificationRepository = emailVerificationRepository;
         this.clientCodeGenerator = clientCodeGenerator;
@@ -50,6 +52,7 @@ public class EmailVerificationService {
         this.staffRepository = staffRepository;
         this.clientRepository = clientRepository;
         this.accountRepository = accountRepository;
+        this.databaseSequenceSyncService = databaseSequenceSyncService;
         this.eventPublisher = eventPublisher;
     }
 
@@ -91,6 +94,7 @@ public class EmailVerificationService {
                 client.setAccount(account);
                 client.setFullName("User" + account.getId());
                 client.setClientCode(clientCodeGenerator.generate());
+                databaseSequenceSyncService.syncIdSequence("clients");
                 clientRepository.save(client);
 
                 log.info("Client entity created with code={}", client.getClientCode());
@@ -99,11 +103,18 @@ public class EmailVerificationService {
                 log.info("Marking staff account as pending approval id={}", account.getId());
                 account.setStatus(AccountStatus.PENDING_APPROVAL);
 
-                Staff staff = new Staff();
+                Staff staff = staffRepository.findByAccount(account).orElseGet(Staff::new);
                 staff.setAccount(account);
-                staff.setFullName("User" + account.getId());
-                staff.setStaffCode(staffCodeGenerator.generate());
+                if (staff.getFullName() == null || staff.getFullName().isBlank()) {
+                    staff.setFullName(account.getUsername());
+                }
+                if (staff.getStaffCode() == null || staff.getStaffCode().isBlank()) {
+                    staff.setStaffCode(staffCodeGenerator.generate());
+                }
                 staff.setApproved(false);
+                if (staff.getId() == null) {
+                    databaseSequenceSyncService.syncIdSequence("staffs");
+                }
                 staffRepository.save(staff);
 
                 log.info("Staff entity created with code={}", staff.getStaffCode());

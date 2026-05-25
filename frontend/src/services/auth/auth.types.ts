@@ -15,6 +15,9 @@ export interface RegisterRequest {
   email: string;
   password: string;
   role: Exclude<UserRole, 'ADMIN'>;
+  fullName?: string;
+  requestedBrandName?: string;
+  requestedBrandDescription?: string;
   langKey?: string;
 }
 
@@ -46,8 +49,13 @@ export interface AuthResponse {
     username: string;
     email: string;
     role: UserRole;
+    status?: string;
     fullName?: string;
     avatarUrl?: string;
+    brandId?: number;
+    brandName?: string;
+    requestedBrandName?: string;
+    requestedBrandDescription?: string;
     langKey?: string;
   };
 }

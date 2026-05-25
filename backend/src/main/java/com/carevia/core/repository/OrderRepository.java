@@ -38,4 +38,18 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
 
     @Query("SELECT COUNT(o) FROM Order o WHERE o.status = com.carevia.shared.constant.OrderStatus.COMPLETED AND o.createdAt BETWEEN :start AND :end")
     long countCompletedOrders(@Param("start") Instant start, @Param("end") Instant end);
+
+        @Query("""
+            SELECT DISTINCT o
+            FROM Order o
+            JOIN o.items item
+            WHERE o.account.id = :accountId
+              AND item.device.id = :deviceId
+              AND o.status = com.carevia.shared.constant.OrderStatus.COMPLETED
+            ORDER BY o.createdAt DESC
+            """)
+        List<Order> findCompletedOrdersForDeviceReview(
+            @Param("accountId") Long accountId,
+            @Param("deviceId") Long deviceId,
+            Pageable pageable);
 }

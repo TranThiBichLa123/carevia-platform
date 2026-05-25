@@ -6,6 +6,7 @@ import { useSyncExternalStore } from "react";
 import {
     ClipboardList,
     BellRing,
+    Building2,
     ChartColumnBig,
     MessageSquareMore,
     Settings2,
@@ -18,27 +19,32 @@ import { useUserStore } from "@/lib/store";
 
 const sidebarItems = [
     {
-        title: "Dashboard",
+        title: "Dashboard hệ thống",
         href: "/admin",
         icon: LayoutDashboard,
     },
     {
-        title: "Thống Kê Hệ Thống",
-        href: "/admin/statistics",
-        icon: ChartColumnBig,
+        title: "Quản lý Brand",
+        href: "/admin/brands",
+        icon: Building2,
     },
     {
-        title: "Quản Lý Người Dùng",
+        title: "User & Seller Staff",
         href: "/admin/users",
         icon: Shield,
     },
     {
-        title: "CRM & Đánh Giá",
+        title: "Kiểm duyệt nội dung",
         href: "/admin/reviews",
         icon: MessageSquareMore,
     },
     {
-        title: "Lịch Sử Thao Tác",
+        title: "Thống kê hệ thống",
+        href: "/admin/statistics",
+        icon: ChartColumnBig,
+    },
+    {
+        title: "Audit Log",
         href: "/admin/audit-logs",
         icon: ClipboardList,
     },
@@ -80,7 +86,7 @@ export default function AdminLayout({
     if (!isAuthenticated) {
         return (
             <div className="flex min-h-screen items-center justify-center bg-slate-50 px-6 text-sm text-muted-foreground">
-                Đăng nhập bằng tài khoản admin để truy cập khu vực quản trị.
+                Đăng nhập bằng tài khoản Platform Admin để truy cập khu vực quản trị.
             </div>
         );
     }
@@ -89,7 +95,7 @@ export default function AdminLayout({
     if (authUser?.role !== "ADMIN") {
         return (
             <div className="flex min-h-screen items-center justify-center bg-slate-50 px-6 text-sm text-muted-foreground">
-                Chỉ admin mới có quyền truy cập dashboard quản trị.
+                Chỉ Platform Admin mới có quyền truy cập dashboard quản trị.
             </div>
         );
     }
@@ -102,7 +108,7 @@ export default function AdminLayout({
                 <div className="flex h-16 items-center border-b border-slate-200 px-6">
                     <Link href="/admin" className="flex items-center gap-2 font-bold text-slate-900">
                         <span className="flex h-7 w-7 items-center justify-center rounded-lg bg-sky-600 text-white font-black text-sm">C</span>
-                        Carevia Admin
+                        Carevia Platform
                     </Link>
                 </div>
 
@@ -157,7 +163,7 @@ export default function AdminLayout({
                 {/* Top Navbar */}
                 <header className="sticky top-0 z-10 flex h-16 items-center justify-between border-b border-slate-200 bg-white/80 px-8 backdrop-blur-md">
                     <div className="text-sm font-medium text-slate-500">
-                        Hệ thống điều hành / <span className="text-slate-900">{currentSection?.title || "Bảng điều khiển"}</span>
+                        Marketplace Platform / <span className="text-slate-900">{currentSection?.title || "Bảng điều khiển"}</span>
                     </div>
                 </header>
 

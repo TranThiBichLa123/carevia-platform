@@ -18,6 +18,7 @@ public class CreateDeviceRequest {
     private Double discountPercentage;
     private Integer stock;
     private String image;
+    private String imagePublicId;
     private List<String> images;
     private Long categoryId;
     private Long brandId;

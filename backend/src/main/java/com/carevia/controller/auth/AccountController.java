@@ -25,6 +25,7 @@ import com.carevia.shared.dto.request.account.RejectRequest;
 import com.carevia.shared.dto.request.account.UpsertAddressRequest;
 import com.carevia.shared.dto.request.account.UpdateProfileRequest;
 import com.carevia.shared.dto.request.account.UpdateStatusRequest;
+import com.carevia.shared.dto.request.staff.ApproveStaffRequest;
 import com.carevia.shared.dto.response.account.AddressMutationResponse;
 import com.carevia.shared.dto.response.account.AccountProfileResponse;
 import com.carevia.shared.dto.response.account.AccountResponse;
@@ -194,10 +195,11 @@ public class AccountController {
     public ResponseEntity<com.carevia.shared.dto.ApiResponse<Object>> approveStaffAccount(
             @Parameter(description = "ID of the staff account to approve", required = true)
             @PathVariable Long id,
+                        @Valid @RequestBody ApproveStaffRequest approveRequest,
             HttpServletRequest request
     ) {
         String ip = Optional.ofNullable(request.getHeader("X-Forwarded-For")).orElse(request.getRemoteAddr());
-        AccountProfileResponse res = accountService.approveStaffAccount(id, ip);
+                AccountProfileResponse res = accountService.approveStaffAccount(id, approveRequest.getBrandId(), ip);
         return ResponseEntity.ok(JsonViewUtils.formatAccountProfileResponse(res));
     }
 

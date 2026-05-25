@@ -35,8 +35,8 @@ import {
 	type BackofficeVoucher,
 	type BackofficeVoucherStatus,
 	type BackofficeVoucherType,
+	type StaffDevice,
 } from "@/lib/backofficeApi";
-import { deviceApi, type DeviceData } from "@/lib/deviceApi";
 import { useUserStore } from "@/lib/store";
 import {
 	formatCurrency,
@@ -61,7 +61,7 @@ const VOUCHER_VARIANTS: Record<BackofficeVoucherStatus, "default" | "secondary" 
 
 export default function StaffVouchersPage() {
 	const { authUser, isAuthenticated } = useUserStore();
-	const [devices, setDevices] = useState<DeviceData[]>([]);
+	const [devices, setDevices] = useState<StaffDevice[]>([]);
 	const [vouchers, setVouchers] = useState<BackofficeVoucher[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
@@ -75,7 +75,7 @@ export default function StaffVouchersPage() {
 		totalQuantity: "50",
 		startDate: "",
 		endDate: "",
-		applicableDeviceId: "ALL",
+		applicableDeviceId: "",
 	});
 
 	const loadInitialData = useCallback(async () => {
@@ -83,10 +83,14 @@ export default function StaffVouchersPage() {
 			setLoading(true);
 			const [voucherData, deviceData] = await Promise.all([
 				backofficeApi.getAllVouchers(),
-				deviceApi.getAll({ page: 0, size: 100 }),
+				backofficeApi.getStaffDevices({ page: 0, size: 100 }),
 			]);
 			setVouchers(voucherData);
 			setDevices(deviceData.items || []);
+			setForm((current) => ({
+				...current,
+				applicableDeviceId: current.applicableDeviceId || String(deviceData.items?.[0]?.id || ""),
+			}));
 		} catch (error) {
 			toast.error(getBackofficeErrorMessage(error, "Không thể tải dữ liệu voucher."));
 		} finally {
@@ -116,6 +120,11 @@ export default function StaffVouchersPage() {
 			return;
 		}
 
+		if (!form.applicableDeviceId) {
+			toast.error("Chọn thiết bị thuộc brand của bạn để tạo voucher.");
+			return;
+		}
+
 		try {
 			setSaving(true);
 			await backofficeApi.createVoucher({
@@ -128,10 +137,7 @@ export default function StaffVouchersPage() {
 				totalQuantity: Number(form.totalQuantity),
 				startDate: toIsoDateTime(form.startDate),
 				endDate: toIsoDateTime(form.endDate),
-				applicableDeviceId:
-					form.applicableDeviceId === "ALL"
-						? undefined
-						: Number(form.applicableDeviceId),
+				applicableDeviceId: Number(form.applicableDeviceId),
 			});
 			toast.success("Đã tạo voucher mới.");
 			setForm((current) => ({ ...current, code: "", description: "" }));
@@ -164,7 +170,7 @@ export default function StaffVouchersPage() {
 		);
 	}
 
-	if (authUser && !["STAFF", "ADMIN"].includes(authUser.role)) {
+	if (authUser?.role !== "STAFF") {
 		return (
 			<div className="flex min-h-[50vh] items-center justify-center text-sm text-muted-foreground">
 				Bạn không có quyền truy cập màn voucher.
@@ -225,7 +231,6 @@ export default function StaffVouchersPage() {
 								<Select value={form.applicableDeviceId} onValueChange={(value) => setForm((current) => ({ ...current, applicableDeviceId: value }))}>
 									<SelectTrigger className="w-full bg-white"><SelectValue /></SelectTrigger>
 									<SelectContent>
-										<SelectItem value="ALL">Tất cả thiết bị</SelectItem>
 										{devices.map((device) => (
 											<SelectItem key={device.id} value={String(device.id)}>{device.name}</SelectItem>
 										))}

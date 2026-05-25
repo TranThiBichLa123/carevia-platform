@@ -6,7 +6,9 @@ import com.carevia.shared.annotation.StaffOrAdmin;
 import com.carevia.shared.dto.request.device.CreateDeviceRequest;
 import com.carevia.shared.dto.request.device.UpdateDeviceRequest;
 import com.carevia.shared.dto.request.staff.AdjustInventoryRequest;
+import com.carevia.shared.dto.request.staff.UpdateStaffBrandRequest;
 import com.carevia.shared.dto.request.staff.UpdateMaintenanceRequest;
+import org.springframework.web.multipart.MultipartFile;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -71,6 +73,37 @@ public class StaffOperationsController {
     @Operation(summary = "Get vouchers for staff operations")
     public ResponseEntity<?> getVouchers() {
         return ResponseEntity.ok(staffOperationsService.getVouchers());
+    }
+
+    @GetMapping("/brand")
+    @StaffOnly
+    @Operation(summary = "Get current staff brand profile")
+    public ResponseEntity<?> getMyBrand() {
+        return ResponseEntity.ok(staffOperationsService.getMyBrand());
+    }
+
+    @PutMapping("/brand")
+    @StaffOnly
+    @Operation(summary = "Update current staff brand profile")
+    public ResponseEntity<?> updateMyBrand(@Valid @RequestBody UpdateStaffBrandRequest request) {
+        return ResponseEntity.ok(staffOperationsService.updateMyBrand(request));
+    }
+
+    @PostMapping("/brand/image-upload")
+    @StaffOnly
+    @Operation(summary = "Upload current staff brand avatar/logo")
+    public ResponseEntity<?> uploadMyBrandImage(@RequestParam("file") MultipartFile file) {
+        return ResponseEntity.ok(staffOperationsService.uploadMyBrandImage(file));
+    }
+
+    @PostMapping("/devices/image-upload")
+    @StaffOrAdmin
+    @Operation(summary = "Upload a device image to Cloudinary")
+    public ResponseEntity<?> uploadDeviceImage(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(required = false) Long deviceId,
+            @RequestParam(required = false) String currentPublicId) {
+        return ResponseEntity.ok(staffOperationsService.uploadDeviceImage(deviceId, currentPublicId, file));
     }
 
     @PostMapping("/devices")

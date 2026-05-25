@@ -56,6 +56,7 @@ public class SecurityConfig {
                         .requestMatchers("/error").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
+                        .requestMatchers("/api/v1/recommendations/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/devices/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/system-settings/**").permitAll()
                         // ZaloPay callback is called by ZaloPay servers (no JWT)

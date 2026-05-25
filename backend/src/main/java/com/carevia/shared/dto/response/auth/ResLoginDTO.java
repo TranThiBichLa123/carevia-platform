@@ -6,6 +6,7 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import com.carevia.shared.constant.AccountStatus;
 import com.carevia.shared.constant.Role;
 
 import java.time.Instant;
@@ -56,6 +57,21 @@ public class ResLoginDTO {
 
         @Schema(description = "Avatar URL", example = "https://example.com/avatars/john.jpg")
         private String avatarUrl;
+
+        @Schema(description = "Account status", example = "ACTIVE")
+        private AccountStatus status;
+
+        @Schema(description = "Assigned brand ID for staff", example = "12")
+        private Long brandId;
+
+        @Schema(description = "Assigned brand name for staff", example = "L'Oreal")
+        private String brandName;
+
+        @Schema(description = "Requested brand name from seller onboarding", example = "GlowLab")
+        private String requestedBrandName;
+
+        @Schema(description = "Requested brand description from seller onboarding")
+        private String requestedBrandDescription;
 
         @Schema(description = "Language preference", example = "en")
         private String langKey;

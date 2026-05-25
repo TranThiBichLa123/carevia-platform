@@ -26,6 +26,9 @@ public class Brand extends BaseEntity {
     @Column(length = 512)
     private String image;
 
+    @Column(name = "image_public_id", length = 255)
+    private String imagePublicId;
+
     @Column(columnDefinition = "TEXT")
     private String description;
 

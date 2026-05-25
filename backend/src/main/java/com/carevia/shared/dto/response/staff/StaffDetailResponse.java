@@ -27,6 +27,12 @@ public class StaffDetailResponse {
     @Schema(description = "Staff code", example = "NV2024001")
     private String staffCode;
 
+    @Schema(description = "Assigned brand ID", example = "12")
+    private Long brandId;
+
+    @Schema(description = "Assigned brand name", example = "L'Oreal")
+    private String brandName;
+
     @Schema(description = "Full name", example = "Nguyen Van A")
     private String fullName;
 

@@ -19,6 +19,7 @@ import com.carevia.shared.constant.SecurityConstants;
 import com.carevia.shared.constant.TokenType;
 import com.carevia.shared.dto.request.auth.ChangePasswordDTO;
 import com.carevia.shared.dto.request.auth.ReqLoginDTO;
+import com.carevia.shared.dto.request.auth.RegisterRequest;
 import com.carevia.shared.dto.response.auth.MeResponse;
 import com.carevia.shared.dto.response.auth.ResLoginDTO;
 import com.carevia.shared.exception.*;
@@ -57,6 +58,7 @@ public class AuthService {
     private final EmailVerificationService emailVerificationService;
     private final EmailVerificationRepository emailVerificationRepository;
     private final TokenProvider tokenProvider;
+    private final DatabaseSequenceSyncService databaseSequenceSyncService;
     private static final Logger log = LoggerFactory.getLogger(AuthService.class);
     @Value("${app.avatar.default-url}")
     private String defaultAvatarUrl;
@@ -75,7 +77,8 @@ public class AuthService {
             RefreshTokenService refreshTokenService,
             EmailVerificationService emailVerificationService,
             EmailVerificationRepository emailVerificationRepository,
-            TokenProvider tokenProvider) {
+            TokenProvider tokenProvider,
+            DatabaseSequenceSyncService databaseSequenceSyncService) {
         this.emailVerificationRepository = emailVerificationRepository;
         this.accountRepository = accountRepository;
         this.emailService = emailService;
@@ -88,6 +91,7 @@ public class AuthService {
         this.eventPublisher = eventPublisher;
         this.refreshTokenService = refreshTokenService;
         this.emailVerificationService = emailVerificationService;
+        this.databaseSequenceSyncService = databaseSequenceSyncService;
     }
 
     /**
@@ -105,7 +109,12 @@ public class AuthService {
      */
     @Transactional
     @EnableSoftDeleteFilter
-    public Account registerAccount(Account account) {
+    public Account registerAccount(Account account, RegisterRequest registerRequest) {
+
+        if (account.isStaff() && (registerRequest.getRequestedBrandName() == null
+                || registerRequest.getRequestedBrandName().isBlank())) {
+            throw new InvalidRequestException("Requested brand name is required for seller registration");
+        }
 
         // 1. Kiểm tra trùng Username
         accountRepository.findOneByUsername(account.getUsername())
@@ -145,7 +154,27 @@ public class AuthService {
         }
 
         // 4. Lưu tài khoản
+        databaseSequenceSyncService.syncIdSequence("accounts");
         Account saved = accountRepository.save(account);
+
+        if (saved.isStaff()) {
+            Staff staff = staffRepository.findByAccount(saved).orElseGet(Staff::new);
+            staff.setAccount(saved);
+            staff.setFullName(registerRequest.getFullName() != null && !registerRequest.getFullName().isBlank()
+                ? registerRequest.getFullName().trim()
+                : saved.getUsername());
+            staff.setRequestedBrandName(registerRequest.getRequestedBrandName() != null
+                ? registerRequest.getRequestedBrandName().trim()
+                : null);
+            staff.setRequestedBrandDescription(registerRequest.getRequestedBrandDescription() != null
+                ? registerRequest.getRequestedBrandDescription().trim()
+                : null);
+            staff.setApproved(false);
+            if (staff.getId() == null) {
+                databaseSequenceSyncService.syncIdSequence("staffs");
+            }
+            staffRepository.save(staff);
+        }
 
         // 5. Tạo Token xác thực
         EmailVerification emailVerification = emailVerificationService.generateVerificationToken(saved,
@@ -337,6 +366,12 @@ public class AuthService {
         meResponse.setGender(profile.getGender());
         meResponse.setBio(profile.getBio());
         meResponse.setBirthday(profile.getBirthDate());
+        if (profile instanceof Staff staff) {
+            meResponse.setBrandId(staff.getBrand() != null ? staff.getBrand().getId() : null);
+            meResponse.setBrandName(staff.getBrand() != null ? staff.getBrand().getName() : null);
+            meResponse.setRequestedBrandName(staff.getRequestedBrandName());
+            meResponse.setRequestedBrandDescription(staff.getRequestedBrandDescription());
+        }
 
         if (profile instanceof com.carevia.shared.entity.PersonBase personBase) {
             meResponse.setPhone(personBase.getPhone());

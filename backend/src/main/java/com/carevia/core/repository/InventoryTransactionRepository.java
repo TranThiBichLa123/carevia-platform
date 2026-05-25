@@ -10,5 +10,9 @@ import org.springframework.stereotype.Repository;
 public interface InventoryTransactionRepository extends JpaRepository<InventoryTransaction, Long> {
     Page<InventoryTransaction> findByDeviceIdOrderByCreatedAtDesc(Long deviceId, Pageable pageable);
 
+    Page<InventoryTransaction> findByDeviceIdAndDeviceBrandIdOrderByCreatedAtDesc(Long deviceId, Long brandId, Pageable pageable);
+
+    Page<InventoryTransaction> findByDeviceBrandIdOrderByCreatedAtDesc(Long brandId, Pageable pageable);
+
     Page<InventoryTransaction> findAllByOrderByCreatedAtDesc(Pageable pageable);
 }

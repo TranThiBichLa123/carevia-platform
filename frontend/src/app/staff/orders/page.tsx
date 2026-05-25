@@ -142,7 +142,7 @@ export default function StaffOrdersPage() {
         );
     }
 
-    if (authUser && !["STAFF", "ADMIN"].includes(authUser.role)) {
+    if (authUser?.role !== "STAFF") {
         return (
             <div className="flex min-h-[50vh] items-center justify-center text-sm text-muted-foreground">
                 Bạn không có quyền truy cập màn quản lý đơn hàng.

@@ -33,8 +33,8 @@ import {
 	backofficeApi,
 	type BackofficeSession,
 	type BackofficeSessionStatus,
+	type StaffDevice,
 } from "@/lib/backofficeApi";
-import { deviceApi, type DeviceData } from "@/lib/deviceApi";
 import { useUserStore } from "@/lib/store";
 import {
 	formatCurrency,
@@ -63,7 +63,7 @@ const SESSION_VARIANTS: Record<
 
 export default function StaffSessionsPage() {
 	const { authUser, isAuthenticated } = useUserStore();
-	const [devices, setDevices] = useState<DeviceData[]>([]);
+	const [devices, setDevices] = useState<StaffDevice[]>([]);
 	const [sessions, setSessions] = useState<BackofficeSession[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
@@ -81,7 +81,7 @@ export default function StaffSessionsPage() {
 
 	const loadDevices = useCallback(async () => {
 		try {
-			const response = await deviceApi.getAll({ page: 0, size: 100 });
+			const response = await backofficeApi.getStaffDevices({ page: 0, size: 100 });
 			setDevices(response.items || []);
 			setForm((current) => ({
 				...current,
@@ -175,7 +175,7 @@ export default function StaffSessionsPage() {
 		);
 	}
 
-	if (authUser && !["STAFF", "ADMIN"].includes(authUser.role)) {
+	if (authUser?.role !== "STAFF") {
 		return (
 			<div className="flex min-h-[50vh] items-center justify-center text-sm text-muted-foreground">
 				Bạn không có quyền truy cập màn quản lý phiên.

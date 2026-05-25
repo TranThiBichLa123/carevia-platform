@@ -69,27 +69,27 @@ const SearchInput = () => {
   }, []);
 
 
- const fetchFeaturedProducts = useCallback(async () => {
-  // Nếu không có API thật, dùng hàm getPopular từ deviceApi
-  if (!hasExplicitApiEndpoint()) {
-    try {
-      const data = await deviceApi.getPopular(); // Gọi hàm và đợi dữ liệu về
-      setFeaturedProducts(data.slice(0, 6));     // Lúc này data mới là mảng để slice
-    } catch (err) {
-      console.error("Lỗi lấy sản phẩm phổ biến:", err);
+  const fetchFeaturedProducts = useCallback(async () => {
+    // Nếu không có API thật, dùng hàm getPopular từ deviceApi
+    if (!hasExplicitApiEndpoint()) {
+      try {
+        const data = await deviceApi.getPopular(); // Gọi hàm và đợi dữ liệu về
+        setFeaturedProducts(data.slice(0, 6));     // Lúc này data mới là mảng để slice
+      } catch (err) {
+        console.error("Lỗi lấy sản phẩm phổ biến:", err);
+      }
+      return;
     }
-    return;
-  }
 
-  try {
-    const response = await fetchData<ProductsResponse>("/products?page=1&limit=6");
-    setFeaturedProducts(response.products);
-  } catch {
-    // Tương tự cho phần catch
-    const data = await deviceApi.getPopular();
-    setFeaturedProducts(data.slice(0, 6));
-  }
-}, []);
+    try {
+      const response = await fetchData<ProductsResponse>("/products?page=1&limit=6");
+      setFeaturedProducts(response.products);
+    } catch {
+      // Tương tự cho phần catch
+      const data = await deviceApi.getPopular();
+      setFeaturedProducts(data.slice(0, 6));
+    }
+  }, []);
 
 
   const fetchProducts = useCallback(
@@ -335,7 +335,7 @@ const SearchInput = () => {
                     <div className="py-2">
                       <div className="px-4 py-2 bg-gray-50 border-b border-gray-200">
                         <p className="text-sm font-medium text-gray-700">
-                          Search Results ({products.length})
+                          Kết quả tìm kiếm ({products.length})
                         </p>
                       </div>
                       {products.map((product) => (
@@ -377,7 +377,7 @@ const SearchInput = () => {
                           onClick={closeSearch}
                           className="text-sm text-babyshopSky font-medium hover:underline"
                         >
-                          View all results
+                          Xem tất cả kết quả
                         </Link>
                       </div>
                     </div>
@@ -435,7 +435,7 @@ const SearchInput = () => {
             <div className="py-0">
               <div className="px-4 py-2 bg-gray-50 border-b border-gray-200">
                 <p className="text-sm font-medium text-gray-700">
-                  Search Results ({products.length})
+                  Kết quả tìm kiếm ({products.length})
                 </p>
                 {error && <p className="text-sm font-medium text-babyshopRed">{error}</p>}
               </div>
@@ -469,8 +469,9 @@ const SearchInput = () => {
                           {product.name}
                         </h3>
                         <p className="text-sm font-semibold text-babyshopSky mt-0.5">
-                          ${product.price}
+                          {new Intl.NumberFormat('vi-VN').format(product.price)} đ
                         </p>
+
                         <p className="text-sm text-babyshopTextLight">
                           {product.category?.name || "No Category"} - {product.brand?.name || "No Brand"}
                         </p>
@@ -488,7 +489,7 @@ const SearchInput = () => {
                   }}
                   className="text-sm text-babyshopSky font-medium hover:underline"
                 >
-                  View all results
+                  Xem tất cả kết quả
                 </Link>
               </div>
             </div>
@@ -496,10 +497,10 @@ const SearchInput = () => {
             <>
               <div className="px-4 py-3 bg-gray-50 border-b border-gray-200">
                 {!search ? (
-                  <p className="text-sm font-medium text-gray-700">Popular Products</p>
+                  <p className="text-sm font-medium text-gray-700">Sản phẩm phổ biến</p>
                 ) : (
                   <p className="text-sm font-medium text-gray-700">
-                    No results for &quot;<span className="text-babyshopRed">{search}</span>&quot;
+                    Không có kết quả cho &quot;<span className="text-babyshopRed">{search}</span>&quot;
                   </p>
                 )}
               </div>

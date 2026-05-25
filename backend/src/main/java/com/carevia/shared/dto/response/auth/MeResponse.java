@@ -59,6 +59,18 @@ public class MeResponse {
     @Schema(description = "Client code", example = "CL2024001")
     private String clientCode;
 
+    @Schema(description = "Assigned brand ID for staff", example = "12")
+    private Long brandId;
+
+    @Schema(description = "Assigned brand name for staff", example = "L'Oreal")
+    private String brandName;
+
+    @Schema(description = "Requested brand name from seller onboarding", example = "GlowLab")
+    private String requestedBrandName;
+
+    @Schema(description = "Requested brand description from seller onboarding")
+    private String requestedBrandDescription;
+
     @Schema(description = "Loyalty points", example = "100")
     private Integer loyaltyPoints;
 

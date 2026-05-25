@@ -28,9 +28,17 @@ public class AuditLogController {
     public ResponseEntity<?> getAuditLogs(
             @RequestParam(required = false) String search,
             @RequestParam(required = false) String action,
+            @RequestParam(required = false) String role,
             @RequestParam(required = false) String tableName,
             Pageable pageable
     ) {
-        return ResponseEntity.ok(auditLogService.getAuditLogs(search, action, tableName, pageable));
+        return ResponseEntity.ok(auditLogService.getAuditLogs(search, action, role, tableName, pageable));
+    }
+
+    @GetMapping("/suggestions")
+    @AdminOnly
+    @Operation(summary = "Get audit log filter suggestions")
+    public ResponseEntity<?> getAuditLogSuggestions() {
+        return ResponseEntity.ok(auditLogService.getAuditLogSuggestions());
     }
 }

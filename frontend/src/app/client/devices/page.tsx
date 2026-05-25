@@ -4,21 +4,40 @@ import React, { Suspense, useCallback, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import ProductCard from "@/components/common/products/ProductCard";
 import { Product } from "@/types_enum/devices";
-import Link from "next/link";
 import Container from "@/components/common/Container";
 import { deviceApi, DevicePageResponse, BrandData } from "@/lib/deviceApi";
 import { mapDeviceToProduct } from "@/lib/mappers";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
+import { useIsHydrated } from "@/hooks/useHydration";
+import {
+    createUpdatedPreferences,
+    loadDeviceRecommendationPreferences,
+    rankDevicesByPreferences,
+} from "@/lib/recommendationPreferences";
 
-type SortOption = "newest" | "price_asc" | "price_desc" | "best_selling" | "rating_desc";
+type SortOption = "newest" | "price_asc" | "price_desc" | "best_selling" | "rating_desc" | "best_match";
+
+type DeviceQueryParams = {
+    page: number;
+    size: number;
+    sort: string;
+    categoryId?: number;
+    brandId?: number;
+    minPrice?: number;
+    maxPrice?: number;
+    skinType?: string;
+};
+
+const priceOptions = [
+    { label: "Dưới 200.000đ", id: "p1", minPrice: undefined as number | undefined, maxPrice: 200000 },
+    { label: "200.000đ - 500.000đ", id: "p2", minPrice: 200000, maxPrice: 500000 },
+    { label: "Trên 500.000đ", id: "p3", minPrice: 500000, maxPrice: undefined as number | undefined },
+];
 
 const AllProductsContent = () => {
     const searchParams = useSearchParams();
-    const categoryIdParam = searchParams.get('categoryId');
-    const categoryNameParam = searchParams.get('categoryName');
-    const skinTypeParam = searchParams.get('skinType');
-    const skinTypeNameParam = searchParams.get('skinTypeName');
-    const sortByParam = searchParams.get('sortBy') as SortOption | null;
+    const isHydrated = useIsHydrated();
+    const [searchParamsReady, setSearchParamsReady] = useState(false);
 
     const [products, setProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
@@ -28,22 +47,13 @@ const AllProductsContent = () => {
     const [loadingMore, setLoadingMore] = useState(false);
 
     // Filters
-    const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(
-        categoryIdParam ? Number(categoryIdParam) : null
-    );
-    const [selectedCategoryName, setSelectedCategoryName] = useState<string | null>(categoryNameParam);
-    const [selectedSkinType, setSelectedSkinType] = useState<string | null>(skinTypeParam);
-    const [selectedSkinTypeName, setSelectedSkinTypeName] = useState<string | null>(skinTypeNameParam);
+    const [selectedCategoryId, setSelectedCategoryId] = useState<number | null>(null);
+    const [selectedCategoryName, setSelectedCategoryName] = useState<string | null>(null);
+    const [selectedSkinType, setSelectedSkinType] = useState<string | null>(null);
+    const [selectedSkinTypeName, setSelectedSkinTypeName] = useState<string | null>(null);
     const [selectedBrandIds, setSelectedBrandIds] = useState<number[]>([]);
     const [priceRange, setPriceRange] = useState<string | null>(null);
-    const [sortBy, setSortBy] = useState<SortOption>(sortByParam ?? "newest");
-
-    const priceOptions = [
-        { label: "Dưới 200.000đ", id: "p1", minPrice: undefined as number | undefined, maxPrice: 200000 },
-        { label: "200.000đ - 500.000đ", id: "p2", minPrice: 200000, maxPrice: 500000 },
-        { label: "Trên 500.000đ", id: "p3", minPrice: 500000, maxPrice: undefined as number | undefined },
-    ];
-    const selectedPriceOption = priceOptions.find(p => p.id === priceRange);
+    const [sortBy, setSortBy] = useState<SortOption>("newest");
 
     // Filter options from API
     const [brands, setBrands] = useState<BrandData[]>([]);
@@ -52,6 +62,19 @@ const AllProductsContent = () => {
         deviceApi.getBrands().then(setBrands).catch(console.error);
     }, []);
 
+    useEffect(() => {
+        if (!isHydrated) {
+            return;
+        }
+
+        setSelectedCategoryId(searchParams.get("categoryId") ? Number(searchParams.get("categoryId")) : null);
+        setSelectedCategoryName(searchParams.get("categoryName"));
+        setSelectedSkinType(searchParams.get("skinType"));
+        setSelectedSkinTypeName(searchParams.get("skinTypeName"));
+        setSortBy((searchParams.get("sortBy") as SortOption | null) ?? "newest");
+        setSearchParamsReady(true);
+    }, [isHydrated, searchParams]);
+
     const getSortParam = (sort: SortOption): string => {
         switch (sort) {
             case "newest": return "createdAt,desc";
@@ -59,6 +82,7 @@ const AllProductsContent = () => {
             case "price_desc": return "price,desc";
             case "best_selling": return "sold,desc";
             case "rating_desc": return "averageRating,desc";
+            case "best_match": return "averageRating,desc";
             default: return "createdAt,desc";
         }
     };
@@ -69,7 +93,7 @@ const AllProductsContent = () => {
 
         try {
             const selectedPrice = priceOptions.find(p => p.id === priceRange);
-            const params: Record<string, any> = {
+            const params: DeviceQueryParams = {
                 page: pageNum,
                 size: 12,
                 sort: getSortParam(sortBy),
@@ -81,7 +105,22 @@ const AllProductsContent = () => {
             if (selectedSkinType) params.skinType = selectedSkinType;
 
             const data: DevicePageResponse = await deviceApi.getAll(params);
-            const mapped = data.items.map(mapDeviceToProduct);
+            let rankedDevices = data.items;
+            if (sortBy === "best_match") {
+                const storedPreferences = loadDeviceRecommendationPreferences();
+                const preferences = createUpdatedPreferences({
+                    skinType: selectedSkinType || storedPreferences.skinType,
+                });
+                const ranking = await rankDevicesByPreferences(
+                    data.items,
+                    preferences,
+                    "Danh sách sản phẩm phù hợp nhất"
+                );
+                if (ranking.rankedDevices.length) {
+                    rankedDevices = ranking.rankedDevices;
+                }
+            }
+            const mapped = rankedDevices.map(mapDeviceToProduct);
 
             if (append) {
                 setProducts(prev => [...prev, ...mapped]);
@@ -100,8 +139,12 @@ const AllProductsContent = () => {
     }, [sortBy, selectedBrandIds, selectedCategoryId, priceRange, selectedSkinType]);
 
     useEffect(() => {
+        if (!searchParamsReady) {
+            return;
+        }
+
         fetchProducts(0);
-    }, [fetchProducts]);
+    }, [fetchProducts, searchParamsReady]);
 
     const handleLoadMore = () => {
         if (hasNext && !loadingMore) {
@@ -137,6 +180,7 @@ const AllProductsContent = () => {
         price_desc: "Giá: Cao đến Thấp",
         best_selling: "Bán chạy nhất",
         rating_desc: "Đánh giá cao nhất",
+        best_match: "Phù hợp nhất",
     };
 
     return (
@@ -259,7 +303,7 @@ const AllProductsContent = () => {
                                 <span className="text-[13px] font-bold text-gray-900 uppercase tracking-tighter font-vietnam">Sắp xếp:</span>
 
                                 {/* Khối Dropdown chính */}
-                                <div className="relative group min-w-[140px]">
+                                <div className="relative group min-w-35">
                                     <div className="flex items-center justify-between px-3 py-2 bg-white border border-gray-200 rounded-md cursor-pointer hover:border-gray-300 transition-all">
                                         <span className="text-[13px] font-medium text-gray-700 font-vietnam whitespace-nowrap">{sortLabel[sortBy]}</span>
                                         <svg className="w-4 h-4 text-gray-400 group-hover:rotate-180 transition-transform duration-200" fill="none" stroke="currentColor" viewBox="0 0 24 24">

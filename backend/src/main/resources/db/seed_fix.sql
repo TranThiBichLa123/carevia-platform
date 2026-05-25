@@ -102,6 +102,17 @@ INSERT INTO notifications (
 ON CONFLICT (id) DO NOTHING;
 
 -- =============================================================
+-- FIX 5C: DEMO REVIEW ACCOUNT
+-- Account client_anh (id=4) owns completed order ORD-2024-001 for device_id=1.
+-- Password for demo login is aligned with the known admin password hash: Admin@123
+-- =============================================================
+UPDATE accounts
+SET password_hash = '$2a$10$l6ZVK9xpG39mMeViACh1ueV2ZbfD8kihbBE10kuu9DTAaRSPRJvGC',
+    updated_at = NOW(),
+    updated_by = 'seed_fix'
+WHERE id = 4;
+
+-- =============================================================
 -- FIX 6: NOTIFICATION_RECIPIENT
 -- Lỗi: bảng KHÔNG extend BaseEntity → không có created_at/updated_at/created_by/updated_by
 -- =============================================================
@@ -205,8 +216,45 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- =============================================================
+-- FIX 13: STAFF BRAND ASSIGNMENT / SELLER ONBOARDING
+-- Gắn brand cho staff seed cũ để không còn lỗi "Staff account is not assigned to a brand"
+-- và tạo một seller pending mẫu để test luồng admin duyệt theo hồ sơ brand.
+-- =============================================================
+UPDATE staffs
+SET brand_id = 1,
+    requested_brand_name = COALESCE(requested_brand_name, 'Foreo'),
+    requested_brand_description = COALESCE(requested_brand_description, 'Seller seed đang vận hành brand Foreo trên marketplace.'),
+    updated_at = NOW(),
+    updated_by = 'seed_fix'
+WHERE account_id = 2 AND brand_id IS NULL;
+
+UPDATE staffs
+SET brand_id = 2,
+    requested_brand_name = COALESCE(requested_brand_name, 'NuFace'),
+    requested_brand_description = COALESCE(requested_brand_description, 'Seller seed đang vận hành brand NuFace trên marketplace.'),
+    updated_at = NOW(),
+    updated_by = 'seed_fix'
+WHERE account_id = 3 AND brand_id IS NULL;
+
+INSERT INTO accounts (id, username, email, password_hash, role, status, avatar_url, lang_key, created_at, updated_at, created_by, updated_by)
+VALUES
+  (8, 'staff_huong', 'staff.huong@carevia.vn', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhu0', 'STAFF', 'PENDING_APPROVAL', NULL, 'vi', NOW(), NOW(), 'seed_fix', 'seed_fix')
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO staffs (id, account_id, staff_code, full_name, birth_date, gender, phone, specialty, degree, brand_id, requested_brand_name, requested_brand_description, approved, approved_by, approved_at, created_at, updated_at, created_by, updated_by)
+VALUES
+  (3, 8, 'ST003', 'Lê Thu Hương', '1994-08-09', 'FEMALE', '0981234567', 'Seller onboarding', 'Brand Representative', NULL, 'GlowLab Vietnam', 'Brand thiết bị skincare công nghệ cao đang chờ Platform Admin duyệt để mở seller workspace.', false, NULL, NULL, NOW(), NOW(), 'seed_fix', 'seed_fix')
+ON CONFLICT (id) DO UPDATE SET
+  requested_brand_name = EXCLUDED.requested_brand_name,
+  requested_brand_description = EXCLUDED.requested_brand_description,
+  updated_at = NOW(),
+  updated_by = 'seed_fix';
+
+-- =============================================================
 -- Reset sequences
 -- =============================================================
+SELECT setval('accounts_id_seq',            (SELECT MAX(id) FROM accounts));
+SELECT setval('staffs_id_seq',              (SELECT MAX(id) FROM staffs));
 SELECT setval('orders_id_seq',              (SELECT MAX(id) FROM orders));
 SELECT setval('order_items_id_seq',         (SELECT MAX(id) FROM order_items));
 SELECT setval('booking_history_id_seq',     (SELECT MAX(id) FROM booking_history));

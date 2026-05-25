@@ -2,6 +2,7 @@ package com.carevia.service;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.carevia.core.domain.Device;
 import com.carevia.core.domain.Voucher;
 import com.carevia.core.repository.DeviceRepository;
 import com.carevia.core.repository.VoucherRepository;
@@ -21,10 +22,15 @@ public class VoucherService {
 
     private final VoucherRepository voucherRepository;
     private final DeviceRepository deviceRepository;
+    private final StaffBrandAccessService staffBrandAccessService;
 
-    public VoucherService(VoucherRepository voucherRepository, DeviceRepository deviceRepository) {
+    public VoucherService(
+            VoucherRepository voucherRepository,
+            DeviceRepository deviceRepository,
+            StaffBrandAccessService staffBrandAccessService) {
         this.voucherRepository = voucherRepository;
         this.deviceRepository = deviceRepository;
+        this.staffBrandAccessService = staffBrandAccessService;
     }
 
     @Transactional
@@ -50,15 +56,26 @@ public class VoucherService {
                 .build();
 
         if (request.getApplicableDeviceId() != null) {
-            voucher.setApplicableDevice(deviceRepository.findById(request.getApplicableDeviceId())
-                    .orElseThrow(() -> new ResourceNotFoundException("Device not found")));
+            Device device = deviceRepository.findById(request.getApplicableDeviceId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Device not found"));
+            staffBrandAccessService.requireManageableDevice(device);
+            voucher.setApplicableDevice(device);
+        } else if (!staffBrandAccessService.hasGlobalAccess()) {
+            throw new InvalidRequestException("Staff must attach vouchers to a device in their own brand");
         }
 
         return toResponse(voucherRepository.save(voucher));
     }
 
     public List<VoucherResponse> getAllVouchers() {
-        return voucherRepository.findAll().stream().map(this::toResponse).collect(Collectors.toList());
+        if (staffBrandAccessService.hasGlobalAccess()) {
+            return voucherRepository.findAll().stream().map(this::toResponse).collect(Collectors.toList());
+        }
+
+        return voucherRepository.findAll().stream()
+                .filter(staffBrandAccessService::belongsToCurrentBrand)
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 
     public List<VoucherResponse> getActiveVouchers() {
@@ -76,6 +93,7 @@ public class VoucherService {
     public VoucherResponse updateVoucherStatus(Long id, String status) {
         Voucher voucher = voucherRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Voucher not found"));
+        staffBrandAccessService.requireManageableVoucher(voucher);
         voucher.setStatus(VoucherStatus.valueOf(status));
         return toResponse(voucherRepository.save(voucher));
     }
@@ -84,6 +102,13 @@ public class VoucherService {
     public VoucherResponse assignVoucherToDevice(Long voucherId, Long deviceId) {
         Voucher voucher = voucherRepository.findById(voucherId)
                 .orElseThrow(() -> new ResourceNotFoundException("Voucher not found"));
+        Device device = deviceRepository.findById(deviceId)
+                .orElseThrow(() -> new ResourceNotFoundException("Device not found"));
+
+        staffBrandAccessService.requireManageableDevice(device);
+        if (voucher.getApplicableDevice() != null) {
+            staffBrandAccessService.requireManageableVoucher(voucher);
+        }
 
         if (voucher.getStatus() == VoucherStatus.EXPIRED || voucher.getStatus() == VoucherStatus.USED_UP) {
             throw new InvalidRequestException("Voucher is no longer assignable to a device");
@@ -92,8 +117,7 @@ public class VoucherService {
             throw new InvalidRequestException("Voucher has already expired");
         }
 
-        voucher.setApplicableDevice(deviceRepository.findById(deviceId)
-                .orElseThrow(() -> new ResourceNotFoundException("Device not found")));
+        voucher.setApplicableDevice(device);
         return toResponse(voucherRepository.save(voucher));
     }
 
@@ -101,6 +125,7 @@ public class VoucherService {
     public VoucherResponse removeVoucherFromDevice(Long voucherId, Long deviceId) {
         Voucher voucher = voucherRepository.findById(voucherId)
                 .orElseThrow(() -> new ResourceNotFoundException("Voucher not found"));
+        staffBrandAccessService.requireManageableVoucher(voucher);
 
         if (voucher.getApplicableDevice() == null || !voucher.getApplicableDevice().getId().equals(deviceId)) {
             throw new InvalidRequestException("Voucher is not assigned to this device");

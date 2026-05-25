@@ -47,6 +47,7 @@ public class AccountMapper {
                         .role(client.getAccount().getRole())
                         .fullName(client.getFullName())
                         .avatarUrl(client.getAccount().getAvatarUrl())
+                        .status(client.getAccount().getStatus())
                         .langKey(client.getAccount().getLangKey())
                         .build())
                 .build();
@@ -61,6 +62,11 @@ public class AccountMapper {
                         .role(staff.getAccount().getRole())
                         .avatarUrl(staff.getAccount().getAvatarUrl())
                         .fullName(staff.getFullName())
+                        .status(staff.getAccount().getStatus())
+                        .brandId(staff.getBrand() != null ? staff.getBrand().getId() : null)
+                        .brandName(staff.getBrand() != null ? staff.getBrand().getName() : null)
+                        .requestedBrandName(staff.getRequestedBrandName())
+                        .requestedBrandDescription(staff.getRequestedBrandDescription())
                         .langKey(staff.getAccount().getLangKey())
                         .build())
                 .build();
@@ -74,6 +80,7 @@ public class AccountMapper {
                         .email(admin.getEmail())
                         .role(admin.getRole())
                         .avatarUrl(admin.getAvatarUrl())
+                        .status(admin.getStatus())
                         .langKey(admin.getLangKey())
                         .build())
                 .build();
@@ -93,6 +100,10 @@ public class AccountMapper {
     }
 
     public static AccountResponse toAccountResponse(Account account) {
+                return toAccountResponse(account, null);
+        }
+
+        public static AccountResponse toAccountResponse(Account account, Staff staff) {
         return AccountResponse.builder()
                 .accountId(account.getId())
                 .username(account.getUsername())
@@ -102,6 +113,10 @@ public class AccountMapper {
                 .avatarUrl(account.getAvatarUrl())
                 .lastLoginAt(account.getLastLoginAt())
                 .createdAt(account.getCreatedAt())
+                                .brandId(staff != null && staff.getBrand() != null ? staff.getBrand().getId() : null)
+                                .brandName(staff != null && staff.getBrand() != null ? staff.getBrand().getName() : null)
+                                .requestedBrandName(staff != null ? staff.getRequestedBrandName() : null)
+                                .requestedBrandDescription(staff != null ? staff.getRequestedBrandDescription() : null)
                 .build();
     }
 

@@ -71,6 +71,22 @@ public class AccountProfileResponse {
         @Schema(description = "Staff code", example = "NV2024001")
         private String staffCode;
 
+        @JsonView(Views.Staff.class)
+        @Schema(description = "Assigned brand ID for staff", example = "12")
+        private Long brandId;
+
+        @JsonView(Views.Staff.class)
+        @Schema(description = "Assigned brand name for staff", example = "L'Oreal")
+        private String brandName;
+
+        @JsonView(Views.Staff.class)
+        @Schema(description = "Requested brand name from seller onboarding", example = "GlowLab")
+        private String requestedBrandName;
+
+        @JsonView(Views.Staff.class)
+        @Schema(description = "Requested brand description from seller onboarding")
+        private String requestedBrandDescription;
+
         @JsonView(Views.Public.class)
         @Schema(description = "Full name", example = "John Doe")
         private String fullName;

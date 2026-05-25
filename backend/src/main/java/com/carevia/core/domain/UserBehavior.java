@@ -3,9 +3,6 @@ package com.carevia.core.domain;
 import jakarta.persistence.*;
 import lombok.*;
 import com.carevia.shared.entity.BaseEntity;
-import org.hibernate.annotations.JdbcTypeCode;
-import org.hibernate.type.SqlTypes;
-
 @Entity
 @Table(name = "user_behaviors")
 @Getter
@@ -32,8 +29,7 @@ public class UserBehavior extends BaseEntity {
     @Column(name = "target_id", nullable = false)
     private Long targetId;
 
-    @JdbcTypeCode(SqlTypes.JSON) // Ép kiểu dữ liệu sang JSON cho Postgres
-    @Column(name = "metadata", columnDefinition = "json")
-    private String metadata; // Hoặc kiểu Map/Object nếu bạn đang dùng
+    @Column(name = "metadata", columnDefinition = "TEXT")
+    private String metadata;
 
 }

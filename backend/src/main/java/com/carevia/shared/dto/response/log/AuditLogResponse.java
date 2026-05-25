@@ -16,6 +16,7 @@ public class AuditLogResponse {
     private Long userAccountId;
     private String username;
     private String email;
+    private String role;
     private String ipAddress;
     private Instant createdAt;
 }

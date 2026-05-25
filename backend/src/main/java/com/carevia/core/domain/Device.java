@@ -58,6 +58,9 @@ public class Device extends BaseEntity {
     @Column(length = 512)
     private String image;
 
+    @Column(name = "image_public_id", length = 255)
+    private String imagePublicId;
+
     @ElementCollection
     @CollectionTable(name = "device_images", joinColumns = @JoinColumn(name = "device_id"))
     @Column(name = "image_url", length = 512)

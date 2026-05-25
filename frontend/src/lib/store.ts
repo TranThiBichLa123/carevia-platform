@@ -178,6 +178,11 @@ export interface User {
     email: string;
     avatar_url?: string;
     role: string;
+    status?: string;
+    brand_id?: number;
+    brand_name?: string;
+    requested_brand_name?: string;
+    requested_brand_description?: string;
     phone?: string;
     address?: string; // Địa chỉ mặc định
     birth_date?: string;

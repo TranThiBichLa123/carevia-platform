@@ -38,6 +38,22 @@ public class Staff extends PersonBase implements BaseProfile {
     @Column(length = 128)
     private String degree;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "brand_id")
+    private Brand brand;
+
+    @Column(name = "requested_brand_name", length = 150)
+    private String requestedBrandName;
+
+    @Column(name = "requested_brand_description", columnDefinition = "TEXT")
+    private String requestedBrandDescription;
+
+    @Column(name = "requested_brand_image", length = 512)
+    private String requestedBrandImage;
+
+    @Column(name = "requested_brand_image_public_id", length = 255)
+    private String requestedBrandImagePublicId;
+
     @Column(nullable = false)
     @Builder.Default
     private boolean approved = false;

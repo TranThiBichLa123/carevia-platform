@@ -12,34 +12,46 @@ import { useUserStore } from "@/lib/store";
 
 const staffSections = [
 	{
-        title: "Thiết bị, tồn kho & bảo trì",
-        description: "CRUD thiết bị, nhập/xuất kiểm kê, cập nhật trạng thái và gán voucher ngay trên cùng một màn vận hành.",
+        title: "Sản phẩm & tồn kho của brand",
+        description: "Quản lý catalog, giá, tồn kho, bảo trì và tình trạng hiển thị của sản phẩm thuộc brand bạn phụ trách.",
 		href: "/staff/inventory",
-		tag: "Inventory"
+		tag: "Catalog"
 	},
     {
-        title: "Quản lý Booking",
-        description: "Xác nhận, check-in, đánh dấu no-show và hoàn tất lịch trải nghiệm của khách hàng.",
+        title: "Quản lý booking",
+        description: "Xử lý booking trải nghiệm phát sinh trên sản phẩm và phiên thuộc brand đang vận hành.",
         href: "/staff/bookings",
         tag: "Operational"
     },
     {
-        title: "Quản lý Đơn Hàng",
-        description: "Theo dõi trạng thái đơn, cập nhật xử lý và hoàn tất giao dịch.",
+        title: "Quản lý đơn hàng",
+        description: "Theo dõi các đơn cần đóng gói, xử lý và hoàn tất trong phạm vi seller workspace.",
         href: "/staff/orders",
         tag: "Financial"
     },
     {
-        title: "Quản lý Phiên",
-        description: "Tạo phiên trải nghiệm mới và kiểm soát số slot theo từng ngày.",
+        title: "Phiên trải nghiệm",
+        description: "Tạo lịch demo, kiểm soát slot và điều phối trải nghiệm cho khách hàng của brand.",
         href: "/staff/sessions",
         tag: "Configuration"
     },
     {
-        title: "Quản lý Voucher",
-        description: "Tạo mã giảm giá, bật tắt voucher và gán cho thiết bị phù hợp.",
+        title: "Voucher của brand",
+        description: "Tạo mã khuyến mãi cho brand, gán voucher cho catalog phù hợp và theo dõi hạn dùng.",
         href: "/staff/vouchers",
         tag: "Marketing"
+    },
+    {
+        title: "CRM & Đánh giá",
+        description: "Theo dõi review thuộc catalog đang quản lý để chuẩn bị phản hồi và moderation theo brand.",
+        href: "/staff/reviews",
+        tag: "CRM"
+    },
+    {
+        title: "Thống kê brand",
+        description: "Tổng hợp KPI vận hành chính theo ngày để tách brand-level metrics khỏi dashboard platform.",
+        href: "/staff/statistics",
+        tag: "Analytics"
     },
 ];
 
@@ -78,8 +90,8 @@ export default function StaffDashboardPage() {
               { label: "Booking hôm nay", value: dashboard.bookingsToday, hint: `${dashboard.pendingBookings} chờ xác nhận` },
               { label: "Khách đã check-in", value: dashboard.checkedInToday, hint: "Theo lịch hôm nay" },
               { label: "Đơn chờ xử lý", value: dashboard.pendingOrders, hint: "PENDING_PAYMENT, PAID, PROCESSING" },
-              { label: "Thiết bị sắp hết", value: dashboard.lowStockDevices, hint: "Ngưỡng cảnh báo <= 5" },
-              { label: "Thiết bị bảo trì", value: dashboard.maintenanceDevices, hint: "Đang khóa vận hành" },
+                            { label: "Sản phẩm sắp hết", value: dashboard.lowStockDevices, hint: "Ngưỡng cảnh báo <= 5" },
+                            { label: "Thiết bị bảo trì", value: dashboard.maintenanceDevices, hint: "Tạm khóa trong workspace" },
               { label: "Voucher sắp hết hạn", value: dashboard.vouchersExpiringSoon, hint: "Trong 7 ngày tới" },
           ]
         : [];
@@ -88,31 +100,43 @@ export default function StaffDashboardPage() {
         <div className="space-y-8">
             <div className="border-b-4 border-[#111111] pb-2 mb-8">
                 <div className="text-[11px] font-bold uppercase tracking-wider text-[#C70000] font-sans">
-                    Carevia Internal Network / Staff Editorial Workspace
+                    Carevia Marketplace / Brand Staff Workspace
                 </div>
                 <h1 className="mt-1 font-vietnam text-3xl font-extrabold tracking-tight text-[#111111] sm:text-4xl md:text-5xl">
-                    Bảng điều khiển vận hành
+                    Dashboard brand
                 </h1>
                 <p className="mt-3 text-sm md:text-base text-[#444444] font-vietnam max-w-3xl leading-relaxed">
-                    Hệ thống xử lý nghiệp vụ, quản trị phân phối dịch vụ số và cấu hình chuỗi cung ứng trải nghiệm khách hàng tại Carevia.
+                    Khu vực vận hành dành cho seller staff, tập trung vào catalog, booking, đơn hàng, voucher và trải nghiệm khách hàng của brand bạn đang phụ trách.
                 </p>
+            </div>
+
+            <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+                Workspace này đang chạy theo phạm vi brand hiện tại. Mọi sản phẩm, booking, đơn hàng, voucher và phiên trải nghiệm chỉ hiển thị trong <span className="font-semibold">brand_id = current_staff.brand_id</span>.
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 border-b border-[#DCDCDC] pb-6 mb-8 text-xs font-vietnam">
                 <div className="border-l-2 border-[#052962] pl-2">
                     <span className="text-[#666666] block">Phiên làm việc</span>
-                    <span className="font-bold text-[#111111]">Chính thức (Production)</span>
+                    <span className="font-bold text-[#111111]">Brand workspace</span>
                 </div>
                 <div className="border-l-2 border-[#052962] pl-2">
-                    <span className="text-[#666666] block">Tài khoản điều hành</span>
+                    <span className="text-[#666666] block">Tài khoản brand staff</span>
                     <span className="font-bold text-[#111111]">{authUser?.email || "N/A"}</span>
                 </div>
                 <div className="border-l-2 border-[#052962] pl-2">
-                    <span className="text-[#666666] block">Ngôn ngữ phân phối</span>
-                    <span className="font-bold text-[#111111]">Tiếng Việt (VI)</span>
+                    <span className="text-[#666666] block">Phạm vi truy cập</span>
+                    <span className="font-bold text-[#111111]">Catalog và vận hành của brand</span>
                 </div>
                 <div className="border-l-2 border-[#052962] pl-2">
-                    <span className="text-[#666666] block">Trạng thái cổng mạng</span>
+                    <span className="text-[#666666] block">Brand đang quản lý</span>
+                    <span className="font-bold text-[#111111]">{authUser?.brand_name || "Chưa xác định"}</span>
+                </div>
+                <div className="border-l-2 border-[#052962] pl-2">
+                    <span className="text-[#666666] block">Ngôn ngữ vận hành</span>
+                    <span className="font-bold text-[#111111]">Tiếng Việt (VI)</span>
+                </div>
+                <div className="border-l-2 border-[#052962] pl-2 col-span-2 md:col-span-1">
+                    <span className="text-[#666666] block">Trạng thái workspace</span>
                     <span className="font-bold text-emerald-700 flex items-center gap-1">
                         <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 inline-block" /> Trực tuyến
                     </span>
@@ -188,7 +212,7 @@ export default function StaffDashboardPage() {
             <div className="grid gap-6 xl:grid-cols-3">
                 <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-lg"><Boxes className="size-5 text-[#052962]" /> Low Stock</CardTitle>
+                        <CardTitle className="flex items-center gap-2 text-lg"><Boxes className="size-5 text-[#052962]" /> Tồn kho cần bổ sung</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3 text-sm">
                         {dashboard?.lowStockAlerts.length ? dashboard.lowStockAlerts.map((item) => (
@@ -202,22 +226,22 @@ export default function StaffDashboardPage() {
 
                 <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-lg"><Boxes className="size-5 text-[#0B6E4F]" /> Device Operations</CardTitle>
+                        <CardTitle className="flex items-center gap-2 text-lg"><Boxes className="size-5 text-[#0B6E4F]" /> Catalog của brand</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3 text-sm">
                         <div className="rounded-xl border bg-muted/20 p-3">
-                            <div className="font-semibold text-[#111111]">Quản lý thiết bị đã gộp vào tồn kho</div>
-                            <div className="text-muted-foreground">Staff thao tác CRUD thiết bị, tồn kho, bảo trì và voucher trên cùng một tab để tránh tách luồng.</div>
+                            <div className="font-semibold text-[#111111]">Quản lý sản phẩm thuộc brand</div>
+                            <div className="text-muted-foreground">Brand Staff thao tác catalog, tồn kho, bảo trì và voucher ngay trong một luồng làm việc thống nhất.</div>
                         </div>
                         <Button asChild variant="outline">
-                            <Link href="/staff/inventory">Mở tab thiết bị</Link>
+                            <Link href="/staff/inventory">Mở catalog</Link>
                         </Button>
                     </CardContent>
                 </Card>
 
                 <Card>
                     <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-lg"><AlertTriangle className="size-5 text-[#B45309]" /> Maintenance</CardTitle>
+                        <CardTitle className="flex items-center gap-2 text-lg"><AlertTriangle className="size-5 text-[#B45309]" /> Thiết bị cần bảo trì</CardTitle>
                     </CardHeader>
                     <CardContent className="space-y-3 text-sm">
                         {dashboard?.maintenanceAlerts.length ? dashboard.maintenanceAlerts.map((item) => (

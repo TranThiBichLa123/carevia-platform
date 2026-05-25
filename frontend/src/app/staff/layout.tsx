@@ -5,9 +5,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { CSSProperties } from "react";
 import { 
+  Building2,
   CalendarCheck2, 
+  ChartColumnBig,
   ClipboardList, 
   Layers3, 
+  MessageSquareMore,
   TicketPercent, 
   Boxes,
   Menu, 
@@ -20,16 +23,19 @@ import { cn } from "@/lib/utils";
 import { useUserStore } from "@/lib/store";
 
 const staffSections = [
-  { title: "Dashboard tổng quan", href: "/staff", icon: LayoutDashboard },
-  { title: "Thiết bị, tồn kho & bảo trì", href: "/staff/inventory", icon: Boxes },
-  { title: "Quản lý Booking", href: "/staff/bookings", icon: CalendarCheck2 },
-  { title: "Quản lý Đơn Hàng", href: "/staff/orders", icon: ClipboardList },
-  { title: "Quản lý Phiên", href: "/staff/sessions", icon: Layers3 },
-  { title: "Quản lý Voucher", href: "/staff/vouchers", icon: TicketPercent },
+  { title: "Dashboard brand", href: "/staff", icon: LayoutDashboard },
+  { title: "Hồ sơ brand", href: "/staff/brand", icon: Building2 },
+  { title: "Sản phẩm & tồn kho", href: "/staff/inventory", icon: Boxes },
+  { title: "Quản lý booking", href: "/staff/bookings", icon: CalendarCheck2 },
+  { title: "Quản lý đơn hàng", href: "/staff/orders", icon: ClipboardList },
+  { title: "Phiên trải nghiệm", href: "/staff/sessions", icon: Layers3 },
+  { title: "Voucher của brand", href: "/staff/vouchers", icon: TicketPercent },
+  { title: "CRM & Đánh giá", href: "/staff/reviews", icon: MessageSquareMore },
+  { title: "Thống kê brand", href: "/staff/statistics", icon: ChartColumnBig },
 ];
 
 export default function StaffLayout({ children }: { children: React.ReactNode }) {
-  const { isAuthenticated } = useUserStore();
+  const { authUser, isAuthenticated } = useUserStore();
   const pathname = usePathname();
   const isMobile = useIsMobile();
   const [isDesktopSidebarOpen, setIsDesktopSidebarOpen] = useState(true);
@@ -51,8 +57,49 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
     return (
       <div className="flex min-h-screen items-center justify-center bg-[#F6F6F6] text-center">
         <div className="max-w-md border-t-4 border-[#C70000] bg-white p-8 shadow-sm">
-          <h1 className="font-serif text-2xl font-bold text-[#111111]">Access Denied</h1>
-          <p className="mt-2 text-sm text-[#666666]">Vui lòng đăng nhập tài khoản Staff.</p>
+          <h1 className="font-vietnam text-2xl font-bold text-[#111111]">Access Denied</h1>
+          <p className="mt-2 text-sm text-[#666666]">Vui lòng đăng nhập tài khoản Brand Staff.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (authUser?.role !== "STAFF") {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#F6F6F6] px-6 text-center">
+        <div className="max-w-md border-t-4 border-[#C70000] bg-white p-8 shadow-sm">
+          <h1 className="font-vietnam text-2xl font-bold text-[#111111]">Sai phạm vi truy cập</h1>
+          <p className="mt-2 text-sm text-[#666666]">Khu vực này dành cho Brand Staff. Platform Admin chỉ thao tác trong dashboard quản trị.</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (authUser?.status !== "ACTIVE" || !authUser?.brand_id) {
+    const isPendingApproval = authUser?.status === "PENDING_APPROVAL";
+
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#F6F6F6] px-6 text-center">
+        <div className="max-w-2xl border-t-4 border-[#052962] bg-white p-8 shadow-sm">
+          <h1 className="font-vietnam text-2xl font-bold text-[#111111]">
+            {isPendingApproval ? "Seller đang chờ admin duyệt" : "Brand chưa được gán cho tài khoản staff"}
+          </h1>
+          <p className="mt-3 text-sm leading-6 text-[#666666]">
+            {isPendingApproval
+              ? "Sau khi xác thực email, seller chỉ có thể vào workspace khi Platform Admin duyệt hồ sơ brand và gắn brand vận hành."
+              : "Tài khoản staff này chưa có brand hoạt động nên các trang nghiệp vụ đã bị khóa để tránh truy cập sai phạm vi dữ liệu."}
+          </p>
+          {authUser?.requested_brand_name ? (
+            <div className="mt-5 rounded-xl border border-sky-200 bg-sky-50 p-4 text-left text-sm text-sky-950">
+              <div className="font-semibold">Hồ sơ đang gửi duyệt: {authUser.requested_brand_name}</div>
+              {authUser.requested_brand_description ? (
+                <p className="mt-2 text-sky-900/80">{authUser.requested_brand_description}</p>
+              ) : null}
+            </div>
+          ) : null}
+          <div className="mt-6 text-sm text-[#666666]">
+            Platform Admin có thể gắn bạn vào brand có sẵn hoặc tạo brand mới từ hồ sơ seller ngay trong màn hình quản trị user.
+          </div>
         </div>
       </div>
     );
@@ -83,7 +130,7 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
           !isMobile && !isDesktopSidebarOpen ? "justify-center px-2" : "justify-between"
         )}>
           {(isMobile || isDesktopSidebarOpen) && (
-            <span className="font-serif text-xl font-bold text-[#FFE500]">Carevia</span>
+            <span className="font-vietnam text-xl font-bold text-[#FFE500]">Carevia Seller</span>
           )}
           <button
             onClick={toggleSidebar}
@@ -108,7 +155,7 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
                   }
                 }}
                 className={cn(
-                  "flex items-center rounded-xl px-3 py-3 text-sm transition-all duration-200",
+                  "flex items-center rounded-xl px-3 py-3 text-sm font-vietnam transition-all duration-200",
                   isMobile || isDesktopSidebarOpen ? "justify-start gap-3" : "justify-center gap-0 px-2",
                   isActive
                     ? "bg-[#173E77] text-white font-semibold ring-1 ring-inset ring-[#2E5B99]"
@@ -128,7 +175,7 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
             isMobile || isDesktopSidebarOpen ? "items-center gap-3 justify-start" : "items-center justify-center px-2"
           )}>
             <LogOut className="size-4 shrink-0" />
-            {(isMobile || isDesktopSidebarOpen) && <span>Đăng xuất</span>}
+            {(isMobile || isDesktopSidebarOpen) && <span className="font-vietnam">Đăng xuất</span>}
           </button>
         </div>
       </aside>
@@ -138,7 +185,7 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
           <button onClick={toggleSidebar} className="rounded-lg border border-[#DCDCDC] p-2 transition-colors hover:bg-slate-50">
             <Menu className="size-5" />
           </button>
-          <span className="font-serif text-lg font-bold text-[#052962]">Carevia Work</span>
+          <span className="font-vietnam text-lg font-bold text-[#052962]">Carevia Brand Hub</span>
           <div className="w-9" />
         </header>
 

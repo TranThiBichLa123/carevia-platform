@@ -65,4 +65,13 @@ public class RegisterRequest {
         example = "en"
     )
     private String langKey;
+
+    @Schema(description = "Seller's display name for staff profile", example = "Tran Thi Lan")
+    private String fullName;
+
+    @Schema(description = "Requested brand name for seller onboarding", example = "GlowLab")
+    private String requestedBrandName;
+
+    @Schema(description = "Requested brand description for seller onboarding", example = "Thiết bị chăm sóc da công nghệ cao")
+    private String requestedBrandDescription;
 }

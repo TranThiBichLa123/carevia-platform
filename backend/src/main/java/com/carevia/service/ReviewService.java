@@ -1,24 +1,34 @@
 package com.carevia.service;
 
+import com.carevia.service.storage.CloudinaryStorageService;
+import com.carevia.shared.dto.response.device.DeviceImageUploadResponse;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.carevia.core.domain.Account;
 import com.carevia.core.domain.Device;
+import com.carevia.core.domain.Order;
 import com.carevia.core.domain.Review;
 import com.carevia.core.repository.AccountRepository;
 import com.carevia.core.repository.DeviceRepository;
+import com.carevia.core.repository.OrderRepository;
 import com.carevia.core.repository.ReviewRepository;
 import com.carevia.shared.dto.PageResponse;
 import com.carevia.shared.dto.request.review.CreateReviewRequest;
 import com.carevia.shared.dto.request.review.ModerateReviewRequest;
 import com.carevia.shared.dto.response.review.AdminReviewResponse;
+import com.carevia.shared.dto.response.review.ReviewEligibilityResponse;
 import com.carevia.shared.dto.response.review.ReviewResponse;
+import com.carevia.shared.exception.InvalidRequestException;
 import com.carevia.shared.exception.ResourceNotFoundException;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -29,12 +39,19 @@ public class ReviewService {
     private final ReviewRepository reviewRepository;
     private final DeviceRepository deviceRepository;
     private final AccountRepository accountRepository;
+        private final OrderRepository orderRepository;
+        private final ObjectMapper objectMapper;
+        private final CloudinaryStorageService cloudinaryStorageService;
 
     public ReviewService(ReviewRepository reviewRepository, DeviceRepository deviceRepository,
-            AccountRepository accountRepository) {
+                                                AccountRepository accountRepository, OrderRepository orderRepository, ObjectMapper objectMapper,
+                        CloudinaryStorageService cloudinaryStorageService) {
         this.reviewRepository = reviewRepository;
         this.deviceRepository = deviceRepository;
         this.accountRepository = accountRepository;
+                                this.orderRepository = orderRepository;
+                this.objectMapper = objectMapper;
+                this.cloudinaryStorageService = cloudinaryStorageService;
     }
 
     public PageResponse<ReviewResponse> getReviewsByDevice(Long deviceId, Pageable pageable) {
@@ -50,6 +67,34 @@ public class ReviewService {
                 .build();
     }
 
+        @Transactional(readOnly = true)
+        public ReviewEligibilityResponse getReviewEligibility(Long deviceId, Long accountId) {
+                deviceRepository.findById(deviceId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Device not found with id: " + deviceId));
+
+                Order completedOrder = findLatestCompletedOrder(accountId, deviceId);
+                boolean alreadyReviewed = reviewRepository.existsByAccountIdAndDeviceId(accountId, deviceId);
+                boolean canReview = completedOrder != null && !alreadyReviewed;
+
+                String message;
+                if (canReview) {
+                        message = "Bạn có thể viết đánh giá cho sản phẩm này từ đơn hàng đã hoàn tất.";
+                } else if (alreadyReviewed) {
+                        message = "Bạn đã gửi đánh giá cho sản phẩm này rồi.";
+                } else {
+                        message = "Chỉ khách hàng có đơn hàng đã hoàn tất chứa sản phẩm này mới được viết đánh giá.";
+                }
+
+                return ReviewEligibilityResponse.builder()
+                                .canReview(canReview)
+                                .alreadyReviewed(alreadyReviewed)
+                                .hasCompletedOrder(completedOrder != null)
+                                .completedOrderId(completedOrder != null ? completedOrder.getId() : null)
+                                .completedOrderCode(completedOrder != null ? completedOrder.getOrderCode() : null)
+                                .message(message)
+                                .build();
+        }
+
     @Transactional
     public ReviewResponse createReview(Long deviceId, Long accountId, CreateReviewRequest request) {
         Device device = deviceRepository.findById(deviceId)
@@ -57,12 +102,27 @@ public class ReviewService {
         Account account = accountRepository.findById(accountId)
                 .orElseThrow(() -> new ResourceNotFoundException("Account not found with id: " + accountId));
 
+                if (reviewRepository.existsByAccountIdAndDeviceId(accountId, deviceId)) {
+                        throw new InvalidRequestException("Bạn đã đánh giá sản phẩm này rồi.");
+                }
+
+                Order completedOrder = findLatestCompletedOrder(accountId, deviceId);
+                if (completedOrder == null) {
+                        throw new InvalidRequestException("Chỉ có thể đánh giá sau khi đơn hàng chứa sản phẩm này đã hoàn tất.");
+                }
+
         Review review = Review.builder()
                 .device(device)
                 .account(account)
+                                .order(completedOrder)
                 .rating(request.getRating())
+                .effectivenessRating(request.getEffectivenessRating())
+                .safetyRating(request.getSafetyRating())
+                .ergonomicsRating(request.getErgonomicsRating())
+                .durabilityRating(request.getDurabilityRating())
+                .mediaUrls(serializeMediaUrls(request.getMediaUrls()))
                 .comment(request.getComment())
-                .isVerifiedPurchase(false)
+                                .isVerifiedPurchase(true)
                 .isHidden(false)
                 .build();
 
@@ -72,6 +132,24 @@ public class ReviewService {
 
         return toResponse(saved);
     }
+
+        private Order findLatestCompletedOrder(Long accountId, Long deviceId) {
+                return orderRepository.findCompletedOrdersForDeviceReview(accountId, deviceId, PageRequest.of(0, 1))
+                                .stream()
+                                .findFirst()
+                                .orElse(null);
+        }
+
+        public DeviceImageUploadResponse uploadReviewImage(Long deviceId, MultipartFile file) {
+                deviceRepository.findById(deviceId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Device not found with id: " + deviceId));
+
+                CloudinaryStorageService.UploadResult uploadResult = cloudinaryStorageService.uploadReviewImage(file, deviceId);
+                return DeviceImageUploadResponse.builder()
+                                .imageUrl(uploadResult.getUrl())
+                                .imagePublicId(uploadResult.getPublicId())
+                                .build();
+        }
 
         @Transactional(readOnly = true)
         public PageResponse<AdminReviewResponse> getAdminReviews(String search, Boolean hidden, Long deviceId, Pageable pageable) {
@@ -122,6 +200,11 @@ public class ReviewService {
                 .accountName(r.getAccount().getUsername())
                 .accountAvatar(r.getAccount().getAvatarUrl())
                 .rating(r.getRating())
+                                .effectivenessRating(r.getEffectivenessRating())
+                                .safetyRating(r.getSafetyRating())
+                                .ergonomicsRating(r.getErgonomicsRating())
+                                .durabilityRating(r.getDurabilityRating())
+                .mediaUrls(readMediaUrls(r.getMediaUrls()))
                 .comment(r.getComment())
                 .isVerifiedPurchase(r.getIsVerifiedPurchase())
                 .adminReply(r.getAdminReply())
@@ -138,6 +221,11 @@ public class ReviewService {
                                 .accountName(review.getAccount().getUsername())
                                 .accountAvatar(review.getAccount().getAvatarUrl())
                                 .rating(review.getRating())
+                                .effectivenessRating(review.getEffectivenessRating())
+                                .safetyRating(review.getSafetyRating())
+                                .ergonomicsRating(review.getErgonomicsRating())
+                                .durabilityRating(review.getDurabilityRating())
+                                .mediaUrls(readMediaUrls(review.getMediaUrls()))
                                 .comment(review.getComment())
                                 .isVerifiedPurchase(review.getIsVerifiedPurchase())
                                 .adminReply(review.getAdminReply())
@@ -183,5 +271,33 @@ public class ReviewService {
                 device.setAverageRating(averageRating);
                 device.setReviewCount((int) visibleReviewCount);
                 deviceRepository.save(device);
+        }
+
+        private String serializeMediaUrls(List<String> mediaUrls) {
+                if (mediaUrls == null || mediaUrls.isEmpty()) {
+                        return null;
+                }
+
+                try {
+                        return objectMapper.writeValueAsString(mediaUrls.stream()
+                                        .filter(url -> url != null && !url.isBlank())
+                                        .limit(4)
+                                        .toList());
+                } catch (Exception exception) {
+                        return null;
+                }
+        }
+
+        private List<String> readMediaUrls(String rawMediaUrls) {
+                if (rawMediaUrls == null || rawMediaUrls.isBlank()) {
+                        return List.of();
+                }
+
+                try {
+                        return objectMapper.readValue(rawMediaUrls, new TypeReference<List<String>>() {
+                        });
+                } catch (Exception exception) {
+                        return List.of();
+                }
         }
 }

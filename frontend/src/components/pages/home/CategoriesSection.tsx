@@ -51,7 +51,7 @@ const CategoriesSection = () => {
     { id: 'r1', name: 'Phổ biến nhất', emoji: '🔥', color: '#FF8A65', type: 'featured', path: `/client/devices?categoryName=${encodeURIComponent('Phổ biến nhất')}&sortBy=best_selling` },
     { id: 'r2', name: 'Đánh giá cao nhất', emoji: '⭐', color: '#FFD54F', type: 'featured', path: `/client/devices?categoryName=${encodeURIComponent('Đánh giá cao nhất')}&sortBy=rating_desc` },
     { id: 'r3', name: 'Giá thấp nhất', emoji: '💰', color: '#2196F3', type: 'featured', path: `/client/devices?categoryName=${encodeURIComponent('Giá thấp nhất')}&sortBy=price_asc` },
-    { id: 'r4', name: 'Sản phẩm mới nhất', emoji: '🌟', color: '#4CAF50', type: 'featured', path: `/client/devices?categoryName=${encodeURIComponent('Sản phẩm mới nhất')}&sortBy=newest` },
+    { id: 'r4', name: 'Sản phẩm phù hợp nhất', emoji: '🌟', color: '#4CAF50', type: 'featured', path: '/client/recommendations/devices' },
     { id: 'r5', name: 'Đặt lịch phù hợp nhất', emoji: '📅', color: '#9C27B0', type: 'featured', path: '/client/booking' },
   ];
 
@@ -104,7 +104,7 @@ const CategoriesSection = () => {
 
       {/* Dropdown Menu */}
       {items && (
-        <div className="absolute top-full left-0 w-64 bg-white border border-gray-100 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-[60] py-2 rounded-b-md">
+        <div className="absolute top-full left-0 z-60 w-64 rounded-b-md border border-gray-100 bg-white py-2 shadow-xl opacity-0 invisible transition-all duration-200 group-hover:opacity-100 group-hover:visible">
           {items.map((sub, index) => (
             <a
               key={index}

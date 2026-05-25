@@ -13,10 +13,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import com.carevia.core.domain.Account;
 import com.carevia.core.domain.AccountActionLog;
+import com.carevia.core.domain.Brand;
 import com.carevia.core.domain.Client;
 import com.carevia.core.domain.ClientAddress;
 import com.carevia.core.domain.Staff;
 import com.carevia.core.repository.AccountRepository;
+import com.carevia.core.repository.BrandRepository;
 import com.carevia.core.repository.ClientRepository;
 import com.carevia.core.repository.StaffRepository;
 import com.carevia.service.event.AccountStatusChangeEvent;
@@ -42,6 +44,7 @@ import com.carevia.shared.util.SecurityUtils;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 
@@ -61,6 +64,7 @@ public class AccountService {
 
         private final AccountRepository accountRepository;
         private final ClientRepository clientRepository;
+        private final BrandRepository brandRepository;
 
         private final StaffRepository staffRepository;
         private final CloudinaryStorageService cloudinaryStorageService;
@@ -76,6 +80,7 @@ public class AccountService {
 
         public AccountService(AccountRepository accountRepository,
                         ClientRepository clientRepository,
+                        BrandRepository brandRepository,
                         StaffRepository staffRepository,
                         CloudinaryStorageService cloudinaryStorageService,
                         CloudinaryUtils cloudinaryUtils,
@@ -85,6 +90,7 @@ public class AccountService {
                 this.accountActionLogService = accountActionLogService;
                 this.accountRepository = accountRepository;
                 this.clientRepository = clientRepository;
+                this.brandRepository = brandRepository;
                 this.staffRepository = staffRepository;
                 this.cloudinaryStorageService = cloudinaryStorageService;
                 this.cloudinaryUtils = cloudinaryUtils;
@@ -354,7 +360,11 @@ public class AccountService {
 
                 List<AccountResponse> items = page.getContent()
                                 .stream()
-                                .map(AccountMapper::toAccountResponse)
+                                .map(account -> account.isStaff()
+                                                ? AccountMapper.toAccountResponse(
+                                                                account,
+                                                                staffRepository.findByAccount(account).orElse(null))
+                                                : AccountMapper.toAccountResponse(account))
                                 .toList();
 
                 return new PageResponse<>(
@@ -481,7 +491,7 @@ public class AccountService {
          * @return approved staff profile
          */
         @Transactional
-        public AccountProfileResponse approveStaffAccount(Long id, String ipAddress) {
+        public AccountProfileResponse approveStaffAccount(Long id, Long brandId, String ipAddress) {
                 log.info("Approving staff account id={}, ip={}", id, ipAddress);
 
                 Account account = accountRepository.findById(id)
@@ -499,6 +509,12 @@ public class AccountService {
                 Staff staff = staffRepository.findByAccount(account)
                                 .orElseThrow(() -> new ResourceNotFoundException("Staff not found"));
 
+                Brand brand = resolveApprovalBrand(staff, brandId);
+
+                if (Boolean.FALSE.equals(brand.getIsActive())) {
+                        throw new InvalidRequestException("Cannot assign inactive brand to staff");
+                }
+
                 Long adminId = SecurityUtils.getCurrentUserId()
                                 .orElseThrow(() -> new UnauthorizedException("User not authenticated"));
 
@@ -507,6 +523,7 @@ public class AccountService {
 
                 // Use domain behaviors for approval
                 AccountStatus oldStatus = account.getStatus();
+                staff.setBrand(brand);
                 staff.approve(adminId);
 
                 staffRepository.save(staff);
@@ -534,6 +551,65 @@ public class AccountService {
                 AccountService.log.info("Staff account id={} approved successfully by admin={}", id,
                                 adminAccount.getUsername());
                 return response;
+        }
+
+        private Brand resolveApprovalBrand(Staff staff, Long brandId) {
+                if (brandId != null) {
+                        return brandRepository.findById(brandId)
+                                        .orElseThrow(() -> new ResourceNotFoundException("Brand not found"));
+                }
+
+                if (staff.getBrand() != null) {
+                        return staff.getBrand();
+                }
+
+                String requestedBrandName = normalizeNullable(staff.getRequestedBrandName());
+                if (requestedBrandName == null) {
+                        throw new InvalidRequestException(
+                                        "Brand is required when approving staff without a seller brand application");
+                }
+
+                return brandRepository.findByNameIgnoreCase(requestedBrandName)
+                                .orElseGet(() -> createBrandFromApplication(staff, requestedBrandName));
+        }
+
+        private Brand createBrandFromApplication(Staff staff, String requestedBrandName) {
+                Brand brand = Brand.builder()
+                                .name(requestedBrandName)
+                                .slug(generateUniqueBrandSlug(requestedBrandName))
+                                .description(normalizeNullable(staff.getRequestedBrandDescription()))
+                                .image(staff.getRequestedBrandImage())
+                                .imagePublicId(staff.getRequestedBrandImagePublicId())
+                                .isActive(true)
+                                .isFeatured(false)
+                                .build();
+                return brandRepository.save(brand);
+        }
+
+        private String generateUniqueBrandSlug(String name) {
+                String baseSlug = name.trim()
+                                .toLowerCase(Locale.ROOT)
+                                .replaceAll("[^a-z0-9]+", "-")
+                                .replaceAll("(^-|-$)", "");
+                if (baseSlug.isBlank()) {
+                        baseSlug = "brand";
+                }
+
+                String candidate = baseSlug;
+                int suffix = 2;
+                while (brandRepository.existsBySlug(candidate)) {
+                        candidate = baseSlug + "-" + suffix;
+                        suffix++;
+                }
+                return candidate;
+        }
+
+        private String normalizeNullable(String value) {
+                if (value == null) {
+                        return null;
+                }
+                String trimmed = value.trim();
+                return trimmed.isEmpty() ? null : trimmed;
         }
 
         /**
@@ -624,9 +700,16 @@ public class AccountService {
                 Account account = accountRepository.findById(accountId)
                                 .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
 
+                AccountStatus oldStatus = account.getStatus();
+
                 // Handle staff-specific approval/rejection
                 if (account.isStaff() && newStatus == AccountStatus.ACTIVE) {
-                        return approveStaffAccount(accountId, ip);
+                        if (oldStatus == AccountStatus.PENDING_APPROVAL) {
+                                throw new InvalidRequestException("Use approve staff endpoint with brand assignment for pending staff accounts");
+                        }
+                        if (oldStatus == AccountStatus.SUSPENDED) {
+                                return unlockAccount(accountId, reason, ip);
+                        }
                 }
 
                 if (account.isStaff() && newStatus == AccountStatus.REJECTED) {
@@ -639,7 +722,6 @@ public class AccountService {
                 }
 
                 // Store old status and set new status
-                AccountStatus oldStatus = account.getStatus();
                 account.setStatus(newStatus);
 
                 Long adminId = SecurityUtils.getCurrentUserId()

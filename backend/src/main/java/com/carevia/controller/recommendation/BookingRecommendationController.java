@@ -28,9 +28,9 @@ public class BookingRecommendationController {
 		return ResponseEntity.ok(fuzzyTopsisService.rankBookingOptions(request));
 	}
 
-	@GetMapping("/demo")
-	public ResponseEntity<BookingRecommendationResponse> getDemoRanking() {
-		BookingRecommendationRequest demoRequest = fuzzyTopsisService.buildDemoRequest();
-		return ResponseEntity.ok(fuzzyTopsisService.rankBookingOptions(demoRequest));
-	}
+	// @GetMapping("/demo")
+	// public ResponseEntity<BookingRecommendationResponse> getDemoRanking() {
+	// 	BookingRecommendationRequest demoRequest = fuzzyTopsisService.buildDemoRequest();
+	// 	return ResponseEntity.ok(fuzzyTopsisService.rankBookingOptions(demoRequest));
+	// }
 }

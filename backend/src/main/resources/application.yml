@@ -19,6 +19,10 @@ spring:
     password: ${SPRING_DATASOURCE_PASSWORD:admin}
     driver-class-name: org.postgresql.Driver
 
+  sql:
+    init:
+      mode: always
+
   jpa:
     # Khi dùng Docker, ta nên ép Dialect luôn để tránh Hibernate mất công tìm kiếm metadata khi kết nối chưa ổn định
     database-platform: org.hibernate.dialect.PostgreSQLDialect
@@ -71,6 +75,9 @@ app:
     folder: ${APP_AVATAR_FOLDER:avatars}
     max-size-bytes: ${APP_AVATAR_MAX_SIZE:5242880} # 5MB
     default-url: "${APP_DEFAULT_AVATAR_URL:https://cloudinary.com}"
+  device:
+    image:
+      folder: ${APP_DEVICE_IMAGE_FOLDER:device/devices}
   websocket:
     endpoint: "/ws-notification"
     topic: "/topic/messages"

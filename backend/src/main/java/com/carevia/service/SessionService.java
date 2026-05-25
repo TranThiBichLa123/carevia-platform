@@ -19,17 +19,21 @@ public class SessionService {
     private final ExperienceSessionRepository sessionRepository;
     private final DeviceRepository deviceRepository;
     private final StaffRepository staffRepository;
+    private final StaffBrandAccessService staffBrandAccessService;
 
-    public SessionService(ExperienceSessionRepository sessionRepository, DeviceRepository deviceRepository, StaffRepository staffRepository) {
+    public SessionService(ExperienceSessionRepository sessionRepository, DeviceRepository deviceRepository,
+            StaffRepository staffRepository, StaffBrandAccessService staffBrandAccessService) {
         this.sessionRepository = sessionRepository;
         this.deviceRepository = deviceRepository;
         this.staffRepository = staffRepository;
+        this.staffBrandAccessService = staffBrandAccessService;
     }
 
     @Transactional
     public SessionResponse createSession(CreateSessionRequest request) {
         Device device = deviceRepository.findById(request.getDeviceId())
                 .orElseThrow(() -> new ResourceNotFoundException("Device not found"));
+        staffBrandAccessService.requireManageableDevice(device);
 
         ExperienceSession session = ExperienceSession.builder()
                 .device(device)
@@ -58,13 +62,22 @@ public class SessionService {
     }
 
     public List<SessionResponse> getSessionsByDate(LocalDate date) {
-        return sessionRepository.findSessionsByDate(date).stream()
+        Long scopedBrandId = staffBrandAccessService.getScopedBrandIdOrNull();
+        return sessionRepository.findAll((root, query, cb) -> cb.and(
+                cb.equal(root.get("sessionDate"), date),
+                root.get("status").in(com.carevia.shared.constant.SessionStatus.OPEN,
+                    com.carevia.shared.constant.SessionStatus.FULL),
+                scopedBrandId != null ? cb.equal(root.get("device").get("brand").get("id"), scopedBrandId) : cb.conjunction()))
+            .stream()
                 .map(this::toResponse).collect(Collectors.toList());
     }
 
     public SessionResponse getSessionById(Long id) {
         ExperienceSession session = sessionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Session not found"));
+        if (!staffBrandAccessService.hasGlobalAccess()) {
+            staffBrandAccessService.requireManageableSession(session);
+        }
         return toResponse(session);
     }
 
@@ -72,6 +85,7 @@ public class SessionService {
     public SessionResponse updateSessionStatus(Long id, String status) {
         ExperienceSession session = sessionRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Session not found"));
+        staffBrandAccessService.requireManageableSession(session);
         switch (status.toUpperCase()) {
             case "CLOSED" -> session.close();
             case "CANCELLED" -> session.cancel();

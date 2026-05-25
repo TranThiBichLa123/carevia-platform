@@ -27,6 +27,7 @@ public class DeviceResponse {
     private Integer stock;
     private Double averageRating;
     private String image;
+    private String imagePublicId;
     private List<String> images;
     private CategoryInfo category;
     private BrandInfo brand;
@@ -39,6 +40,10 @@ public class DeviceResponse {
     private DeviceStatus status;
     private Integer sold;
     private Integer reviewCount;
+    private Double effectivenessScore;
+    private Double safetyScore;
+    private Double ergonomicsScore;
+    private Double durabilityScore;
     private Long viewCount;
     private Boolean isBookingAvailable;
     private BigDecimal bookingPrice;

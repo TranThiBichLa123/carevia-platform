@@ -41,4 +41,16 @@ public class AccountResponse {
     @Schema(description = "Account creation timestamp", example = "2025-11-01T08:00:00Z")
     private Instant createdAt;
 
+    @Schema(description = "Assigned brand ID for staff", example = "12")
+    private Long brandId;
+
+    @Schema(description = "Assigned brand name for staff", example = "Foreo")
+    private String brandName;
+
+    @Schema(description = "Requested brand name from seller onboarding", example = "GlowLab")
+    private String requestedBrandName;
+
+    @Schema(description = "Requested brand description from seller onboarding")
+    private String requestedBrandDescription;
+
 }

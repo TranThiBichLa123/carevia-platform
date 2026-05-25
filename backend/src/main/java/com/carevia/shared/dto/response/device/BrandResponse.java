@@ -14,6 +14,7 @@ public class BrandResponse {
     private String name;
     private String slug;
     private String image;
+    private String imagePublicId;
     private String description;
     private Boolean isFeatured;
     private Boolean isActive;

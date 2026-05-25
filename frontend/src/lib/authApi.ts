@@ -113,6 +113,8 @@ const normalizeResponseData = (url: string, payload: unknown) => {
 				email?: string;
 				avatarUrl?: string;
 				role?: string;
+				brandId?: number;
+				brandName?: string;
 			};
 		};
 
@@ -125,6 +127,8 @@ const normalizeResponseData = (url: string, payload: unknown) => {
 			email: loginPayload.user?.email || "",
 			avatar: loginPayload.user?.avatarUrl || "",
 			role: loginPayload.user?.role || "",
+			brand_id: loginPayload.user?.brandId,
+			brand_name: loginPayload.user?.brandName || undefined,
 		};
 	}
 
@@ -147,6 +151,10 @@ const normalizeResponseData = (url: string, payload: unknown) => {
 			phone?: string;
 			address?: string;
 			clientCode?: string;
+			brandId?: number;
+			brandName?: string;
+			requestedBrandName?: string;
+			requestedBrandDescription?: string;
 			loyaltyPoints?: number;
 			membershipLevel?: string;
 			skinType?: string;
@@ -179,6 +187,10 @@ const normalizeResponseData = (url: string, payload: unknown) => {
 			phone: mePayload.phone,
 			address: mePayload.address,
 			client_code: mePayload.clientCode,
+			brand_id: mePayload.brandId,
+			brand_name: mePayload.brandName,
+			requested_brand_name: mePayload.requestedBrandName,
+			requested_brand_description: mePayload.requestedBrandDescription,
 			loyalty_points: mePayload.loyaltyPoints,
 			membership_level: mePayload.membershipLevel,
 			skin_type: mePayload.skinType,

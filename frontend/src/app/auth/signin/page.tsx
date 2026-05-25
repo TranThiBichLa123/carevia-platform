@@ -8,8 +8,6 @@ import { toast } from "sonner";
 import { ENV } from "@/config/env";
 import { authService } from "@/services/auth/auth.service";
 import { useUserStore } from "@/lib/store";
-import { AuthResponse } from "@/services/auth/auth.types";
-import { AnimatePresence } from "framer-motion";
 
 const logoImage = "/assets/images/smallLogo.png";
 const leftImage = "/assets/images/leftsignin.png";
@@ -21,26 +19,7 @@ export default function LoginPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { setAuthToken, updateUser } = useUserStore();
   const animationSpeed = 0.8;
-  // Hiệu ứng chữ trượt nhẹ nhàng
-  const textVariants = {
-    initial: { opacity: 0, y: 15 },
-    animate: { opacity: 1, y: 0, transition: { duration: 0.2 } },
-    exit: { opacity: 0, y: -15, transition: { duration: 0.2 } }
-  };
 
-  // Hiệu ứng mũi tên chuyển động tịnh tiến (Ping-pong)
-  const arrowVariants = {
-    rest: { x: 0 },
-    hover: { x: 4 },
-    submitting: {
-      x: [0, 8, 0], // Chạy tới 8px rồi quay về 0
-      transition: {
-        repeat: Infinity,
-        duration: 0.8,
-        ease: "easeInOut" as const,
-      }
-    }
-  };
   const getRedirectPath = (role: string) => {
     if (role === "ADMIN") {
       return "/admin";
@@ -71,10 +50,18 @@ export default function LoginPage() {
       setAuthToken(response.accessToken);
 
       updateUser({
-        ...response.user,
-        _id: response.user.id.toString(), // Store cần _id (string)
-        name: response.user.fullName || response.user.username, // Store cần name
-      } as any);
+        _id: response.user.id.toString(),
+        username: response.user.username,
+        email: response.user.email,
+        role: response.user.role,
+        status: response.user.status,
+        avatar_url: response.user.avatarUrl,
+        full_name: response.user.fullName || response.user.username,
+        brand_id: response.user.brandId,
+        brand_name: response.user.brandName,
+        requested_brand_name: response.user.requestedBrandName,
+        requested_brand_description: response.user.requestedBrandDescription,
+      });
       // Lưu thêm các token khác vào localStorage nếu cần cho logic cũ
       localStorage.setItem(ENV.TOKEN_KEY, response.accessToken);
       localStorage.setItem(ENV.REFRESH_TOKEN_KEY, response.refreshToken);
@@ -129,15 +116,6 @@ export default function LoginPage() {
     },
   };
 
-  const buttonHoverVariants = {
-    rest: { scale: 1 },
-    hover: {
-      scale: 1.03,
-      transition: { duration: 0.2 * animationSpeed, ease: easeInOut },
-    },
-    tap: { scale: 0.98 },
-  };
-
   const inputHoverVariants = {
     rest: { boxShadow: "0 0 0 rgba(0, 0, 0, 0)" },
     hover: {
@@ -181,7 +159,7 @@ export default function LoginPage() {
               className="w-20 h-20 rounded-full bg-linear-to-br bg-blue-100 opacity-90 flex items-center justify-center shadow-xl"
 
             >
-              <ShoppingCart className="w-10 h-10 text-[var(--primary)]" strokeWidth={2.5} />
+              <ShoppingCart className="w-10 h-10 text-primary" strokeWidth={2.5} />
             </div>
           </motion.div>
 
@@ -204,7 +182,7 @@ export default function LoginPage() {
               className="w-32 h-32 rounded-full bg-linear-to-br bg-blue-100 opacity-85 flex items-center justify-center shadow-xl"
 
             >
-              <ShoppingBag className="w-16 h-16 text-[var(--primary)]" strokeWidth={2.5} />
+              <ShoppingBag className="w-16 h-16 text-primary" strokeWidth={2.5} />
             </div>
           </motion.div>
 
@@ -227,7 +205,7 @@ export default function LoginPage() {
               className="w-24 h-24 rounded-full bg-linear-to-br bg-blue-100 opacity-90 flex items-center justify-center shadow-xl"
 
             >
-              <Package className="w-12 h-12 text-[var(--primary)]" strokeWidth={2.5} />
+              <Package className="w-12 h-12 text-primary" strokeWidth={2.5} />
             </div>
           </motion.div>
 

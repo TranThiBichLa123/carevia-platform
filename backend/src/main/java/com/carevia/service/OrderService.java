@@ -34,12 +34,13 @@ public class OrderService {
     private final NotificationService notificationService;
     private final RefundService refundService;
     private final RefundRepository refundRepository;
+    private final StaffBrandAccessService staffBrandAccessService;
 
     public OrderService(OrderRepository orderRepository, DeviceRepository deviceRepository,
             AccountRepository accountRepository, VoucherRepository voucherRepository,
             CartRepository cartRepository, UserBehaviorRepository userBehaviorRepository,
             NotificationService notificationService, RefundService refundService,
-            RefundRepository refundRepository) {
+            RefundRepository refundRepository, StaffBrandAccessService staffBrandAccessService) {
         this.orderRepository = orderRepository;
         this.deviceRepository = deviceRepository;
         this.accountRepository = accountRepository;
@@ -49,6 +50,7 @@ public class OrderService {
         this.notificationService = notificationService;
         this.refundService = refundService;
         this.refundRepository = refundRepository;
+        this.staffBrandAccessService = staffBrandAccessService;
     }
 
     @Transactional
@@ -148,13 +150,13 @@ public class OrderService {
     public OrderResponse getOrderById(Long id) {
         Order order = orderRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
-        return toResponse(order);
+        return toAuthorizedResponse(order);
     }
 
     public OrderResponse getOrderByCode(String code) {
         Order order = orderRepository.findByOrderCode(code)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
-        return toResponse(order);
+        return toAuthorizedResponse(order);
     }
 
     // Staff operations
@@ -162,6 +164,7 @@ public class OrderService {
     public OrderResponse updateOrderStatus(Long orderId, String status) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found"));
+        staffBrandAccessService.requireManageableOrderForMutation(order);
 
         switch (status.toUpperCase()) {
             case "PAID" -> {
@@ -219,8 +222,15 @@ public class OrderService {
     }
 
     public PageResponse<OrderResponse> getAllOrders(Pageable pageable) {
-        Page<Order> page = orderRepository.findAll(pageable);
-        return toPageResponse(page);
+        Long scopedBrandId = staffBrandAccessService.getScopedBrandIdOrNull();
+        Page<Order> page = orderRepository.findAll((root, query, cb) -> {
+            query.distinct(true);
+            if (scopedBrandId == null) {
+                return cb.conjunction();
+            }
+            return cb.equal(root.join("items").join("device").get("brand").get("id"), scopedBrandId);
+        }, pageable);
+        return toPageResponse(page, scopedBrandId);
     }
 
     @Transactional
@@ -238,12 +248,28 @@ public class OrderService {
         }
     }
 
-    private OrderResponse toResponse(Order o) {
+        private OrderResponse toResponse(Order o) {
+        return toResponse(o, null);
+        }
+
+        private OrderResponse toResponse(Order o, Long scopedBrandId) {
+        List<OrderItem> visibleItems = scopedBrandId == null
+            ? o.getItems()
+            : o.getItems().stream()
+                .filter(item -> item.getDevice() != null
+                    && item.getDevice().getBrand() != null
+                    && scopedBrandId.equals(item.getDevice().getBrand().getId()))
+                .toList();
+
+        BigDecimal scopedSubtotal = visibleItems.stream()
+            .map(OrderItem::getSubtotal)
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
         return OrderResponse.builder()
                 .id(o.getId())
                 .orderCode(o.getOrderCode())
                 .accountId(o.getAccount().getId())
-                .items(o.getItems().stream().map(i -> OrderResponse.OrderItemInfo.builder()
+            .items(visibleItems.stream().map(i -> OrderResponse.OrderItemInfo.builder()
                         .id(i.getId())
                         .deviceId(i.getDevice().getId())
                         .deviceName(i.getDevice().getName())
@@ -252,11 +278,11 @@ public class OrderService {
                         .unitPrice(i.getUnitPrice())
                         .subtotal(i.getSubtotal())
                         .build()).collect(Collectors.toList()))
-                .subtotal(o.getSubtotal())
-                .discountAmount(o.getDiscountAmount())
-                .shippingFee(o.getShippingFee())
-                .taxAmount(o.getTaxAmount())
-                .totalAmount(o.getTotalAmount())
+                    .subtotal(scopedBrandId == null ? o.getSubtotal() : scopedSubtotal)
+                    .discountAmount(scopedBrandId == null ? o.getDiscountAmount() : BigDecimal.ZERO)
+                    .shippingFee(scopedBrandId == null ? o.getShippingFee() : BigDecimal.ZERO)
+                    .taxAmount(scopedBrandId == null ? o.getTaxAmount() : BigDecimal.ZERO)
+                    .totalAmount(scopedBrandId == null ? o.getTotalAmount() : scopedSubtotal)
                 .status(o.getStatus())
                 .paymentStatus(o.getPaymentStatus())
                 .paymentMethod(o.getPaymentMethod())
@@ -275,8 +301,12 @@ public class OrderService {
     }
 
     private PageResponse<OrderResponse> toPageResponse(Page<Order> page) {
+        return toPageResponse(page, null);
+    }
+
+    private PageResponse<OrderResponse> toPageResponse(Page<Order> page, Long scopedBrandId) {
         return PageResponse.<OrderResponse>builder()
-                .items(page.getContent().stream().map(this::toResponse).collect(Collectors.toList()))
+                .items(page.getContent().stream().map(order -> toResponse(order, scopedBrandId)).collect(Collectors.toList()))
                 .page(page.getNumber())
                 .size(page.getSize())
                 .totalItems(page.getTotalElements())
@@ -284,5 +314,29 @@ public class OrderService {
                 .hasNext(page.hasNext())
                 .hasPrevious(page.hasPrevious())
                 .build();
+    }
+
+    private OrderResponse toAuthorizedResponse(Order order) {
+        Long currentUserId = com.carevia.shared.util.SecurityUtils.getCurrentUserId()
+                .orElseThrow(() -> new ResourceNotFoundException("User not authenticated"));
+        Account currentAccount = accountRepository.findById(currentUserId)
+                .orElseThrow(() -> new ResourceNotFoundException("Account not found"));
+
+        if (currentAccount.isAdmin()) {
+            return toResponse(order);
+        }
+
+        if (currentAccount.isStaff()) {
+            if (!staffBrandAccessService.canViewOrder(order)) {
+                throw new InvalidRequestException("You can only view orders containing your own brand devices");
+            }
+            return toResponse(order, staffBrandAccessService.requireCurrentStaffBrand().getId());
+        }
+
+        if (!order.getAccount().getId().equals(currentAccount.getId())) {
+            throw new InvalidRequestException("Cannot view another user's order");
+        }
+
+        return toResponse(order);
     }
 }

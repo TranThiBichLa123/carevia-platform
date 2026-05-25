@@ -34,13 +34,14 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 -- =============================================================
--- 3. ACCOUNTS (1 admin, 2 staff, 3 client)
+-- 3. ACCOUNTS (1 admin, 3 staff, 3 client)
 -- =============================================================
 INSERT INTO accounts (id, username, email, password_hash, role, status, avatar_url, lang_key, created_at, updated_at, created_by, updated_by)
 VALUES
   (1, 'admin',       'admin@carevia.vn',       '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhu0', 'ADMIN',  'ACTIVE', NULL, 'vi', NOW(), NOW(), 'seed', 'seed'),
   (2, 'staff_lan',   'staff.lan@carevia.vn',   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhu0', 'STAFF',  'ACTIVE', NULL, 'vi', NOW(), NOW(), 'seed', 'seed'),
   (3, 'staff_minh',  'staff.minh@carevia.vn',  '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhu0', 'STAFF',  'ACTIVE', NULL, 'vi', NOW(), NOW(), 'seed', 'seed'),
+  (8, 'staff_huong', 'staff.huong@carevia.vn', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhu0', 'STAFF',  'PENDING_APPROVAL', NULL, 'vi', NOW(), NOW(), 'seed', 'seed'),
   (4, 'client_anh',  'anh.nguyen@gmail.com',   '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhu0', 'CLIENT', 'ACTIVE', NULL, 'vi', NOW(), NOW(), 'seed', 'seed'),
   (5, 'client_bich', 'bich.tran@gmail.com',    '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhu0', 'CLIENT', 'ACTIVE', NULL, 'vi', NOW(), NOW(), 'seed', 'seed'),
   (6, 'client_cuong','cuong.le@gmail.com',     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhu0', 'CLIENT', 'ACTIVE', NULL, 'vi', NOW(), NOW(), 'seed', 'seed')
@@ -68,8 +69,10 @@ WHERE id = 2;
 -- 1. Thêm Admin (nếu chưa có ID 1) hoặc thêm một Admin thứ hai (ID 7)
 INSERT INTO accounts (id, username, email, password_hash, role, status, lang_key, created_at, updated_at, created_by, updated_by)
 OVERRIDING SYSTEM VALUE VALUES 
-(7, 'admin', 'admin@carevia.vn', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhu0', 'ADMIN', 'ACTIVE', 'vi', NOW(), NOW(), 'seed', 'seed')
+(7, 'platform_admin', 'platform.admin@carevia.vn', '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhu0', 'ADMIN', 'ACTIVE', 'vi', NOW(), NOW(), 'seed', 'seed')
 ON CONFLICT (id) DO UPDATE SET 
+  username = EXCLUDED.username,
+  email = EXCLUDED.email,
     role = 'ADMIN', 
     status = 'ACTIVE';
 
@@ -89,10 +92,11 @@ TRUNCATE TABLE staffs RESTART IDENTITY CASCADE;
 -- 1. Ép mã hóa UTF8 cho phiên làm việc này
 SET client_encoding = 'UTF8';
 
-INSERT INTO staffs (id, account_id, staff_code, full_name, birth_date, gender, phone, specialty, degree, approved, approved_by, approved_at, created_at, updated_at, created_by, updated_by)
+INSERT INTO staffs (id, account_id, staff_code, full_name, birth_date, gender, phone, specialty, degree, brand_id, requested_brand_name, requested_brand_description, approved, approved_by, approved_at, created_at, updated_at, created_by, updated_by)
 VALUES
-  (1, 2, 'ST001', 'Trần Thị Lan',   '1992-05-15', 'FEMALE', '0901234567', 'Da liễu thẩm mỹ', 'Cử nhân Điều dưỡng', true, 1, NOW(), NOW(), NOW(), 'seed', 'seed'),
-  (2, 3, 'ST002', 'Nguyễn Văn Minh','1989-10-20', 'MALE',   '0912345678', 'Vật lý trị liệu',  'Thạc sĩ Y học',      true, 1, NOW(), NOW(), NOW(), 'seed', 'seed')
+  (1, 2, 'ST001', 'Trần Thị Lan',   '1992-05-15', 'FEMALE', '0901234567', 'Da liễu thẩm mỹ', 'Cử nhân Điều dưỡng', 1, 'Foreo', 'Seller seed đang vận hành brand Foreo trên marketplace.', true, 1, NOW(), NOW(), NOW(), 'seed', 'seed'),
+  (2, 3, 'ST002', 'Nguyễn Văn Minh','1989-10-20', 'MALE',   '0912345678', 'Vật lý trị liệu',  'Thạc sĩ Y học',      2, 'NuFace', 'Seller seed đang vận hành brand NuFace trên marketplace.', true, 1, NOW(), NOW(), NOW(), 'seed', 'seed'),
+  (3, 8, 'ST003', 'Lê Thu Hương',   '1994-08-09', 'FEMALE', '0981234567', 'Seller onboarding', 'Brand Representative', NULL, 'GlowLab Vietnam', 'Brand thiết bị skincare công nghệ cao đang chờ Platform Admin duyệt để mở seller workspace.', false, NULL, NULL, NOW(), NOW(), 'seed', 'seed')
 ON CONFLICT (id) DO NOTHING;
 
 -- =============================================================
@@ -225,6 +229,44 @@ VALUES
        true, 600000, NULL, NOW(), NOW(), 'seed', 'seed')
 ON CONFLICT (id) DO NOTHING;
 
+-- 3. Bổ sung thêm 30 thiết bị đa dạng cho demo fuzzy TOPSIS
+INSERT INTO devices (id, name, slug, description, content, price, original_price, discount_percentage, stock, average_rating, image, category_id, brand_id, sku, warranty_period, warranty_policy, origin, device_condition, skin_type, skin_concerns, status, sold, review_count, view_count, is_booking_available, booking_price, video_url, created_at, updated_at, created_by, updated_by)
+VALUES
+  (11, 'Foreo BEAR 2 - Máy nâng cơ vi dòng', 'foreo-bear-2', 'Thiết bị vi dòng nâng cơ mặt và cải thiện độ săn chắc.', '<p>Foreo BEAR 2 phù hợp cho nhu cầu nâng cơ nhanh tại nhà và chăm sóc gương mặt hằng ngày.</p>', 7900000, 8900000, 11.24, 12, 4.9, 'https://placehold.co/600x400?text=Foreo+Bear+2', 2, 1, 'FOREO-BEAR2-001', 24, '24 tháng bảo hành chính hãng', 'Thụy Điển', 'new', 'Mọi loại da', 'Chảy xệ, Nếp nhăn', 'AVAILABLE', 34, 11, 980, true, 550000, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (12, 'Philips Lumea Facial Precision IPL', 'philips-lumea-facial-precision', 'Thiết bị IPL hỗ trợ làm đều màu da và cải thiện vùng thâm.', '<p>Philips Lumea Facial Precision IPL nhắm đến nhóm khách hàng muốn cải thiện sắc tố da và bề mặt da.</p>', 6100000, 7200000, 15.28, 10, 4.6, 'https://placehold.co/600x400?text=Philips+Lumea', 3, 3, 'PHILIPS-LUMEA-001', 24, '24 tháng bảo hành chính hãng', 'Hà Lan', 'new', 'Da thường, Da hỗn hợp', 'Thâm mụn, Không đều màu', 'AVAILABLE', 22, 8, 540, true, 420000, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (13, 'Panasonic Nano Facial Steamer EH-SA0B', 'panasonic-nano-facial-steamer-eh-sa0b', 'Máy xông mặt nano hỗ trợ cấp ẩm và làm mềm da trước treatment.', '<p>EH-SA0B phù hợp với làn da khô, nhạy cảm cần tăng độ ẩm và thư giãn.</p>', 4300000, 4900000, 12.24, 16, 4.7, 'https://placehold.co/600x400?text=Panasonic+Steamer', 4, 4, 'PANASONIC-SA0B-001', 12, '12 tháng bảo hành chính hãng', 'Nhật Bản', 'new', 'Da khô, Da nhạy cảm', 'Thiếu ẩm, Xỉn màu', 'AVAILABLE', 19, 7, 410, false, NULL, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (14, 'NuFace FIX Line Smoothing Device', 'nuface-fix-line-smoothing', 'Thiết bị chăm sóc vùng mắt và rãnh cười bằng microcurrent nhẹ.', '<p>NuFace FIX thích hợp cho vùng mắt, trán và rãnh cười với cường độ dịu hơn Trinity.</p>', 4600000, 5200000, 11.54, 14, 4.5, 'https://placehold.co/600x400?text=NuFace+Fix', 2, 2, 'NUFACE-FIX-001', 12, '12 tháng bảo hành chính hãng', 'Mỹ', 'new', 'Da thường, Da hỗn hợp', 'Nếp nhăn vùng mắt, Rãnh cười', 'AVAILABLE', 27, 9, 760, true, 380000, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (15, 'CurrentBody Skin RF Radio Frequency', 'currentbody-skin-rf-radio-frequency', 'Thiết bị RF hỗ trợ săn chắc da và giảm chùng nhão.', '<p>CurrentBody RF là lựa chọn cao cấp cho nhóm khách hàng ưu tiên nâng cơ chuyên sâu tại nhà.</p>', 10500000, 11900000, 11.76, 7, 4.8, 'https://placehold.co/600x400?text=CurrentBody+RF', 2, 5, 'CB-RF-001', 24, '24 tháng bảo hành chính hãng', 'Anh', 'new', 'Mọi loại da', 'Lão hóa, Chùng nhão', 'AVAILABLE', 14, 6, 390, true, 720000, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (16, 'Foreo ESPADA 2 Blue Light', 'foreo-espada-2-blue-light', 'Thiết bị ánh sáng xanh hỗ trợ giảm viêm mụn và gom cồi.', '<p>ESPADA 2 tập trung vào vùng mụn viêm, phù hợp da dầu và da hỗn hợp thiên dầu.</p>', 2900000, 3400000, 14.71, 25, 4.4, 'https://placehold.co/600x400?text=Foreo+Espada+2', 3, 1, 'FOREO-ESPADA2-001', 24, '24 tháng bảo hành chính hãng', 'Thụy Điển', 'new', 'Da dầu, Da hỗn hợp', 'Mụn viêm, Mụn ẩn', 'AVAILABLE', 41, 13, 1180, true, 260000, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (17, 'Philips Sonicare Radiance Cleanse Brush', 'philips-sonicare-radiance-cleanse-brush', 'Máy làm sạch bằng sóng âm cho da dầu và da thường.', '<p>Sonicare Radiance phù hợp làm sạch bụi bẩn hằng ngày và hỗ trợ thông thoáng lỗ chân lông.</p>', 2100000, 2500000, 16.00, 28, 4.3, 'https://placehold.co/600x400?text=Philips+Sonicare', 1, 3, 'PHILIPS-SONICARE-001', 18, '18 tháng bảo hành chính hãng', 'Hà Lan', 'new', 'Da thường, Da dầu', 'Bụi bẩn, Lỗ chân lông to', 'AVAILABLE', 36, 10, 860, false, NULL, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (18, 'Panasonic EH-SC67 Micro-Foaming Cleanser', 'panasonic-eh-sc67-micro-foaming-cleanser', 'Máy tạo bọt siêu mịn hỗ trợ làm sạch sâu và massage nhẹ.', '<p>EH-SC67 kết hợp làm sạch và làm mềm da, phù hợp chu trình chăm sóc da buổi tối.</p>', 3550000, 4050000, 12.35, 18, 4.6, 'https://placehold.co/600x400?text=Panasonic+SC67', 1, 4, 'PANASONIC-SC67-001', 12, '12 tháng bảo hành chính hãng', 'Nhật Bản', 'new', 'Da thường, Da hỗn hợp', 'Làm sạch sâu, Xỉn màu', 'AVAILABLE', 24, 7, 530, false, NULL, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (19, 'PMD Clean Pro Rose Quartz', 'pmd-clean-pro-rose-quartz', 'Thiết bị massage rung và nhiệt nhẹ hỗ trợ thư giãn da mặt.', '<p>PMD Clean Pro Rose Quartz hướng đến trải nghiệm massage dịu nhẹ cho da nhạy cảm.</p>', 2750000, 3200000, 14.06, 20, 4.2, 'https://placehold.co/600x400?text=PMD+Clean+Pro', 4, 3, 'PMD-CLEANPRO-001', 12, '12 tháng bảo hành', 'Mỹ', 'new', 'Da nhạy cảm, Da khô', 'Sưng nhẹ, Cần thư giãn', 'AVAILABLE', 17, 5, 340, false, NULL, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (20, 'NuFace Trinity Plus Smart', 'nuface-trinity-plus-smart', 'Phiên bản thông minh của Trinity với chương trình chăm sóc cá nhân hóa.', '<p>NuFace Trinity Plus Smart phù hợp demo nhóm thiết bị nâng cơ cao cấp.</p>', 6900000, 7900000, 12.66, 11, 4.9, 'https://placehold.co/600x400?text=NuFace+Trinity+Plus', 2, 2, 'NUFACE-TRINITYPLUS-001', 12, '12 tháng bảo hành chính hãng', 'Mỹ', 'new', 'Mọi loại da', 'Chảy xệ, Đường nét kém săn chắc', 'AVAILABLE', 31, 12, 1010, true, 520000, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (21, 'CurrentBody LED Neck and Dec Perfector', 'currentbody-led-neck-and-dec-perfector', 'Thiết bị LED chuyên cho vùng cổ và ngực.', '<p>Sản phẩm phù hợp khách hàng cần treatment riêng cho vùng cổ có dấu hiệu lão hóa.</p>', 7400000, 8400000, 11.90, 9, 4.7, 'https://placehold.co/600x400?text=CurrentBody+Neck+LED', 3, 5, 'CB-NECKLED-001', 24, '24 tháng bảo hành chính hãng', 'Anh', 'new', 'Mọi loại da', 'Nếp nhăn vùng cổ, Xỉn màu', 'AVAILABLE', 16, 6, 470, true, 480000, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (22, 'Foreo UFO 3 Smart Mask Treatment', 'foreo-ufo-3-smart-mask-treatment', 'Thiết bị đẩy tinh chất với nhiệt, lạnh và xung T-Sonic.', '<p>Foreo UFO 3 phù hợp quy trình chăm sóc da nhanh và tăng khả năng hấp thụ dưỡng chất.</p>', 5200000, 5900000, 11.86, 15, 4.5, 'https://placehold.co/600x400?text=Foreo+UFO+3', 4, 1, 'FOREO-UFO3-001', 24, '24 tháng bảo hành chính hãng', 'Thụy Điển', 'new', 'Da khô, Da thường', 'Thiếu ẩm, Cần phục hồi', 'AVAILABLE', 29, 9, 690, false, NULL, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (23, 'Panasonic EH-ST98 Warm Ion Booster', 'panasonic-eh-st98-warm-ion-booster', 'Thiết bị ion ấm hỗ trợ đưa tinh chất vào sâu hơn.', '<p>EH-ST98 phù hợp khách hàng cần kết hợp massage nhẹ và tăng hấp thu serum.</p>', 4950000, 5600000, 11.61, 13, 4.6, 'https://placehold.co/600x400?text=Panasonic+ST98', 4, 4, 'PANASONIC-ST98-001', 12, '12 tháng bảo hành chính hãng', 'Nhật Bản', 'new', 'Da khô, Da hỗn hợp', 'Dưỡng chất khó thẩm thấu, Xỉn màu', 'AVAILABLE', 21, 8, 560, true, 360000, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (24, 'Philips VisaBoost Serum Infuser', 'philips-visaboost-serum-infuser', 'Thiết bị serum infuser hỗ trợ cấp ẩm và làm dịu da.', '<p>VisaBoost Serum Infuser phù hợp routine nhẹ nhàng cho da thiếu nước và nhạy cảm.</p>', 3300000, 3900000, 15.38, 17, 4.4, 'https://placehold.co/600x400?text=Philips+VisaBoost', 4, 3, 'PHILIPS-VISABOOST-001', 18, '18 tháng bảo hành chính hãng', 'Hà Lan', 'new', 'Da khô, Da nhạy cảm', 'Thiếu ẩm, Cần làm dịu', 'AVAILABLE', 18, 6, 430, false, NULL, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (25, 'Foreo LUNA 4 Body Polish', 'foreo-luna-4-body-polish', 'Thiết bị làm sạch body và tẩy da chết vật lý nhẹ.', '<p>LUNA 4 Body Polish tạo thêm lựa chọn phong phú cho nhóm thiết bị chăm sóc cơ thể.</p>', 4100000, 4700000, 12.77, 22, 4.3, 'https://placehold.co/600x400?text=Foreo+Body+Polish', 1, 1, 'FOREO-BODYPOLISH-001', 24, '24 tháng bảo hành chính hãng', 'Thụy Điển', 'new', 'Mọi loại da', 'Da sần, Làm sạch body', 'AVAILABLE', 26, 8, 610, false, NULL, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (26, 'NuFace Mini Plus Starter', 'nuface-mini-plus-starter', 'Máy nâng cơ mini dành cho nhu cầu sử dụng hằng ngày.', '<p>NuFace Mini Plus Starter phù hợp khách hàng mới bắt đầu với microcurrent.</p>', 3900000, 4500000, 13.33, 19, 4.7, 'https://placehold.co/600x400?text=NuFace+Mini+Plus', 2, 2, 'NUFACE-MINIPLUS-001', 12, '12 tháng bảo hành chính hãng', 'Mỹ', 'new', 'Mọi loại da', 'Nâng cơ nhẹ, Săn chắc', 'AVAILABLE', 33, 11, 920, true, 340000, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (27, 'CurrentBody LED Hair Growth Helmet', 'currentbody-led-hair-growth-helmet', 'Thiết bị LED cho da đầu và nang tóc.', '<p>Thiết bị mở rộng danh mục high-tech treatment cho demo recommendation.</p>', 11900000, 13200000, 9.85, 6, 4.5, 'https://placehold.co/600x400?text=CurrentBody+Helmet', 3, 5, 'CB-HAIRLED-001', 24, '24 tháng bảo hành chính hãng', 'Anh', 'new', 'Mọi loại da', 'Da đầu yếu, Tóc thưa', 'AVAILABLE', 9, 4, 250, false, NULL, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (28, 'Panasonic EH-XR10 RF Lift Care', 'panasonic-eh-xr10-rf-lift-care', 'Thiết bị RF kết hợp massage cho da có dấu hiệu lão hóa.', '<p>EH-XR10 là lựa chọn mạnh trong nhóm chăm sóc lão hóa và cải thiện săn chắc.</p>', 8700000, 9700000, 10.31, 8, 4.8, 'https://placehold.co/600x400?text=Panasonic+XR10', 2, 4, 'PANASONIC-XR10-001', 12, '12 tháng bảo hành chính hãng', 'Nhật Bản', 'new', 'Da thường, Da hỗn hợp', 'Lão hóa, Săn chắc da', 'AVAILABLE', 15, 6, 380, true, 650000, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (29, 'Philips Rejuvenate Sonic Dermaplaning', 'philips-rejuvenate-sonic-dermaplaning', 'Thiết bị hỗ trợ tẩy da chết nhẹ và làm mịn bề mặt da.', '<p>Dermaplaning sonic phù hợp nhóm da dầu và da thường cần bề mặt da mịn hơn.</p>', 2500000, 3000000, 16.67, 24, 4.2, 'https://placehold.co/600x400?text=Philips+Dermaplaning', 5, 3, 'PHILIPS-DERMAPLANE-001', 18, '18 tháng bảo hành chính hãng', 'Hà Lan', 'new', 'Da dầu, Da thường', 'Tế bào chết, Da thô ráp', 'AVAILABLE', 23, 7, 500, true, 290000, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (30, 'Foreo IRIS 2 Eye Massager', 'foreo-iris-2-eye-massager', 'Thiết bị massage vùng mắt giảm bọng và quầng thâm.', '<p>IRIS 2 là thiết bị chăm sóc vùng mắt nhẹ nhàng và dễ demo cho khách hàng.</p>', 3600000, 4200000, 14.29, 18, 4.6, 'https://placehold.co/600x400?text=Foreo+Iris+2', 4, 1, 'FOREO-IRIS2-001', 24, '24 tháng bảo hành chính hãng', 'Thụy Điển', 'new', 'Da nhạy cảm, Da thường', 'Bọng mắt, Quầng thâm', 'AVAILABLE', 20, 7, 450, false, NULL, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (31, 'NuFace Trinity Wrinkle Reducer', 'nuface-trinity-wrinkle-reducer', 'Thiết bị chuyên cho vùng nếp nhăn sâu và da kém đàn hồi.', '<p>Trinity Wrinkle Reducer giúp nhóm anti-aging có thêm lựa chọn cao cấp cho fuzzy ranking.</p>', 8300000, 9300000, 10.75, 7, 4.7, 'https://placehold.co/600x400?text=NuFace+Wrinkle', 2, 2, 'NUFACE-WRINKLE-001', 12, '12 tháng bảo hành chính hãng', 'Mỹ', 'new', 'Da thường, Da khô', 'Nếp nhăn sâu, Chảy xệ', 'AVAILABLE', 13, 5, 310, true, 680000, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (32, 'CurrentBody Precision LED Blemish Pen', 'currentbody-precision-led-blemish-pen', 'Thiết bị LED cầm tay cho vùng mụn nhỏ và thâm mới.', '<p>Precision LED Blemish Pen tạo thêm lựa chọn giá tầm trung cho da dầu và da hỗn hợp.</p>', 3150000, 3650000, 13.70, 21, 4.4, 'https://placehold.co/600x400?text=CurrentBody+Blemish+Pen', 3, 5, 'CB-BLEMISHPEN-001', 24, '24 tháng bảo hành chính hãng', 'Anh', 'new', 'Da dầu, Da hỗn hợp', 'Mụn sưng, Vết thâm mới', 'AVAILABLE', 30, 10, 780, true, 240000, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (33, 'Panasonic EH-SA3C Compact Steamer', 'panasonic-eh-sa3c-compact-steamer', 'Máy xông mini cho nhu cầu cấp ẩm nhẹ và thư giãn.', '<p>EH-SA3C phù hợp khách hàng cần thiết bị xông nhỏ gọn, dễ mang theo.</p>', 2600000, 3100000, 16.13, 26, 4.3, 'https://placehold.co/600x400?text=Panasonic+SA3C', 4, 4, 'PANASONIC-SA3C-001', 12, '12 tháng bảo hành chính hãng', 'Nhật Bản', 'new', 'Da khô, Da nhạy cảm', 'Thiếu ẩm, Cần làm dịu', 'AVAILABLE', 27, 9, 640, false, NULL, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (34, 'Philips Daily Deep Pore Cleanser', 'philips-daily-deep-pore-cleanser', 'Máy làm sạch sâu giá dễ tiếp cận cho da dầu và da hỗn hợp.', '<p>Daily Deep Pore Cleanser tạo thêm nhiều lựa chọn giá thấp cho thuật toán fuzzy.</p>', 1750000, 2100000, 16.67, 30, 4.1, 'https://placehold.co/600x400?text=Philips+Pore+Cleanser', 1, 3, 'PHILIPS-PORECLEAN-001', 18, '18 tháng bảo hành chính hãng', 'Hà Lan', 'new', 'Da dầu, Da hỗn hợp', 'Bã nhờn, Lỗ chân lông to', 'AVAILABLE', 42, 12, 1350, false, NULL, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (35, 'Foreo FAQ 202 LED Scalp Massager', 'foreo-faq-202-led-scalp-massager', 'Thiết bị massage da đầu kết hợp ánh sáng LED thư giãn.', '<p>FAQ 202 tạo độ đa dạng về công nghệ và nhu cầu sử dụng trong catalog.</p>', 6800000, 7600000, 10.53, 9, 4.5, 'https://placehold.co/600x400?text=Foreo+FAQ+202', 4, 1, 'FOREO-FAQ202-001', 24, '24 tháng bảo hành chính hãng', 'Thụy Điển', 'new', 'Mọi loại da', 'Thư giãn, Chăm sóc da đầu', 'AVAILABLE', 12, 4, 260, false, NULL, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (36, 'NuFace Sculpt Neck Toning Device', 'nuface-sculpt-neck-toning-device', 'Thiết bị định hình vùng cổ và hàm bằng microcurrent.', '<p>Sculpt Neck Toning Device phù hợp demo nhóm khách hàng có nhu cầu nâng cơ vùng cổ.</p>', 7600000, 8500000, 10.59, 10, 4.8, 'https://placehold.co/600x400?text=NuFace+Neck+Toning', 2, 2, 'NUFACE-NECKTONE-001', 12, '12 tháng bảo hành chính hãng', 'Mỹ', 'new', 'Mọi loại da', 'Chảy xệ vùng cổ, Cằm nọng', 'AVAILABLE', 18, 6, 400, true, 620000, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (37, 'CurrentBody Skin Tone Corrector Pro', 'currentbody-skin-tone-corrector-pro', 'Thiết bị hỗ trợ cải thiện đốm nâu và sắc tố không đều.', '<p>Skin Tone Corrector Pro phù hợp nhóm khách hàng quan tâm sắc tố và bề mặt da.</p>', 6500000, 7300000, 10.96, 11, 4.5, 'https://placehold.co/600x400?text=CurrentBody+Tone+Pro', 3, 5, 'CB-TONEPRO-001', 24, '24 tháng bảo hành chính hãng', 'Anh', 'new', 'Da thường, Da hỗn hợp', 'Đốm nâu, Không đều màu', 'AVAILABLE', 17, 5, 360, false, NULL, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (38, 'Panasonic Smooth Peel Micro Polish', 'panasonic-smooth-peel-micro-polish', 'Thiết bị micro polish hỗ trợ làm mịn bề mặt da tại nhà.', '<p>Thiết bị này mở rộng nhóm exfoliating để fuzzy TOPSIS có nhiều lựa chọn hơn.</p>', 2850000, 3350000, 14.93, 19, 4.3, 'https://placehold.co/600x400?text=Panasonic+Micro+Polish', 5, 4, 'PANASONIC-MICROPOLISH-001', 12, '12 tháng bảo hành chính hãng', 'Nhật Bản', 'new', 'Da thường, Da dầu', 'Tẩy da chết nhẹ, Làm mịn da', 'AVAILABLE', 21, 7, 470, false, NULL, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (39, 'Philips LumiLift Cooling Wand', 'philips-lumilift-cooling-wand', 'Thiết bị massage lạnh hỗ trợ giảm sưng và làm dịu da.', '<p>LumiLift Cooling Wand là lựa chọn phù hợp cho da nhạy cảm sau treatment.</p>', 3050000, 3550000, 14.08, 20, 4.4, 'https://placehold.co/600x400?text=Philips+LumiLift', 4, 3, 'PHILIPS-LUMILIFT-001', 18, '18 tháng bảo hành chính hãng', 'Hà Lan', 'new', 'Da nhạy cảm, Da thường', 'Làm dịu, Giảm sưng', 'AVAILABLE', 25, 8, 520, true, 310000, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),
+  (40, 'Foreo KIWI Blackhead Remover 2', 'foreo-kiwi-blackhead-remover-2', 'Thiết bị hút mụn đầu đen và hỗ trợ làm sạch lỗ chân lông.', '<p>KIWI Blackhead Remover 2 là sản phẩm phù hợp cho nhu cầu da dầu, dễ nhìn thấy hiệu quả khi demo.</p>', 3400000, 3950000, 13.92, 17, 4.2, 'https://placehold.co/600x400?text=Foreo+KIWI+2', 5, 1, 'FOREO-KIWI2-001', 24, '24 tháng bảo hành chính hãng', 'Thụy Điển', 'new', 'Da dầu, Da hỗn hợp', 'Đầu đen, Lỗ chân lông to', 'AVAILABLE', 28, 9, 710, true, 280000, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo')
+ON CONFLICT (id) DO NOTHING;
+
+UPDATE devices
+SET image = 'https://res.cloudinary.com/dcisx0vss/image/upload/q_auto/f_auto/v1776492129/shopping_b5cn7u.webp';
+
 UPDATE devices
 SET 
     skin_type = CASE 
@@ -233,7 +275,8 @@ SET
         WHEN id IN (6, 7)    THEN 'Da hỗn hợp'
         WHEN id IN (10)      THEN 'Da nhạy cảm'
         ELSE 'Da thường'
-    END
+  END
+WHERE id BETWEEN 1 AND 10;
 
 
 -- =============================================================
@@ -251,6 +294,9 @@ INSERT INTO device_images (device_id, image_url) VALUES
   (6, 'https://placehold.co/600x400?text=LUNAmini-img1'),
   (7, 'https://placehold.co/600x400?text=NuFaceMini-img1')
 ON CONFLICT DO NOTHING;
+
+UPDATE device_images
+SET image_url = 'https://res.cloudinary.com/dcisx0vss/image/upload/q_auto/f_auto/v1776492129/shopping_b5cn7u.webp';
 
 -- =============================================================
 -- 9. DEVICE_TAGS (element collection)
@@ -524,12 +570,12 @@ ON CONFLICT (id) DO NOTHING;
 -- =============================================================
 -- 28. REVIEW
 -- =============================================================
-INSERT INTO review (id, account_id, device_id, service_id, order_id, rating, comment, is_verified_purchase, is_hidden, created_at, updated_at, created_by, updated_by)
+INSERT INTO review (id, account_id, device_id, service_id, order_id, rating, effectiveness_rating, safety_rating, ergonomics_rating, durability_rating, comment, is_verified_purchase, is_hidden, created_at, updated_at, created_by, updated_by)
 VALUES
-  (1, 4, 1,    NULL, 1, 5, 'Sản phẩm tuyệt vời! Da tôi sạch hơn hẳn sau 2 tuần sử dụng. Rất đáng tiền.',  true,  false, NOW() - INTERVAL '20 days', NOW() - INTERVAL '20 days', 'seed', 'seed'),
-  (2, 5, 2,    NULL, 2, 5, 'NuFace Trinity thực sự hiệu quả. Mặt tôi nâng cơ rõ ràng sau 1 tháng!',         true,  false, NOW() - INTERVAL '10 days', NOW() - INTERVAL '10 days', 'seed', 'seed'),
-  (3, 4, NULL, 1,    NULL, 4, 'Dịch vụ tốt, nhân viên chuyên nghiệp. Tuy nhiên không gian hơi nhỏ.',        false, false, NOW() - INTERVAL '5 days',  NOW() - INTERVAL '5 days',  'seed', 'seed'),
-  (4, 5, 2,    NULL, NULL, 5, 'Thiết bị hoạt động tốt, giao hàng nhanh.',                                   false, false, NOW() - INTERVAL '3 days',  NOW() - INTERVAL '3 days',  'seed', 'seed')
+  (1, 4, 1,    NULL, 1, 5, 5, 5, 4, 5, 'Sản phẩm tuyệt vời! Da tôi sạch hơn hẳn sau 2 tuần sử dụng. Rất đáng tiền.',  true,  false, NOW() - INTERVAL '20 days', NOW() - INTERVAL '20 days', 'seed', 'seed'),
+  (2, 5, 2,    NULL, 2, 5, 5, 4, 5, 5, 'NuFace Trinity thực sự hiệu quả. Mặt tôi nâng cơ rõ ràng sau 1 tháng!',         true,  false, NOW() - INTERVAL '10 days', NOW() - INTERVAL '10 days', 'seed', 'seed'),
+  (3, 4, NULL, 1,    NULL, 4, 4, 5, 4, 4, 'Dịch vụ tốt, nhân viên chuyên nghiệp. Tuy nhiên không gian hơi nhỏ.',        false, false, NOW() - INTERVAL '5 days',  NOW() - INTERVAL '5 days',  'seed', 'seed'),
+  (4, 6, 7,    NULL, NULL, 5, 5, 4, 5, 4, 'Thiết bị hoạt động tốt, giao hàng nhanh và cảm giác dùng rất ổn định.',     false, false, NOW() - INTERVAL '3 days',  NOW() - INTERVAL '3 days',  'seed', 'seed')
 ON CONFLICT (id) DO NOTHING;
 
 -- =============================================================
@@ -549,15 +595,15 @@ ON CONFLICT (id) DO NOTHING;
 -- =============================================================
 -- 30. SEARCH_HISTORY
 -- =============================================================
-INSERT INTO recommendation_log (id, account_id, device_id, rule_code, score, created_at)
+INSERT INTO search_history (id, account_id, keyword, searched_at)
 VALUES
-  (1, 4, 2,  'SKIN_TYPE_MATCH',    92, NOW() - INTERVAL '5 days'),
-  (2, 4, 3,  'CATEGORY_COLLAB',    88, NOW() - INTERVAL '5 days'),
-  (3, 4, 7,  'PURCHASE_HISTORY',   85, NOW() - INTERVAL '5 days'),
-  (4, 5, 1,  'SKIN_TYPE_MATCH',    90, NOW() - INTERVAL '3 days'),
-  (5, 5, 6,  'CATEGORY_COLLAB',    82, NOW() - INTERVAL '3 days'),
-  (6, 6, 4,  'PURCHASE_HISTORY',   78, NOW() - INTERVAL '1 day'),
-  (7, 6, 5,  'SKIN_CONCERN_MATCH', 75, NOW() - INTERVAL '1 day')
+  (1, 4, 'máy nâng cơ nuface',             NOW() - INTERVAL '5 days'),
+  (2, 4, 'thiết bị led trị liệu da',       NOW() - INTERVAL '4 days'),
+  (3, 4, 'booking trải nghiệm foreo',      NOW() - INTERVAL '3 days'),
+  (4, 5, 'máy chăm sóc da nhạy cảm',       NOW() - INTERVAL '3 days'),
+  (5, 5, 'thiết bị chống lão hóa tại nhà', NOW() - INTERVAL '2 days'),
+  (6, 6, 'máy rửa mặt da dầu',             NOW() - INTERVAL '1 day'),
+  (7, 6, 'thiết bị giảm thâm mụn',         NOW() - INTERVAL '12 hours')
 ON CONFLICT (id) DO NOTHING;
 
 -- =============================================================

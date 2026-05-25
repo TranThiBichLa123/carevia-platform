@@ -36,6 +36,18 @@ public class Review extends BaseEntity {
     @Column(nullable = false)
     private Integer rating;
 
+    @Column(name = "effectiveness_rating", nullable = false)
+    private Integer effectivenessRating;
+
+    @Column(name = "safety_rating", nullable = false)
+    private Integer safetyRating;
+
+    @Column(name = "ergonomics_rating", nullable = false)
+    private Integer ergonomicsRating;
+
+    @Column(name = "durability_rating", nullable = false)
+    private Integer durabilityRating;
+
     @Column(columnDefinition = "TEXT")
     private String comment;
 
