@@ -37,10 +37,14 @@ public class FuzzyTopsisService {
 	private static final String ALGORITHM_NAME = "Fuzzy TOPSIS";
 
 	public BookingRecommendationResponse rankBookingOptions(BookingRecommendationRequest request) {
+		// Step 0: validate the request before running Fuzzy TOPSIS.
 		validateRequest(request);
 
+		// Step 1: determine the fuzzy weightage of criteria.
 		List<ResolvedCriterion> criteria = resolveCriteria(request.criteria());
+		// Step 2: construct the fuzzy decision matrix for all booking options.
 		List<ResolvedAlternative> alternatives = resolveAlternatives(request.alternatives(), criteria);
+		// Step 3: prepare normalization denominators for benefit and cost criteria.
 		Map<String, Double> benefitDenominators = resolveBenefitDenominators(criteria, alternatives);
 		Map<String, Double> costDenominators = resolveCostDenominators(criteria, alternatives);
 
@@ -52,11 +56,13 @@ public class FuzzyTopsisService {
 
 			for (ResolvedCriterion criterion : criteria) {
 				TriangularFuzzyNumber rawScore = alternative.rawScores().get(criterion.id());
+				// Step 4: normalize each criterion score into the comparable fuzzy scale.
 				TriangularFuzzyNumber normalizedScore = normalizeScore(
 						rawScore,
 						criterion,
 						benefitDenominators.get(criterion.id()),
 						costDenominators.get(criterion.id()));
+				// Step 5: apply the criterion weight and accumulate distances to FPIS/FNIS.
 				TriangularFuzzyNumber weightedScore = normalizedScore.multiply(criterion.weight()).round(6);
 				distanceToPositiveIdeal += weightedScore.distanceTo(POSITIVE_IDEAL);
 				distanceToNegativeIdeal += weightedScore.distanceTo(NEGATIVE_IDEAL);
@@ -69,6 +75,7 @@ public class FuzzyTopsisService {
 						weightedScore));
 			}
 
+			// Step 6: compute the closeness coefficient for the current alternative.
 			double closenessCoefficient = distanceToNegativeIdeal / (distanceToPositiveIdeal + distanceToNegativeIdeal);
 			scoredAlternatives.add(new ScoredAlternative(
 					alternative,
@@ -78,11 +85,13 @@ public class FuzzyTopsisService {
 					breakdown));
 		}
 
+		// Step 7: sort alternatives by closeness coefficient to obtain the final ranking.
 		scoredAlternatives.sort(Comparator
 				.comparingDouble(ScoredAlternative::closenessCoefficient).reversed()
 				.thenComparing(Comparator.comparingDouble(ScoredAlternative::distanceToNegativeIdeal).reversed())
 				.thenComparing(scored -> scored.alternative().optionId()));
 
+		// Step 8: build the API response with rankings and criterion breakdown.
 		List<RankedBookingOptionResponse> rankings = new ArrayList<>();
 		for (int index = 0; index < scoredAlternatives.size(); index++) {
 			ScoredAlternative scored = scoredAlternatives.get(index);
@@ -120,72 +129,7 @@ public class FuzzyTopsisService {
 				rankings);
 	}
 
-	// mock data
-	// public BookingRecommendationRequest buildDemoRequest() {
-	// 	List<RecommendationCriterionRequest> criteria = List.of(
-	// 			new RecommendationCriterionRequest("distanceKm", "Distance to branch", CriterionPreference.COST,
-	// 					fuzzyValue(0.95)),
-	// 			new RecommendationCriterionRequest("bookingPrice", "Booking price", CriterionPreference.COST,
-	// 					fuzzyValue(0.8)),
-	// 			new RecommendationCriterionRequest("availableSlots", "Available slots", CriterionPreference.BENEFIT,
-	// 					fuzzyValue(LinguisticTerm.HIGH)),
-	// 			new RecommendationCriterionRequest("serviceQuality", "Service quality", CriterionPreference.BENEFIT,
-	// 					fuzzyValue(LinguisticTerm.VERY_HIGH)),
-	// 			new RecommendationCriterionRequest("supportResponsiveness", "Support responsiveness",
-	// 					CriterionPreference.BENEFIT, fuzzyValue(LinguisticTerm.HIGH)));
-
-	// 	Map<String, FuzzyValueInput> optionOneScores = new LinkedHashMap<>();
-	// 	optionOneScores.put("distanceKm", fuzzyValue(2.0));
-	// 	optionOneScores.put("bookingPrice", fuzzyValue(15.0));
-	// 	optionOneScores.put("availableSlots", fuzzyValue(4.0));
-	// 	optionOneScores.put("serviceQuality", fuzzyValue(LinguisticTerm.HIGH));
-	// 	optionOneScores.put("supportResponsiveness", fuzzyValue(LinguisticTerm.HIGH));
-
-	// 	Map<String, FuzzyValueInput> optionTwoScores = new LinkedHashMap<>();
-	// 	optionTwoScores.put("distanceKm", fuzzyValue(3.5));
-	// 	optionTwoScores.put("bookingPrice", fuzzyValue(12.0));
-	// 	optionTwoScores.put("availableSlots", fuzzyValue(7.0));
-	// 	optionTwoScores.put("serviceQuality", fuzzyValue(LinguisticTerm.VERY_HIGH));
-	// 	optionTwoScores.put("supportResponsiveness", fuzzyValue(LinguisticTerm.VERY_HIGH));
-
-	// 	Map<String, FuzzyValueInput> optionThreeScores = new LinkedHashMap<>();
-	// 	optionThreeScores.put("distanceKm", fuzzyValue(7.0));
-	// 	optionThreeScores.put("bookingPrice", fuzzyValue(10.0));
-	// 	optionThreeScores.put("availableSlots", fuzzyValue(9.0));
-	// 	optionThreeScores.put("serviceQuality", fuzzyValue(LinguisticTerm.MEDIUM_HIGH));
-	// 	optionThreeScores.put("supportResponsiveness", fuzzyValue(LinguisticTerm.MEDIUM));
-
-	// 	return new BookingRecommendationRequest(
-	// 			"Recommend the best Carevia booking option for a premium skin-treatment session",
-	// 			"svc-hifu-premium",
-	// 			criteria,
-	// 			List.of(
-	// 					new BookingOptionRequest(
-	// 							"booking-option-1",
-	// 							"sess-01",
-	// 							"CareVia Quan 1",
-	// 							"Phong Trai Nghiem Tang 2",
-	// 							"2026-04-15T09:00:00Z",
-	// 							"2026-04-15T10:30:00Z",
-	// 							optionOneScores),
-	// 					new BookingOptionRequest(
-	// 							"booking-option-2",
-	// 							"sess-03",
-	// 							"CareVia Phu Nhuan",
-	// 							"Studio Skin Lab Room 03",
-	// 							"2026-04-16T10:00:00Z",
-	// 							"2026-04-16T11:00:00Z",
-	// 							optionTwoScores),
-	// 					new BookingOptionRequest(
-	// 							"booking-option-3",
-	// 							"sess-06",
-	// 							"CareVia Thu Duc",
-	// 							"Beauty Corner Tang 1",
-	// 							"2026-04-17T13:30:00Z",
-	// 							"2026-04-17T14:30:00Z",
-	// 							optionThreeScores)));
-	// }
-
+	
 	private void validateRequest(BookingRecommendationRequest request) {
 		if (request.criteria().size() < 1) {
 			throw badRequest("At least one criterion is required.");
@@ -195,6 +139,7 @@ public class FuzzyTopsisService {
 		}
 	}
 
+	// Step 1: convert request weights into resolved fuzzy criterion weights.
 	private List<ResolvedCriterion> resolveCriteria(List<RecommendationCriterionRequest> criteria) {
 		Set<String> seenCriterionIds = new HashSet<>();
 		List<ResolvedCriterion> resolved = new ArrayList<>();
@@ -217,6 +162,7 @@ public class FuzzyTopsisService {
 				.max()
 				.orElse(1.0);
 
+		// Normalize all criterion weights by the largest upper bound.
 		return resolved.stream()
 				.map(criterion -> new ResolvedCriterion(
 						criterion.id(),
@@ -226,6 +172,7 @@ public class FuzzyTopsisService {
 				.toList();
 	}
 
+	// Step 2: assemble the fuzzy decision matrix for booking alternatives.
 	private List<ResolvedAlternative> resolveAlternatives(List<BookingOptionRequest> alternatives,
 			List<ResolvedCriterion> criteria) {
 		Set<String> seenAlternativeIds = new HashSet<>();
@@ -267,6 +214,7 @@ public class FuzzyTopsisService {
 		return resolved;
 	}
 
+	// Step 3a: find normalization denominators for benefit criteria.
 	private Map<String, Double> resolveBenefitDenominators(List<ResolvedCriterion> criteria,
 			List<ResolvedAlternative> alternatives) {
 		Map<String, Double> denominators = new HashMap<>();
@@ -283,6 +231,7 @@ public class FuzzyTopsisService {
 		return denominators;
 	}
 
+	// Step 3b: find normalization denominators for cost criteria.
 	private Map<String, Double> resolveCostDenominators(List<ResolvedCriterion> criteria,
 			List<ResolvedAlternative> alternatives) {
 		Map<String, Double> denominators = new HashMap<>();
@@ -299,6 +248,7 @@ public class FuzzyTopsisService {
 		return denominators;
 	}
 
+	// Step 4: normalize a fuzzy score based on whether the criterion is benefit or cost.
 	private TriangularFuzzyNumber normalizeScore(
 			TriangularFuzzyNumber rawScore,
 			ResolvedCriterion criterion,
@@ -362,12 +312,16 @@ public class FuzzyTopsisService {
 	// ─── Device Recommendation ────────────────────────────────────────────────
 
 	public DeviceRecommendationResponse rankDeviceOptions(DeviceRecommendationRequest request) {
+		// Step 0: validate the minimum number of device alternatives.
 		if (request.alternatives().size() < 2) {
 			throw badRequest("At least two device options are required for Fuzzy TOPSIS ranking.");
 		}
 
+		// Step 1: Xác định trọng số mờ của các tiêu chí từ yêu cầu đầu vào.
 		List<ResolvedCriterion> criteria = resolveCriteria(request.criteria());
+		// Step 2: Xây dựng ma trận mờ
 		List<ResolvedDeviceAlternative> alternatives = resolveDeviceAlternatives(request.alternatives(), criteria);
+		// Step 3: 
 		Map<String, Double> benefitDenominators = resolveDeviceBenefitDenominators(criteria, alternatives);
 		Map<String, Double> costDenominators = resolveDeviceCostDenominators(criteria, alternatives);
 
@@ -379,10 +333,12 @@ public class FuzzyTopsisService {
 
 			for (ResolvedCriterion criterion : criteria) {
 				TriangularFuzzyNumber rawScore = alternative.rawScores().get(criterion.id());
+				// Step 4: normalize each criterion score into the comparable fuzzy scale.
 				TriangularFuzzyNumber normalizedScore = normalizeScore(
 						rawScore, criterion,
 						benefitDenominators.get(criterion.id()),
 						costDenominators.get(criterion.id()));
+				// Step 5: apply the criterion weight and accumulate distances to FPIS/FNIS.
 				TriangularFuzzyNumber weightedScore = normalizedScore.multiply(criterion.weight()).round(6);
 				distanceToPositiveIdeal += weightedScore.distanceTo(POSITIVE_IDEAL);
 				distanceToNegativeIdeal += weightedScore.distanceTo(NEGATIVE_IDEAL);
@@ -391,6 +347,7 @@ public class FuzzyTopsisService {
 						rawScore.round(6), normalizedScore.round(6), weightedScore));
 			}
 
+			// Step 6: compute the closeness coefficient for the current device.
 			double closenessCoefficient = distanceToNegativeIdeal / (distanceToPositiveIdeal + distanceToNegativeIdeal);
 			scoredAlternatives.add(new ScoredDeviceAlternative(
 					alternative,
@@ -400,11 +357,13 @@ public class FuzzyTopsisService {
 					breakdown));
 		}
 
+		// Step 7: sort alternatives by closeness coefficient to obtain the final ranking.
 		scoredAlternatives.sort(Comparator
 				.comparingDouble(ScoredDeviceAlternative::closenessCoefficient).reversed()
 				.thenComparing(Comparator.comparingDouble(ScoredDeviceAlternative::distanceToNegativeIdeal).reversed())
 				.thenComparing(scored -> scored.alternative().optionId()));
 
+		// Step 8: build the API response with rankings and criterion breakdown.
 		List<RankedDeviceOptionResponse> rankings = new ArrayList<>();
 		for (int index = 0; index < scoredAlternatives.size(); index++) {
 			ScoredDeviceAlternative scored = scoredAlternatives.get(index);
@@ -431,6 +390,7 @@ public class FuzzyTopsisService {
 				criterionResponses, rankings);
 	}
 
+	// Step 2: assemble the fuzzy decision matrix for device alternatives.
 	private List<ResolvedDeviceAlternative> resolveDeviceAlternatives(
 			List<DeviceOptionRequest> alternatives, List<ResolvedCriterion> criteria) {
 		Set<String> seenIds = new HashSet<>();
@@ -454,6 +414,7 @@ public class FuzzyTopsisService {
 		return resolved;
 	}
 
+	// Step 3a: find normalization denominators for benefit criteria.
 	private Map<String, Double> resolveDeviceBenefitDenominators(
 			List<ResolvedCriterion> criteria, List<ResolvedDeviceAlternative> alternatives) {
 		Map<String, Double> denominators = new HashMap<>();
@@ -469,6 +430,7 @@ public class FuzzyTopsisService {
 		return denominators;
 	}
 
+	// Step 3b: find normalization denominators for cost criteria.
 	private Map<String, Double> resolveDeviceCostDenominators(
 			List<ResolvedCriterion> criteria, List<ResolvedDeviceAlternative> alternatives) {
 		Map<String, Double> denominators = new HashMap<>();

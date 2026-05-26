@@ -265,8 +265,8 @@ VALUES
 ON CONFLICT (id) DO NOTHING;
 
 UPDATE devices
-SET image = 'https://res.cloudinary.com/dcisx0vss/image/upload/q_auto/f_auto/v1776492129/shopping_b5cn7u.webp';
-
+SET image = 'https://res.cloudinary.com/dcisx0vss/image/upload/q_auto/f_auto/v1779702056/Mat-na-den-LED-tre-hoa-lan-da-den-LED-7-mau-quang-pho-WCL22-4_xknqic.jpg'
+WHERE id = 4;
 UPDATE devices
 SET 
     skin_type = CASE 

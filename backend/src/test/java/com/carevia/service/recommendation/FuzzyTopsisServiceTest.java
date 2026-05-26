@@ -1,85 +1,160 @@
-// package com.carevia.service.recommendation;
+package com.carevia.service.recommendation;
 
-// import com.carevia.shared.dto.recommendation.BookingOptionRequest;
-// import com.carevia.shared.dto.recommendation.BookingRecommendationRequest;
-// import com.carevia.shared.dto.recommendation.BookingRecommendationResponse;
-// import com.carevia.shared.dto.recommendation.CriterionPreference;
-// import com.carevia.shared.dto.recommendation.FuzzyValueInput;
-// import com.carevia.shared.dto.recommendation.LinguisticTerm;
-// import com.carevia.shared.dto.recommendation.RecommendationCriterionRequest;
-// import org.junit.jupiter.api.Test;
-// import org.springframework.web.server.ResponseStatusException;
+import com.carevia.shared.dto.recommendation.CriterionPreference;
+import com.carevia.shared.dto.recommendation.DeviceOptionRequest;
+import com.carevia.shared.dto.recommendation.DeviceRecommendationRequest;
+import com.carevia.shared.dto.recommendation.DeviceRecommendationResponse;
+import com.carevia.shared.dto.recommendation.FuzzyValueInput;
+import com.carevia.shared.dto.recommendation.LinguisticTerm;
+import com.carevia.shared.dto.recommendation.RecommendationCriterionRequest;
+import org.junit.jupiter.api.Test;
+import org.springframework.web.server.ResponseStatusException;
 
-// import java.util.LinkedHashMap;
-// import java.util.List;
-// import java.util.Map;
+import java.util.List;
+import java.util.Map;
 
-// import static org.junit.jupiter.api.Assertions.assertEquals;
-// import static org.junit.jupiter.api.Assertions.assertThrows;
-// import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
-// class FuzzyTopsisServiceTest {
+class FuzzyTopsisServiceTest {
 
-// 	private final FuzzyTopsisService fuzzyTopsisService = new FuzzyTopsisService();
+	private final FuzzyTopsisService fuzzyTopsisService = new FuzzyTopsisService();
 
-// 	@Test
-// 	void shouldRankDemoScenarioAndMarkFirstOptionAsRecommended() {
-// 		BookingRecommendationResponse response = fuzzyTopsisService.rankBookingOptions(fuzzyTopsisService.buildDemoRequest());
+	@Test
+	void shouldRankDeviceOptionsAndMarkTopDeviceAsRecommended() {
+		DeviceRecommendationResponse response = fuzzyTopsisService.rankDeviceOptions(new DeviceRecommendationRequest(
+			"Recommend best skin device",
+			List.of(
+				new RecommendationCriterionRequest("price", "Price", CriterionPreference.COST, fuzzyValue(LinguisticTerm.VERY_HIGH)),
+				new RecommendationCriterionRequest("safety", "Safety", CriterionPreference.BENEFIT, fuzzyValue(LinguisticTerm.HIGH))
+			),
+			List.of(
+				new DeviceOptionRequest(
+					"device-best",
+					"device-best",
+					"Budget Safe Device",
+					Map.of(
+						"price", fuzzyValue(10.0),
+						"safety", fuzzyTriangle(0.8, 0.9, 1.0)
+					)
+				),
+				new DeviceOptionRequest(
+					"device-balanced",
+					"device-balanced",
+					"Balanced Device",
+					Map.of(
+						"price", fuzzyValue(20.0),
+						"safety", fuzzyTriangle(0.6, 0.7, 0.8)
+					)
+				),
+				new DeviceOptionRequest(
+					"device-expensive",
+					"device-expensive",
+					"Premium Device",
+					Map.of(
+						"price", fuzzyValue(50.0),
+						"safety", fuzzyTriangle(0.5, 0.6, 0.7)
+					)
+				)
+			)
+		));
 
-// 		assertEquals("Fuzzy TOPSIS", response.algorithm());
-// 		assertEquals(3, response.rankings().size());
-// 		assertEquals(1, response.rankings().get(0).rank());
-// 		assertTrue(response.rankings().get(0).recommended());
-// 		assertTrue(response.rankings().get(0).closenessCoefficient() >= response.rankings().get(response.rankings().size() - 1).closenessCoefficient());
-// 	}
+		assertEquals("Fuzzy TOPSIS", response.algorithm());
+		assertEquals(2, response.criteria().size());
+		assertEquals(3, response.rankings().size());
+		assertEquals("device-best", response.rankings().get(0).deviceId());
+		assertEquals(1, response.rankings().get(0).rank());
+		assertTrue(response.rankings().get(0).recommended());
+		assertEquals(2, response.rankings().get(0).criteriaBreakdown().size());
+		assertTrue(response.rankings().get(0).closenessCoefficient() > response.rankings().get(1).closenessCoefficient());
+		assertTrue(response.rankings().get(1).closenessCoefficient() > response.rankings().get(2).closenessCoefficient());
+	}
 
-// 	@Test
-// 	void shouldRejectAlternativeMissingCriterionScore() {
-// 		BookingRecommendationRequest invalidRequest = new BookingRecommendationRequest(
-// 			"Invalid request",
-// 			"svc-1",
-// 			List.of(
-// 				new RecommendationCriterionRequest("quality", "Quality", CriterionPreference.BENEFIT, fuzzyValue(LinguisticTerm.VERY_HIGH)),
-// 				new RecommendationCriterionRequest("price", "Price", CriterionPreference.COST, fuzzyValue(0.6))
-// 			),
-// 			List.of(
-// 				new BookingOptionRequest(
-// 					"option-1",
-// 					"sess-1",
-// 					"CareVia Quan 1",
-// 					"Room A",
-// 					"2026-04-15T09:00:00Z",
-// 					"2026-04-15T10:00:00Z",
-// 					Map.of("quality", fuzzyValue(LinguisticTerm.HIGH))
-// 				),
-// 				new BookingOptionRequest(
-// 					"option-2",
-// 					"sess-2",
-// 					"CareVia Phu Nhuan",
-// 					"Room B",
-// 					"2026-04-15T11:00:00Z",
-// 					"2026-04-15T12:00:00Z",
-// 					Map.of(
-// 						"quality", fuzzyValue(LinguisticTerm.MEDIUM),
-// 						"price", fuzzyValue(10.0)
-// 					)
-// 				)
-// 			)
-// 		);
+	@Test
+	void shouldRejectDeviceRequestWithLessThanTwoAlternatives() {
+		DeviceRecommendationRequest invalidRequest = new DeviceRecommendationRequest(
+			"Invalid request",
+			List.of(new RecommendationCriterionRequest("price", "Price", CriterionPreference.COST, fuzzyValue(1.0))),
+			List.of(new DeviceOptionRequest(
+				"device-only",
+				"device-only",
+				"Only Device",
+				Map.of("price", fuzzyValue(10.0))
+			))
+		);
 
-// 		ResponseStatusException exception = assertThrows(
-// 			ResponseStatusException.class,
-// 			() -> fuzzyTopsisService.rankBookingOptions(invalidRequest)
-// 		);
+		ResponseStatusException exception = assertThrows(
+			ResponseStatusException.class,
+			() -> fuzzyTopsisService.rankDeviceOptions(invalidRequest)
+		);
 
-// 		assertTrue(exception.getReason().contains("missing score"));
-// 	}
+		assertTrue(exception.getReason().contains("At least two device options"));
+	}
 
-// 	private static FuzzyValueInput fuzzyValue(double value) {
-// 		return new FuzzyValueInput(value, null, null, null, null);
-// 	}
+	@Test
+	void shouldRejectDeviceOptionMissingCriterionScore() {
+		DeviceRecommendationRequest invalidRequest = new DeviceRecommendationRequest(
+			"Invalid request",
+			List.of(
+				new RecommendationCriterionRequest("price", "Price", CriterionPreference.COST, fuzzyValue(LinguisticTerm.HIGH)),
+				new RecommendationCriterionRequest("safety", "Safety", CriterionPreference.BENEFIT, fuzzyValue(LinguisticTerm.HIGH))
+			),
+			List.of(
+				new DeviceOptionRequest(
+					"device-1",
+					"device-1",
+					"Incomplete Device",
+					Map.of("price", fuzzyValue(10.0))
+				),
+				new DeviceOptionRequest(
+					"device-2",
+					"device-2",
+					"Complete Device",
+					Map.of(
+						"price", fuzzyValue(15.0),
+						"safety", fuzzyValue(4.0)
+					)
+				)
+			)
+		);
 
-// 	private static FuzzyValueInput fuzzyValue(LinguisticTerm term) {
-// 		return new FuzzyValueInput(null, null, null, null, term);
-// 	}
-// }
+		ResponseStatusException exception = assertThrows(
+			ResponseStatusException.class,
+			() -> fuzzyTopsisService.rankDeviceOptions(invalidRequest)
+		);
+
+		assertTrue(exception.getReason().contains("missing score"));
+	}
+
+	@Test
+	void shouldRejectDuplicateDeviceOptionId() {
+		DeviceRecommendationRequest invalidRequest = new DeviceRecommendationRequest(
+			"Duplicate ids",
+			List.of(new RecommendationCriterionRequest("price", "Price", CriterionPreference.COST, fuzzyValue(LinguisticTerm.HIGH))),
+			List.of(
+				new DeviceOptionRequest("device-1", "device-1", "First Device", Map.of("price", fuzzyValue(10.0))),
+				new DeviceOptionRequest("device-1", "device-2", "Second Device", Map.of("price", fuzzyValue(20.0)))
+			)
+		);
+
+		ResponseStatusException exception = assertThrows(
+			ResponseStatusException.class,
+			() -> fuzzyTopsisService.rankDeviceOptions(invalidRequest)
+		);
+
+		assertTrue(exception.getReason().contains("Duplicate device option id"));
+	}
+
+	private static FuzzyValueInput fuzzyValue(double value) {
+		return new FuzzyValueInput(value, null, null, null, null);
+	}
+
+	private static FuzzyValueInput fuzzyValue(LinguisticTerm term) {
+		return new FuzzyValueInput(null, null, null, null, term);
+	}
+
+	private static FuzzyValueInput fuzzyTriangle(double lower, double middle, double upper) {
+		return new FuzzyValueInput(null, lower, middle, upper, null);
+	}
+}

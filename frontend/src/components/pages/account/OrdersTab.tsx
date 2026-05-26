@@ -434,6 +434,8 @@ const OrdersTab = () => {
                                   alt={item.deviceName}
                                   width={56}
                                   height={56}
+                                  unoptimized
+                                  loading="lazy"
                                   className="object-cover w-full h-full"
                                 />
                               ) : (

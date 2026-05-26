@@ -6,6 +6,7 @@ import ProductActions from "@/components/pages/product/ProductActions";
 import PersonalizedRecommendationShelf from "@/components/pages/product/PersonalizedRecommendationShelf";
 import { deviceApi } from "@/lib/deviceApi";
 import { mapDeviceToProduct } from "@/lib/mappers";
+import { formatDiscountPercentage } from "@/lib/utils";
 import { Product } from "@/types_enum/devices";
 import {
   Share2,
@@ -142,7 +143,7 @@ const ProductDetails = async ({
                         className="text-lg text-muted-foreground line-through"
                       />
                       <span className="bg-cancel text-white text-sm font-bold px-3 py-1 rounded-md shadow-sm">
-                        -{product.discountPercentage}%
+                        -{formatDiscountPercentage(product.discountPercentage)}%
                       </span>
                     </>
                   )}
