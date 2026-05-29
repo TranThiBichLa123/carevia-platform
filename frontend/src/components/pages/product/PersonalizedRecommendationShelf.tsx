@@ -199,7 +199,7 @@ export default function PersonalizedRecommendationShelf({
   }, [authUser?.skin_type, currentDeviceId, currentDeviceName]);
 
   return (
-    <div className="mx-auto mt-10">
+    <div className="mx-auto mt-10 font-vietnam">
       <div className="mb-6 flex items-center justify-between px-2">
         <div>
           <h2 className="flex items-center gap-2 text-xl font-bold text-foreground md:text-2xl">
@@ -213,7 +213,7 @@ export default function PersonalizedRecommendationShelf({
             <span className="text-xs text-muted-foreground">
               {selectedSkinType
                 ? isSkinTypeFallback
-                  ? `Chưa có thiết bị khớp hoàn toàn với loại da ${selectedSkinType.toLowerCase()}, đang hiển thị các gợi ý gần nhất theo độ tương đồng và review.`
+                  ? `Top thiết bị phù hợp với ${selectedSkinType.toLowerCase()}, đang hiển thị các gợi ý gần nhất theo độ tương đồng và review.`
                   : `Đang cá nhân hoá theo loại da ${selectedSkinType.toLowerCase()}, bộ tiêu chí bạn đã chọn và tín hiệu từ review thực tế.`
                 : "Đang dùng bộ tiêu chí mặc định của hệ thống và tín hiệu từ review thực tế."}
             </span>
@@ -242,9 +242,9 @@ export default function PersonalizedRecommendationShelf({
                 const rankBadge = getRankBadge(item.fuzzyRank);
 
                 return rankBadge ? (
-                  <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex justify-center px-2">
+                  <div className="pointer-events-none absolute inset-x-0 top-0 z-25 flex justify-center px-2">
                     <div
-                      className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-[11px] font-semibold shadow-md ring-1 ring-black/5 ${rankBadge.className}`}
+                      className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1 text-[11px] font-semibold shadow-md ring-1 ring-black/5 ${rankBadge.className}`}
                     >
                       <span aria-hidden="true">{rankBadge.icon}</span>
                       <span>{rankBadge.label}</span>
@@ -257,11 +257,11 @@ export default function PersonalizedRecommendationShelf({
               })()}
 
               <div className="relative h-full">
-                {item.closenessCoefficient != null && item.closenessCoefficient > 0 && (
+                {/* {item.closenessCoefficient != null && item.closenessCoefficient > 0 && (
                   <div className="absolute bottom-2 right-2 z-10 rounded-full bg-primary/90 px-1.5 py-0.5 text-[9px] font-medium text-white shadow">
                     CC {(item.closenessCoefficient * 100).toFixed(0)}%
                   </div>
-                )}
+                )} */}
                 <ProductCard product={item} />
               </div>
             </div>
