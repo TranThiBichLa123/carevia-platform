@@ -41,7 +41,7 @@ const ORDER_OPTIONS: Array<{ value: OrderFilter; label: string }> = [
     { value: "ALL", label: "Tất cả trạng thái" },
     { value: "PENDING_PAYMENT", label: "Chờ thanh toán" },
     { value: "PAID", label: "Đã thanh toán" },
-    { value: "PROCESSING", label: "Đang xử lý" },
+    { value: "PROCESSING", label: "Đang vận chuyển" },
     { value: "COMPLETED", label: "Hoàn tất" },
     { value: "FAILED", label: "Thanh toán lỗi" },
     { value: "CANCELLED", label: "Đã hủy" },
@@ -50,7 +50,7 @@ const ORDER_OPTIONS: Array<{ value: OrderFilter; label: string }> = [
 const ORDER_LABELS: Record<BackofficeOrderStatus, string> = {
     PENDING_PAYMENT: "Chờ thanh toán",
     PAID: "Đã thanh toán",
-    PROCESSING: "Đang xử lý",
+    PROCESSING: "Đang vận chuyển",
     SHIPPING: "Đang giao",
     COMPLETED: "Hoàn tất",
     FAILED: "Lỗi thanh toán",
@@ -218,7 +218,7 @@ export default function StaffOrdersPage() {
                 </Card>
                 <Card>
                     <CardHeader>
-                        <CardDescription>Đang xử lý</CardDescription>
+                        <CardDescription>Đang vận chuyển</CardDescription>
                         <CardTitle className="flex items-center gap-3 text-3xl">
                             <Truck className="size-6 text-amber-500" />
                             {processingOrders}

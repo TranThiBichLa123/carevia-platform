@@ -112,7 +112,7 @@ const getStatusBanner = (status: string) => {
     case "PROCESSING":
       return {
         bg: "bg-purple-50 border-purple-200",
-        icon: <Truck className="h-5 w-5 text-purple-600" />,
+        icon: <Truck className="h-5 w-5 font-vietnam text-purple-600" />,
         title: "Đang vận chuyển",
         desc: "Đơn hàng của bạn đang trên đường giao. Shipper sẽ liên hệ trước khi đến.",
         titleColor: "text-purple-800",
@@ -121,7 +121,7 @@ const getStatusBanner = (status: string) => {
     case "COMPLETED":
       return {
         bg: "bg-emerald-50 border-emerald-200",
-        icon: <CheckCircle2 className="h-5 w-5 text-emerald-600" />,
+        icon: <CheckCircle2 className="h-5 w-5 font-vietnam text-emerald-600" />,
         title: "Đã giao hàng thành công",
         desc: "Cảm ơn bạn đã mua sắm! Đơn hàng đã được giao thành công.",
         titleColor: "text-emerald-800",
@@ -130,7 +130,7 @@ const getStatusBanner = (status: string) => {
     case "CANCELLED":
       return {
         bg: "bg-red-50 border-red-200",
-        icon: <XCircle className="h-5 w-5 text-red-600" />,
+        icon: <XCircle className="h-5 w-5 font-vietnam text-red-600" />,
         title: "Đơn hàng đã hủy",
         desc: "Đơn hàng này đã bị hủy.",
         titleColor: "text-red-800",
@@ -433,7 +433,7 @@ const OrderDetailsPage = () => {
                     </p>
                   </div>
                 </div>
-                <div className={`px-3 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full ${getStatusColor(order.status)}`}>
+                <div className={`px-3 py-1 text-[10px] font-bold font-vietnam uppercase tracking-wider rounded-full ${getStatusColor(order.status)}`}>
                   {getStatusText(order.status)}
                 </div>
               </div>
@@ -710,12 +710,12 @@ const OrderDetailsPage = () => {
                   <span>Phí vận chuyển</span>
                   <PriceFormatter amount={calculateShipping()} />
                 </div>
-                {calculateTax() > 0 && (
+                {/* {calculateTax() > 0 && (
                   <div className="flex justify-between text-sm text-gray-500">
                     <span>Thuế VAT (8%)</span>
                     <PriceFormatter amount={calculateTax()} />
                   </div>
-                )}
+                )} */}
                 <div className="flex justify-between text-sm text-gray-500">
                   <span>Voucher giảm giá</span>
                   <span className="text-red-500">- <PriceFormatter amount={0} /></span>

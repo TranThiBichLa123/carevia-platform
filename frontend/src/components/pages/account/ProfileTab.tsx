@@ -599,7 +599,7 @@ const ProfileTab = () => {
                     <FormItem className="space-y-1.5">
                       <FormLabel className="text-[11px] font-black text-gray-400 font-vietnam uppercase tracking-widest ml-1">Họ và tên khách hàng</FormLabel>
                       <FormControl>
-                        <Input {...field} disabled={isLoading} value={field.value ?? ""} className="h-12 rounded-2xl border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-primary/20 transition-all font-bold" />
+                        <Input {...field} disabled={isLoading} value={field.value ?? ""} className="h-12 rounded-2xl font-vietnam border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-primary/20 transition-all font-bold" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -613,7 +613,7 @@ const ProfileTab = () => {
                     <FormItem className="space-y-1.5">
                       <FormLabel className="text-[11px] font-black text-gray-400 font-vietnam uppercase tracking-widest ml-1">Số điện thoại liên lạc</FormLabel>
                       <FormControl>
-                        <Input {...field} disabled={isLoading} value={field.value ?? ""} className="h-12 rounded-2xl border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-primary/20 transition-all font-bold" />
+                        <Input {...field} disabled={isLoading} value={field.value ?? ""} className="h-12 font-vietnam rounded-2xl border-gray-100 bg-gray-50/50 focus:bg-white focus:ring-primary/20 transition-all font-bold" />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -634,7 +634,7 @@ const ProfileTab = () => {
                     name="skinType"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[10px] font-bold font-vietnam text-gray-500 uppercase ml-1">Loại da</FormLabel>
+                        <FormLabel className="text-[11px] font-bold font-vietnam text-gray-500 uppercase ml-1">Loại da</FormLabel>
                         <FormControl>
                           <Input {...field} disabled={isLoading} value={field.value ?? ""} className="h-11 rounded-xl border-white bg-white shadow-sm focus:ring-primary/20 transition-all font-medium" />
                         </FormControl>
@@ -646,7 +646,7 @@ const ProfileTab = () => {
                     name="skinConcerns"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-[10px] font-bold font-vietnam text-gray-500 uppercase ml-1">Vấn đề quan tâm</FormLabel>
+                        <FormLabel className="text-[11px] font-bold font-vietnam text-gray-500 uppercase ml-1">Vấn đề quan tâm</FormLabel>
                         <FormControl>
                           <Input {...field} disabled={isLoading} value={field.value ?? ""} className="h-11 rounded-xl border-white bg-white shadow-sm focus:ring-primary/20 transition-all font-medium" />
                         </FormControl>
@@ -701,7 +701,7 @@ const ProfileTab = () => {
                   {/* Lớp nền trượt màu Primary */}
                   <span className="absolute inset-y-0 left-0 w-0 bg-primary transition-all duration-500 ease-out group-hover:w-full" />
 
-                  <div className="relative z-10 flex items-center gap-2 transition-colors group-hover:text-white uppercase text-xs tracking-widest">
+                  <div className="relative z-10 font-vietnam font-bold flex items-center gap-2 transition-colors group-hover:text-white uppercase text-xs tracking-widest">
                     {isLoading ? <RefreshCw className="animate-spin" size={16} /> : <Save size={16} />}
                     <span>{isLoading ? "Đang xử lý..." : "Lưu thay đổi hồ sơ"}</span>
                   </div>

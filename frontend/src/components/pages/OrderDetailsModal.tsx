@@ -192,10 +192,10 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                 <span>Phí vận chuyển</span>
                 <span>Miễn phí</span>
               </div>
-              <div className="flex justify-between text-sm">
+              {/* <div className="flex justify-between text-sm">
                 <span>Thuế VAT (8%)</span>
                 <span>Đã bao gồm</span>
-              </div>
+              </div> */}
               <Separator className="my-2" />
               <div className="flex justify-between font-semibold">
                 <span>Tổng cộng</span>

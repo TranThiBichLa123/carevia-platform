@@ -52,7 +52,7 @@ const BookingCard = ({ device, onSelect }: Props) => {
           <div className="flex justify-between items-end">
             <div>
               <p className="text-[9px] text-gray-400 uppercase font-bold tracking-tight">Giá trải nghiệm</p>
-              <p className="text-base font-black text-primary">
+              <p className="text-base font-black text-primary" suppressHydrationWarning={true}>
                 {device?.bookingPrice > 0
                   ? `${Number(device?.bookingPrice).toLocaleString('vi-VN')} đ`
                   : 'MIỄN PHÍ'}

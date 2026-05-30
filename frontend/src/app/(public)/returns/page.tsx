@@ -30,7 +30,7 @@ import {
 const REFUND_STATUS_CONFIG: Record<RefundStatus, { label: string; color: string; icon: React.ReactNode }> = {
   REQUESTED: { label: "Chờ duyệt", color: "bg-amber-100 text-amber-700 border-amber-200", icon: <Clock className="w-4 h-4" /> },
   APPROVED: { label: "Đã duyệt", color: "bg-blue-100 text-blue-700 border-blue-200", icon: <CheckCircle2 className="w-4 h-4" /> },
-  PROCESSING: { label: "Đang xử lý", color: "bg-purple-100 text-purple-700 border-purple-200", icon: <RefreshCw className="w-4 h-4" /> },
+  PROCESSING: { label: "Đang vận chuyển", color: "bg-purple-100 text-purple-700 border-purple-200", icon: <RefreshCw className="w-4 h-4" /> },
   SUCCESS: { label: "Hoàn tiền thành công", color: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: <CheckCircle2 className="w-4 h-4" /> },
   FAILED: { label: "Thất bại", color: "bg-red-100 text-red-700 border-red-200", icon: <XCircle className="w-4 h-4" /> },
   CANCELLED: { label: "Đã hủy", color: "bg-slate-100 text-slate-600 border-slate-200", icon: <XCircle className="w-4 h-4" /> },
@@ -163,7 +163,7 @@ export default function ReturnsPage() {
             {/* Active refunds */}
             {activeRefunds.length > 0 && (
               <div>
-                <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">Đang xử lý</h2>
+                <h2 className="text-sm font-semibold text-slate-500 uppercase tracking-wide mb-3">Đang vận chuyển</h2>
                 <div className="space-y-3">
                   {activeRefunds.map((refund) => (
                     <RefundCard key={refund.id} refund={refund} router={router} />

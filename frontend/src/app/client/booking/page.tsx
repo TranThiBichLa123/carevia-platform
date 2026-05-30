@@ -14,6 +14,7 @@ const priceOptions = [
     { label: "Trên 500.000đ", id: "p3", minPrice: 500000, maxPrice: undefined as number | undefined },
 ];
 
+
 const BookingPage = () => {
     const router = useRouter();
 

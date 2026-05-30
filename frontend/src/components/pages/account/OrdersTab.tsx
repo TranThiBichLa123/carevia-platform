@@ -54,7 +54,7 @@ import {
 const statusConfig: Record<string, { label: string; color: string; icon: React.ReactNode }> = {
   pending_payment: { label: "Chờ thanh toán", color: "bg-yellow-100 text-yellow-800 border-yellow-200", icon: <Clock size={14} /> },
   paid: { label: "Đã thanh toán", color: "bg-green-100 text-green-800 border-green-200", icon: <CheckCircle size={14} /> },
-  processing: { label: "Đang xử lý", color: "bg-blue-100 text-blue-800 border-blue-200", icon: <Package size={14} /> },
+  processing: { label: "Đang vận chuyển", color: "bg-blue-100 text-blue-800 border-blue-200", icon: <Package size={14} /> },
   completed: { label: "Hoàn thành", color: "bg-emerald-100 text-emerald-800 border-emerald-200", icon: <CheckCircle size={14} /> },
   cancelled: { label: "Đã hủy", color: "bg-red-100 text-red-800 border-red-200", icon: <XCircle size={14} /> },
   failed: { label: "Thất bại", color: "bg-red-100 text-red-800 border-red-200", icon: <XCircle size={14} /> },
@@ -63,7 +63,7 @@ const statusConfig: Record<string, { label: string; color: string; icon: React.R
 const REFUND_STATUS_CONFIG: Record<RefundStatus, { label: string; color: string; icon: React.ReactNode }> = {
   REQUESTED: { label: "Chờ duyệt", color: "bg-amber-100 text-amber-700 border-amber-200", icon: <Clock size={14} /> },
   APPROVED: { label: "Đã duyệt", color: "bg-blue-100 text-blue-700 border-blue-200", icon: <CheckCircle2 size={14} /> },
-  PROCESSING: { label: "Đang xử lý", color: "bg-purple-100 text-purple-700 border-purple-200", icon: <RefreshCw size={14} /> },
+  PROCESSING: { label: "Đang vận chuyển", color: "bg-purple-100 text-purple-700 border-purple-200", icon: <RefreshCw size={14} /> },
   SUCCESS: { label: "Hoàn tiền thành công", color: "bg-emerald-100 text-emerald-700 border-emerald-200", icon: <CheckCircle2 size={14} /> },
   FAILED: { label: "Thất bại", color: "bg-red-100 text-red-700 border-red-200", icon: <XCircle size={14} /> },
   CANCELLED: { label: "Đã hủy", color: "bg-slate-100 text-slate-600 border-slate-200", icon: <XCircle size={14} /> },
@@ -383,7 +383,7 @@ const OrdersTab = () => {
               { key: "all", label: "Tất cả" },
               { key: "pending_payment", label: "Chờ thanh toán" },
               { key: "paid", label: "Đã thanh toán" },
-              { key: "processing", label: "Đang xử lý" },
+              { key: "processing", label: "Đang vận chuyển" },
               { key: "completed", label: "Hoàn thành" },
               { key: "cancelled", label: "Đã hủy" },
               { key: "return", label: "Trả hàng" },
@@ -391,18 +391,14 @@ const OrdersTab = () => {
               <button
                 key={tab.key}
                 onClick={() => {
-                  if (tab.key === "return") {
-                    setSection("returns");
-                  } else {
-                    setFilter(tab.key);
-                  }
+                  // Loại bỏ điều kiện check tab.key === "return" riêng lẻ
+                  setFilter(tab.key);
                 }}
-                className={`px-4 py-2 rounded-full text-xs font-medium transition-all ${tab.key === "return"
-                  ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                  : filter === tab.key
+                className={`px-4 py-2 rounded-full text-xs font-medium transition-all ${filter === tab.key // Cho phép nút "Trả hàng" chuyển màu xanh khi được active
                     ? "bg-primary text-white"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
                   }`}
+
               >
                 {tab.label}
                 {tab.key !== "all" && tab.key !== "return" && (
@@ -438,9 +434,9 @@ const OrdersTab = () => {
                     {/* Order Header */}
                     <div className="flex items-center justify-between px-5 py-3 bg-gray-50 border-b border-gray-100">
                       <div className="flex items-center gap-3">
-                        <span className="text-[11px] font-mono font-semibold text-gray-400 tracking-wider">
+                        {/* <span className="text-[11px] font-mono font-semibold text-gray-400 tracking-wider">
                           #{order.orderCode || String(orderId)?.slice(-8)}
-                        </span>
+                        </span> */}
                         <span className="w-1 h-1 rounded-full bg-gray-300" />
                         <span className="text-[11px] text-gray-400">{formatDate(order.createdAt)}</span>
                       </div>
@@ -501,7 +497,7 @@ const OrdersTab = () => {
                           <Button
                             size="sm"
                             variant={"none"}
-                            className="bg-orange-500  text-white rounded-lg text-xs"
+                            className="bg-primary  text-white rounded-lg text-xs"
                             onClick={() => router.push(`/client/user/checkout?orderId=${orderId}`)}
                           >
                             <CreditCard size={13} className="mr-1" /> Thanh toán

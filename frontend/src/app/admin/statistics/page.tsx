@@ -46,7 +46,7 @@ const getBookingStatusStyle = (status: string) => {
 const getOrderStatusStyle = (status: string) => {
 	const configs: Record<string, { label: string; color: string; bg: string }> = {
 		PENDING: { label: "Chờ thanh toán", color: "text-amber-600", bg: "bg-amber-50" },
-		PROCESSING: { label: "Đang xử lý", color: "text-indigo-600", bg: "bg-indigo-50" },
+		PROCESSING: { label: "Đang vận chuyển", color: "text-indigo-600", bg: "bg-indigo-50" },
 		SHIPPED: { label: "Đang giao", color: "text-sky-600", bg: "bg-sky-50" },
 		DELIVERED: { label: "Đã giao", color: "text-emerald-600", bg: "bg-emerald-50" },
 		CANCELLED: { label: "Đã hủy", color: "text-rose-600", bg: "bg-rose-50" },
