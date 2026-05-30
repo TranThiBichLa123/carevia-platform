@@ -221,7 +221,7 @@ const MyBookings = () => {
                         <Calendar className="mx-auto w-12 h-12 text-gray-200 mb-4" />
                         <p className="text-gray-400 text-[11px] font-bold uppercase tracking-widest">Bạn chưa có lịch hẹn nào</p>
                         <Link href="/client/booking" passHref>
-                            <button className="mt-4 px-8 py-3 bg-primary text-white text-[11px] font-bold uppercase tracking-widest active:scale-95 transition-transform">
+                            <button className="mt-4 px-8 py-3 bg-primary text-white text-[11px] font-bold uppercase tracking-widest active:scale-95 rounded-lg transition-transform">
                                 Đặt lịch ngay
                             </button>
                         </Link>                    </div>

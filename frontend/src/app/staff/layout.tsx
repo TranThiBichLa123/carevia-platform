@@ -2,23 +2,25 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import type { CSSProperties } from "react";
-import { 
+import {
   Building2,
-  CalendarCheck2, 
+  CalendarCheck2,
   ChartColumnBig,
-  ClipboardList, 
-  Layers3, 
+  ClipboardList,
+  Layers3,
   MessageSquareMore,
-  TicketPercent, 
+  TicketPercent,
   Boxes,
-  Menu, 
-  X, 
+  Menu,
+  X,
   LayoutDashboard,
   LogOut
 } from "lucide-react";
+import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
+import authApi from "@/lib/authApi";
 import { cn } from "@/lib/utils";
 import { useUserStore } from "@/lib/store";
 
@@ -35,11 +37,13 @@ const staffSections = [
 ];
 
 export default function StaffLayout({ children }: { children: React.ReactNode }) {
-  const { authUser, isAuthenticated } = useUserStore();
+  const { authUser, isAuthenticated, logoutUser } = useUserStore();
   const pathname = usePathname();
+  const router = useRouter();
   const isMobile = useIsMobile();
   const [isDesktopSidebarOpen, setIsDesktopSidebarOpen] = useState(true);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
 
   const isSidebarOpen = isMobile ? isMobileSidebarOpen : isDesktopSidebarOpen;
   const sidebarWidth = isDesktopSidebarOpen ? "16rem" : "5rem";
@@ -51,6 +55,32 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
     }
 
     setIsDesktopSidebarOpen((current) => !current);
+  };
+
+  const handleLogout = async () => {
+    if (isLoggingOut) {
+      return;
+    }
+
+    setIsLoggingOut(true);
+
+    try {
+      const response = await authApi.post("/auth/logout", {});
+
+      if (!response.success) {
+        throw new Error(response.error?.message || "Không thể đăng xuất.");
+      }
+
+      await logoutUser();
+      setIsMobileSidebarOpen(false);
+      toast.success("Đã đăng xuất khỏi workspace seller.");
+      router.push("/auth/signin");
+    } catch (error) {
+      console.error("Staff logout error:", error);
+      toast.error(error instanceof Error ? error.message : "Không thể đăng xuất.");
+    } finally {
+      setIsLoggingOut(false);
+    }
   };
 
   if (!isAuthenticated) {
@@ -107,9 +137,15 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
 
   return (
     <div
-      className="min-h-screen bg-[#F6F6F6] text-[#111111] antialiased md:grid md:grid-cols-[var(--staff-sidebar-width)_minmax(0,1fr)]"
-      style={{ "--staff-sidebar-width": sidebarWidth } as CSSProperties}
+      className={cn(
+        "min-h-screen bg-[#F6F6F6] text-[#111111] antialiased md:grid transition-[grid-template-columns] duration-300",
+        // Nếu mở rộng thì cột sidebar là 210px, nếu thu gọn thì cột sidebar chỉ là 64px
+        isDesktopSidebarOpen
+          ? "md:grid-cols-[210px_minmax(0,1fr)]"
+          : "md:grid-cols-[64px_minmax(0,1fr)]"
+      )}
     >
+
       <div
         className={cn(
           "fixed inset-0 z-40 bg-slate-950/45 backdrop-blur-[1px] transition-opacity duration-300 md:hidden",
@@ -118,27 +154,42 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
         onClick={() => setIsMobileSidebarOpen(false)}
       />
 
-      <aside 
+      <aside
         className={cn(
-          "fixed inset-y-0 left-0 z-50 flex max-w-[85vw] flex-col bg-[#052962] text-white shadow-xl transition-[transform,width] duration-300 ease-out md:sticky md:top-0 md:h-screen md:max-w-none md:shadow-none",
-          isMobile ? "w-72" : "w-(--staff-sidebar-width)",
+          "fixed inset-y-0 left-0 z-50 flex flex-col bg-[#052962] text-white shadow-xl transition-[width,transform] duration-300 ease-in-out md:sticky md:top-0 md:h-screen md:max-w-none md:shadow-none",
+          // Xử lý chiều rộng linh hoạt theo trạng thái đóng/mở trên PC
+          isMobile
+            ? "w-72 max-w-[85vw]"
+            : isDesktopSidebarOpen ? "w-[210px]" : "w-[64px]",
           isMobileSidebarOpen || !isMobile ? "translate-x-0" : "-translate-x-full"
         )}
       >
         <div className={cn(
-          "flex h-16 items-center border-b border-[#173E77] px-4",
-          !isMobile && !isDesktopSidebarOpen ? "justify-center px-2" : "justify-between"
+          "flex h-16 items-center border-b border-[#173E77] px-8 transition-all duration-300",
+          // Căn giữa nút Menu khi thu gọn sidebar để nhìn cân đối
+          !isMobile && !isDesktopSidebarOpen ? "justify-center px-0" : "justify-between"
         )}>
+          {/* Khi sidebar ĐANG MỞ: Hiển thị chữ, bấm vào chữ để thu gọn */}
           {(isMobile || isDesktopSidebarOpen) && (
-            <span className="font-vietnam text-xl font-bold text-[#FFE500]">Carevia Seller</span>
+            <button
+              onClick={toggleSidebar}
+              className="font-vietnam text-xl font-bold text-[#FFE500] hover:opacity-80 transition-opacity text-left active:scale-[0.98]"
+              aria-label="Thu gọn sidebar"
+            >
+              Carevia Seller
+            </button>
           )}
-          <button
-            onClick={toggleSidebar}
-            className="rounded-lg p-2 text-white/80 transition-colors hover:bg-[#173E77] hover:text-white"
-            aria-label="Thu gọn hoặc mở rộng sidebar"
-          >
-            {isSidebarOpen ? <X className="size-5" /> : <Menu className="size-5" />}
-          </button>
+
+          {/* Khi sidebar ĐANG ĐÓNG: Hiển thị nút Menu căn ngay giữa dòng */}
+          {(!isMobile && !isDesktopSidebarOpen) && (
+            <button
+              onClick={toggleSidebar}
+              className="rounded-lg p-2 text-white/80 transition-colors hover:bg-[#173E77] hover:text-white active:scale-95"
+              aria-label="Mở rộng sidebar"
+            >
+              <Menu className="size-5" />
+            </button>
+          )}
         </div>
 
         <nav className="mt-4 flex-1 space-y-1 overflow-y-auto p-2">
@@ -156,11 +207,12 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
                 }}
                 className={cn(
                   "flex items-center rounded-xl px-3 py-3 text-sm font-vietnam transition-all duration-200",
-                  isMobile || isDesktopSidebarOpen ? "justify-start gap-3" : "justify-center gap-0 px-2",
+                  isMobile || isDesktopSidebarOpen ? "justify-start gap-3" : "justify-center gap-0 px-0 h-10 w-10 mx-auto",
                   isActive
                     ? "bg-[#173E77] text-white font-semibold ring-1 ring-inset ring-[#2E5B99]"
                     : "text-white/80 hover:bg-[#123466] hover:text-white"
                 )}
+                title={!isDesktopSidebarOpen ? item.title : undefined} // Hiện tooltip tên menu khi thu gọn
               >
                 <Icon className="size-4 shrink-0" />
                 {(isMobile || isDesktopSidebarOpen) && <span className="truncate">{item.title}</span>}
@@ -170,12 +222,20 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
         </nav>
 
         <div className="border-t border-[#173E77] p-2">
-          <button className={cn(
-            "flex w-full rounded-xl px-3 py-3 text-sm text-white/70 transition-colors hover:bg-red-900/40 hover:text-white",
-            isMobile || isDesktopSidebarOpen ? "items-center gap-3 justify-start" : "items-center justify-center px-2"
-          )}>
+          <button
+            type="button"
+            onClick={handleLogout}
+            disabled={isLoggingOut}
+            className={cn(
+              "flex rounded-xl text-sm text-white/70 transition-all duration-200 hover:bg-red-900/40 hover:text-white disabled:cursor-not-allowed disabled:opacity-60",
+              isMobile || isDesktopSidebarOpen
+                ? "w-full px-3 py-3 items-center gap-3 justify-start"
+                : "w-10 h-10 px-0 py-0 items-center justify-center mx-auto"
+            )}
+            title={!isDesktopSidebarOpen ? "Đăng xuất" : undefined}
+          >
             <LogOut className="size-4 shrink-0" />
-            {(isMobile || isDesktopSidebarOpen) && <span className="font-vietnam">Đăng xuất</span>}
+            {(isMobile || isDesktopSidebarOpen) && <span className="font-vietnam">{isLoggingOut ? "Đang đăng xuất..." : "Đăng xuất"}</span>}
           </button>
         </div>
       </aside>
@@ -203,4 +263,5 @@ export default function StaffLayout({ children }: { children: React.ReactNode })
 
     </div>
   );
+
 }

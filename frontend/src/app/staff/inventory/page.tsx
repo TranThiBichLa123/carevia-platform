@@ -570,7 +570,7 @@ export default function StaffInventoryPage() {
 					{/* 1. Nút Nhập sản phẩm mới (Đồng bộ style, chiều cao và font chữ) */}
 					<button
 						onClick={() => void openCreateDialog()}
-						className="inline-flex h-9.5 items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-primary px-4 text-[13px] text-white shadow-sm transition-all duration-200 active:scale-95 hover:bg-primary/90 font-vietnam"
+						className="inline-flex h-9.5 items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-staff-primary px-4 text-[13px] text-white shadow-sm transition-all duration-200 active:scale-95  font-vietnam"
 					>
 						<Plus className="w-4 h-4" />
 						<span>Nhập sản phẩm mới</span>
@@ -587,12 +587,12 @@ export default function StaffInventoryPage() {
 							"group relative overflow-hidden",
 							"text-[13px] font-medium whitespace-nowrap",
 							"border border-gray-100 bg-white text-gray-700",
-							"hover:border-primary transition-all duration-500",
+							"hover:border-staff-primary transition-all duration-500",
 							"h-9.5 shrink-0 rounded-md px-4 shadow-sm active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
 						)}
 					>
 						{/* Lớp nền trượt màu Primary: Khớp hoàn toàn với màu gốc của nút Nhập sản phẩm mới */}
-						<span className="absolute inset-y-0 left-0 w-0 bg-primary transition-all duration-500 ease-out group-hover:w-full" />
+						<span className="absolute inset-y-0 left-0 w-0 bg-staff-primary transition-all duration-500 ease-out group-hover:w-full" />
 
 						{/* Nội dung chữ và Icon: Chuyển sang màu trắng tinh tế khi lớp nền trượt qua */}
 						<div className="relative z-10 flex items-center justify-center text-gray-700 group-hover:text-white transition-colors duration-500">

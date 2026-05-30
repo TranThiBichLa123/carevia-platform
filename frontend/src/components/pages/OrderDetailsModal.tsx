@@ -193,7 +193,7 @@ const OrderDetailsModal: React.FC<OrderDetailsModalProps> = ({
                 <span>Miễn phí</span>
               </div>
               <div className="flex justify-between text-sm">
-                <span>Thuế</span>
+                <span>Thuế VAT (8%)</span>
                 <span>Đã bao gồm</span>
               </div>
               <Separator className="my-2" />

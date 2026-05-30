@@ -117,22 +117,50 @@ const OrdersTab = () => {
     }
   }, [auth_token]);
 
+  // 1. Tối ưu lại fetchRefunds: KHÔNG gọi lại API getUserOrders nữa, 
+  // vì danh sách orders đã được fetchOrders lấy về và lưu ở state `orders` rồi.
   const fetchRefunds = useCallback(async () => {
-    setRefundsLoading(true);
-    const [refundRes, allOrders] = await Promise.all([
-      getMyRefunds(),
-      getUserOrders(auth_token || ""),
-    ]);
-    if (refundRes.success) setRefunds(refundRes.refunds);
-    if (Array.isArray(allOrders))
-      setCompletedOrders(allOrders.filter((o) => o.status === "COMPLETED"));
-    setRefundsLoading(false);
+    if (!auth_token) return;
+    try {
+      setRefundsLoading(true);
+      const refundRes = await getMyRefunds();
+      if (refundRes.success) {
+        setRefunds(refundRes.refunds);
+      }
+    } catch (error) {
+      console.error("Failed to load refunds", error);
+    } finally {
+      setRefundsLoading(false);
+    }
   }, [auth_token]);
 
-  useEffect(() => { fetchOrders(); }, [fetchOrders]);
+  // 2. Tự động đồng bộ các đơn hàng hoàn thành (Completed Orders) từ biến `orders` đã có sẵn
   useEffect(() => {
-    if (section === "returns") fetchRefunds();
-  }, [section, fetchRefunds]);
+    if (Array.isArray(orders)) {
+      const completed = orders.filter((o) => o.status?.toUpperCase() === "COMPLETED" || o.status?.toUpperCase() === "DELIVERED");
+      setCompletedOrders(completed);
+    }
+  }, [orders]); // Chỉ chạy lại khi biến orders thay đổi
+
+  // 3. Khởi tạo dữ liệu ban đầu khi có Token
+  useEffect(() => {
+    if (auth_token) {
+      fetchOrders();
+    }
+  }, [auth_token, fetchOrders]);
+
+  // 4. Chỉ fetch dữ liệu đổi trả khi người dùng thực sự bấm vào tab "returns" và chưa có dữ liệu
+  useEffect(() => {
+    if (section === "returns" && auth_token) {
+      fetchRefunds();
+    }
+  }, [section, auth_token, fetchRefunds]);
+
+
+
+
+
+
 
   const openReturnDialog = (order: Order) => {
     setSelectedOrder(order);
@@ -369,13 +397,12 @@ const OrdersTab = () => {
                     setFilter(tab.key);
                   }
                 }}
-                className={`px-4 py-2 rounded-full text-xs font-medium transition-all ${
-                  tab.key === "return"
-                    ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                    : filter === tab.key
+                className={`px-4 py-2 rounded-full text-xs font-medium transition-all ${tab.key === "return"
+                  ? "bg-gray-100 text-gray-600 hover:bg-gray-200"
+                  : filter === tab.key
                     ? "bg-primary text-white"
                     : "bg-gray-100 text-gray-600 hover:bg-gray-200"
-                }`}
+                  }`}
               >
                 {tab.label}
                 {tab.key !== "all" && tab.key !== "return" && (
@@ -480,12 +507,13 @@ const OrdersTab = () => {
                             <CreditCard size={13} className="mr-1" /> Thanh toán
                           </Button>
                         )}
-                        <Link href={`/client/user/orders/${orderId}`}>
-                          <Button size="sm" variant="none" className="text-primary  rounded-lg text-xs">
+                        <Link href={`/client/user/orders/${orderId}`} prefetch={false}>
+                          <Button size="sm" variant="none" className="text-primary rounded-lg text-xs">
                             <Eye size={13} className="mr-1" /> Chi tiết
                             <ChevronRight size={13} />
                           </Button>
                         </Link>
+
                         {(order.status === "CANCELLED" || order.status === "FAILED") && (
                           <Button
                             size="sm"

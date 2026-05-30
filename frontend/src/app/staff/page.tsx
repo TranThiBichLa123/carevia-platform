@@ -105,14 +105,14 @@ export default function StaffDashboardPage() {
                 <h1 className="mt-1 font-vietnam text-3xl font-extrabold tracking-tight text-[#111111] sm:text-4xl md:text-5xl">
                     Dashboard brand
                 </h1>
-                <p className="mt-3 text-sm md:text-base text-[#444444] font-vietnam max-w-3xl leading-relaxed">
+                {/* <p className="mt-3 text-sm md:text-base text-[#444444] font-vietnam max-w-3xl leading-relaxed">
                     Khu vực vận hành dành cho seller staff, tập trung vào catalog, booking, đơn hàng, voucher và trải nghiệm khách hàng của brand bạn đang phụ trách.
-                </p>
+                </p> */}
             </div>
 
-            <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
+            {/* <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
                 Workspace này đang chạy theo phạm vi brand hiện tại. Mọi sản phẩm, booking, đơn hàng, voucher và phiên trải nghiệm chỉ hiển thị trong <span className="font-semibold">brand_id = current_staff.brand_id</span>.
-            </div>
+            </div> */}
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 border-b border-[#DCDCDC] pb-6 mb-8 text-xs font-vietnam">
                 <div className="border-l-2 border-[#052962] pl-2">
@@ -179,7 +179,8 @@ export default function StaffDashboardPage() {
                     return (
                         <div
                             key={section.href}
-                            className="flex flex-col justify-between bg-white border-t-4 border-[#052962] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-md transition-shadow"
+                            className="flex flex-col justify-between bg-white border-t-4 border-[#
+                            ] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-md transition-shadow"
                         >
                             <div>
                                 {/* Meta Topic Tag */}

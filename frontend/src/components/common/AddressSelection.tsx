@@ -147,7 +147,7 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
   };
 
   return (
-    <Card className="w-full">
+    <Card className="w-full font-vietnam">
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MapPin className="w-5 h-5" />
@@ -413,16 +413,18 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
                   Thêm địa chỉ mới
                 </Button>
               </DialogTrigger>
-              <DialogContent>
+
+
+              <DialogContent className="focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 border-none rounded-2xl">
                 <DialogHeader>
-                  <DialogTitle>Thêm địa chỉ mới</DialogTitle>
+                  <DialogTitle className="font-vietnam">Thêm địa chỉ mới</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleAddAddress} className="space-y-6">
                   <div className="grid grid-cols-1 gap-5">
                     {/* Tỉnh / Thành phố & Quận / Huyện */}
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="city" className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1">Tỉnh / Thành phố</Label>
+                        <Label htmlFor="city" className="text-xs uppercase font-vietnam font-black text-gray-500 ml-1">Tỉnh / Thành phố</Label>
                         <Input
                           id="city"
                           value={formData.city}
@@ -433,7 +435,7 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="district" className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1">Quận / Huyện</Label>
+                        <Label htmlFor="district" className="text-xs uppercase font-vietnam font-black text-gray-500 ml-1">Quận / Huyện</Label>
                         <Input
                           id="district"
                           value={formData.district}
@@ -447,7 +449,7 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
 
                     {/* Phường / Xã */}
                     <div className="space-y-2">
-                      <Label htmlFor="ward" className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1">Phường / Xã</Label>
+                      <Label htmlFor="ward" className="text-xs uppercase font-vietnam font-black text-gray-500 ml-1">Phường / Xã</Label>
                       <Input
                         id="ward"
                         value={formData.ward}
@@ -460,7 +462,7 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
 
                     {/* Địa chỉ chi tiết */}
                     <div className="space-y-2">
-                      <Label htmlFor="street" className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1">Số nhà / Tên đường</Label>
+                      <Label htmlFor="street" className="text-xs uppercase font-vietnam font-black text-gray-500 ml-1">Số nhà / Tên đường</Label>
                       <Input
                         id="street"
                         value={formData.street}
@@ -491,10 +493,10 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
                     <Button
                       type="submit"
                       disabled={isLoading}
-                      className="group relative overflow-hidden flex-1 h-12 bg-white border-2 border-primary text-primary font-bold rounded-xl transition-all duration-500"
+                      className="group relative overflow-hidden flex-1 h-12 bg-white border-2 border-primary text-primary font-black rounded-xl transition-all duration-500"
                     >
                       <span className="absolute inset-y-0 left-0 w-0 bg-primary transition-all duration-500 ease-out group-hover:w-full" />
-                      <span className="relative z-10 group-hover:text-white transition-colors duration-500">
+                      <span className="relative z-10 font-vietnam group-hover:text-white transition-colors duration-500">
                         {isLoading ? "Đang xử lý..." : "Lưu địa chỉ ngay"}
                       </span>
                     </Button>
@@ -502,7 +504,7 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
                     <Button
                       type="button"
                       variant="ghost"
-                      className="h-12 rounded-xl font-medium text-gray-500 hover:bg-gray-100"
+                      className="h-12 rounded-xl font-vietnam font-black text-gray-500 hover:bg-gray-100"
                       onClick={() => setIsAddDialogOpen(false)}
                     >
                       Hủy bỏ
@@ -514,16 +516,16 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
             </Dialog>
 
             <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-              <DialogContent>
+              <DialogContent className="focus:outline-none focus:ring-0 focus-visible:outline-none focus-visible:ring-0 border-none rounded-2xl">
                 <DialogHeader>
-                  <DialogTitle>Chỉnh sửa địa chỉ</DialogTitle>
+                  <DialogTitle className="font-vietnam font-black">Chỉnh sửa địa chỉ</DialogTitle>
                 </DialogHeader>
                 <form onSubmit={handleEditAddress} className="space-y-6">
                   <div className="grid grid-cols-1 gap-5">
                     {/* Tỉnh / Thành phố & Quận / Huyện */}
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <Label htmlFor="edit-city" className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 ml-1">Tỉnh / Thành phố</Label>
+                        <Label htmlFor="city" className="text-xs uppercase font-vietnam font-black text-gray-500 ml-1">Tỉnh / Thành phố</Label>
                         <Input
                           id="edit-city"
                           value={formData.city}
@@ -533,7 +535,7 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
                         />
                       </div>
                       <div className="space-y-2">
-                        <Label htmlFor="edit-district" className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 ml-1">Quận / Huyện</Label>
+                        <Label htmlFor="district" className="text-xs uppercase font-vietnam font-black text-gray-500 ml-1">Quận / Huyện</Label>
                         <Input
                           id="edit-district"
                           value={formData.district}
@@ -546,7 +548,7 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
 
                     {/* Phường / Xã */}
                     <div className="space-y-2">
-                      <Label htmlFor="edit-ward" className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 ml-1">Phường / Xã</Label>
+                      <Label htmlFor="ward" className="text-xs uppercase font-vietnam font-black text-gray-500 ml-1">Phường / Xã</Label>
                       <Input
                         id="edit-ward"
                         value={formData.ward}
@@ -558,7 +560,7 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
 
                     {/* Địa chỉ chi tiết */}
                     <div className="space-y-2">
-                      <Label htmlFor="edit-street" className="text-[10px] font-bold uppercase tracking-[0.2em] text-gray-400 ml-1">Số nhà / Tên đường</Label>
+                      <Label htmlFor="street" className="text-xs uppercase font-vietnam font-black text-gray-500 ml-1">Số nhà / Tên đường</Label>
                       <Input
                         id="edit-street"
                         value={formData.street}
@@ -579,7 +581,7 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
                       checked={formData.isDefault}
                       onChange={(e) => setFormData({ ...formData, isDefault: e.target.checked })}
                     />
-                    <Label htmlFor="edit-isDefault" className="font-vietnam font-bold text-sm text-gray-700 cursor-pointer select-none">
+                    <Label htmlFor="edit-isDefault" className="font-vietnam font-black text-sm text-gray-700 cursor-pointer select-none">
                       Đặt làm địa chỉ mặc định
                     </Label>
                   </div>
@@ -589,7 +591,7 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
                     <Button
                       type="submit"
                       disabled={isLoading}
-                      className="group relative overflow-hidden flex-[2] h-12 bg-white border-2 border-primary text-primary font-bold rounded-xl transition-all duration-500 shadow-lg shadow-primary/5"
+                      className="group relative overflow-hidden flex-[2] h-12 bg-white border-2 border-primary text-primary font-vietnam font-black rounded-xl transition-all duration-500 shadow-lg shadow-primary/5"
                     >
                       <span className="absolute inset-y-0 left-0 w-0 bg-primary transition-all duration-500 ease-out group-hover:w-full" />
                       <span className="relative z-10 group-hover:text-white transition-colors duration-500">
@@ -600,7 +602,7 @@ export const AddressSelection: React.FC<AddressSelectionProps> = ({
                     <Button
                       type="button"
                       variant="ghost"
-                      className="flex-1 h-12 rounded-xl font-medium text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
+                      className="flex-1 h-12 rounded-xl font-vietnam font-black text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-all"
                       onClick={() => setIsEditDialogOpen(false)}
                     >
                       Hủy bỏ

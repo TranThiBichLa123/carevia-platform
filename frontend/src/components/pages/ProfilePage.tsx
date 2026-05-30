@@ -356,7 +356,7 @@ const ProfilePage = () => {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5, ease: "easeOut" }}
-      className="min-h-screen bg-linear-to-br from-gray-50 to-gray-200 py-12 px-4 sm:px-6 lg:px-8"
+      className="min-h-screen bg-linear-to-br from-gray-50  to-gray-200 py-12 px-4 sm:px-6 lg:px-8"
     >
       <div className="max-w-4xl mx-auto space-y-8">
         {/* User Information Dashboard */}
@@ -668,7 +668,7 @@ const ProfilePage = () => {
                     <ShoppingCart size={32} />
                   </div>
                   <p className="text-gray-500 font-medium">Giỏ hàng đang trống</p>
-                  <Button variant="link" className="text-teal-600 mt-2">Tiếp tục mua sắm →</Button>
+                  <Button variant="none" className="text-teal-600 mt-2">Tiếp tục mua sắm →</Button>
                 </div>
               ) : (
                 <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
@@ -802,7 +802,7 @@ const ProfilePage = () => {
                     name="street"
                     render={({ field }) => (
                       <FormItem>
-                        <FormLabel className="text-xs font-bold uppercase tracking-widest text-gray-500 ml-1">Số nhà / Tên đường</FormLabel>
+                        <FormLabel className="text-xs   text-gray-500 ml-1">Số nhà / Tên đường</FormLabel>
                         <FormControl>
                           <Input
                             {...field}

@@ -20,13 +20,6 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
-import {
 	Table,
 	TableBody,
 	TableCell,
@@ -47,15 +40,15 @@ const STATUS_OPTIONS: Array<{
 	value: BookingFilterValue;
 	label: string;
 }> = [
-	{ value: "ALL", label: "Tất cả trạng thái" },
-	{ value: "PENDING_CONFIRM", label: "Chờ xác nhận" },
-	{ value: "CONFIRMED", label: "Đã xác nhận" },
-	{ value: "CHECKED_IN", label: "Đã check-in" },
-	{ value: "COMPLETED", label: "Hoàn tất" },
-	{ value: "NO_SHOW", label: "Không đến" },
-	{ value: "CANCELLED", label: "Đã hủy" },
-	{ value: "EXPIRED", label: "Hết hạn" },
-];
+		{ value: "ALL", label: "Tất cả trạng thái" },
+		{ value: "PENDING_CONFIRM", label: "Chờ xác nhận" },
+		{ value: "CONFIRMED", label: "Đã xác nhận" },
+		{ value: "CHECKED_IN", label: "Đã check-in" },
+		{ value: "COMPLETED", label: "Hoàn tất" },
+		{ value: "NO_SHOW", label: "Không đến" },
+		{ value: "CANCELLED", label: "Đã hủy" },
+		{ value: "EXPIRED", label: "Hết hạn" },
+	];
 
 const STATUS_LABELS: Record<StaffBookingStatus, string> = {
 	PENDING_CONFIRM: "Chờ xác nhận",
@@ -264,7 +257,7 @@ export default function StaffBookingsPage() {
 	}
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-6 font-vietnam">
 			<div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
 				<div>
 					<h1 className="text-3xl font-bold tracking-tight">Quản lý booking</h1>
@@ -274,37 +267,51 @@ export default function StaffBookingsPage() {
 				</div>
 
 				<div className="flex flex-col gap-3 sm:flex-row">
-					<Button asChild variant="outline">
+					{/* <Button asChild variant="outline" >
 						<Link href="/staff/sessions">Quản lý phiên trải nghiệm</Link>
-					</Button>
-					<Select
-						value={statusFilter}
-						onValueChange={(value) => setStatusFilter(value as BookingFilterValue)}
-					>
-						<SelectTrigger className="w-full min-w-52 bg-white sm:w-52">
-							<SelectValue placeholder="Lọc trạng thái" />
-						</SelectTrigger>
-						<SelectContent>
-							{STATUS_OPTIONS.map((option) => (
-								<SelectItem key={option.value} value={option.value}>
-									{option.label}
-								</SelectItem>
-							))}
-						</SelectContent>
-					</Select>
+					</Button> */}
+					<div className="group relative z-50 w-full sm:min-w-52 sm:w-auto">
+						<div className="flex h-9.5 cursor-pointer items-center justify-between rounded-md border border-gray-100 bg-white px-3 py-2 shadow-sm transition-all hover:border-gray-200">
+							<span className="whitespace-nowrap text-[13px] font-medium text-gray-700">
+								{STATUS_OPTIONS.find((option) => option.value === statusFilter)?.label || "Lọc trạng thái"}
+							</span>
+							<svg className="ml-2 h-4 w-4 shrink-0 text-gray-400 transition-transform duration-200 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+								<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+							</svg>
+						</div>
 
-					<Button
-						variant="outline"
+						<div className="invisible absolute top-full left-0 mt-1 w-full overflow-hidden rounded-md border border-gray-200 bg-white opacity-0 shadow-lg transition-all duration-200 group-hover:visible group-hover:opacity-100">
+							<div className="flex flex-col whitespace-nowrap">
+								{STATUS_OPTIONS.map((option) => (
+									<div
+										key={option.value}
+										onClick={() => setStatusFilter(option.value as BookingFilterValue)}
+										className={`border-b border-gray-100 px-3 py-2.5 text-[13px] transition-colors last:border-b-0 ${statusFilter === option.value ? "bg-gray-50 font-bold text-staff-primary" : "cursor-pointer text-gray-700 hover:bg-gray-50"}`}
+									>
+										{option.label}
+									</div>
+								))}
+							</div>
+						</div>
+					</div>
+
+					<button
 						onClick={() => void loadBookings()}
 						disabled={loading}
+						className="group relative h-9.5 shrink-0 overflow-hidden rounded-md border border-gray-100 bg-white px-4 text-[13px] font-medium whitespace-nowrap text-gray-700 shadow-sm transition-all duration-500 hover:border-staff-primary active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
 					>
-						<RefreshCw className={loading ? "animate-spin" : ""} />
-						Làm mới
-					</Button>
+						<span className="absolute inset-y-0 left-0 w-0 bg-staff-primary transition-all duration-500 ease-out group-hover:w-full" />
+						<div className="relative z-10 flex items-center justify-center text-gray-700 transition-colors duration-500 group-hover:text-white">
+							<RefreshCw
+								className={`mr-2 h-3.5 w-3.5 text-gray-400 transition-transform duration-700 ease-in-out group-hover:text-white ${loading ? "animate-spin" : "group-hover:rotate-180"}`}
+							/>
+							<span className="relative">Làm mới</span>
+						</div>
+					</button>
 				</div>
 			</div>
 
-			<Card className="border-l-4 border-l-[#052962] bg-slate-50/70">
+			{/* <Card className="border-l-4 border-l-[#052962] bg-slate-50/70">
 				<CardContent className="flex flex-col gap-3 py-4 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
 					<div>
 						<div className="font-semibold text-foreground">Booking chỉ xuất hiện sau khi staff mở phiên trải nghiệm.</div>
@@ -316,7 +323,7 @@ export default function StaffBookingsPage() {
 						<Link href="/staff/sessions">Tạo phiên mới</Link>
 					</Button>
 				</CardContent>
-			</Card>
+			</Card> */}
 
 			<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
 				<Card>
@@ -374,18 +381,19 @@ export default function StaffBookingsPage() {
 							Không có booking phù hợp với bộ lọc hiện tại.
 						</div>
 					) : (
-						<Table>
-							<TableHeader>
-								<TableRow>
-									<TableHead>Mã booking</TableHead>
-									<TableHead>Khách hàng</TableHead>
-									<TableHead>Thiết bị</TableHead>
-									<TableHead>Lịch hẹn</TableHead>
-									<TableHead>Thanh toán</TableHead>
-									<TableHead>Trạng thái</TableHead>
-									<TableHead className="text-right">Thao tác</TableHead>
-								</TableRow>
-							</TableHeader>
+								<div className="overflow-hidden rounded-lg border border-gray-100 bg-white shadow-sm">
+									<Table>
+									<TableHeader>
+										<TableRow className="bg-[#052962] text-white rounded-t-lg">
+											<TableHead className="text-[#ffe600] font-bold uppercase text-sm px-4 py-3">MÃ ĐƠN</TableHead>
+											<TableHead className="font-semibold uppercase text-sm px-4 py-3">KHÁCH HÀNG</TableHead>
+											<TableHead className="font-semibold uppercase text-sm px-4 py-3">SẢN PHẨM</TableHead>
+											<TableHead className="font-semibold uppercase text-sm px-4 py-3">LỊCH HẸN</TableHead>
+											<TableHead className="font-semibold uppercase text-sm px-4 py-3">THANH TOÁN</TableHead>
+											<TableHead className="font-semibold uppercase text-sm px-4 py-3">TRẠNG THÁI</TableHead>
+											<TableHead className="text-[#ffe600] font-bold uppercase text-sm px-4 py-3 text-right">THAO TÁC</TableHead>
+										</TableRow>
+									</TableHeader>
 							<TableBody>
 								{bookings.map((booking) => {
 									const isActing = actionBookingId === booking.id;
@@ -429,15 +437,17 @@ export default function StaffBookingsPage() {
 												</div>
 											</TableCell>
 											<TableCell>
-												<Badge variant={STATUS_BADGE_VARIANTS[booking.status]}>
+												{/* Bỏ variant, thêm className để đổi màu nền và màu chữ */}
+												<Badge className="rounded-lg bg-staff-primary px-2.5 py-1 text-white hover:bg-staff-primary/90 shadow-none">
 													{STATUS_LABELS[booking.status]}
 												</Badge>
 												{booking.cancelReason ? (
-													<div className="mt-2 max-w-52 text-xs text-muted-foreground">
+													<div className="mt-2 max-w-52 text-xs ">
 														Lý do: {booking.cancelReason}
 													</div>
 												) : null}
 											</TableCell>
+
 											<TableCell>
 												<div className="flex justify-end gap-2">
 													{booking.status === "PENDING_CONFIRM" ? (
@@ -445,6 +455,7 @@ export default function StaffBookingsPage() {
 															size="sm"
 															onClick={() => void handleConfirm(booking.id)}
 															disabled={isActing}
+															className="rounded-lg"
 														>
 															{isActing ? <Loader2 className="animate-spin" /> : null}
 															Xác nhận
@@ -458,8 +469,9 @@ export default function StaffBookingsPage() {
 																variant="outline"
 																onClick={() => void handleCheckIn(booking.id)}
 																disabled={isActing}
+																className="rounded-lg"
 															>
-																{isActing ? <Loader2 className="animate-spin" /> : null}
+																{isActing ? <Loader2 className="animate-spin " /> : null}
 																Check-in
 															</Button>
 															<Button
@@ -467,6 +479,7 @@ export default function StaffBookingsPage() {
 																variant="outline"
 																onClick={() => void handleNoShow(booking.id)}
 																disabled={isActing}
+																className="rounded-lg"
 															>
 																{isActing ? <Loader2 className="animate-spin" /> : null}
 																No-show
@@ -480,6 +493,7 @@ export default function StaffBookingsPage() {
 															variant="outline"
 															onClick={() => void handleComplete(booking.id)}
 															disabled={isActing}
+															className="rounded-lg"
 														>
 															{isActing ? <Loader2 className="animate-spin" /> : null}
 															Hoàn tất
@@ -494,6 +508,7 @@ export default function StaffBookingsPage() {
 															variant="destructive"
 															onClick={() => void handleCancel(booking.id)}
 															disabled={isActing}
+															className="rounded-lg"
 														>
 															{isActing ? <Loader2 className="animate-spin" /> : null}
 															Hủy
@@ -505,7 +520,8 @@ export default function StaffBookingsPage() {
 									);
 								})}
 							</TableBody>
-						</Table>
+							</Table>
+						</div>
 					)}
 				</CardContent>
 			</Card>

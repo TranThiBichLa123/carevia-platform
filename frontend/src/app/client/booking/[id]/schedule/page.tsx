@@ -358,7 +358,7 @@ const BookingSchedulePage = () => {
                             <button
                                 disabled={!customerPhone || !selectedBranch || !selectedSession}
                                 onClick={() => setStep(2)}
-                                className="order-1 sm:order-2 w-full sm:w-auto min-w-60 px-10 py-4 bg-primary text-white text-[11px] font-vietnam font-black uppercase tracking-[0.2em] shadow-xl shadow-primary/20 hover:bg-primary-hover disabled:bg-gray-200 disabled:shadow-none disabled:cursor-not-allowed transition-all"
+                                className="order-1 sm:order-2 w-full sm:w-auto min-w-60 px-10 py-4 bg-primary text-white text-[11px] font-vietnam font-black uppercase tracking-[0.2em] shadow-xl shadow-primary/20 hover:bg-primary-hover disabled:bg-gray-200 disabled:shadow-none disabled:cursor-not-allowed rounded-lg transition-all"
                             >
                                 Tiếp tục xác nhận
                             </button>
@@ -429,14 +429,14 @@ const BookingSchedulePage = () => {
                                         <div className="flex flex-col sm:flex-row gap-3 pt-4">
                                             <button
                                                 onClick={() => setStep(1)}
-                                                className="flex-1 border border-black py-4 text-[11px] font-bold uppercase tracking-widest hover:bg-gray-50 transition-colors"
+                                                className="flex-1 border rounded-lg border-black py-4 text-[11px] font-bold uppercase tracking-widest hover:bg-gray-50 transition-colors"
                                             >
                                                 Thay đổi lịch
                                             </button>
                                             <button
                                                 onClick={handleCompleteBooking}
                                                 disabled={submitting}
-                                                className="flex-2 bg-black text-white py-4 text-[11px] font-bold uppercase tracking-widest hover:bg-gray-800 transition-shadow shadow-lg shadow-black/10 disabled:opacity-50"
+                                                className="flex-2 bg-black text-white py-4 text-[11px] font-bold uppercase tracking-widest hover:bg-gray-800 transition-shadow shadow-lg shadow-black/10 disabled:opacity-50 rounded-lg"
                                             >
                                                 {submitting ? 'Đang xử lý...' : 'Xác nhận hoàn tất'}
                                             </button>

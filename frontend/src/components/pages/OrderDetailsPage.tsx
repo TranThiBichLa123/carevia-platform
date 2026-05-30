@@ -207,18 +207,26 @@ const OrderDetailsPage = () => {
   }
 
   useEffect(() => {
+    // Tạo một biến cờ để tránh gọi API trùng lặp nếu component re-render nhanh
+    let isMounted = true;
+
     const fetchOrder = async () => {
       if (!orderId || !auth_token) {
-        toast.error("Order ID or authentication token missing");
+        toast.error("Thiếu thông tin đăng nhập hoặc mã đơn hàng.");
         router.push("/client/account?tab=orders");
         return;
       }
-      setLoading(true);
+
       try {
+        setLoading(true);
         const orderData = await getOrderById(orderId, auth_token);
+
+        if (!isMounted) return;
+
         if (orderData) {
           setOrder(orderData);
-          if (success === "true" && orderData.status === "PAID") {
+          // Kiểm tra thông báo thành công chỉ chạy 1 lần duy nhất
+          if (success === "true" && orderData.status?.toUpperCase() === "PAID") {
             toast.success("Thanh toán thành công! Đơn hàng đã được xác nhận.");
           }
         } else {
@@ -230,15 +238,22 @@ const OrderDetailsPage = () => {
         toast.error("Không thể tải chi tiết đơn hàng");
         router.push("/client/account?tab=orders");
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
+
     fetchOrder();
-  }, [orderId, auth_token, router, success]);
+
+    // Cleanup function: Hủy trạng thái khi component bị unmount
+    return () => {
+      isMounted = false;
+    };
+    // TUYỆT ĐỐI KHÔNG đưa 'router' hoặc 'success' vào mảng dependency này nữa
+  }, [orderId, auth_token]);
 
   const handleCancelOrder = async () => {
     if (!order || !auth_token) return;
-    const finalReason = cancelReason === "LÃ½ do khÃ¡c" ? cancelCustomReason.trim() || "LÃ½ do khÃ¡c" : cancelReason;
+    const finalReason = cancelReason === "Lý do khác" ? cancelCustomReason.trim() || "Lý do khác" : cancelReason;
     setCancelling(true);
     try {
       const result = await cancelOrder(String(order.id), finalReason, auth_token);
@@ -505,12 +520,11 @@ const OrderDetailsPage = () => {
               </p>
             )}
             {order.refundStatus && (
-              <div className={`mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border ${
-                order.refundStatus === 'SUCCESS' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                order.refundStatus === 'REQUESTED' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                (order.refundStatus === 'APPROVED' || order.refundStatus === 'PROCESSING') ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                'bg-slate-50 text-slate-600 border-slate-200'
-              }`}>
+              <div className={`mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border ${order.refundStatus === 'SUCCESS' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
+                  order.refundStatus === 'REQUESTED' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                    (order.refundStatus === 'APPROVED' || order.refundStatus === 'PROCESSING') ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                      'bg-slate-50 text-slate-600 border-slate-200'
+                }`}>
                 {order.refundStatus === 'REQUESTED' && '⏳ Hoàn tiền đang chờ xét duyệt'}
                 {order.refundStatus === 'APPROVED' && '✅ Hoàn tiền đã được duyệt'}
                 {order.refundStatus === 'PROCESSING' && '🔄 Đang xử lý hoàn tiền'}
@@ -698,7 +712,7 @@ const OrderDetailsPage = () => {
                 </div>
                 {calculateTax() > 0 && (
                   <div className="flex justify-between text-sm text-gray-500">
-                    <span>Thuế (VAT)</span>
+                    <span>Thuế VAT (8%)</span>
                     <PriceFormatter amount={calculateTax()} />
                   </div>
                 )}

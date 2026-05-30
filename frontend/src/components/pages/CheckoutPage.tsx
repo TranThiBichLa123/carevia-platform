@@ -284,7 +284,9 @@ const CheckoutPageContent = () => {
   };
 
   const calculateTotal = () => {
-    return calculateSubtotal() + calculateShipping() + calculateTax();
+    return calculateSubtotal() + calculateShipping() 
+    // + calculateTax()
+    ;
   };
 
   const handleStripeCheckout = async () => {
@@ -575,13 +577,13 @@ const CheckoutPageContent = () => {
                 </span>
               </div>
 
-              <div className="flex justify-between items-center py-2">
-                <span className="text-gray-600">Thuế</span>
+              {/* <div className="flex justify-between items-center py-2">
+                <span className="text-gray-600">Thuế VAT (8%)</span>
                 <PriceFormatter
                   amount={calculateTax()}
                   className="text-base font-medium text-gray-900"
                 />
-              </div>
+              </div> */}
 
               {calculateShipping() === 0 && (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-3">

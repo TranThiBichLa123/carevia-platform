@@ -11,7 +11,8 @@ public class DatabaseSequenceSyncService {
     private static final Set<String> ALLOWED_TABLES = Set.of(
             "accounts",
             "staffs",
-            "clients");
+            "clients",
+            "bookings");
 
     private final JdbcTemplate jdbcTemplate;
 

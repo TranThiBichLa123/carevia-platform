@@ -46,6 +46,14 @@ const getAuthToken = (): string | undefined => {
 	return cookies.auth_token;
 };
 
+const getRefreshToken = (): string | undefined => {
+	if (typeof window === "undefined") {
+		return undefined;
+	}
+
+	return window.localStorage.getItem("carevia_refresh_token") || undefined;
+};
+
 const normalizeUrl = (url: string) => endpointAliases[url] || url;
 
 const normalizeBody = (url: string, body: unknown) => {
@@ -76,6 +84,16 @@ const normalizeBody = (url: string, body: unknown) => {
 			login:
 				payload.login || payload.email || payload.username || payload.identifier,
 			password: payload.password,
+		};
+	}
+
+	if (normalizedUrl === "/auth/logout") {
+		return {
+			...payload,
+			refreshToken:
+				typeof payload.refreshToken === "string" && payload.refreshToken.trim()
+					? payload.refreshToken
+					: getRefreshToken() || "",
 		};
 	}
 

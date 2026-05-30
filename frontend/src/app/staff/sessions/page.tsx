@@ -195,11 +195,11 @@ export default function StaffSessionsPage() {
 				<Badge variant="outline" className="w-fit">Nguồn lịch cho khách đặt hẹn</Badge>
 			</div>
 
-			<Card className="border-l-4 border-l-emerald-600 bg-emerald-50/40">
+			{/* <Card className="border-l-4 border-l-emerald-600 bg-emerald-50/40">
 				<CardContent className="py-4 text-sm text-muted-foreground">
 					Mỗi phiên bạn tạo sẽ xuất hiện trực tiếp trong màn khách chọn lịch tại trang booking của thiết bị tương ứng. Nếu không có phiên đang mở, khách sẽ không chọn được giờ hẹn.
 				</CardContent>
-			</Card>
+			</Card> */}
 
 			<div className="grid gap-6 xl:grid-cols-[1.15fr_2fr]">
 				<Card>

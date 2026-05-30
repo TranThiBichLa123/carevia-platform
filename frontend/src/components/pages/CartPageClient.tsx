@@ -688,7 +688,7 @@ const CartPageClient = () => {
               </div>
 
               <div className="flex justify-between items-center py-2">
-                <span className="text-gray-600">Thuế</span>
+                <span className="text-gray-600">Thuế VAT (8%)</span>
                 <PriceFormatter
                   amount={calculateSubtotal() * 0.08}
                   className="text-base font-medium text-gray-900"

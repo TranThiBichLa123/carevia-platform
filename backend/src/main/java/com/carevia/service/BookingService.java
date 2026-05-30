@@ -33,6 +33,7 @@ public class BookingService {
     private final NotificationService notificationService;
     private final RefundService refundService;
     private final StaffBrandAccessService staffBrandAccessService;
+    private final DatabaseSequenceSyncService databaseSequenceSyncService;
 
     private static final int MAX_BOOKINGS_PER_DAY = 3;
 
@@ -40,7 +41,8 @@ public class BookingService {
             DeviceRepository deviceRepository, AccountRepository accountRepository,
             VoucherRepository voucherRepository, UserBehaviorRepository userBehaviorRepository,
             NotificationService notificationService, RefundService refundService,
-            StaffBrandAccessService staffBrandAccessService) {
+            StaffBrandAccessService staffBrandAccessService,
+            DatabaseSequenceSyncService databaseSequenceSyncService) {
         this.bookingRepository = bookingRepository;
         this.sessionRepository = sessionRepository;
         this.deviceRepository = deviceRepository;
@@ -50,6 +52,7 @@ public class BookingService {
         this.notificationService = notificationService;
         this.refundService = refundService;
         this.staffBrandAccessService = staffBrandAccessService;
+        this.databaseSequenceSyncService = databaseSequenceSyncService;
     }
 
     @Transactional
@@ -110,6 +113,7 @@ public class BookingService {
                 .status(BookingStatus.PENDING_CONFIRM)
                 .build();
 
+            databaseSequenceSyncService.syncIdSequence("bookings");
         booking = bookingRepository.save(booking);
         sessionRepository.save(session);
 

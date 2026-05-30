@@ -22,19 +22,21 @@ import {
 import Link from "next/link";
 import { Badge } from "@/components/ui/badge";
 
-// Tab components
-import AccountProfileTab from "@/components/pages/account/ProfileTab";
-import AccountOrdersTab from "@/components/pages/account/OrdersTab";
-import AccountAnalyticsTab from "@/components/pages/account/AnalyticsTab";
-import AccountNotificationsTab from "@/components/pages/account/NotificationsTab";
-import AccountSettingsTab from "@/components/pages/account/SettingsTab";
+// // Tab components
+// import AccountProfileTab from "@/components/pages/account/ProfileTab";
+// import AccountOrdersTab from "@/components/pages/account/OrdersTab";
+// import AccountAnalyticsTab from "@/components/pages/account/AnalyticsTab";
+// import AccountNotificationsTab from "@/components/pages/account/NotificationsTab";
+// import AccountSettingsTab from "@/components/pages/account/SettingsTab";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { toast } from "sonner";
 import authApi from "@/lib/authApi";
-
+import { Skeleton } from "@/components/ui/skeleton";
+import dynamic from "next/dynamic";
+import AccountProfileTab from "@/components/pages/account/ProfileTab";
 const tabs = [
   { key: "profile", label: "Hồ sơ", icon: User },
   { key: "orders", label: "Đơn hàng", icon: Package },
@@ -118,6 +120,42 @@ const AccountPage = () => {
     notifications: "Thông báo",
     settings: "Cài đặt tài khoản",
   };
+
+
+  // Tạo một component hiển thị trong lúc chờ tab load
+  const TabLoading = () => (
+    <div className="space-y-4 p-4">
+      <Skeleton className="h-8 w-[250px] rounded-lg" />
+      <Skeleton className="h-[200px] w-full rounded-xl" />
+    </div>
+  );
+
+  // Lazy load các tab - Chỉ compile khi người dùng bấm vào tab đó
+  // const AccountProfileTab = dynamic(() => import("@/components/pages/account/ProfileTab"), {
+  //   loading: () => <TabLoading />,
+  //   ssr: false, // Tắt SSR ở client component để giảm tải cho server render
+  // });
+
+  const AccountOrdersTab = dynamic(() => import("@/components/pages/account/OrdersTab"), {
+    loading: () => <TabLoading />,
+    ssr: false,
+  });
+
+  const AccountAnalyticsTab = dynamic(() => import("@/components/pages/account/AnalyticsTab"), {
+    loading: () => <TabLoading />,
+    ssr: false,
+  });
+
+  const AccountNotificationsTab = dynamic(() => import("@/components/pages/account/NotificationsTab"), {
+    loading: () => <TabLoading />,
+    ssr: false,
+  });
+
+  const AccountSettingsTab = dynamic(() => import("@/components/pages/account/SettingsTab"), {
+    loading: () => <TabLoading />,
+    ssr: false,
+  });
+
 
   const renderTab = () => {
     switch (activeTab) {

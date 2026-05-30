@@ -16,7 +16,7 @@ const buttonVariants = cva(
         destructive: "bg-red-500 text-white shadow-sm hover:bg-red-600 focus-visible:ring-red-500/20",
 
         // 3. Outline: SỬA LẠI - Hover dùng màu xám nhạt (slate-100) thay vì accent đỏ
-        outline: "border border-gray-300 bg-background shadow-sm hover:border-gray-400 hover:bg-slate-100 hover:text-slate-900",
+        outline: "border border-gray-100 bg-background shadow-sm ",
 
         // 4. Secondary: Màu nhẹ nhàng
         fortrashicon: " text-slate-900  hover:bg-slate-200",

@@ -164,7 +164,7 @@ const BookingDetail = () => {
 
         {/* THÔNG TIN TRẠNG THÁI & QR */}
         <div className="bg-white border border-gray-200 p-8 text-center space-y-4">
-          <div className={`inline-flex items-center gap-2 px-4 py-1 rounded-full border text-[10px] font-black uppercase tracking-widest ${currentStatus.bg} ${currentStatus.color}`}>
+          <div className={`inline-flex items-center gap-2 px-4 py-1 rounded-full border text-[10px]  uppercase tracking-widest ${currentStatus.bg} ${currentStatus.color}`}>
             <span className={`w-1.5 h-1.5 rounded-full bg-current animate-pulse`}></span>
             {currentStatus.label}
           </div>
@@ -192,7 +192,7 @@ const BookingDetail = () => {
             <img src={booking.image} className="w-full h-full object-cover" alt="" />
           </div> */}
           <div className="p-6">
-            <h2 className="text-lg font-black uppercase tracking-tight text-gray-900">{booking.deviceName}</h2>
+            <h2 className="text-lg  uppercase tracking-tight text-gray-900">{booking.deviceName}</h2>
             <div className="mt-4 grid grid-cols-2 gap-6">
               <div className="space-y-1">
                 <p className="text-[10px] font-bold text-gray-400 uppercase">Ngày hẹn</p>
@@ -227,7 +227,7 @@ const BookingDetail = () => {
 
         {/* THÔNG TIN KHÁCH HÀNG */}
         <div className="bg-white border border-gray-200 p-6">
-          <h3 className="text-[11px] font-black uppercase tracking-widest mb-4 flex items-center gap-2">
+          <h3 className="text-[11px]  uppercase tracking-widest mb-4 flex items-center gap-2">
             <User size={14} /> Thông tin khách hàng
           </h3>
           <div className="space-y-3">
@@ -296,7 +296,7 @@ const BookingDetail = () => {
             <div className="space-y-2">
               <label className="text-[14px] leading-relaxed text-gray-500 flex items-center justify-between">
                 Lý do hủy
-                <span className="text-[11px] font-normal text-gray-400 italic">(Không bắt buộc)</span>
+                <span className="text-[11px]  text-gray-400 italic">(Không bắt buộc)</span>
               </label>
               <textarea
                 value={cancelReason}

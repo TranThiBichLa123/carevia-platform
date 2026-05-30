@@ -14,11 +14,6 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
 } from "@/components/ui/select";
 import {
     Table,
@@ -151,7 +146,7 @@ export default function StaffOrdersPage() {
     }
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 font-vietnam">
             <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div>
                     <h1 className="text-3xl font-bold tracking-tight">Quản lý đơn hàng</h1>
@@ -161,26 +156,44 @@ export default function StaffOrdersPage() {
                 </div>
 
                 <div className="flex flex-col gap-3 sm:flex-row">
-                    <Select
-                        value={statusFilter}
-                        onValueChange={(value) => setStatusFilter(value as OrderFilter)}
-                    >
-                        <SelectTrigger className="w-full min-w-52 bg-white sm:w-52">
-                            <SelectValue placeholder="Lọc trạng thái" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            {ORDER_OPTIONS.map((option) => (
-                                <SelectItem key={option.value} value={option.value}>
-                                    {option.label}
-                                </SelectItem>
-                            ))}
-                        </SelectContent>
-                    </Select>
+                    <div className="group relative z-50 w-full sm:min-w-52 sm:w-auto">
+                        <div className="flex h-9.5 cursor-pointer items-center justify-between rounded-md border border-gray-100 bg-white px-3 py-2 shadow-sm transition-all hover:border-gray-200">
+                            <span className="whitespace-nowrap text-[13px] font-medium text-gray-700">
+                                {ORDER_OPTIONS.find((option) => option.value === statusFilter)?.label || "Lọc trạng thái"}
+                            </span>
+                            <svg className="ml-2 h-4 w-4 shrink-0 text-gray-400 transition-transform duration-200 group-hover:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+                            </svg>
+                        </div>
 
-                    <Button variant="outline" onClick={() => void loadOrders()} disabled={loading}>
-                        <RefreshCw className={loading ? "animate-spin" : ""} />
-                        Làm mới
-                    </Button>
+                        <div className="invisible absolute top-full left-0 mt-1 w-full overflow-hidden rounded-md border border-gray-200 bg-white opacity-0 shadow-lg transition-all duration-200 group-hover:visible group-hover:opacity-100">
+                            <div className="flex flex-col whitespace-nowrap">
+                                {ORDER_OPTIONS.map((option) => (
+                                    <div
+                                        key={option.value}
+                                        onClick={() => setStatusFilter(option.value as OrderFilter)}
+                                        className={`border-b border-gray-100 px-3 py-2.5 text-[13px] transition-colors last:border-b-0 ${statusFilter === option.value ? "bg-gray-50 font-bold text-staff-primary" : "cursor-pointer text-gray-700 hover:bg-gray-50"}`}
+                                    >
+                                        {option.label}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+
+                    <button
+                        onClick={() => void loadOrders()}
+                        disabled={loading}
+                        className="group relative h-9.5 shrink-0 overflow-hidden rounded-md border border-gray-100 bg-white px-4 text-[13px] font-medium whitespace-nowrap text-gray-700 shadow-sm transition-all duration-500 hover:border-staff-primary active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                        <span className="absolute inset-y-0 left-0 w-0 bg-staff-primary transition-all duration-500 ease-out group-hover:w-full" />
+                        <div className="relative z-10 flex items-center justify-center text-gray-700 transition-colors duration-500 group-hover:text-white">
+                            <RefreshCw
+                                className={`mr-2 h-3.5 w-3.5 text-gray-400 transition-transform duration-700 ease-in-out group-hover:text-white ${loading ? "animate-spin" : "group-hover:rotate-180"}`}
+                            />
+                            <span className="relative">Làm mới</span>
+                        </div>
+                    </button>
                 </div>
             </div>
 
@@ -236,7 +249,8 @@ export default function StaffOrdersPage() {
                             Không có đơn hàng phù hợp.
                         </div>
                     ) : (
-                        <div className="w-full font-vietnam overflow-x-auto border-b-2 border-[#111111]">
+                        <div className="w-full overflow-hidden rounded-lg border border-[#DCDCDC] bg-white font-vietnam">
+                            <div className="overflow-x-auto">
                             <Table className="w-full border-collapse bg-white font-sans text-[#111111]">
                                 <TableHeader className="bg-[#052962] text-white">
                                     <TableRow className="border-none hover:bg-[#052962]">
@@ -290,7 +304,7 @@ export default function StaffOrdersPage() {
                                                 <TableCell className="py-4 align-top">
                                                     <Badge
                                                         variant={ORDER_VARIANTS[order.status]}
-                                                        className="rounded-none px-2 py-0.5 text-[10px] font-vietnam font-bold uppercase border-none tracking-wider"
+                                                        className="rounded-lg px-2.5 py-1 text-[10px] font-vietnam font-bold uppercase border-none tracking-wider"
                                                     >
                                                         {ORDER_LABELS[order.status]}
                                                     </Badge>
@@ -308,7 +322,7 @@ export default function StaffOrdersPage() {
                                                             asChild
                                                             variant="outline"
                                                             size="sm"
-                                                            className="rounded-none border-[#052962] text-[#052962] font-bold text-xs h-7 hover:bg-[#052962] hover:text-white transition-colors px-3"
+                                                            className="rounded-lg border-[#052962] text-[#052962] font-bold text-xs h-7 hover:bg-[#052962] hover:text-white transition-colors px-3"
                                                         >
                                                             <Link href={`/staff/orders/${order.id}`}>Chi tiết</Link>
                                                         </Button>
@@ -318,7 +332,7 @@ export default function StaffOrdersPage() {
                                                                 size="sm"
                                                                 onClick={() => void handleStatusUpdate(order.id, "PAID")}
                                                                 disabled={isUpdating}
-                                                                className="rounded-none bg-[#052962] hover:bg-[#031F4B] text-white text-xs font-bold h-7 px-3 shadow-none"
+                                                                className="rounded-lg bg-[#052962] hover:bg-[#031F4B] text-white text-xs font-bold h-7 px-3 shadow-none"
                                                             >
                                                                 Đánh dấu PAID
                                                             </Button>
@@ -329,7 +343,7 @@ export default function StaffOrdersPage() {
                                                                 size="sm"
                                                                 onClick={() => void handleStatusUpdate(order.id, "PROCESSING")}
                                                                 disabled={isUpdating}
-                                                                className="rounded-none bg-[#052962] hover:bg-[#031F4B] text-white text-xs font-bold h-7 px-3 shadow-none"
+                                                                className="rounded-lg bg-[#052962] hover:bg-[#031F4B] text-white text-xs font-bold h-7 px-3 shadow-none"
                                                             >
                                                                 Chuyển xử lý
                                                             </Button>
@@ -340,7 +354,7 @@ export default function StaffOrdersPage() {
                                                                 size="sm"
                                                                 onClick={() => void handleStatusUpdate(order.id, "COMPLETED")}
                                                                 disabled={isUpdating}
-                                                                className="rounded-none bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold h-7 px-3 shadow-none"
+                                                                className="rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold h-7 px-3 shadow-none"
                                                             >
                                                                 Hoàn tất
                                                             </Button>
@@ -352,7 +366,7 @@ export default function StaffOrdersPage() {
                                                                 variant="destructive"
                                                                 onClick={() => void handleStatusUpdate(order.id, "CANCELLED")}
                                                                 disabled={isUpdating}
-                                                                className="rounded-none bg-[#C70000] hover:bg-red-900 text-white text-xs font-bold h-7 px-3 shadow-none"
+                                                                className="rounded-lg bg-[#C70000] hover:bg-red-900 text-white text-xs font-bold h-7 px-3 shadow-none"
                                                             >
                                                                 Hủy
                                                             </Button>
@@ -364,6 +378,7 @@ export default function StaffOrdersPage() {
                                     })}
                                 </TableBody>
                             </Table>
+                            </div>
                         </div>
 
                     )}

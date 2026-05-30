@@ -2,7 +2,9 @@ package com.carevia.controller.booking;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import com.carevia.service.BookingService;
@@ -117,7 +119,7 @@ public class BookingController {
     @Operation(summary = "Get all bookings (Staff/Admin)")
     public ResponseEntity<?> getAllBookings(
             @RequestParam(required = false) String status,
-            Pageable pageable) {
+            @PageableDefault(size = 50, sort = "createdAt", direction = Sort.Direction.DESC) Pageable pageable) {
         com.carevia.shared.constant.BookingStatus bookingStatus = status != null ?
                 com.carevia.shared.constant.BookingStatus.valueOf(status) : null;
         return ResponseEntity.ok(bookingService.getAllBookings(bookingStatus, pageable));
