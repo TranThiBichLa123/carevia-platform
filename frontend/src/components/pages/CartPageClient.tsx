@@ -77,8 +77,10 @@ const CartPageClient = () => {
   const calculateTotal = () => {
     const subtotal = calculateSubtotal();
     const shipping = subtotal > 100 ? 0 : 15; // Free shipping over $100
-    const tax = subtotal * 0.08; // 8% tax
-    return subtotal + shipping + tax;
+    // const tax = subtotal * 0.08; // 8% tax
+    return subtotal + shipping 
+    // + tax
+    ;
   };
 
   const handleQuantityChange = async (itemId: string, newQuantity: number) => {
@@ -382,7 +384,7 @@ const CartPageClient = () => {
         <div className="xl:col-span-3">
           <div className="bg-babyshopWhite rounded-2xl border border-gray-100 shadow-sm p-6">
             {/* Cart Table Header - Only visible on larger screens */}
-            <div className="hidden lg:grid grid-cols-12 gap-4 py-4 border-b border-gray-200 mb-6">
+            <div className="hidden lg:grid font-vietnam grid-cols-12 gap-4 py-4 border-b border-gray-200 mb-6">
               <div className="col-span-6 text-sm font-medium text-gray-900 uppercase tracking-wide">
                 Sản phẩm
               </div>
@@ -659,7 +661,7 @@ const CartPageClient = () => {
 
         {/* Tổng giỏ hàng */}
         <div className="xl:col-span-1">
-          <div className="bg-babyshopWhite rounded-2xl p-6 sticky top-4 border border-gray-100 shadow-sm">
+          <div className="bg-babyshopWhite font-vietnam rounded-2xl p-6 sticky top-4 border border-gray-100 shadow-sm">
             <h2 className="text-xl font-bold text-gray-900 mb-6">
               Tổng giỏ hàng
             </h2>
@@ -687,13 +689,13 @@ const CartPageClient = () => {
                 </span>
               </div>
 
-              <div className="flex justify-between items-center py-2">
+              {/* <div className="flex justify-between items-center py-2">
                 <span className="text-gray-600">Thuế VAT (8%)</span>
                 <PriceFormatter
                   amount={calculateSubtotal() * 0.08}
                   className="text-base font-medium text-gray-900"
                 />
-              </div>
+              </div> */}
 
               {calculateSubtotal() > 100 && (
                 <div className="bg-green-50 border border-green-200 rounded-lg p-3">

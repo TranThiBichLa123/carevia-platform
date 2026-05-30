@@ -219,8 +219,8 @@ const SuccessPageClient = () => {
     return (
       <Container className="">
         <PageBreadcrumb
-          items={[{ label: "Checkout", href: "/checkout" }]}
-          currentPage="Thành công"
+          items={[{ label: "Đơn hàng của bạn", href: "/client/account?tab=orders" }]}
+          currentPage="Thanh toán thành công"
           showSocialShare={false}
         />
 
@@ -242,8 +242,8 @@ const SuccessPageClient = () => {
     <Container className="">
       <div className="my-4">
         <PageBreadcrumb
-          items={[{ label: "Checkout", href: "/checkout" }]}
-          currentPage="Thành công"
+          items={[{ label: "Đơn hàng của bạn", href: "/client/account?tab=orders" }]}
+          currentPage="Thanh toán thành công"
           showSocialShare={false}
         />
       </div>
@@ -251,10 +251,10 @@ const SuccessPageClient = () => {
 
       <div className="max-w-4xl mx-auto">
         {/* Success Animation */}
-        <div className="bg-white rounded-3xl border border-gray-100 shadow-lg p-8 md:p-12 text-center mb-8">
+        <div className="bg-white rounded-3xl border border-gray-100 shadow-lg p-8 md:p-12 text-center mb-8 ">
           <div className="relative">
             {/* Animated Success Icon */}
-            <div className="w-24 h-24 bg-gradient-to-r from-green-400 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-8 animate-bounce">
+            <div className="w-24 h-24 bg-gradient-to-r from-purple-400 to-purple-500 rounded-full flex items-center justify-center mx-auto mb-8 animate-bounce">
               <CheckCircle className="w-14 h-14 text-white animate-pulse" />
             </div>
 
@@ -267,55 +267,55 @@ const SuccessPageClient = () => {
             </div>
           </div>
 
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4 animate-fade-in">
+          <h1 className="text-xl md:text-2xl font-bold text-gray-900 mb-2 animate-fade-in">
             Thanh toán thành công! 🎉
           </h1>
 
-          <p className="text-xl text-gray-600 mb-8 animate-fade-in delay-100">
+          <p className="text-base text-gray-600 mb-5 animate-fade-in delay-100">
             Cảm ơn bạn đã mua hàng. Đơn hàng của bạn đã được xác nhận và đang
             được xử lý.
           </p>
 
           {order && (
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-2xl p-6 mb-8 animate-fade-in delay-200">
+            <div className="bg-gradient-to-r from-purple-50 to-purple-100 font-vietnam border border-purple-200 rounded-2xl p-6 mb-8 animate-fade-in delay-200">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-center">
                 <div className="space-y-2">
-                  <div className="flex items-center justify-center gap-2 text-green-700">
+                  <div className="flex items-center justify-center gap-2 text-purple-700">
                     <Package className="w-5 h-5" />
                     <span className="font-medium">Mã đơn hàng</span>
                   </div>
-                  <p className="font-mono text-lg font-bold text-gray-900">
+                  <p className="font-mono text-base font-bold text-gray-900">
                     #{order._id.slice(-8).toUpperCase()}
                   </p>
                 </div>
 
-                <div className="space-y-2">
-                  <div className="flex items-center justify-center gap-2 text-green-700">
+                <div className="space-y-2 text-base">
+                  <div className="flex items-center justify-center gap-2 text-purple-700">
                     <Calendar className="w-5 h-5" />
                     <span className="font-medium">Ngày đặt hàng</span>
                   </div>
-                  <p className="text-gray-900 font-semibold">
+                  <p className="text-gray-900 text-base font-bold">
                     {formatDate(order.createdAt)}
                   </p>
                 </div>
 
-                <div className="space-y-2">
-                  <div className="flex items-center justify-center gap-2 text-green-700">
+                <div className="space-y-2 text-base">
+                  <div className="flex items-center justify-center gap-2 text-purple-700">
                     <CreditCard className="w-5 h-5" />
                     <span className="font-medium">Trạng thái thanh toán</span>
                   </div>
                   <div className="flex items-center justify-center gap-2">
                     {order.status === "PAID" ? (
                       <>
-                        <CheckCircle className="w-5 h-5 text-green-500" />
-                        <span className="font-semibold text-green-600">
+                        <CheckCircle className="w-5 h-5 text-purple-500" />
+                        <span className="font-semibold text-base text-purple-600">
                           Đã thanh toán
                         </span>
                       </>
                     ) : (
                       <>
                         <div className="w-5 h-5 border-2 border-yellow-500 border-t-transparent rounded-full animate-spin" />
-                        <span className="font-semibold text-yellow-600">
+                        <span className="font-semibold text-base text-yellow-600">
                           Đang xử lý
                         </span>
                       </>
@@ -323,14 +323,14 @@ const SuccessPageClient = () => {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <div className="flex items-center justify-center gap-2 text-green-700">
+                <div className="space-y-2 text-base">
+                  <div className="flex items-center justify-center gap-2 text-purple-700">
                     <CreditCard className="w-5 h-5" />
                     <span className="font-medium">Tổng thanh toán</span>
                   </div>
                   <PriceFormatter
                     amount={order.total}
-                    className="text-2xl font-bold text-green-600"
+                    className="text-base font-bold text-purple-600"
                   />
                 </div>
               </div>
@@ -342,7 +342,7 @@ const SuccessPageClient = () => {
             <Link href="/client/account?tab=orders">
               <Button
                 size="lg"
-                className="bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white px-8 py-3 rounded-full shadow-lg transition-all transform hover:scale-105"
+                className="bg-gradient-to-r text-base from-primary to-primary hover:from-primary-dark hover:to-primary text-white px-8 py-3 rounded-full shadow-lg transition-all transform hover:scale-105"
               >
                 <Package className="w-5 h-5 mr-2" />
                 Xem đơn hàng của tôi
@@ -350,11 +350,11 @@ const SuccessPageClient = () => {
               </Button>
             </Link>
 
-            <Link href="/shop">
+            <Link href="/client/devices">
               <Button
                 variant="outline"
                 size="lg"
-                className="border-2 border-gray-300 hover:border-gray-400 px-8 py-3 rounded-full transition-all transform hover:scale-105"
+                className="text-base border-2 border-gray-300 hover:border-gray-400 px-8 py-3 rounded-full transition-all transform hover:scale-105"
               >
                 <ShoppingBag className="w-5 h-5 mr-2" />
                 Tiếp tục mua sắm
@@ -365,7 +365,7 @@ const SuccessPageClient = () => {
               <Button
                 variant="ghost"
                 size="lg"
-                className="hover:bg-gray-100 px-8 py-3 rounded-full transition-all"
+                className="hover:bg-gray-100 text-base px-8 py-3 rounded-full transition-all"
               >
                 <Home className="w-5 h-5 mr-2" />
                 Về trang chủ
@@ -376,8 +376,8 @@ const SuccessPageClient = () => {
 
         {/* Order Summary */}
         {order && (
-          <div className="bg-white rounded-2xl border border-gray-100 shadow-sm p-6 md:p-8 animate-fade-in delay-400">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          <div className="bg-white rounded-2xl font-vietnam border border-gray-100 shadow-sm p-6 md:p-8 animate-fade-in delay-400">
+            <h2 className="text-xl font-bold text-gray-900 mb-6">
               Tóm tắt đơn hàng
             </h2>
 
@@ -387,7 +387,7 @@ const SuccessPageClient = () => {
                   key={index}
                   className="flex items-center gap-4 p-4 border border-gray-100 rounded-lg hover:shadow-sm transition-shadow"
                 >
-                  <div className="w-16 h-16 bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
+                  <div className="w-16 h-16 text-base bg-gray-100 rounded-lg flex items-center justify-center flex-shrink-0">
                     {item.image ? (
                       <Image
                         src={item.image}
@@ -402,7 +402,7 @@ const SuccessPageClient = () => {
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-gray-900 mb-1">
+                    <h3 className="text-base font-medium text-gray-900 mb-1">
                       {item.name}
                     </h3>
                     <p className="text-sm text-gray-600">
@@ -424,12 +424,12 @@ const SuccessPageClient = () => {
             <div className="border-t pt-6 mt-6">
               <div className="bg-gray-50 rounded-lg p-4">
                 <div className="flex justify-between items-center">
-                  <span className="text-xl font-bold text-gray-900">
+                  <span className="text-base font-bold text-gray-900">
                     Tổng thanh toán:
                   </span>
                   <PriceFormatter
                     amount={order.total}
-                    className="text-2xl font-bold text-green-600"
+                    className="text-base font-bold text-primary"
                   />
                 </div>
               </div>
@@ -438,14 +438,14 @@ const SuccessPageClient = () => {
         )}
 
         {/* Tiếp theo */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl border border-blue-100 p-6 md:p-8 mt-8 animate-fade-in delay-500">
+        <div className="bg-primary-light font-vietnam rounded-2xl border border-primary-light p-6 md:p-8 mt-8 animate-fade-in delay-500">
           <h3 className="text-xl font-bold text-gray-900 mb-4">
             Tiếp theo
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             <div className="text-center">
               <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-3">
-                <span className="text-blue-600 font-bold">1</span>
+                <span className="text-primary font-bold">1</span>
               </div>
               <h4 className="font-semibold text-gray-900 mb-2">
                 Order Confirmation
