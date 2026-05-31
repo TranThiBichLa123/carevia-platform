@@ -62,6 +62,14 @@ import {
 import { formatCurrency, formatDate, formatDateTime, getBackofficeErrorMessage } from "@/lib/backofficeUtils";
 import { useUserStore } from "@/lib/store";
 import { cn } from "@/components/pages/OrdersPage";
+import {
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu" // Đảm bảo đường dẫn này đúng với project của bạn
+
 
 type DeviceFilter = "ALL" | StaffDeviceStatus;
 type DeviceDialogMode = "create" | "edit";
@@ -511,17 +519,22 @@ export default function StaffInventoryPage() {
 	// Hàm helper định nghĩa màu sắc Badge trạng thái dẹt mượt mà
 	const getDeviceStatusBadge = (status: string) => {
 		const configs: Record<string, { label: string; className: string }> = {
-			AVAILABLE: { label: "Sẵn sàng", className: "bg-emerald-50 border-emerald-100 text-emerald-700" },
-			MAINTENANCE: { label: "Bảo trì", className: "bg-blue-50 border-blue-100 text-blue-700" },
-			OUT_OF_STOCK: { label: "Hết hàng", className: "bg-rose-50 border-rose-100 text-rose-700" },
+			AVAILABLE: { label: "Sẵn sàng", className: " font-vietnam bg-emerald-50 border-emerald-100 text-emerald-700" },
+			MAINTENANCE: { label: "Bảo trì", className: " font-vietnam bg-blue-50 border-blue-50 text-staff-primary" },
+			OUT_OF_STOCK: { label: "Hết hàng", className: " font-vietnam bg-rose-50 border-rose-100 text-rose-700" },
 		};
-		const config = configs[status] || { label: status, className: "bg-gray-50 border-gray-100 text-gray-600" };
+		const config = configs[status] || { label: status, className: " font-vietnam bg-gray-50 border-gray-100 text-gray-600" };
 		return (
-			<span className={cn("inline-flex items-center px-2.5 py-0.5 rounded-full text-[11px] font-bold border uppercase tracking-wider font-vietnam shadow-sm", config.className)}>
+			<span className={cn(
+				// GIẢI PHÁP: Dùng py-1 để đẩy trần và sàn ra đều nhau, chữ tự căn giữa tự nhiên
+				"inline-flex items-center justify-center px-2 py-1 rounded-md text-[10.5px] font-bold border uppercase tracking-wider font-vietnam shadow-xs leading-normal",
+				config.className
+			)}>
 				{config.label}
 			</span>
 		);
 	};
+
 	const handleRemoveVoucher = async (voucher: BackofficeVoucher) => {
 		if (!editingDevice) return;
 
@@ -786,45 +799,45 @@ export default function StaffInventoryPage() {
 								<CardDescription>Voucher chỉ tải khi cần chỉnh sửa thiết bị, để tránh phát sinh request thừa lúc mở trang.</CardDescription>
 							</CardHeader>
 							<CardContent className="space-y-4">
-							{metadataLoading ? (
-								<div className="flex min-h-28 items-center justify-center text-muted-foreground"><Loader2 className="size-5 animate-spin" /></div>
-							) : deviceDialogMode === "edit" && editingDevice ? (
-								<>
-									<div className="space-y-2">
-										<div className="text-sm font-medium">Voucher đang gán</div>
-										{assignedVouchersForEditingDevice.length ? (
-											<div className="space-y-2">
-												{assignedVouchersForEditingDevice.map((voucher) => (
-													<div key={voucher.id} className="flex items-center justify-between rounded-xl border bg-white px-3 py-2">
-														<div>
-															<div className="font-medium">{voucher.code}</div>
-															<div className="text-xs text-muted-foreground">Thiết bị đích: {voucher.applicableDeviceName || editingDevice.name}</div>
+								{metadataLoading ? (
+									<div className="flex min-h-28 items-center justify-center text-muted-foreground"><Loader2 className="size-5 animate-spin" /></div>
+								) : deviceDialogMode === "edit" && editingDevice ? (
+									<>
+										<div className="space-y-2">
+											<div className="text-sm font-medium">Voucher đang gán</div>
+											{assignedVouchersForEditingDevice.length ? (
+												<div className="space-y-2">
+													{assignedVouchersForEditingDevice.map((voucher) => (
+														<div key={voucher.id} className="flex items-center justify-between rounded-xl border bg-white px-3 py-2">
+															<div>
+																<div className="font-medium">{voucher.code}</div>
+																<div className="text-xs text-muted-foreground">Thiết bị đích: {voucher.applicableDeviceName || editingDevice.name}</div>
+															</div>
+															<Button size="sm" variant="outline" disabled={voucherLoading} onClick={() => void handleRemoveVoucher(voucher)}>Bỏ gán</Button>
 														</div>
-														<Button size="sm" variant="outline" disabled={voucherLoading} onClick={() => void handleRemoveVoucher(voucher)}>Bỏ gán</Button>
-													</div>
-												))}
-											</div>
-										) : <div className="text-sm text-muted-foreground">Thiết bị này chưa có voucher riêng.</div>}
-									</div>
+													))}
+												</div>
+											) : <div className="text-sm text-muted-foreground">Thiết bị này chưa có voucher riêng.</div>}
+										</div>
 
-									<div className="space-y-2">
-										<label className="text-sm font-medium">Gán voucher hiện có</label>
-										<Select value={voucherSelection} onValueChange={setVoucherSelection}>
-											<SelectTrigger className="bg-white"><SelectValue placeholder="Chọn voucher" /></SelectTrigger>
-											<SelectContent>
-												<SelectItem value="NONE">Chọn voucher để gán</SelectItem>
-												{assignableVouchers.map((voucher) => <SelectItem key={voucher.id} value={String(voucher.id)}>{voucher.code} - {voucher.applicableDeviceName || "Chưa gán"}</SelectItem>)}
-											</SelectContent>
-										</Select>
-										<Button className="w-full" disabled={voucherLoading || voucherSelection === "NONE"} onClick={() => void handleAssignVoucher()}>
-											{voucherLoading ? <Loader2 className="animate-spin" /> : <TicketPercent className="size-4" />}
-											Gán voucher cho thiết bị
-										</Button>
-									</div>
-								</>
-							) : (
-								<div className="text-sm text-muted-foreground">Tạo thiết bị trước. Sau đó mở chế độ sửa để cập nhật trạng thái và gán voucher áp dụng riêng.</div>
-							)}
+										<div className="space-y-2">
+											<label className="text-sm font-medium">Gán voucher hiện có</label>
+											<Select value={voucherSelection} onValueChange={setVoucherSelection}>
+												<SelectTrigger className="bg-white"><SelectValue placeholder="Chọn voucher" /></SelectTrigger>
+												<SelectContent>
+													<SelectItem value="NONE">Chọn voucher để gán</SelectItem>
+													{assignableVouchers.map((voucher) => <SelectItem key={voucher.id} value={String(voucher.id)}>{voucher.code} - {voucher.applicableDeviceName || "Chưa gán"}</SelectItem>)}
+												</SelectContent>
+											</Select>
+											<Button className="w-full" disabled={voucherLoading || voucherSelection === "NONE"} onClick={() => void handleAssignVoucher()}>
+												{voucherLoading ? <Loader2 className="animate-spin" /> : <TicketPercent className="size-4" />}
+												Gán voucher cho thiết bị
+											</Button>
+										</div>
+									</>
+								) : (
+									<div className="text-sm text-muted-foreground">Tạo thiết bị trước. Sau đó mở chế độ sửa để cập nhật trạng thái và gán voucher áp dụng riêng.</div>
+								)}
 							</CardContent>
 						</Card>
 					</div>
@@ -855,7 +868,7 @@ export default function StaffInventoryPage() {
 				<Card>
 					<CardHeader className="gap-2 px-6 py-5">
 						<CardDescription>Đang bảo trì</CardDescription>
-						<CardTitle className="flex items-center gap-3 text-3xl"><Wrench className="size-6 text-indigo-500" />{maintenanceCount}</CardTitle>
+						<CardTitle className="flex items-center gap-3 text-3xl"><Wrench className="size-6 text-staff-primary" />{maintenanceCount}</CardTitle>
 					</CardHeader>
 				</Card>
 				<Card>
@@ -921,7 +934,7 @@ export default function StaffInventoryPage() {
 										<div
 											key={option.value}
 											onClick={() => setStatusFilter(option.value as DeviceFilter)}
-											className={`px-3 py-2.5 text-[13px] cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors ${statusFilter === option.value ? 'text-primary font-bold bg-gray-50' : 'text-gray-700 hover:bg-gray-50'}`}
+											className={`px-3 py-2.5 text-[13px] cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors ${statusFilter === option.value ? 'text-staff-primary font-bold bg-gray-50' : 'text-gray-700 hover:bg-gray-50'}`}
 										>
 											{option.label}
 										</div>
@@ -950,11 +963,11 @@ export default function StaffInventoryPage() {
 							className={cn(
 								"inline-flex h-9.5 items-center justify-center gap-1.5 rounded-md border px-4 text-[13px] font-vietnam whitespace-nowrap shadow-sm transition-all duration-300 active:scale-95",
 								maintenanceOnly
-									? "bg-blue-50 border-blue-200 text-blue-700 font-bold"
+									? "bg-blue-50 border-staff-primary-50 text-staff-primary font-bold"
 									: "bg-white border-gray-100 text-gray-600 hover:border-gray-200 hover:bg-gray-50"
 							)}
 						>
-							<Wrench className={cn("w-3.5 h-3.5", maintenanceOnly ? "text-blue-600" : "text-gray-400")} />
+							<Wrench className={cn("w-3.5 h-3.5", maintenanceOnly ? "text-staff-primary" : "text-gray-400")} />
 							<span>Bảo trì</span>
 						</button>
 					</div>
@@ -967,7 +980,7 @@ export default function StaffInventoryPage() {
 					<CardTitle>Thiết bị vận hành</CardTitle>
 					<CardDescription>Thao tác nhập, xuất, kiểm kê, chỉnh sửa và cập nhật bảo trì trực tiếp theo từng thiết bị.</CardDescription>
 				</CardHeader>
-				<CardContent className="p-0 font-vietnam">
+				<CardContent className=" font-vietnam">
 					{loadingDevices ? (
 						<div className="flex min-h-64 flex-col items-center justify-center gap-3 text-gray-400">
 							<Loader2 className="w-6 h-6 animate-spin text-primary" />
@@ -979,19 +992,21 @@ export default function StaffInventoryPage() {
 							<p className="text-[13px] font-semibold">Không có thiết bị phù hợp với bộ lọc hiện tại.</p>
 						</div>
 					) : (
-						<div className="overflow-x-auto">
+						<div className="overflow-x-auto rounded-lg">
 							<Table className="w-full border-collapse">
-								<TableHeader className="bg-gray-50/70 border-b border-gray-100">
-									<TableRow className="hover:bg-transparent">
-										<TableHead className="text-[12px] font-bold text-gray-500 py-3.5 pl-6">Thiết bị</TableHead>
-										<TableHead className="text-[12px] font-bold text-gray-500 py-3.5">SKU / Thương hiệu</TableHead>
-										<TableHead className="text-[12px] font-bold text-gray-500 py-3.5">Tồn kho</TableHead>
-										<TableHead className="text-[12px] font-bold text-gray-500 py-3.5">Giá vận hành</TableHead>
-										<TableHead className="text-[12px] font-bold text-gray-500 py-3.5">Trạng thái</TableHead>
-										<TableHead className="min-w-50 py-3.5 text-[12px] font-bold text-gray-500">Thông tin bảo trì</TableHead>
-										<TableHead className="text-[12px] font-bold text-gray-500 py-3.5 pr-6 text-right">Thao tác</TableHead>
+
+								<TableHeader className="bg-[#052962] text-white">
+									<TableRow className="border-none hover:bg-[#052962]">
+										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-[#FFE500] pl-4">Thiết bị</TableHead>
+										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">SKU / Thương hiệu</TableHead>
+										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">Tồn kho</TableHead>
+										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">Giá vận hành</TableHead>
+										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">Trạng thái</TableHead>
+										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">Thông tin bảo trì</TableHead>
+										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-[#FFE500] pr-4 text-right">Thao tác</TableHead>
 									</TableRow>
 								</TableHeader>
+
 
 								<TableBody className="divide-y divide-gray-50">
 									{devices.map((device) => {
@@ -1000,10 +1015,10 @@ export default function StaffInventoryPage() {
 											<TableRow key={device.id} className="hover:bg-gray-50/30 transition-colors group">
 
 												{/* CỘT 1: HÌNH ẢNH SẢN PHẨM & TÊN */}
-												<TableCell className="py-3.5 pl-6">
+												<TableCell className="py-3.5 pl-4">
 													<div className="flex items-center gap-3">
 														{/* Box Ảnh thiết bị tỉ lệ 1:1 có shadow mượt */}
-														<div className="relative w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 shrink-0 overflow-hidden shadow-inner">
+														<div className="relative w-12 h-12 rounded-xl bg-gray-50 border border-gray-100 shrink-0  shadow-inner">
 															<Image
 																src={device.image || "https://images.unsplash.com/photo-1515377905703-c4788e51af15?auto=format&fit=crop&w=96&q=80"}
 																alt={device.name}
@@ -1013,7 +1028,7 @@ export default function StaffInventoryPage() {
 															/>
 														</div>
 														<div className="min-w-0">
-															<p className="text-[13px] font-bold text-gray-800 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
+															<p className="text-[13px] font-bold text-gray-800 line-clamp-2 leading-tight group-hover:text-staff-primary transition-colors">
 																{device.name}
 															</p>
 															<p className="text-[11px] font-bold text-gray-400 mt-1 uppercase tracking-wide bg-gray-50 border border-gray-100 w-fit px-1.5 py-0.5 rounded">
@@ -1062,7 +1077,7 @@ export default function StaffInventoryPage() {
 												{/* CỘT 6: THÔNG TIN BẢO TRÌ ĐÓNG HỘP TINH TẾ */}
 												<TableCell className="py-3.5 align-top">
 													{device.maintenanceReason ? (
-														<div className="max-w-47.5 space-y-0.5 rounded-lg border border-gray-100/50 bg-gray-50/60 p-2 text-[11px] font-medium text-gray-500">
+														<div className="max-w-fit space-y-0.5 rounded-lg border border-gray-100/50 bg-gray-50/60 p-2 text-[11px] font-medium text-gray-500">
 															<div className="text-gray-700 font-semibold truncate">🔧 {device.maintenanceReason}</div>
 															{device.maintenanceStartDate && <div>Bắt đầu: {formatDate(device.maintenanceStartDate)}</div>}
 															{device.maintenanceEndDate && <div>Hạn: {formatDate(device.maintenanceEndDate)}</div>}
@@ -1073,85 +1088,96 @@ export default function StaffInventoryPage() {
 															)}
 														</div>
 													) : (
-														<span className="text-[12px] text-gray-300 italic pl-1">Sẵn sàng vận hành</span>
+														<TableCell className="  px-0 py-3.5">
+															<span className="text-[12px] text-gray-300 italic">Sẵn sàng vận hành</span>
+														</TableCell>
 													)}
 												</TableCell>
 
-												{/* 🌟 CỘT 7: GỘP THÀNH MỘT NÚT DROPDOWN HOVER DUY NHẤT */}
-												<TableCell className="py-3.5 pr-6 text-right relative">
-													<div className="inline-block relative group/menu">
 
-														{/* Nút Ba Chấm kích hoạt menu */}
-														<button
-															disabled={isActing}
-															className="p-1.5 hover:bg-gray-100 text-gray-400 hover:text-gray-600 rounded-md transition-all active:scale-90 border border-transparent hover:border-gray-200 shadow-sm"
+												{/* 🌟 CỘT 7: ĐÃ CHUYỂN SANG PORTAL DROPDOWN (HẾT BỊ LẤP HOÀN TOÀN) */}
+												<TableCell className="py-3.5 pr-6 text-right font-vietnam">
+													{/* Thêm modal={false} để không bị vô hiệu hóa thanh cuộn trang khi mở menu */}
+													<DropdownMenu modal={false}>
+
+														{/* Nút Ba Chấm kích hoạt menu - Cần bọc trong DropdownMenuTrigger asChild */}
+														<DropdownMenuTrigger asChild>
+															<button
+																disabled={isActing}
+																className="p-1.5 hover:bg-gray-100 text-gray-400 hover:text-gray-600 rounded-md transition-all active:scale-90 border border-transparent hover:border-gray-200 shadow-sm outline-none"
+															>
+																{isActing ? (
+																	<Loader2 className="w-4 h-4 animate-spin text-primary" />
+																) : (
+																	<MoreHorizontal className="w-4 h-4" />
+																)}
+															</button>
+														</DropdownMenuTrigger>
+
+														{/* Menu tự động bay ra ngoài body, align="end" để mép phải menu thẳng hàng với nút bấm */}
+														<DropdownMenuContent
+															align="end"
+															sideOffset={4}
+															className="w-44 bg-white border border-gray-200 rounded-lg shadow-lg py-1 font-vietnam z-50 pointer-events-auto"
 														>
-															{isActing ? <Loader2 className="w-4 h-4 animate-spin text-primary" /> : <MoreHorizontal className="w-4 h-4" />}
-														</button>
 
-														{/* Menu thả xuống đổ về bên trái (z-50 chống đè khuất) */}
-														<div className="absolute right-0 top-full mt-1 w-44 bg-white border border-gray-200 rounded-lg shadow-lg overflow-hidden z-50 opacity-0 invisible group-hover/menu:opacity-100 group-hover/menu:visible transition-all duration-200 font-vietnam">
-															<div className="flex flex-col text-left py-1">
+															{/* 1. Nhập kho */}
+															<DropdownMenuItem
+																onClick={() => void requestInventoryAdjustment(device.id, "IMPORT")}
+																className="flex items-center gap-2 px-3 py-2 text-[12.5px] font-medium text-gray-600 hover:bg-gray-50 cursor-pointer outline-none transition-colors"
+															>
+																<ArrowDownToLine className="w-3.5 h-3.5 text-gray-400" /> Nhập số lượng
+															</DropdownMenuItem>
 
-																{/* 1. Nhập kho */}
-																<button
-																	onClick={() => void requestInventoryAdjustment(device.id, "IMPORT")}
-																	className="flex items-center gap-2 px-3 py-2 text-[12.5px] font-medium text-gray-600 hover:bg-gray-50 transition-colors"
-																>
-																	<ArrowDownToLine className="w-3.5 h-3.5 text-gray-400" /> Nhập số lượng
-																</button>
+															{/* 2. Xuất kho */}
+															<DropdownMenuItem
+																onClick={() => void requestInventoryAdjustment(device.id, "EXPORT")}
+																className="flex items-center gap-2 px-3 py-2 text-[12.5px] font-medium text-gray-600 hover:bg-gray-50 cursor-pointer outline-none transition-colors"
+															>
+																<ArrowUpFromLine className="w-3.5 h-3.5 text-gray-400" /> Xuất hàng đi
+															</DropdownMenuItem>
 
-																{/* 2. Xuất kho */}
-																<button
-																	onClick={() => void requestInventoryAdjustment(device.id, "EXPORT")}
-																	className="flex items-center gap-2 px-3 py-2 text-[12.5px] font-medium text-gray-600 hover:bg-gray-50 transition-colors"
-																>
-																	<ArrowUpFromLine className="w-3.5 h-3.5 text-gray-400" /> Xuất hàng đi
-																</button>
+															{/* 3. Kiểm kê */}
+															<DropdownMenuItem
+																onClick={() => void requestInventoryAdjustment(device.id, "AUDIT_ADJUSTMENT")}
+																className="flex items-center gap-2 px-3 py-2 text-[12.5px] font-medium text-gray-600 hover:bg-gray-50 cursor-pointer outline-none transition-colors"
+															>
+																<ClipboardCheck className="w-3.5 h-3.5 text-gray-400" /> Kiểm kê kho
+															</DropdownMenuItem>
 
-																{/* 3. Kiểm kê */}
-																<button
-																	onClick={() => void requestInventoryAdjustment(device.id, "AUDIT_ADJUSTMENT")}
-																	className="flex items-center gap-2 px-3 py-2 text-[12.5px] font-medium text-gray-600 hover:bg-gray-50 transition-colors"
-																>
-																	<ClipboardCheck className="w-3.5 h-3.5 text-gray-400" /> Kiểm kê kho
-																</button>
+															{/* 4. Điều phối bảo trì */}
+															<DropdownMenuItem
+																onClick={() => void handleMaintenance(device)}
+																className={cn(
+																	"flex items-center gap-2 px-3 py-2 text-[12.5px] font-semibold border-t border-gray-50 cursor-pointer outline-none transition-colors",
+																	device.status === "MAINTENANCE" ? "text-emerald-600 hover:bg-emerald-50/50" : "text-staff-primary hover:bg-blue-50/50"
+																)}
+															>
+																<Wrench className="w-3.5 h-3.5 text-current" />
+																{device.status === "MAINTENANCE" ? "Hoàn tất sửa" : "Yêu cầu bảo trì"}
+															</DropdownMenuItem>
 
-																{/* 4. Điều phối bảo trì */}
-																<button
-																	onClick={() => void handleMaintenance(device)}
-																	className={cn(
-																		"flex items-center gap-2 px-3 py-2 text-[12.5px] font-semibold border-t border-gray-50",
-																		device.status === "MAINTENANCE" ? "text-emerald-600 hover:bg-emerald-50/50" : "text-blue-600 hover:bg-blue-50/50"
-																	)}
-																>
-																	<Wrench className="w-3.5 h-3.5 text-current" />
-																	{device.status === "MAINTENANCE" ? "Hoàn tất sửa" : "Yêu cầu bảo trì"}
-																</button>
+															{/* ĐƯỜNG KẺ NGĂN CÁCH KHỐI HÀNH ĐỘNG NGUY HIỂM */}
+															<DropdownMenuSeparator className="h-px bg-gray-100 my-1" />
 
-																{/* ĐƯỜNG KẺ NGĂN CÁCH KHỐI HÀNH ĐỘNG NGUY HIỂM */}
-																<div className="h-px bg-gray-100 my-1" />
+															{/* 5. Chỉnh sửa */}
+															<DropdownMenuItem
+																onClick={() => void openEditDialog(device)}
+																className="flex items-center gap-2 px-3 py-2 text-[12.5px] font-medium text-gray-600 hover:bg-gray-50 cursor-pointer outline-none transition-colors"
+															>
+																<Pencil className="w-3.5 h-3.5 text-gray-400" /> Chỉnh sửa thông tin
+															</DropdownMenuItem>
 
-																{/* 5. Chỉnh sửa */}
-																<button
-																	onClick={() => void openEditDialog(device)}
-																	className="flex items-center gap-2 px-3 py-2 text-[12.5px] font-medium text-gray-600 hover:bg-gray-50 transition-colors"
-																>
-																	<Pencil className="w-3.5 h-3.5 text-gray-400" /> Chỉnh sửa thông tin
-																</button>
+															{/* 6. Xóa bỏ */}
+															<DropdownMenuItem
+																onClick={() => void handleDeleteDevice(device)}
+																className="flex items-center gap-2 px-3 py-2 text-[12.5px] font-medium text-rose-600 hover:bg-rose-50 cursor-pointer outline-none transition-colors"
+															>
+																<Trash2 className="w-3.5 h-3.5 text-rose-400" /> Xóa thiết bị
+															</DropdownMenuItem>
 
-																{/* 6. Xóa bỏ */}
-																<button
-																	onClick={() => void handleDeleteDevice(device)}
-																	className="flex items-center gap-2 px-3 py-2 text-[12.5px] font-medium text-rose-600 hover:bg-rose-50 transition-colors"
-																>
-																	<Trash2 className="w-3.5 h-3.5 text-rose-400" /> Xóa thiết bị
-																</button>
-
-															</div>
-														</div>
-
-													</div>
+														</DropdownMenuContent>
+													</DropdownMenu>
 												</TableCell>
 
 											</TableRow>
@@ -1175,36 +1201,40 @@ export default function StaffInventoryPage() {
 					) : transactions.length === 0 ? (
 						<div className="rounded-2xl border border-dashed px-6 py-12 text-center text-sm text-muted-foreground">Chưa có giao dịch tồn kho nào được ghi nhận.</div>
 					) : (
-						<Table>
-							<TableHeader>
-								<TableRow>
-									<TableHead>Thời gian</TableHead>
-									<TableHead>Thiết bị</TableHead>
-									<TableHead>Loại giao dịch</TableHead>
-									<TableHead>Biến động</TableHead>
-									<TableHead>Kết quả</TableHead>
-									<TableHead>Ghi chú</TableHead>
-								</TableRow>
-							</TableHeader>
-							<TableBody>
-								{transactions.map((transaction) => (
-									<TableRow key={transaction.id}>
-										<TableCell>{formatDateTime(transaction.createdAt)}</TableCell>
-										<TableCell>
-											<div className="font-medium">{transaction.deviceName}</div>
-											<div className="text-xs text-muted-foreground">{transaction.createdBy || "system"}</div>
-										</TableCell>
-										<TableCell>{TRANSACTION_LABELS[transaction.transactionType]}</TableCell>
-										<TableCell className={transaction.quantityChange >= 0 ? "text-emerald-600" : "text-rose-600"}>{transaction.quantityChange >= 0 ? "+" : ""}{transaction.quantityChange}</TableCell>
-<TableCell>{transaction.previousStock} → {transaction.newStock}</TableCell>
-										<TableCell>
-											<div className="font-medium">{transaction.reason}</div>
-											<div className="text-xs text-muted-foreground">{transaction.note || "Không có ghi chú"}</div>
-										</TableCell>
+						<div className="rounded-lg overflow-hidden border border-gray-100">
+							<Table>
+								<TableHeader className="bg-[#052962] text-white">
+									<TableRow className="border-none hover:bg-[#052962]">
+										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-[#FFE500] pl-4">Thời gian</TableHead>
+										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">Thiết bị</TableHead>
+										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">Loại giao dịch</TableHead>
+										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">Biến động</TableHead>
+										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">Kết quả</TableHead>
+										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-[#FFE500] pr-4 text-right">Ghi chú</TableHead>
 									</TableRow>
-								))}
-							</TableBody>
-						</Table>
+								</TableHeader>
+
+
+								<TableBody>
+									{transactions.map((transaction) => (
+										<TableRow key={transaction.id}>
+											<TableCell className="pl-4" >{formatDateTime(transaction.createdAt)}</TableCell>
+											<TableCell>
+												<div className="font-medium">{transaction.deviceName}</div>
+												<div className="text-xs text-muted-foreground">{transaction.createdBy || "system"}</div>
+											</TableCell>
+											<TableCell>{TRANSACTION_LABELS[transaction.transactionType]}</TableCell>
+											<TableCell className={transaction.quantityChange >= 0 ? "text-emerald-600" : "text-rose-600"}>{transaction.quantityChange >= 0 ? "+" : ""}{transaction.quantityChange}</TableCell>
+											<TableCell>{transaction.previousStock} → {transaction.newStock}</TableCell>
+											<TableCell className="text-right pr-4">
+												<div className="font-medium">{transaction.reason}</div>
+												<div className="text-xs text-muted-foreground">{transaction.note || "Không có ghi chú"}</div>
+											</TableCell>
+										</TableRow>
+									))}
+								</TableBody>
+							</Table>
+						</div>
 					)}
 				</CardContent>
 			</Card>

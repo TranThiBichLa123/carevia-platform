@@ -381,145 +381,148 @@ export default function StaffBookingsPage() {
 							Không có booking phù hợp với bộ lọc hiện tại.
 						</div>
 					) : (
-								<div className="overflow-hidden rounded-lg border border-gray-100 bg-white shadow-sm">
-									<Table>
-									<TableHeader>
-										<TableRow className="bg-[#052962] text-white rounded-t-lg">
-											<TableHead className="text-[#ffe600] font-bold uppercase text-sm px-4 py-3">MÃ ĐƠN</TableHead>
-											<TableHead className="font-semibold uppercase text-sm px-4 py-3">KHÁCH HÀNG</TableHead>
-											<TableHead className="font-semibold uppercase text-sm px-4 py-3">SẢN PHẨM</TableHead>
-											<TableHead className="font-semibold uppercase text-sm px-4 py-3">LỊCH HẸN</TableHead>
-											<TableHead className="font-semibold uppercase text-sm px-4 py-3">THANH TOÁN</TableHead>
-											<TableHead className="font-semibold uppercase text-sm px-4 py-3">TRẠNG THÁI</TableHead>
-											<TableHead className="text-[#ffe600] font-bold uppercase text-sm px-4 py-3 text-right">THAO TÁC</TableHead>
-										</TableRow>
-									</TableHeader>
-							<TableBody>
-								{bookings.map((booking) => {
-									const isActing = actionBookingId === booking.id;
-									return (
-										<TableRow key={booking.id}>
-											<TableCell>
-												<div className="font-medium">{booking.bookingCode}</div>
-												<div className="text-xs text-muted-foreground">
-													Tạo lúc {formatDate(booking.createdAt)}
-												</div>
-											</TableCell>
-											<TableCell>
-												<div className="font-medium">{booking.accountName}</div>
-												<div className="text-xs text-muted-foreground">
-													Account #{booking.accountId}
-												</div>
-											</TableCell>
-											<TableCell>
-												<div className="font-medium">{booking.device.name}</div>
-												<div className="text-xs text-muted-foreground">
-													{booking.session.branchName}
-												</div>
-											</TableCell>
-											<TableCell>
-												<div className="font-medium">
-													{formatDate(booking.appointmentDate)}
-												</div>
-												<div className="text-xs text-muted-foreground">
-													{formatTime(booking.startTime)} - {formatTime(booking.endTime)}
-												</div>
-												<div className="text-xs text-muted-foreground">
-													Còn {booking.session.availableSlots}/{booking.session.maxSlots} slot
-												</div>
-											</TableCell>
-											<TableCell>
-												<div className="font-medium">
-													{formatCurrency(booking.totalPrice)}
-												</div>
-												<div className="text-xs text-muted-foreground">
-													Voucher: {booking.voucherCode || "Không dùng"}
-												</div>
-											</TableCell>
-											<TableCell>
-												{/* Bỏ variant, thêm className để đổi màu nền và màu chữ */}
-												<Badge className="rounded-lg bg-staff-primary px-2.5 py-1 text-white hover:bg-staff-primary/90 shadow-none">
-													{STATUS_LABELS[booking.status]}
-												</Badge>
-												{booking.cancelReason ? (
-													<div className="mt-2 max-w-52 text-xs ">
-														Lý do: {booking.cancelReason}
+						<div className="overflow-hidden rounded-lg border border-gray-100 bg-white shadow-sm">
+							<Table>
+
+
+								<TableHeader>
+									<TableRow className="bg-[#052962]  rounded-t-lg">
+										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-[#FFE500] pl-4">MÃ ĐƠN</TableHead>
+										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">KHÁCH HÀNG</TableHead>
+										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">SẢN PHẨM</TableHead>
+										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">LỊCH HẸN</TableHead>
+										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">THANH TOÁN</TableHead>
+										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">TRẠNG THÁI</TableHead>
+										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-[#FFE500] pr-4 text-right">THAO TÁC</TableHead>
+									</TableRow>
+								</TableHeader>
+
+								<TableBody>
+									{bookings.map((booking) => {
+										const isActing = actionBookingId === booking.id;
+										return (
+											<TableRow key={booking.id}>
+												<TableCell>
+													<div className="font-medium">{booking.bookingCode}</div>
+													<div className="text-xs text-muted-foreground">
+														Tạo lúc {formatDate(booking.createdAt)}
 													</div>
-												) : null}
-											</TableCell>
-
-											<TableCell>
-												<div className="flex justify-end gap-2">
-													{booking.status === "PENDING_CONFIRM" ? (
-														<Button
-															size="sm"
-															onClick={() => void handleConfirm(booking.id)}
-															disabled={isActing}
-															className="rounded-lg"
-														>
-															{isActing ? <Loader2 className="animate-spin" /> : null}
-															Xác nhận
-														</Button>
+												</TableCell>
+												<TableCell>
+													<div className="font-medium">{booking.accountName}</div>
+													<div className="text-xs text-muted-foreground">
+														Account #{booking.accountId}
+													</div>
+												</TableCell>
+												<TableCell>
+													<div className="font-medium">{booking.device.name}</div>
+													<div className="text-xs text-muted-foreground">
+														{booking.session.branchName}
+													</div>
+												</TableCell>
+												<TableCell>
+													<div className="font-medium">
+														{formatDate(booking.appointmentDate)}
+													</div>
+													<div className="text-xs text-muted-foreground">
+														{formatTime(booking.startTime)} - {formatTime(booking.endTime)}
+													</div>
+													<div className="text-xs text-muted-foreground">
+														Còn {booking.session.availableSlots}/{booking.session.maxSlots} slot
+													</div>
+												</TableCell>
+												<TableCell>
+													<div className="font-medium">
+														{formatCurrency(booking.totalPrice)}
+													</div>
+													<div className="text-xs text-muted-foreground">
+														Voucher: {booking.voucherCode || "Không dùng"}
+													</div>
+												</TableCell>
+												<TableCell>
+													{/* Bỏ variant, thêm className để đổi màu nền và màu chữ */}
+													<Badge className="rounded-lg  bg-staff-primary px-2.5 py-1 text-white hover:bg-staff-primary/90 shadow-none">
+														{STATUS_LABELS[booking.status]}
+													</Badge>
+													{booking.cancelReason ? (
+														<div className="mt-2 max-w-52 text-xs ">
+															Lý do: {booking.cancelReason}
+														</div>
 													) : null}
+												</TableCell>
 
-													{booking.status === "CONFIRMED" ? (
-														<>
+												<TableCell>
+													<div className="flex justify-end gap-2">
+														{booking.status === "PENDING_CONFIRM" ? (
 															<Button
 																size="sm"
-																variant="outline"
-																onClick={() => void handleCheckIn(booking.id)}
-																disabled={isActing}
-																className="rounded-lg"
-															>
-																{isActing ? <Loader2 className="animate-spin " /> : null}
-																Check-in
-															</Button>
-															<Button
-																size="sm"
-																variant="outline"
-																onClick={() => void handleNoShow(booking.id)}
+																onClick={() => void handleConfirm(booking.id)}
 																disabled={isActing}
 																className="rounded-lg"
 															>
 																{isActing ? <Loader2 className="animate-spin" /> : null}
-																No-show
+																Xác nhận
 															</Button>
-														</>
-													) : null}
+														) : null}
 
-													{booking.status === "CHECKED_IN" ? (
-														<Button
-															size="sm"
-															variant="outline"
-															onClick={() => void handleComplete(booking.id)}
-															disabled={isActing}
-															className="rounded-lg"
-														>
-															{isActing ? <Loader2 className="animate-spin" /> : null}
-															Hoàn tất
-														</Button>
-													) : null}
+														{booking.status === "CONFIRMED" ? (
+															<>
+																<Button
+																	size="sm"
+																	variant="outline"
+																	onClick={() => void handleCheckIn(booking.id)}
+																	disabled={isActing}
+																	className="rounded-lg"
+																>
+																	{isActing ? <Loader2 className="animate-spin " /> : null}
+																	Check-in
+																</Button>
+																<Button
+																	size="sm"
+																	variant="outline"
+																	onClick={() => void handleNoShow(booking.id)}
+																	disabled={isActing}
+																	className="rounded-lg"
+																>
+																	{isActing ? <Loader2 className="animate-spin" /> : null}
+																	No-show
+																</Button>
+															</>
+														) : null}
 
-													{["PENDING_CONFIRM", "CONFIRMED"].includes(
-														booking.status
-													) ? (
-														<Button
-															size="sm"
-															variant="destructive"
-															onClick={() => void handleCancel(booking.id)}
-															disabled={isActing}
-															className="rounded-lg"
-														>
-															{isActing ? <Loader2 className="animate-spin" /> : null}
-															Hủy
-														</Button>
-													) : null}
-												</div>
-											</TableCell>
-										</TableRow>
-									);
-								})}
-							</TableBody>
+														{booking.status === "CHECKED_IN" ? (
+															<Button
+																size="sm"
+																variant="outline"
+																onClick={() => void handleComplete(booking.id)}
+																disabled={isActing}
+																className="rounded-lg"
+															>
+																{isActing ? <Loader2 className="animate-spin" /> : null}
+																Hoàn tất
+															</Button>
+														) : null}
+
+														{["PENDING_CONFIRM", "CONFIRMED"].includes(
+															booking.status
+														) ? (
+															<Button
+																size="sm"
+																variant="destructive"
+																onClick={() => void handleCancel(booking.id)}
+																disabled={isActing}
+																className="rounded-lg"
+															>
+																{isActing ? <Loader2 className="animate-spin" /> : null}
+																Hủy
+															</Button>
+														) : null}
+													</div>
+												</TableCell>
+											</TableRow>
+										);
+									})}
+								</TableBody>
 							</Table>
 						</div>
 					)}

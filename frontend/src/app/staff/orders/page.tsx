@@ -251,133 +251,133 @@ export default function StaffOrdersPage() {
                     ) : (
                         <div className="w-full overflow-hidden rounded-lg border border-[#DCDCDC] bg-white font-vietnam">
                             <div className="overflow-x-auto">
-                            <Table className="w-full border-collapse bg-white font-sans text-[#111111]">
-                                <TableHeader className="bg-[#052962] text-white">
-                                    <TableRow className="border-none hover:bg-[#052962]">
-                                        <TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-[#FFE500] pl-4">Mã đơn</TableHead>
-                                        <TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">Khách hàng</TableHead>
-                                        <TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">Sản phẩm</TableHead>
-                                        <TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">Thanh toán</TableHead>
-                                        <TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">Trạng thái</TableHead>
-                                        <TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">Tạo lúc</TableHead>
-                                        <TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-[#FFE500] pr-4 text-right">Thao tác</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {filteredOrders.map((order) => {
-                                        const isUpdating = updatingId === order.id;
-                                        return (
-                                            <TableRow
-                                                key={order.id}
-                                                className="border-b border-[#DCDCDC] hover:bg-[#F6F6F6] transition-colors"
-                                            >
-                                                {/* Mã đơn */}
-                                                <TableCell className="py-4 pl-4 align-top">
-                                                    <div className="font-vietnam font-bold text-sm text-[#052962]">{order.orderCode}</div>
-                                                    <div className="text-[11px] font-mono text-[#666666] mt-0.5">ID: #{order.id}</div>
-                                                </TableCell>
+                                <Table className="w-full border-collapse bg-white font-sans text-[#111111]">
+                                    <TableHeader className="bg-[#052962] text-white">
+                                        <TableRow className="border-none hover:bg-[#052962]">
+                                            <TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-[#FFE500] pl-4">Mã đơn</TableHead>
+                                            <TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">Khách hàng</TableHead>
+                                            <TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">Sản phẩm</TableHead>
+                                            <TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">Thanh toán</TableHead>
+                                            <TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">Trạng thái</TableHead>
+                                            <TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">Tạo lúc</TableHead>
+                                            <TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-[#FFE500] pr-4 text-right">Thao tác</TableHead>
+                                        </TableRow>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {filteredOrders.map((order) => {
+                                            const isUpdating = updatingId === order.id;
+                                            return (
+                                                <TableRow
+                                                    key={order.id}
+                                                    className="border-b border-[#DCDCDC] hover:bg-[#F6F6F6] transition-colors"
+                                                >
+                                                    {/* Mã đơn */}
+                                                    <TableCell className="py-4 pl-4 align-top">
+                                                        <div className="font-vietnam font-bold text-sm text-[#052962]">{order.orderCode}</div>
+                                                        <div className="text-[11px] font-mono text-[#666666] mt-0.5">ID: #{order.id}</div>
+                                                    </TableCell>
 
-                                                {/* Khách hàng */}
-                                                <TableCell className="py-4 align-top text-sm font-vietnam font-medium">
-                                                    Account #{order.accountId}
-                                                </TableCell>
+                                                    {/* Khách hàng */}
+                                                    <TableCell className="py-4 align-top text-sm font-vietnam font-medium">
+                                                        Account #{order.accountId}
+                                                    </TableCell>
 
-                                                {/* Sản phẩm */}
-                                                <TableCell className="py-4 align-top">
-                                                    <div className="text-sm font-vietnam font-bold text-[#111111]">{order.items.length} sản phẩm</div>
-                                                    <div className="max-w-56 truncate text-xs text-[#444444] font-vietnam mt-1 leading-tight">
-                                                        {order.items.map((item) => item.deviceName).join(", ")}
-                                                    </div>
-                                                </TableCell>
+                                                    {/* Sản phẩm */}
+                                                    <TableCell className="py-4 align-top">
+                                                        <div className="text-sm font-vietnam font-bold text-[#111111]">{order.items.length} sản phẩm</div>
+                                                        <div className="max-w-56 truncate text-xs text-[#444444] font-vietnam mt-1 leading-tight">
+                                                            {order.items.map((item) => item.deviceName).join(", ")}
+                                                        </div>
+                                                    </TableCell>
 
-                                                {/* Thanh toán */}
-                                                <TableCell className="py-4 align-top">
-                                                    <div className="font-vietnam font-bold text-sm text-[#C70000]">
-                                                        {formatCurrency(order.totalAmount)}
-                                                    </div>
-                                                    <div className="text-[11px] text-[#666666] uppercase tracking-wider mt-0.5">
-                                                        {order.paymentMethod || "Chưa chọn phương thức"}
-                                                    </div>
-                                                </TableCell>
+                                                    {/* Thanh toán */}
+                                                    <TableCell className="py-4 align-top">
+                                                        <div className="font-vietnam font-bold text-sm text-[#C70000]">
+                                                            {formatCurrency(order.totalAmount)}
+                                                        </div>
+                                                        <div className="text-[11px] text-[#666666] uppercase tracking-wider mt-0.5">
+                                                            {order.paymentMethod || "Chưa chọn phương thức"}
+                                                        </div>
+                                                    </TableCell>
 
-                                                {/* Trạng thái - Dạng nhãn phẳng, không bo tròn góc */}
-                                                <TableCell className="py-4 align-top">
-                                                    <Badge
-                                                        variant={ORDER_VARIANTS[order.status]}
-                                                        className="rounded-lg px-2.5 py-1 text-[10px] font-vietnam font-bold uppercase border-none tracking-wider"
-                                                    >
-                                                        {ORDER_LABELS[order.status]}
-                                                    </Badge>
-                                                </TableCell>
-
-                                                {/* Tạo lúc */}
-                                                <TableCell className="py-4 align-top text-xs text-[#333333] font-vietnam">
-                                                    {formatDateTime(order.createdAt)}
-                                                </TableCell>
-
-                                                {/* Thao tác */}
-                                                <TableCell className="py-4 pr-4 align-top">
-                                                    <div className="flex flex-col sm:flex-row justify-end items-end sm:items-center gap-1.5">
-                                                        <Button
-                                                            asChild
-                                                            variant="outline"
-                                                            size="sm"
-                                                            className="rounded-lg border-[#052962] text-[#052962] font-bold text-xs h-7 hover:bg-[#052962] hover:text-white transition-colors px-3"
+                                                    {/* Trạng thái - Dạng nhãn phẳng, không bo tròn góc */}
+                                                    <TableCell className="py-4 align-top">
+                                                        <Badge
+                                                            variant={ORDER_VARIANTS[order.status]}
+                                                            className="rounded-lg px-2.5 py-1 text-[10px] font-vietnam font-bold uppercase border-none tracking-wider"
                                                         >
-                                                            <Link href={`/staff/orders/${order.id}`}>Chi tiết</Link>
-                                                        </Button>
+                                                            {ORDER_LABELS[order.status]}
+                                                        </Badge>
+                                                    </TableCell>
 
-                                                        {order.status === "PENDING_PAYMENT" && (
-                                                            <Button
-                                                                size="sm"
-                                                                onClick={() => void handleStatusUpdate(order.id, "PAID")}
-                                                                disabled={isUpdating}
-                                                                className="rounded-lg bg-[#052962] hover:bg-[#031F4B] text-white text-xs font-bold h-7 px-3 shadow-none"
-                                                            >
-                                                                Đánh dấu PAID
-                                                            </Button>
-                                                        )}
+                                                    {/* Tạo lúc */}
+                                                    <TableCell className="py-4 align-top text-xs text-[#333333] font-vietnam">
+                                                        {formatDateTime(order.createdAt)}
+                                                    </TableCell>
 
-                                                        {order.status === "PAID" && (
+                                                    {/* Thao tác */}
+                                                    <TableCell className="py-4 pr-4 align-top">
+                                                        <div className="flex flex-col sm:flex-row justify-end items-end sm:items-center gap-1.5">
                                                             <Button
+                                                                asChild
+                                                                variant="outline"
                                                                 size="sm"
-                                                                onClick={() => void handleStatusUpdate(order.id, "PROCESSING")}
-                                                                disabled={isUpdating}
-                                                                className="rounded-lg bg-[#052962] hover:bg-[#031F4B] text-white text-xs font-bold h-7 px-3 shadow-none"
+                                                                className="rounded-lg border-[#052962] text-[#052962] font-vietnam font-bold text-xs h-7 hover:bg-[#052962] hover:text-white transition-colors px-3"
                                                             >
-                                                                Chuyển xử lý
+                                                                <Link href={`/staff/orders/${order.id}`}>Chi tiết</Link>
                                                             </Button>
-                                                        )}
 
-                                                        {order.status === "PROCESSING" && (
-                                                            <Button
-                                                                size="sm"
-                                                                onClick={() => void handleStatusUpdate(order.id, "COMPLETED")}
-                                                                disabled={isUpdating}
-                                                                className="rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold h-7 px-3 shadow-none"
-                                                            >
-                                                                Hoàn tất
-                                                            </Button>
-                                                        )}
+                                                            {order.status === "PENDING_PAYMENT" && (
+                                                                <Button
+                                                                    size="sm"
+                                                                    onClick={() => void handleStatusUpdate(order.id, "PAID")}
+                                                                    disabled={isUpdating}
+                                                                    className="rounded-lg bg-[#052962] font-vietnam hover:bg-[#031F4B] text-white text-xs font-bold h-7 px-3 shadow-none"
+                                                                >
+                                                                    Đánh dấu PAID
+                                                                </Button>
+                                                            )}
 
-                                                        {["PENDING_PAYMENT", "PAID"].includes(order.status) && (
-                                                            <Button
-                                                                size="sm"
-                                                                variant="destructive"
-                                                                onClick={() => void handleStatusUpdate(order.id, "CANCELLED")}
-                                                                disabled={isUpdating}
-                                                                className="rounded-lg bg-[#C70000] hover:bg-red-900 text-white text-xs font-bold h-7 px-3 shadow-none"
-                                                            >
-                                                                Hủy
-                                                            </Button>
-                                                        )}
-                                                    </div>
-                                                </TableCell>
-                                            </TableRow>
-                                        );
-                                    })}
-                                </TableBody>
-                            </Table>
+                                                            {order.status === "PAID" && (
+                                                                <Button
+                                                                    size="sm"
+                                                                    onClick={() => void handleStatusUpdate(order.id, "PROCESSING")}
+                                                                    disabled={isUpdating}
+                                                                    className="rounded-lg font-vietnam bg-[#052962] hover:bg-[#031F4B] text-white text-xs font-bold h-7 px-3 shadow-none"
+                                                                >
+                                                                    Chuyển xử lý
+                                                                </Button>
+                                                            )}
+
+                                                            {order.status === "PROCESSING" && (
+                                                                <Button
+                                                                    size="sm"
+                                                                    onClick={() => void handleStatusUpdate(order.id, "COMPLETED")}
+                                                                    disabled={isUpdating}
+                                                                    className="rounded-lg font-vietnam bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold h-7 px-3 shadow-none"
+                                                                >
+                                                                    Hoàn tất
+                                                                </Button>
+                                                            )}
+
+                                                            {["PENDING_PAYMENT", "PAID"].includes(order.status) && (
+                                                                <Button
+                                                                    size="sm"
+                                                                    variant="destructive"
+                                                                    onClick={() => void handleStatusUpdate(order.id, "CANCELLED")}
+                                                                    disabled={isUpdating}
+                                                                    className="rounded-lg font-vietnam bg-[#C70000] hover:bg-red-900 text-white text-xs font-bold h-7 px-3 shadow-none"
+                                                                >
+                                                                    Hủy
+                                                                </Button>
+                                                            )}
+                                                        </div>
+                                                    </TableCell>
+                                                </TableRow>
+                                            );
+                                        })}
+                                    </TableBody>
+                                </Table>
                             </div>
                         </div>
 
