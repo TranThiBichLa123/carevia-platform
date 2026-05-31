@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Percent, RefreshCw, TicketPercent, WalletCards } from "lucide-react";
+import { Loader2, Percent, RefreshCw, Ticket, TicketPercent, WalletCards } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -44,6 +44,7 @@ import {
 	getBackofficeErrorMessage,
 	toIsoDateTime,
 } from "@/lib/backofficeUtils";
+import { cn } from "@/lib/utils";
 
 const VOUCHER_LABELS: Record<BackofficeVoucherStatus, string> = {
 	ACTIVE: "Đang chạy",
@@ -179,7 +180,7 @@ export default function StaffVouchersPage() {
 	}
 
 	return (
-		<div className="space-y-6">
+		<div className="space-y-6 font-vietnam">
 			<div>
 				<h1 className="text-3xl font-bold tracking-tight">Quản lý voucher</h1>
 				<p className="text-sm text-muted-foreground">
@@ -187,63 +188,218 @@ export default function StaffVouchersPage() {
 				</p>
 			</div>
 
-			<div className="grid gap-6 xl:grid-cols-[1.1fr_2fr]">
-				<Card>
-					<CardHeader>
-						<CardTitle>Tạo voucher mới</CardTitle>
-						<CardDescription>Thiết lập nhanh mã khuyến mãi cho booking hoặc mua sắm.</CardDescription>
-					</CardHeader>
-					<CardContent>
-						<form className="space-y-4" onSubmit={handleCreateVoucher}>
-							<div className="grid gap-4 md:grid-cols-2">
-								<div className="space-y-2"><label className="text-sm font-medium">Mã</label><Input value={form.code} onChange={(event) => setForm((current) => ({ ...current, code: event.target.value }))} /></div>
+			<div className="flex flex-col lg:flex-row gap-6 w-full items-start">
+				<div className="w-full lg:w-[400px] shrink-0">
+					<Card className="border border-gray-100 bg-white shadow-xl shadow-gray-100/50 rounded-2xl overflow-hidden font-vietnam">
+						{/* ĐỒNG BỘ HEADER: Tách nền nhẹ nhàng với border mờ ngăn cách */}
+						<CardHeader className="space-y-1.5 pb-6 border-b border-gray-50 bg-gray-50/30 p-5 md:p-6">
+							<CardTitle className="text-xl font-bold text-gray-900 tracking-tight flex items-center gap-2">
+								<Ticket className="h-5 w-5 text-[#173E77]" />
+								Tạo voucher mới
+							</CardTitle>
+							<CardDescription className="text-sm text-gray-500 leading-relaxed">
+								Thiết lập nhanh mã khuyến mãi cho booking hoặc mua sắm.
+							</CardDescription>
+						</CardHeader>
+
+						<CardContent className="p-5 md:p-6 pt-6">
+							<form className="space-y-5" onSubmit={handleCreateVoucher}>
+
+								{/* Áp dụng cho thiết bị */}
 								<div className="space-y-2">
-									<label className="text-sm font-medium">Loại giảm</label>
-									<Select value={form.voucherType} onValueChange={(value) => setForm((current) => ({ ...current, voucherType: value as BackofficeVoucherType }))}>
-										<SelectTrigger className="w-full bg-white"><SelectValue /></SelectTrigger>
-										<SelectContent>
-											<SelectItem value="PERCENTAGE">Phần trăm</SelectItem>
-											<SelectItem value="FIXED_AMOUNT">Tiền mặt</SelectItem>
-										</SelectContent>
-									</Select>
+									<label className="text-[13px] font-semibold text-gray-700 tracking-wide">Thiết bị áp dụng</label>
+									{/* Custom Dropdown Hover cho ô Chọn thiết bị */}
+									<div className="group/device relative z-60 w-full">
+										<div className="flex h-10 cursor-pointer items-center justify-between rounded-xl border border-gray-200 bg-white px-3.5 py-2 shadow-xs transition-all hover:border-gray-300">
+											<span className="whitespace-nowrap text-[13px] font-medium text-gray-700 truncate max-w-[90%]">
+												{devices.find((device) => String(device.id) === form.applicableDeviceId)?.name || "Áp dụng cho tất cả thiết bị"}
+											</span>
+											<svg className="ml-2 h-4 w-4 shrink-0 text-gray-400 transition-transform duration-200 group-hover/device:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+												<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+											</svg>
+										</div>
+										<div className="invisible absolute top-full left-0 mt-1.5 w-full max-h-52 overflow-y-auto rounded-xl border border-gray-100 bg-white opacity-0 shadow-lg transition-all duration-200 group-hover/device:visible group-hover/device:opacity-100 p-1">
+											<div className="flex flex-col whitespace-nowrap">
+												<div
+													onClick={() => setForm((current) => ({ ...current, applicableDeviceId: "" }))}
+													className={`rounded-lg px-3 py-2.5 text-[13px] transition-colors ${!form.applicableDeviceId ? "bg-gray-50 font-bold text-staff-primary" : "cursor-pointer text-gray-700 hover:bg-gray-50/80"}`}
+												>
+													Áp dụng cho tất cả thiết bị
+												</div>
+												{devices.map((device) => (
+													<div
+														key={device.id}
+														onClick={() => setForm((current) => ({ ...current, applicableDeviceId: String(device.id) }))}
+														className={`rounded-lg px-3 py-2.5 text-[13px] transition-colors ${form.applicableDeviceId === String(device.id) ? "bg-gray-50 font-bold text-staff-primary" : "cursor-pointer text-gray-700 hover:bg-gray-50/80"}`}
+													>
+														{device.name}
+													</div>
+												))}
+											</div>
+										</div>
+									</div>
 								</div>
-							</div>
+								{/* Mã & Loại giảm */}
+								<div className="grid gap-4 md:grid-cols-2">
+									<div className="space-y-2">
+										<label className="text-[13px] font-semibold text-gray-700 tracking-wide">Mã Voucher</label>
+										<Input
+											placeholder="Ví dụ: SUMMER2026"
+											value={form.code}
+											onChange={(event) => setForm((current) => ({ ...current, code: event.target.value }))}
+											className="h-10 bg-white border border-gray-200 rounded-xl shadow-xs transition-all focus-visible:ring-2 focus-visible:ring-staff-primary/10 focus-visible:border-staff-primary focus-visible:ring-offset-0 text-gray-700 uppercase"
+										/>
+									</div>
 
-							<div className="space-y-2"><label className="text-sm font-medium">Mô tả</label><Textarea value={form.description} onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))} /></div>
+									<div className="space-y-2">
+										<label className="text-[13px] font-semibold text-gray-700 tracking-wide">Loại giảm giá</label>
+										{/* Custom Dropdown Hover cho ô Loại giảm */}
+										<div className="group/type relative z-50 w-full">
+											<div className="flex h-10 cursor-pointer items-center justify-between rounded-xl border border-gray-200 bg-white px-3.5 py-2 shadow-xs transition-all hover:border-gray-300">
+												<span className="whitespace-nowrap text-[13px] font-medium text-gray-700">
+													{form.voucherType === "PERCENTAGE" ? "Phần trăm (%)" : form.voucherType === "FIXED_AMOUNT" ? "Tiền mặt (đ)" : "Chọn loại giảm"}
+												</span>
+												<svg className="ml-2 h-4 w-4 shrink-0 text-gray-400 transition-transform duration-200 group-hover/type:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+													<path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7" />
+												</svg>
+											</div>
+											<div className="invisible absolute top-full left-0 mt-1.5 w-full overflow-hidden rounded-xl border border-gray-100 bg-white opacity-0 shadow-lg transition-all duration-200 group-hover/type:visible group-hover/type:opacity-100 p-1">
+												<div className="flex flex-col whitespace-nowrap">
+													<div
+														onClick={() => setForm((current) => ({ ...current, voucherType: "PERCENTAGE" }))}
+														className={`rounded-lg px-3 py-2.5 text-[13px] transition-colors ${form.voucherType === "PERCENTAGE" ? "bg-gray-50 font-bold text-staff-primary" : "cursor-pointer text-gray-700 hover:bg-gray-50/80"}`}
+													>
+														Phần trăm (%)
+													</div>
+													<div
+														onClick={() => setForm((current) => ({ ...current, voucherType: "FIXED_AMOUNT" }))}
+														className={`rounded-lg px-3 py-2.5 text-[13px] transition-colors ${form.voucherType === "FIXED_AMOUNT" ? "bg-gray-50 font-bold text-staff-primary" : "cursor-pointer text-gray-700 hover:bg-gray-50/80"}`}
+													>
+														Tiền mặt (đ)
+													</div>
+												</div>
+											</div>
+										</div>
+									</div>
+								</div>
 
-							<div className="grid gap-4 md:grid-cols-2">
-								<div className="space-y-2"><label className="text-sm font-medium">Giá trị giảm</label><Input type="number" min="0" value={form.discountValue} onChange={(event) => setForm((current) => ({ ...current, discountValue: event.target.value }))} /></div>
-								<div className="space-y-2"><label className="text-sm font-medium">Số lượng</label><Input type="number" min="1" value={form.totalQuantity} onChange={(event) => setForm((current) => ({ ...current, totalQuantity: event.target.value }))} /></div>
-							</div>
+								{/* Mô tả */}
+								<div className="space-y-2">
+									<label className="text-[13px] font-semibold text-gray-700 tracking-wide">Mô tả chương trình</label>
+									<Textarea
+										placeholder="Nhập nội dung hiển thị của voucher..."
+										value={form.description}
+										onChange={(event) => setForm((current) => ({ ...current, description: event.target.value }))}
+										className="min-h-[80px] bg-white border border-gray-200 rounded-xl shadow-xs transition-all focus-visible:ring-2 focus-visible:ring-staff-primary/10 focus-visible:border-staff-primary focus-visible:ring-offset-0 text-gray-700 py-2.5"
+									/>
+								</div>
 
-							<div className="grid gap-4 md:grid-cols-2">
-								<div className="space-y-2"><label className="text-sm font-medium">Đơn tối thiểu</label><Input type="number" min="0" value={form.minOrderValue} onChange={(event) => setForm((current) => ({ ...current, minOrderValue: event.target.value }))} /></div>
-								<div className="space-y-2"><label className="text-sm font-medium">Giảm tối đa</label><Input type="number" min="0" value={form.maxDiscount} onChange={(event) => setForm((current) => ({ ...current, maxDiscount: event.target.value }))} /></div>
-							</div>
+								{/* Giá trị giảm & Số lượng */}
+								<div className="grid gap-4 md:grid-cols-2">
+									<div className="space-y-2">
+										<label className="text-[13px] font-semibold text-gray-700 tracking-wide">Giá trị giảm</label>
+										<Input
+											type="number"
+											min="0"
+											value={form.discountValue}
+											onChange={(event) => setForm((current) => ({ ...current, discountValue: event.target.value }))}
+											className="h-10 bg-white border border-gray-200 rounded-xl shadow-xs transition-all focus-visible:ring-2 focus-visible:ring-staff-primary/10 focus-visible:border-staff-primary focus-visible:ring-offset-0"
+										/>
+									</div>
+									<div className="space-y-2">
+										<label className="text-[13px] font-semibold text-gray-700 tracking-wide">Số lượng phát hành</label>
+										<Input
+											type="number"
+											min="1"
+											value={form.totalQuantity}
+											onChange={(event) => setForm((current) => ({ ...current, totalQuantity: event.target.value }))}
+											className="h-10 bg-white border border-gray-200 rounded-xl shadow-xs transition-all focus-visible:ring-2 focus-visible:ring-staff-primary/10 focus-visible:border-staff-primary focus-visible:ring-offset-0"
+										/>
+									</div>
+								</div>
 
-							<div className="grid gap-4 md:grid-cols-2">
-								<div className="space-y-2"><label className="text-sm font-medium">Bắt đầu</label><Input type="datetime-local" value={form.startDate} onChange={(event) => setForm((current) => ({ ...current, startDate: event.target.value }))} /></div>
-								<div className="space-y-2"><label className="text-sm font-medium">Kết thúc</label><Input type="datetime-local" value={form.endDate} onChange={(event) => setForm((current) => ({ ...current, endDate: event.target.value }))} /></div>
-							</div>
+								{/* Đơn tối thiểu & Giảm tối đa */}
+								<div className="grid gap-4 md:grid-cols-2">
+									<div className="space-y-2">
+										<label className="text-[13px] font-semibold text-gray-700 tracking-wide">Giá trị đơn tối thiểu (đ)</label>
+										<Input
+											type="number"
+											min="0"
+											value={form.minOrderValue}
+											onChange={(event) => setForm((current) => ({ ...current, minOrderValue: event.target.value }))}
+											className="h-10 bg-white border border-gray-200 rounded-xl shadow-xs transition-all focus-visible:ring-2 focus-visible:ring-staff-primary/10 focus-visible:border-staff-primary focus-visible:ring-offset-0"
+										/>
+									</div>
+									<div className="space-y-2">
+										<label className="text-[13px] font-semibold text-gray-700 tracking-wide">Mức giảm tối đa (đ)</label>
+										<Input
+											type="number"
+											min="0"
+											value={form.maxDiscount}
+											onChange={(event) => setForm((current) => ({ ...current, maxDiscount: event.target.value }))}
+											className="h-10 bg-white border border-gray-200 rounded-xl shadow-xs transition-all focus-visible:ring-2 focus-visible:ring-staff-primary/10 focus-visible:border-staff-primary focus-visible:ring-offset-0"
+										/>
+									</div>
+								</div>
 
-							<div className="space-y-2">
-								<label className="text-sm font-medium">Áp dụng cho thiết bị</label>
-								<Select value={form.applicableDeviceId} onValueChange={(value) => setForm((current) => ({ ...current, applicableDeviceId: value }))}>
-									<SelectTrigger className="w-full bg-white"><SelectValue /></SelectTrigger>
-									<SelectContent>
-										{devices.map((device) => (
-											<SelectItem key={device.id} value={String(device.id)}>{device.name}</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</div>
+								{/* Bắt đầu & Kết thúc (Đã sửa lỗi ẩn chữ khi gõ) */}
+								<div className="grid gap-4 md:grid-cols-2 font-vietnam">
 
-							<Button className="w-full" type="submit" disabled={saving}>{saving ? "Đang tạo..." : "Tạo voucher"}</Button>
-						</form>
-					</CardContent>
-				</Card>
+									{/* THỜI GIAN BẮT ĐẦU */}
+									<div className="space-y-2">
+										<label className="text-[13px] font-semibold text-gray-700 tracking-wide">Thời gian bắt đầu</label>
+										<Input
+											type="date"
+											value={form.startDate}
+											onChange={(event) =>
+												setForm((current) => ({
+													...current,
+													startDate: event.target.value,
+												}))
+											}
+											className="h-10 bg-white border border-gray-200 rounded-xl shadow-xs transition-all focus-visible:ring-2 focus-visible:ring-staff-primary/10 focus-visible:border-staff-primary focus-visible:ring-offset-0 cursor-pointer w-full text-gray-700"
+										/>
+									</div>
 
-				<div className="space-y-6">
+									{/* THỜI GIAN KẾT THÚC */}
+									<div className="space-y-2">
+										<label className="text-[13px] font-semibold text-gray-700 tracking-wide">Thời gian kết thúc</label>
+										<Input
+											type="date"
+											value={form.endDate}
+											onChange={(event) =>
+												setForm((current) => ({
+													...current,
+													endDate: event.target.value,
+												}))
+											}
+											className="h-10 bg-white border border-gray-200 rounded-xl shadow-xs transition-all focus-visible:ring-2 focus-visible:ring-staff-primary/10 focus-visible:border-staff-primary focus-visible:ring-offset-0 cursor-pointer w-full text-gray-700"
+										/>
+									</div>
+
+								</div>
+
+
+
+								<Button
+									type="submit"
+									disabled={saving}
+									className="w-full h-10 px-5 !bg-[#173E77] !text-white font-medium text-sm rounded-lg shadow-sm transition-all duration-200 ease-in-out hover:!bg-[#052962] hover:-translate-y-[1px] hover:shadow-md active:translate-y-0 active:shadow-sm cursor-pointer"
+								>
+									{saving ? (
+										<Loader2 className="mr-2 size-4 animate-spin" />
+									) : (
+										/* Thay bằng icon Ticket từ lucide-react để phù hợp với ngữ cảnh Voucher */
+										<Ticket className="mr-2 size-4" />
+									)}
+									{saving ? "Đang tạo..." : "Tạo voucher"}
+								</Button>
+
+							</form>
+						</CardContent>
+					</Card>
+				</div>
+				<div className="flex-1 min-w-0 w-full space-y-6">
 					<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
 						<Card><CardHeader><CardDescription>Đang chạy</CardDescription><CardTitle className="flex items-center gap-3 text-3xl"><TicketPercent className="size-6 text-sky-500" />{activeCount}</CardTitle></CardHeader></Card>
 						<Card><CardHeader><CardDescription>Tạm dừng</CardDescription><CardTitle className="flex items-center gap-3 text-3xl"><WalletCards className="size-6 text-rose-500" />{disabledCount}</CardTitle></CardHeader></Card>
@@ -251,74 +407,113 @@ export default function StaffVouchersPage() {
 						<Card><CardHeader><CardDescription>Hết lượt</CardDescription><CardTitle className="flex items-center gap-3 text-3xl"><TicketPercent className="size-6 text-indigo-500" />{usedUpCount}</CardTitle></CardHeader></Card>
 					</div>
 
-					<Card>
-						<CardHeader>
-							<div className="flex items-center justify-between gap-3">
+					<Card className="w-full  overflow-hidden border border-gray-100 bg-white shadow-sm rounded-2xl font-vietnam">
+						<CardHeader className=" border-b border-gray-50 bg-gray-50/10 pb-4">
+							<div className="flex items-center justify-between ">
 								<div>
-									<CardTitle>Danh sách voucher</CardTitle>
-									<CardDescription>{vouchers.length} voucher hiện có.</CardDescription>
+									<CardTitle className="text-lg font-bold text-gray-900 tracking-tight">Danh sách voucher</CardTitle>
+									<CardDescription className="text-sm text-gray-500 mt-0.5">{vouchers.length} voucher hiện có.</CardDescription>
 								</div>
-								<Button variant="outline" onClick={() => void loadInitialData()} disabled={loading}>
-									<RefreshCw className={loading ? "animate-spin" : ""} />
-									Làm mới
-								</Button>
+
+								{/* 🌟 NÚT LÀM MỚI: Giữ nguyên component Button và hàm gốc, chỉ bọc hiệu ứng trượt nền */}
+								<button
+									type="button"
+									onClick={() => void loadInitialData()}
+									disabled={loading}
+									className="group relative h-9 shrink-0 overflow-hidden rounded-lg border border-gray-100 bg-white px-4 text-[13px] font-semibold whitespace-nowrap text-gray-700 shadow-xs transition-all duration-500 hover:border-staff-primary active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
+								>
+									<span className="absolute inset-y-0 left-0 w-0 bg-staff-primary transition-all duration-500 ease-out group-hover:w-full" />
+									<div className="relative z-10 flex items-center justify-center text-gray-700 transition-colors duration-500 group-hover:text-white">
+										<RefreshCw
+											className={`mr-2 h-3.5 w-3.5 text-gray-400 transition-transform duration-700 ease-in-out group-hover:text-white ${loading ? "animate-spin" : "group-hover:rotate-180"
+												}`}
+										/>
+										<span className="relative">Làm mới</span>
+									</div>
+								</button>
 							</div>
 						</CardHeader>
-						<CardContent>
+
+						<CardContent className=""> {/* Đổi thành p-0 để bảng tràn sát viền hai bên */}
 							{loading ? (
 								<div className="py-16 text-center text-sm text-muted-foreground">Đang tải voucher...</div>
 							) : (
-								<Table>
-									<TableHeader>
-										<TableRow>
-											<TableHead>Mã</TableHead>
-											<TableHead>Giảm giá</TableHead>
-											<TableHead>Thiết bị áp dụng</TableHead>
-											<TableHead>Hiệu lực</TableHead>
-											<TableHead>Số lượng</TableHead>
-											<TableHead>Trạng thái</TableHead>
-											<TableHead className="text-right">Thao tác</TableHead>
-										</TableRow>
-									</TableHeader>
-									<TableBody>
-										{vouchers.map((voucher) => (
-											<TableRow key={voucher.id}>
-												<TableCell>
-													<div className="font-medium">{voucher.code}</div>
-													<div className="text-xs text-muted-foreground">{voucher.description || "Không có mô tả"}</div>
-												</TableCell>
-												<TableCell>
-													<div className="font-medium">
-														{voucher.voucherType === "PERCENTAGE"
-															? `${voucher.discountValue}%`
-															: formatCurrency(voucher.discountValue)}
-													</div>
-													<div className="text-xs text-muted-foreground">Đơn tối thiểu {formatCurrency(voucher.minOrderValue || 0)}</div>
-												</TableCell>
-												<TableCell>{voucher.applicableDeviceName || "Toàn hệ thống"}</TableCell>
-												<TableCell>
-													<div className="text-xs text-muted-foreground">Từ {formatDateTime(voucher.startDate)}</div>
-													<div className="text-xs text-muted-foreground">Đến {formatDateTime(voucher.endDate)}</div>
-												</TableCell>
-												<TableCell>{voucher.usedQuantity}/{voucher.totalQuantity}</TableCell>
-												<TableCell><Badge variant={VOUCHER_VARIANTS[voucher.status]}>{VOUCHER_LABELS[voucher.status]}</Badge></TableCell>
-												<TableCell>
-													<div className="flex justify-end gap-2">
-														<Button asChild variant="outline" size="sm"><Link href={`/staff/vouchers/${voucher.id}`}>Chi tiết</Link></Button>
-														{voucher.status !== "USED_UP" && voucher.status !== "EXPIRED" ? (
-															<Button size="sm" onClick={() => void handleToggleStatus(voucher)}>
-																{voucher.status === "DISABLED" ? "Kích hoạt" : "Tạm dừng"}
-															</Button>
-														) : null}
-													</div>
-												</TableCell>
+								/* 🌟 CHỐNG TRÀN BẢNG: Ép cấu trúc table-fixed và cho phép cuộn ngang ở màn hình nhỏ */
+								<div className="w-full overflow-x-auto">
+									<Table className="w-full min-w-[850px]">
+										<TableHeader>
+											{/* Ép cứng màu nền xanh đậm, không bị đổi sang nền trắng khi hover chuột */}
+											<TableRow className="bg-[#052962] hover:bg-[#052962] border-none">
+												<TableHead className="h-11 text-xs font-bold uppercase tracking-wider text-[#FFE500] pl-6 w-[18%]">Mã</TableHead>
+												<TableHead className="h-11 text-xs font-bold uppercase tracking-wider text-white/90 w-[18%]">Giảm giá</TableHead>
+												<TableHead className="h-11 text-xs font-bold uppercase tracking-wider text-white/90 w-[20%]">Thiết bị áp dụng</TableHead>
+												<TableHead className="h-11 text-xs font-bold uppercase tracking-wider text-white/90 w-[20%]">Hiệu lực</TableHead>
+												<TableHead className="h-11 text-xs font-bold uppercase tracking-wider text-white/90 w-[10%]">Đã dùng</TableHead>
+												<TableHead className="h-11 text-xs font-bold uppercase tracking-wider text-white/90 w-[12%]">Trạng thái</TableHead>
+												<TableHead className="h-11 text-xs font-bold uppercase tracking-wider text-[#FFE500] pr-6 text-right w-[16%]">Thao tác</TableHead>
 											</TableRow>
-										))}
-									</TableBody>
-								</Table>
+										</TableHeader>
+										<TableBody>
+											{vouchers.map((voucher) => (
+												<TableRow key={voucher.id} className="hover:bg-gray-50/50 transition-colors border-b border-gray-100 last:border-b-0">
+													<TableCell className="pl-6 py-3.5">
+														<div className="font-bold text-gray-900">{voucher.code}</div>
+														<div className="text-xs text-gray-400 font-medium mt-0.5 truncate max-w-[150px]" title={voucher.description || undefined}>
+															{voucher.description || "Không có mô tả"}
+														</div>
+													</TableCell>
+													<TableCell className="py-3.5">
+														<div className="font-semibold text-gray-800">
+															{voucher.voucherType === "PERCENTAGE"
+																? `${voucher.discountValue}%`
+																: formatCurrency(voucher.discountValue)}
+														</div>
+														<div className="text-xs text-gray-400 font-medium mt-0.5">
+															Đơn tối thiểu {formatCurrency(voucher.minOrderValue || 0)}
+														</div>
+													</TableCell>
+													<TableCell className="py-3.5 font-medium text-gray-600 text-[13px] truncate max-w-[150px]" title={voucher.applicableDeviceName || "Toàn hệ thống"}>
+														{voucher.applicableDeviceName || "Toàn hệ thống"}
+													</TableCell>
+													<TableCell className="py-3.5 text-xs font-medium text-gray-600 space-y-0.5">
+														<div>Từ {formatDateTime(voucher.startDate)}</div>
+														<div>Đến {formatDateTime(voucher.endDate)}</div>
+													</TableCell>
+													<TableCell className="py-3.5 font-semibold text-gray-700 text-[13px]">
+														{voucher.usedQuantity}/{voucher.totalQuantity}
+													</TableCell>
+													<TableCell className="py-3.5">
+														<Badge variant={VOUCHER_VARIANTS[voucher.status]} className="shadow-none font-bold uppercase tracking-wider text-[10px] px-2 py-0.5 rounded-md">
+															{VOUCHER_LABELS[voucher.status]}
+														</Badge>
+													</TableCell>
+
+													{/* Cột Thao tác: Đồng bộ lề phải pr-6 thẳng hàng với chữ THAO TÁC */}
+													<TableCell className="pr-6 py-3.5 text-right">
+														<div className="flex justify-end gap-2">
+															<Button asChild variant="outline" size="sm" className="h-8 px-3 rounded-lg border-gray-200 text-gray-700 shadow-xs hover:bg-gray-50 hover:-translate-y-[0.5px] active:translate-y-0 transition-all text-xs font-semibold cursor-pointer">
+																<Link href={`/staff/vouchers/${voucher.id}`}>Chi tiết</Link>
+															</Button>
+															{voucher.status !== "USED_UP" && voucher.status !== "EXPIRED" ? (
+																<Button
+																	size="sm"
+																	onClick={() => void handleToggleStatus(voucher)}
+																	className="h-8 px-3 rounded-lg font-semibold text-xs shadow-xs transition-all duration-200 hover:-translate-y-[0.5px] active:translate-y-0 cursor-pointer !bg-[#173E77] !text-white hover:!bg-[#052962]"
+																>
+																	{voucher.status === "DISABLED" ? "Kích hoạt" : "Tạm dừng"}
+																</Button>
+															) : null}
+														</div>
+													</TableCell>
+												</TableRow>
+											))}
+										</TableBody>
+									</Table>
+								</div>
 							)}
 						</CardContent>
 					</Card>
+
 				</div>
 			</div>
 		</div>

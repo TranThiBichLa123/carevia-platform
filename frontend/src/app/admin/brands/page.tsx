@@ -10,6 +10,8 @@ import { backofficeApi, type AdminAccount } from "@/lib/backofficeApi";
 import { formatDateTime, getBackofficeErrorMessage } from "@/lib/backofficeUtils";
 import { deviceApi, type BrandData } from "@/lib/deviceApi";
 import { useUserStore } from "@/lib/store";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { cn } from "@/lib/utils";
 
 export default function AdminBrandsPage() {
   const { authUser, isAuthenticated } = useUserStore();
@@ -62,15 +64,31 @@ export default function AdminBrandsPage() {
           <h1 className="text-3xl font-bold tracking-tight">Quản lý Brand</h1>
           <p className="text-sm text-muted-foreground">Theo dõi brand đã hiển thị ngoài marketplace và hàng đợi seller staff đang chờ duyệt.</p>
         </div>
-        <Button variant="outline" onClick={() => void loadData()} disabled={loading}>
-          <RefreshCcw className={loading ? "animate-spin" : ""} />
-          Làm mới
-        </Button>
+        {/* 🌟 NÚT LÀM MỚI CHUẨN THEME: Giữ nguyên 100% logic gốc, bọc hiệu ứng trượt nền cao cấp */}
+        <button
+          type="button" // Đảm bảo an toàn không kích hoạt submit nhầm form
+          onClick={() => void loadData()}
+          disabled={loading}
+          className="group relative h-9.5 shrink-0 overflow-hidden rounded-md border border-gray-100 bg-white px-4 text-[13px] font-medium whitespace-nowrap text-gray-700 shadow-sm transition-all duration-500 hover:border-primary active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer font-vietnam"
+        >
+          {/* Lớp nền màu xanh Primary trượt từ trái sang phải chiếm trọn nút khi hover chuột vào */}
+          <span className="absolute inset-y-0 left-0 w-0 bg-primary transition-all duration-500 ease-out group-hover:w-full" />
+
+          {/* Khung nội dung chữ nổi lên trên lớp nền nhờ z-10 */}
+          <div className="relative z-10 flex items-center justify-center text-gray-700 transition-colors duration-500 group-hover:text-white">
+            <RefreshCcw
+              className={`mr-2 h-3.5 w-3.5 text-gray-400 transition-transform duration-700 ease-in-out group-hover:text-white ${loading ? "animate-spin" : "group-hover:rotate-180"
+                }`}
+            />
+            <span className="relative">Làm mới</span>
+          </div>
+        </button>
+
       </div>
 
-      <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+      {/* <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
         Brand entity đã tồn tại trong catalog public. Luồng xét duyệt hiện vẫn đi qua hàng đợi <span className="font-semibold">seller staff</span>; bước gắn hồ sơ brand riêng và khóa/mở brand theo admin cần backend API chuyên dụng để hoàn tất.
-      </div>
+      </div> */}
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
@@ -94,31 +112,85 @@ export default function AdminBrandsPage() {
       </div>
 
       <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
-        <Card>
-          <CardHeader>
-            <CardTitle>Brand đang hiển thị</CardTitle>
-            <CardDescription>Danh sách lấy từ catalog hiện có trên website khách hàng.</CardDescription>
+        <Card className="w-full overflow-hidden border border-gray-100 bg-white shadow-sm rounded-2xl font-vietnam">
+          {/* ĐỒNG BỘ HEADER CARD: Tách nền mờ nhẹ nhàng */}
+          <CardHeader className="p-5 md:p-6 border-b border-gray-50 bg-gray-50/10 pb-4">
+            <CardTitle className="text-lg font-bold text-gray-900 tracking-tight">Brand đang hiển thị</CardTitle>
+            <CardDescription className="text-sm text-gray-500 mt-0.5">Danh sách lấy từ catalog hiện có trên website khách hàng.</CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
+
+          <CardContent className="p-0"> {/* Đổi thành p-0 để bảng tràn lề hai bên, bo mượt theo Card */}
             {loading ? (
               <div className="py-16 text-center text-sm text-muted-foreground">Đang tải danh sách brand...</div>
             ) : brands.length ? (
-              brands.slice(0, 12).map((brand) => (
-                <div key={brand.id} className="flex items-start justify-between gap-4 rounded-xl border p-4">
-                  <div className="min-w-0">
-                    <div className="flex items-center gap-2">
-                      <p className="truncate font-semibold text-slate-900">{brand.name}</p>
-                      {brand.isFeatured && <span className="rounded-full bg-sky-50 px-2 py-0.5 text-[11px] font-semibold text-sky-700">Featured</span>}
-                    </div>
-                    <p className="mt-1 line-clamp-2 text-sm text-slate-600">{brand.description || "Chưa có mô tả brand."}</p>
-                  </div>
-                  <span className={`rounded-full px-2.5 py-1 text-[11px] font-semibold ${brand.isActive ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"}`}>
-                    {brand.isActive ? "Đang hoạt động" : "Đang ẩn"}
-                  </span>
-                </div>
-              ))
+              /* 🌟 CHỐNG TRÀN BẢNG: Cho phép cuộn ngang ở màn hình nhỏ và ép cố định độ rộng cột bằng table-fixed */
+              <div className="w-full overflow-x-auto">
+                <Table className="w-full min-w-[700px] table-fixed">
+                  <TableHeader>
+                    {/* Tiêu đề bảng màu xanh đậm, khóa màu nền tuyệt đối chống lỗi chuyển trắng khi hover */}
+                    <TableRow className="bg-[#052962] hover:bg-[#052962] border-none">
+                      <TableHead className="h-11 text-xs font-bold uppercase tracking-wider text-[#FFE500] pl-6 w-[25%]">Thương hiệu</TableHead>
+                      <TableHead className="h-11 text-xs font-bold uppercase tracking-wider text-white/90 w-[45%]">Mô tả chi tiết</TableHead>
+                      <TableHead className="h-11 text-xs font-bold uppercase tracking-wider text-white/90 w-[15%]">Loại nhãn</TableHead>
+                      <TableHead className="h-11 text-xs font-bold uppercase tracking-wider text-[#FFE500] pr-6 text-right w-[15%]">Trạng thái</TableHead>
+                    </TableRow>
+                  </TableHeader>
+
+                  <TableBody>
+                    {brands.slice(0, 12).map((brand) => (
+                      <TableRow key={brand.id} className="hover:bg-gray-50/50 transition-colors border-b border-gray-100 last:border-b-0">
+
+                        {/* Cột 1: Tên thương hiệu + Slug */}
+                        <TableCell className="pl-6 py-3.5">
+                          <div className="font-bold text-gray-900 tracking-tight">{brand.name}</div>
+                          <div className="text-xs text-gray-400 font-medium mt-0.5 truncate max-w-[150px]">
+                            slug: {brand.slug}
+                          </div>
+                        </TableCell>
+
+                        {/* Cột 2: Mô tả chi tiết (Ép truncate dấu ba chấm chống tràn chữ làm vỡ bảng) */}
+                        <TableCell className="py-3.5">
+                          <div
+                            className="text-[13px] font-medium text-gray-600 truncate max-w-[320px]"
+                            title={brand.description || undefined}
+                          >
+                            {brand.description || "Chưa có mô tả brand."}
+                          </div>
+                        </TableCell>
+
+                        {/* Cột 3: Loại nhãn (Featured Badge đồng bộ mịn màng, không lỗi dính dấu) */}
+                        <TableCell className="py-3.5">
+                          {brand.isFeatured ? (
+                            <span className="inline-flex items-center justify-center px-2 py-0.5 rounded-md text-[10px] font-bold border border-blue-100 bg-blue-50 text-sky-700 uppercase tracking-wider leading-normal">
+                              Featured
+                            </span>
+                          ) : (
+                            <span className="text-xs text-gray-300 font-medium italic">Thường</span>
+                          )}
+                        </TableCell>
+
+                        {/* Cột 4: Trạng thái (Căn phải thẳng hàng tuyệt đối với chữ TRẠNG THÁI) */}
+                        <TableCell className="pr-6 py-3.5 text-right">
+                          <span className={cn(
+                            "inline-flex items-center justify-center px-2.5 py-0.5 rounded-md text-[11px] font-bold border uppercase tracking-wider shadow-xs leading-normal",
+                            brand.isActive
+                              ? "bg-emerald-50 border-emerald-100 text-emerald-700"
+                              : "bg-gray-50 border-gray-100 text-gray-600"
+                          )}>
+                            {brand.isActive ? "Đang hoạt động" : "Đang ẩn"}
+                          </span>
+                        </TableCell>
+
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
             ) : (
-              <div className="rounded-xl border border-dashed p-6 text-sm text-muted-foreground">Chưa có brand nào được công khai trên marketplace.</div>
+              /* Khung thông báo trống nét đứt tinh tế */
+              <div className="mx-6 my-8 rounded-2xl border border-dashed border-gray-200 px-6 py-12 text-center text-sm text-gray-400 font-medium">
+                Chưa có brand nào được công khai trên marketplace.
+              </div>
             )}
           </CardContent>
         </Card>
@@ -147,7 +219,7 @@ export default function AdminBrandsPage() {
             </CardContent>
           </Card>
 
-          <Card>
+          {/* <Card>
             <CardHeader>
               <CardTitle>Quy tắc marketplace</CardTitle>
             </CardHeader>
@@ -160,7 +232,7 @@ export default function AdminBrandsPage() {
                 Commission, khóa brand và hồ sơ pháp lý brand cần API admin riêng để hoàn chỉnh RBAC marketplace.
               </div>
             </CardContent>
-          </Card>
+          </Card> */}
         </div>
       </div>
 

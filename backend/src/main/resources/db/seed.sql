@@ -468,6 +468,32 @@ VALUES
   (8, 2, 7, 'Carevia Chi nhánh Q1',   'Tầng 3, 25 Nguyễn Huệ, Quận 1, TP.HCM', NOW()::DATE - 3, '10:00','10:45', 5, 0, 5, 'FULL',   500000, 7, 2, NOW(), NOW(), 'seed', 'seed')
 ON CONFLICT (id) DO NOTHING;
 
+-- Bước 1: Gỡ bỏ luật bắt buộc nhập (NOT NULL) của cột Admin
+ALTER TABLE experience_sessions ALTER COLUMN created_by_admin_id DROP NOT NULL;
+
+-- Bước 2: Gỡ bỏ luật bắt buộc nhập của cột Dịch vụ (Nếu form của bạn không chọn dịch vụ)
+ALTER TABLE experience_sessions ALTER COLUMN service_id DROP NOT NULL;
+
+
+-- Lệnh đồng bộ lại bộ đếm tự sinh của PostgreSQL phiên bản mới
+SELECT setval(
+    pg_get_serial_sequence('experience_sessions', 'id'), 
+    COALESCE(MAX(id), 0) + 1, 
+    false
+) FROM experience_sessions;
+
+INSERT INTO experience_sessions (id, service_id, device_id, branch_name, location_detail, session_date, start_time, end_time, max_slots, available_slots, booked_slots, status, price_per_slot, created_by_admin_id, staff_id, created_at, updated_at, created_by, updated_by)
+VALUES
+  (1, 1, 1, 'Carevia Chi nhánh Q1',   'Tầng 3, 25 Nguyễn Huệ, Quận 1, TP.HCM', NOW()::DATE + 3, '09:00', '10:00', 5, 3, 2, 'OPEN',   350000, 7, 2, NOW(), NOW(), 'seed', 'seed'),
+  (2, 2, 11, 'Carevia Chi nhánh Q1',   'Tầng 3, 25 Nguyễn Huệ, Quận 1, TP.HCM', NOW()::DATE + 3, '10:30', '11:15', 5, 4, 1, 'OPEN',   500000, 7, 2, NOW(), NOW(), 'seed', 'seed'),
+  (3, 3, 16, 'Carevia Chi nhánh Q3',   'Tầng 2, 88 Võ Văn Tần, Quận 3, TP.HCM', NOW()::DATE + 5, '14:00', '14:30', 8, 5, 3, 'OPEN',   450000, 7, 2, NOW(), NOW(), 'seed', 'seed'),
+  (4, 4, 22, 'Carevia Chi nhánh Q7',   'Tầng 1, 45 Nguyễn Thị Thập, Quận 7',    NOW()::DATE + 7, '09:00', '09:45', 6, 6, 0, 'OPEN',   300000, 7, 2, NOW(), NOW(), 'seed', 'seed'),
+  (5, 5, 25, 'Carevia Chi nhánh Q1',   'Tầng 3, 25 Nguyễn Huệ, Quận 1, TP.HCM', NOW()::DATE + 10,'13:00','14:00', 4, 2, 2, 'OPEN',   400000, 7, 2, NOW(), NOW(), 'seed', 'seed'),
+  (6, 6, 30,'Carevia Chi nhánh Q3',   'Tầng 2, 88 Võ Văn Tần, Quận 3, TP.HCM', NOW()::DATE + 14,'15:00','16:00', 3, 3, 0, 'OPEN',   700000, 7, 2, NOW(), NOW(), 'seed', 'seed'),
+  (7, 1, 35, 'Carevia Chi nhánh Q7',   'Tầng 1, 45 Nguyễn Thị Thập, Quận 7',    NOW()::DATE + 1, '08:00', '09:00', 5, 5, 0, 'OPEN',   350000, 7, 2, NOW(), NOW(), 'seed', 'seed'),
+  (8, 2, 40, 'Carevia Chi nhánh Q1',   'Tầng 3, 25 Nguyễn Huệ, Quận 1, TP.HCM', NOW()::DATE - 3, '10:00','10:45', 5, 0, 5, 'FULL',   500000, 7, 2, NOW(), NOW(), 'seed', 'seed')
+ON CONFLICT (id) DO NOTHING;
+
 -- =============================================================
 -- 20. BOOKINGS
 -- =============================================================

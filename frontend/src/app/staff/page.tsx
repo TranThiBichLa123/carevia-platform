@@ -12,7 +12,7 @@ import { useUserStore } from "@/lib/store";
 
 const staffSections = [
 	{
-        title: "Sản phẩm & tồn kho của brand",
+        title: "Thiết bị & tồn kho của brand",
         description: "Quản lý catalog, giá, tồn kho, bảo trì và tình trạng hiển thị của sản phẩm thuộc brand bạn phụ trách.",
 		href: "/staff/inventory",
 		tag: "Catalog"
@@ -36,7 +36,7 @@ const staffSections = [
         tag: "Configuration"
     },
     {
-        title: "Voucher của brand",
+        title: "Quản lý Voucher",
         description: "Tạo mã khuyến mãi cho brand, gán voucher cho catalog phù hợp và theo dõi hạn dùng.",
         href: "/staff/vouchers",
         tag: "Marketing"

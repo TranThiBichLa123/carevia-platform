@@ -27,11 +27,11 @@ import { useUserStore } from "@/lib/store";
 const staffSections = [
   { title: "Dashboard brand", href: "/staff", icon: LayoutDashboard },
   { title: "Hồ sơ brand", href: "/staff/brand", icon: Building2 },
-  { title: "Sản phẩm & tồn kho", href: "/staff/inventory", icon: Boxes },
+  { title: "Thiết bị & tồn kho", href: "/staff/inventory", icon: Boxes },
   { title: "Quản lý booking", href: "/staff/bookings", icon: CalendarCheck2 },
   { title: "Quản lý đơn hàng", href: "/staff/orders", icon: ClipboardList },
   { title: "Phiên trải nghiệm", href: "/staff/sessions", icon: Layers3 },
-  { title: "Voucher của brand", href: "/staff/vouchers", icon: TicketPercent },
+  { title: "Quản lý Voucher", href: "/staff/vouchers", icon: TicketPercent },
   { title: "CRM & Đánh giá", href: "/staff/reviews", icon: MessageSquareMore },
   { title: "Thống kê brand", href: "/staff/statistics", icon: ChartColumnBig },
 ];

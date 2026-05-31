@@ -854,25 +854,25 @@ export default function StaffInventoryPage() {
 
 			<div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
 				<Card>
-					<CardHeader className="gap-2 px-6 py-5">
+					<CardHeader className="gap-2 px-8 py-5">
 						<CardDescription>Thiết bị trong bộ lọc hiện tại</CardDescription>
 						<CardTitle className="flex items-center gap-3 text-3xl"><Boxes className="size-6 text-sky-500" />{totalDevices}</CardTitle>
 					</CardHeader>
 				</Card>
 				<Card>
-					<CardHeader className="gap-2 px-6 py-5">
+					<CardHeader className="gap-2 px-8 py-5">
 						<CardDescription>Low stock</CardDescription>
 						<CardTitle className="flex items-center gap-3 text-3xl text-amber-600">{lowStockCount}</CardTitle>
 					</CardHeader>
 				</Card>
 				<Card>
-					<CardHeader className="gap-2 px-6 py-5">
+					<CardHeader className="gap-2 px-8 py-5">
 						<CardDescription>Đang bảo trì</CardDescription>
 						<CardTitle className="flex items-center gap-3 text-3xl"><Wrench className="size-6 text-staff-primary" />{maintenanceCount}</CardTitle>
 					</CardHeader>
 				</Card>
 				<Card>
-					<CardHeader className="gap-2 px-6 py-5">
+					<CardHeader className="gap-2 px-8 py-5">
 						<CardDescription>Đã hết hàng</CardDescription>
 						<CardTitle className="flex items-center gap-3 text-3xl text-rose-600">{outOfStockCount}</CardTitle>
 					</CardHeader>
@@ -884,32 +884,32 @@ export default function StaffInventoryPage() {
 			<Card className="border border-gray-100 shadow-sm bg-white rounded-xl font-vietnam relative">
 
 				{/* Header chính: Thêm "rounded-t-xl" để giữ bo góc phía trên của Card */}
-				<CardHeader className="border-b border-gray-50/60 bg-white px-5 pt-5 pb-3 rounded-t-xl">
+				<CardHeader className="border-b border-gray-50/60 bg-white px-8 pt-5 pb-3 rounded-t-xl">
 					{/* Vùng bên trái: Nội dung tiêu đề */}
 					<div className="shrink-0">
-						<CardTitle className="text-base font-bold text-gray-800 tracking-tight">
+						<CardTitle className="text-[20px] font-bold text-gray-800 tracking-tight">
 							Bộ lọc thiết bị vận hành
 						</CardTitle>
-						<CardDescription className="text-[13px] text-gray-400 mt-1">
+						<CardDescription className="text-[14px] text-gray-400 mt-1">
 							Lọc nhanh thiết bị cần staff xử lý ngay trong ngày.
 						</CardDescription>
 					</div>
 				</CardHeader>
 
-				<CardContent className="px-5 pt-3 pb-4 font-vietnam">
+				<CardContent className="px-8 pt-3 pb-4 font-vietnam">
 					<div className="flex flex-col gap-2.5 lg:flex-row lg:items-center">
 
 						{/* 1. Ô tìm kiếm thông minh tích hợp Icon kính lúp */}
 						<div className="relative flex-1 min-w-0 group">
 							<div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-								<Search className="w-4 h-4 text-gray-400 group-focus-within:text-primary transition-colors" />
+								<Search className="w-4 h-4 text-gray-400 group-focus-within:text-staff-primary transition-colors" />
 							</div>
 							<input
 								type="text"
 								value={search}
 								onChange={(event) => setSearch(event.target.value)}
 								placeholder="Tìm theo tên, SKU hoặc slug..."
-								className="h-9.5 w-full rounded-md border border-gray-100 bg-white pl-9 pr-4 text-[13px] font-medium text-gray-700 placeholder-gray-400 outline-none shadow-sm transition-all duration-300 hover:border-gray-200 focus:border-primary"
+								className="h-9.5 w-full rounded-md border border-gray-100 bg-white pl-9 pr-4 text-[14px] font-medium text-gray-700 placeholder-gray-400 outline-none shadow-sm transition-all duration-300 hover:border-gray-200 focus:border-staff-primary"
 							/>
 						</div>
 
@@ -1014,7 +1014,7 @@ export default function StaffInventoryPage() {
 										return (
 											<TableRow key={device.id} className="hover:bg-gray-50/30 transition-colors group">
 
-												{/* CỘT 1: HÌNH ẢNH SẢN PHẨM & TÊN */}
+												{/* CỘT 1: HÌNH ẢNH THIẾT BỊ & TÊN */}
 												<TableCell className="py-3.5 pl-4">
 													<div className="flex items-center gap-3">
 														{/* Box Ảnh thiết bị tỉ lệ 1:1 có shadow mượt */}
@@ -1205,17 +1205,17 @@ export default function StaffInventoryPage() {
 							<Table>
 								<TableHeader className="bg-[#052962] text-white">
 									<TableRow className="border-none hover:bg-[#052962]">
-										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-[#FFE500] pl-4">Thời gian</TableHead>
-										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">Thiết bị</TableHead>
-										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">Loại giao dịch</TableHead>
-										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">Biến động</TableHead>
-										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">Kết quả</TableHead>
-										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-[#FFE500] pr-4 text-right">Ghi chú</TableHead>
+										<TableHead className="h-10 text-xs font-vietnam font-bold uppercase tracking-wider text-[#FFE500] pl-4">Thời gian</TableHead>
+										<TableHead className="h-10 text-xs font-vietnam font-bold uppercase tracking-wider text-white/90">Thiết bị</TableHead>
+										<TableHead className="h-10 text-xs font-vietnam font-bold uppercase tracking-wider text-white/90">Loại giao dịch</TableHead>
+										<TableHead className="h-10 text-xs font-vietnam font-bold uppercase tracking-wider text-white/90">Biến động</TableHead>
+										<TableHead className="h-10 text-xs font-vietnam font-bold uppercase tracking-wider text-white/90">Kết quả</TableHead>
+										<TableHead className="h-10 text-xs font-vietnam font-bold uppercase tracking-wider text-[#FFE500] pr-4 text-right">Ghi chú</TableHead>
 									</TableRow>
 								</TableHeader>
 
 
-								<TableBody>
+								<TableBody className="font-vietnam">
 									{transactions.map((transaction) => (
 										<TableRow key={transaction.id}>
 											<TableCell className="pl-4" >{formatDateTime(transaction.createdAt)}</TableCell>

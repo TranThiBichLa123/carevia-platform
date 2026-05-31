@@ -304,7 +304,7 @@ export default function StaffOrdersPage() {
                                                     <TableCell className="py-4 align-top">
                                                         <Badge
                                                             variant={ORDER_VARIANTS[order.status]}
-                                                            className="rounded-lg px-2.5 py-1 text-[10px] font-vietnam font-bold uppercase border-none tracking-wider"
+                                                            className="rounded-lg px-2.5 py-1 text-[10px]  font-vietnam font-bold uppercase border-none tracking-wider"
                                                         >
                                                             {ORDER_LABELS[order.status]}
                                                         </Badge>

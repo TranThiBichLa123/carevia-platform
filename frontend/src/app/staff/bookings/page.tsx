@@ -383,17 +383,15 @@ export default function StaffBookingsPage() {
 					) : (
 						<div className="overflow-hidden rounded-lg border border-gray-100 bg-white shadow-sm">
 							<Table>
-
-
 								<TableHeader>
-									<TableRow className="bg-[#052962]  rounded-t-lg">
-										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-[#FFE500] pl-4">MÃ ĐƠN</TableHead>
-										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">KHÁCH HÀNG</TableHead>
-										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">SẢN PHẨM</TableHead>
-										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">LỊCH HẸN</TableHead>
-										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">THANH TOÁN</TableHead>
-										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-white/90">TRẠNG THÁI</TableHead>
-										<TableHead className="h-10 text-xs font-bold uppercase tracking-wider text-[#FFE500] pr-4 text-right">THAO TÁC</TableHead>
+									<TableRow className="bg-[#052962] hover:bg-[#052962] rounded-t-lg">
+										<TableHead className="h-10 text-xs font-vietnam font-bold uppercase tracking-wider text-[#FFE500] pl-4">MÃ ĐƠN</TableHead>
+										<TableHead className="h-10 text-xs font-vietnam font-bold uppercase tracking-wider text-white/90">KHÁCH HÀNG</TableHead>
+										<TableHead className="h-10 text-xs font-vietnam font-bold uppercase tracking-wider text-white/90">SẢN PHẨM</TableHead>
+										<TableHead className="h-10 text-xs font-vietnam font-bold uppercase tracking-wider text-white/90">LỊCH HẸN</TableHead>
+										<TableHead className="h-10 text-xs font-vietnam font-bold uppercase tracking-wider text-white/90">THANH TOÁN</TableHead>
+										<TableHead className="h-10 text-xs font-vietnam font-bold uppercase tracking-wider text-white/90">TRẠNG THÁI</TableHead>
+										<TableHead className="h-10 text-xs font-vietnam font-bold uppercase tracking-wider text-[#FFE500] pr-4 text-right">THAO TÁC</TableHead>
 									</TableRow>
 								</TableHeader>
 
