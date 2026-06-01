@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Building2, CheckCircle2, Clock3, RefreshCcw, ShieldAlert, Store } from "lucide-react";
+import { Badge, Building2, CheckCircle2, Clock3, RefreshCcw, ShieldAlert, Store } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -58,21 +58,21 @@ export default function AdminBrandsPage() {
   const activeBrands = brands.filter((brand) => brand.isActive);
 
   return (
-    <div className="space-y-6 px-4 py-6 md:px-8">
+    <div className="space-y-6 px-4 py-6 md:px-8 font-vietnam">
       <div className="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Quản lý Brand</h1>
           <p className="text-sm text-muted-foreground">Theo dõi brand đã hiển thị ngoài marketplace và hàng đợi seller staff đang chờ duyệt.</p>
         </div>
-        {/* 🌟 NÚT LÀM MỚI CHUẨN THEME: Giữ nguyên 100% logic gốc, bọc hiệu ứng trượt nền cao cấp */}
+        {/*  NÚT LÀM MỚI CHUẨN THEME: Giữ nguyên 100% logic gốc, bọc hiệu ứng trượt nền cao cấp */}
         <button
           type="button" // Đảm bảo an toàn không kích hoạt submit nhầm form
           onClick={() => void loadData()}
           disabled={loading}
-          className="group relative h-9.5 shrink-0 overflow-hidden rounded-md border border-gray-100 bg-white px-4 text-[13px] font-medium whitespace-nowrap text-gray-700 shadow-sm transition-all duration-500 hover:border-primary active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer font-vietnam"
+          className="group relative h-9.5 shrink-0 overflow-hidden rounded-md border border-gray-100 bg-white px-4 text-[13px] font-medium whitespace-nowrap text-gray-700 shadow-sm transition-all duration-500 hover:border-admin-primary active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer font-vietnam"
         >
           {/* Lớp nền màu xanh Primary trượt từ trái sang phải chiếm trọn nút khi hover chuột vào */}
-          <span className="absolute inset-y-0 left-0 w-0 bg-primary transition-all duration-500 ease-out group-hover:w-full" />
+          <span className="absolute inset-y-0 left-0 w-0 bg-admin-primary transition-all duration-500 ease-out group-hover:w-full" />
 
           {/* Khung nội dung chữ nổi lên trên lớp nền nhờ z-10 */}
           <div className="relative z-10 flex items-center justify-center text-gray-700 transition-colors duration-500 group-hover:text-white">
@@ -119,16 +119,16 @@ export default function AdminBrandsPage() {
             <CardDescription className="text-sm text-gray-500 mt-0.5">Danh sách lấy từ catalog hiện có trên website khách hàng.</CardDescription>
           </CardHeader>
 
-          <CardContent className="p-0"> {/* Đổi thành p-0 để bảng tràn lề hai bên, bo mượt theo Card */}
+          <CardContent className="">
             {loading ? (
               <div className="py-16 text-center text-sm text-muted-foreground">Đang tải danh sách brand...</div>
             ) : brands.length ? (
-              /* 🌟 CHỐNG TRÀN BẢNG: Cho phép cuộn ngang ở màn hình nhỏ và ép cố định độ rộng cột bằng table-fixed */
-              <div className="w-full overflow-x-auto">
-                <Table className="w-full min-w-[700px] table-fixed">
+              /*CHỐNG TRÀN BẢNG: Cho phép cuộn ngang ở màn hình nhỏ và ép cố định độ rộng cột bằng table-fixed */
+              <div className="w-full overflow-x-auto rounded-lg">
+                <Table className="w-full min-w-[700px] table-auto">
                   <TableHeader>
                     {/* Tiêu đề bảng màu xanh đậm, khóa màu nền tuyệt đối chống lỗi chuyển trắng khi hover */}
-                    <TableRow className="bg-[#052962] hover:bg-[#052962] border-none">
+                    <TableRow className="bg-admin-primary hover:bg-admin-primary-dark border-none">
                       <TableHead className="h-11 text-xs font-bold uppercase tracking-wider text-[#FFE500] pl-6 w-[25%]">Thương hiệu</TableHead>
                       <TableHead className="h-11 text-xs font-bold uppercase tracking-wider text-white/90 w-[45%]">Mô tả chi tiết</TableHead>
                       <TableHead className="h-11 text-xs font-bold uppercase tracking-wider text-white/90 w-[15%]">Loại nhãn</TableHead>
@@ -142,11 +142,37 @@ export default function AdminBrandsPage() {
 
                         {/* Cột 1: Tên thương hiệu + Slug */}
                         <TableCell className="pl-6 py-3.5">
-                          <div className="font-bold text-gray-900 tracking-tight">{brand.name}</div>
-                          <div className="text-xs text-gray-400 font-medium mt-0.5 truncate max-w-[150px]">
-                            slug: {brand.slug}
+                          <div className="flex items-center gap-3">
+                            {/* 
+      Khung chứa ảnh:
+      - Thêm `rounded-lg` và `overflow-hidden` để ép ảnh bên trong phải bo góc theo 
+    */}
+                            <div className="h-10 w-10 shrink-0 rounded-lg overflow-hidden flex items-center justify-center">
+                              <img
+                                src={brand.image}
+                                alt={brand.name}
+                                /* 
+                                  Thêm `rounded-lg` trực tiếp vào ảnh để đảm bảo ảnh bo góc mượt mà,
+                                  kết hợp với `object-cover` hoặc `object-contain` tùy thuộc vào ảnh gốc
+                                */
+                                className="w-full h-full object-cover rounded-lg"
+                                onError={(e) => {
+                                  e.currentTarget.src = "https://placehold.co";
+                                }}
+                              />
+                            </div>
+
+                            <div className="min-w-0">
+                              <div className="font-semibold text-gray-900 truncate">
+                                {brand.name}
+                              </div>
+                              {/* <div className="text-xs text-gray-500 truncate">
+        {brand.slug}
+      </div> */}
+                            </div>
                           </div>
                         </TableCell>
+
 
                         {/* Cột 2: Mô tả chi tiết (Ép truncate dấu ba chấm chống tràn chữ làm vỡ bảng) */}
                         <TableCell className="py-3.5">
@@ -193,6 +219,7 @@ export default function AdminBrandsPage() {
               </div>
             )}
           </CardContent>
+
         </Card>
 
         <div className="space-y-6">
@@ -213,7 +240,7 @@ export default function AdminBrandsPage() {
               ) : (
                 <div className="rounded-xl border border-dashed p-4 text-sm text-muted-foreground">Không có seller staff nào đang chờ duyệt.</div>
               )}
-              <Button asChild className="w-full">
+              <Button asChild className="w-full bg-admin-primary hover:bg-admin-primary-dark text-white rounded-lg">
                 <Link href="/admin/users">Mở danh sách duyệt seller</Link>
               </Button>
             </CardContent>
@@ -240,14 +267,50 @@ export default function AdminBrandsPage() {
         <Card>
           <CardHeader>
             <CardTitle>Brand nổi bật</CardTitle>
-            <CardDescription>{featuredBrands.length} brand đang được đánh dấu featured trên website khách hàng.</CardDescription>
+            <CardDescription>
+              {featuredBrands.length} thương hiệu đang được ưu tiên hiển thị trên website.
+            </CardDescription>
           </CardHeader>
-          <CardContent className="flex flex-wrap gap-2">
-            {featuredBrands.map((brand) => (
-              <span key={brand.id} className="rounded-full border bg-white px-3 py-1 text-sm text-slate-700">
-                {brand.name}
-              </span>
-            ))}
+
+          <CardContent>
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
+              {featuredBrands.map((brand) => (
+                <div key={brand.id} className="group aspect-square w-full [perspective:1000px]">
+
+                  {/* Khung xoay chuyển động */}
+                  <div className="relative h-full w-full rounded-2xl  border-transparent bg-transparent  transition-all duration-500 [transform-style:preserve-3d] group-hover:[transform:rotateY(180deg)]">
+
+                    {/* --- MẶT TRƯỚC (HIỂN THỊ CHÍNH) --- */}
+                    <div className="absolute inset-0 flex items-center justify-center overflow-hidden rounded-2xl [backface-visibility:hidden]">
+                      <img
+                        src={brand.image}
+                        alt={brand.name}
+
+                        className="w-full h-full object-contain transition-transform duration-300 group-hover:scale-105"
+                        onError={(e) => {
+                          e.currentTarget.src = `https://placehold.co{encodeURIComponent(brand.name)}`;
+                        }}
+                      />
+                    </div>
+
+
+                    {/* --- MẶT SAU (HIỂN THỊ KHI HOVER) --- */}
+                    <div className="absolute inset-0 flex flex-col items-center justify-center rounded-2xl bg-gradient-to-br from-slate-900 to-slate-800 p-4 text-white [backface-visibility:hidden] [transform:rotateY(180deg)]">
+                      <p className="text-xs font-semibold uppercase tracking-wider text-amber-400 mb-1">Thương hiệu</p>
+                      <h4 className="text-base font-bold text-white mb-2">{brand.name}</h4>
+
+                      {/* Nút bấm hành động giả định hoặc xem chi tiết */}
+                      <button className="rounded-lg bg-white/10 px-3 py-1 text-xs font-medium text-white backdrop-blur-sm transition hover:bg-white/20">
+                        Xem sản phẩm
+                      </button>
+                    </div>
+
+                  </div>
+                </div>
+              ))}
+
+
+            </div>
           </CardContent>
         </Card>
       )}

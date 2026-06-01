@@ -295,10 +295,41 @@ export default function AdminAuditLogsPage() {
 
   return (
     <div className="space-y-6 px-4 py-6 md:px-8">
-      <div>
-        <h1 className="text-3xl font-bold tracking-tight">Lịch sử thao tác</h1>
-        <p className="text-sm text-muted-foreground">Theo dõi tài khoản nào đã thay đổi dữ liệu, trên bảng nào, tại thời điểm nào và payload thao tác tương ứng.</p>
+
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 w-full font-vietnam">
+
+        {/* Khối bên trái: Tiêu đề + Mô tả */}
+        <div className="space-y-1">
+          <h1 className="text-3xl font-bold tracking-tight text-slate-900">
+            Lịch sử thao tác
+          </h1>
+          <p className="text-sm text-muted-foreground">
+            Theo dõi tài khoản nào đã thay đổi dữ liệu, trên bảng nào, tại thời điểm nào và payload thao tác tương ứng.
+          </p>
+        </div>
+
+        {/* Khối bên phải: Nút Làm mới (Tự động dạt sang phải nhờ flex-row & justify-between) */}
+        <button
+          onClick={() => void handleResetFilters()}
+          disabled={loading}
+          className={cn(
+            "group relative overflow-hidden w-full shrink-0 sm:w-auto", // Đổi xl:w-auto thành sm:w-auto để nút gọn lại sớm hơn
+            "text-[13px] font-medium whitespace-nowrap",
+            "border border-slate-200 bg-white text-slate-700",
+            "hover:border-admin-primary transition-all duration-500",
+            "h-[38px] rounded-md px-4 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+          )}
+        >
+          <span className="absolute inset-y-0 left-0 w-0 bg-admin-primary transition-all duration-500 ease-out group-hover:w-full" />
+          <div className="relative z-10 flex items-center justify-center text-gray-700 group-hover:text-white transition-colors duration-500">
+            <RefreshCcw className={cn("w-3.5 h-3.5 mr-2 transition-transform duration-700 ease-in-out text-gray-400 group-hover:text-white", loading ? "animate-spin" : "group-hover:rotate-180")} />
+            <span>Làm mới</span>
+          </div>
+        </button>
+
       </div>
+
+
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>
@@ -323,11 +354,11 @@ export default function AdminAuditLogsPage() {
 
       <Card className="border-none shadow-sm bg-white rounded-xl overflow-hidden font-vietnam">
         {/* ================= KHỐI HEADER + BỘ LỌC TÌM KIẾM ================= */}
-        <CardHeader className="border-b border-gray-50 px-5 py-4">
+        <CardHeader className="border-b border-gray-50  py-7">
           <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between xl:gap-6">
             <div className="xl:max-w-60 shrink-0">
               <CardTitle className="text-base font-bold text-gray-800 tracking-tight flex items-center gap-2">
-                <Terminal className="w-4 h-4 text-primary" /> Nhật ký vận hành
+                Nhật ký vận hành
               </CardTitle>
               <CardDescription className="text-[13px] text-gray-400 mt-1">
                 Theo dõi thay đổi dữ liệu gần đây.
@@ -335,25 +366,24 @@ export default function AdminAuditLogsPage() {
             </div>
 
             {/* Cụm thanh bộ lọc đồng bộ cao cấp */}
-            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2 xl:min-w-0 xl:flex-1 xl:grid-cols-[minmax(220px,1.2fr)_minmax(170px,0.82fr)_minmax(140px,0.68fr)_minmax(200px,0.92fr)_auto] xl:items-center">
-
+            <div className="flex flex-wrap items-center justify-end gap-3 w-full flex-1">
               {/* 1. Ô tìm kiếm tích hợp kính lúp */}
-              <div className="relative w-full group xl:min-w-0">
+              <div className="relative w-full sm:w-[300px] shrink-0 group">
                 <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                  <Search className="w-4 h-4 text-gray-400 group-focus-within:text-primary transition-colors" />
+                  <Search className="w-4 h-4 text-gray-400 group-focus-within:text-admin-primary transition-colors" />
                 </div>
                 <input
                   type="text"
+                  className="w-full h-9.5 pl-9 pr-3 rounded-md border border-gray-100 text-[13px] bg-white shadow-sm focus-visible:outline-none focus-visible:border-admin-primary focus-visible:ring-1 focus-visible:ring-admin-primary/20 transition-all"
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                   list="audit-log-search-suggestions"
                   placeholder="Tìm user, email, record id, payload..."
-                  className="h-9.5 w-full rounded-md border border-gray-100 bg-white pl-9 pr-3 text-[13px] font-medium text-gray-700 placeholder-gray-400 outline-none shadow-sm hover:border-gray-200 focus:border-primary transition-all duration-300"
                 />
               </div>
 
               {/* 2. Custom Dropdown Hành động (Hover hiển thị) */}
-              <div className="relative group w-full xl:min-w-35">
+              <div className="relative group w-fit xl:min-w-fit">
                 <div className="flex h-9.5 items-center justify-between rounded-md border border-gray-100 bg-white px-3 py-2 shadow-sm transition-all hover:border-gray-200 cursor-pointer">
                   <span className="text-[13px] font-medium text-gray-700 whitespace-nowrap">
                     {ACTION_FILTER_OPTIONS.find((item) => item.value === actionFilter)?.label}
@@ -369,7 +399,7 @@ export default function AdminAuditLogsPage() {
                       <div
                         key={item.value}
                         onClick={() => setActionFilter(item.value)}
-                        className={`px-3 py-2.5 text-[13px] cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors ${actionFilter === item.value ? 'text-primary font-bold bg-gray-50' : 'text-gray-700 hover:bg-gray-50'}`}
+                        className={`px-3 py-2.5 text-[13px] cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors ${actionFilter === item.value ? 'text-admin-primary font-bold bg-gray-50' : 'text-gray-700 hover:bg-gray-50'}`}
                       >
                         {item.label}
                       </div>
@@ -379,7 +409,7 @@ export default function AdminAuditLogsPage() {
               </div>
 
               {/* 3. Dropdown Vai trò - thêm filter mà không cần thêm nút */}
-              <div className="relative group w-full xl:min-w-35">
+              <div className="relative group w-fit xl:min-w-fit">
                 <div className="flex h-9.5 items-center justify-between rounded-md border border-gray-100 bg-white px-3 py-2 shadow-sm transition-all hover:border-gray-200 cursor-pointer">
                   <span className="text-[13px] font-medium text-gray-700 whitespace-nowrap">
                     {ROLE_FILTER_OPTIONS.find((item) => item.value === roleFilter)?.label}
@@ -389,13 +419,14 @@ export default function AdminAuditLogsPage() {
                   </svg>
                 </div>
 
-                <div className="absolute top-full left-0 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
+                <div className="absolute top-full left-0 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden z-50 opacity-0 invisible 
+                group-hover:opacity-100 group-hover:visible transition-all duration-200">
                   <div className="flex flex-col whitespace-nowrap">
                     {ROLE_FILTER_OPTIONS.map((item) => (
                       <div
                         key={item.value}
                         onClick={() => setRoleFilter(item.value)}
-                        className={`px-3 py-2.5 text-[13px] cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors ${roleFilter === item.value ? 'text-primary font-bold bg-gray-50' : 'text-gray-700 hover:bg-gray-50'}`}
+                        className={`px-3 py-2.5 text-[13px] cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors ${roleFilter === item.value ? 'text-admin-primary font-bold bg-gray-50' : 'text-gray-700 hover:bg-gray-50'}`}
                       >
                         {item.label}
                       </div>
@@ -405,37 +436,22 @@ export default function AdminAuditLogsPage() {
               </div>
 
               {/* 4. Ô nhập tên bảng */}
-              <div className="relative w-full group xl:min-w-0">
+              <div className="relative w-full sm:w-[160px] shrink-0 group">
                 <input
                   type="text"
+                  className="w-full h-9.5 px-3 rounded-md border border-gray-100 text-[13px] bg-white shadow-sm focus-visible:outline-none focus-visible:border-admin-primary transition-all"
+
                   value={tableName}
                   onChange={(event) => setTableName(event.target.value)}
                   list="audit-log-table-suggestions"
-                  placeholder="Tên bảng (ví dụ: accounts)"
-                  className="h-9.5 w-full rounded-md border border-gray-100 bg-white px-3 text-[13px] font-medium text-gray-700 placeholder-gray-400 outline-none shadow-sm hover:border-gray-200 focus:border-primary transition-all duration-300"
+                  placeholder="Tên bảng: accounts"
                 />
               </div>
 
-              {/* 5. Nút Làm mới hiệu ứng Trượt nền màu Primary */}
-              <button
-                onClick={() => void handleResetFilters()}
-                disabled={loading}
-                className={cn(
-                  "group relative overflow-hidden w-full shrink-0 xl:w-auto",
-                  "text-[13px] font-medium whitespace-nowrap",
-                  "border border-gray-100 bg-white text-gray-700",
-                  "hover:border-primary transition-all duration-500",
-                  "h-9.5 rounded-md px-4 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
-                )}
-              >
-                <span className="absolute inset-y-0 left-0 w-0 bg-primary transition-all duration-500 ease-out group-hover:w-full" />
-                <div className="relative z-10 flex items-center justify-center text-gray-700 group-hover:text-white transition-colors duration-500">
-                  <RefreshCcw className={cn("w-3.5 h-3.5 mr-2 transition-transform duration-700 ease-in-out text-gray-400 group-hover:text-white", loading ? "animate-spin" : "group-hover:rotate-180")} />
-                  <span>Làm mới</span>
-                </div>
-              </button>
-
             </div>
+
+
+
 
             <datalist id="audit-log-search-suggestions">
               {searchSuggestions.map((item) => (
@@ -452,23 +468,23 @@ export default function AdminAuditLogsPage() {
         </CardHeader>
 
         {/* ================= KHỐI BẢNG AUDIT LOGS DỮ LIỆU ================= */}
-        <CardContent className="p-0">
+        <CardContent className="">
           {loading ? (
             <div className="py-24 text-center flex flex-col items-center justify-center gap-3">
-              <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+              <div className="w-6 h-6 border-2 border-admin-primary border-t-transparent rounded-full animate-spin" />
               <p className="text-[13px] font-medium text-gray-400">Đang đồng bộ dữ liệu nhật ký...</p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
-              <Table className="w-full border-collapse">
-                <TableHeader className="bg-gray-50/70 border-b border-gray-100">
+            <div className="overflow-x-auto rounded-lg ">
+              <Table className="w-full border-collapse ">
+                <TableHeader className="bg-admin-primary border-b border-gray-100 ">
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="text-[12px] font-bold text-gray-500 py-3.5 pl-6">Người thao tác</TableHead>
-                    <TableHead className="text-[12px] font-bold text-gray-500 py-3.5">Hành động</TableHead>
-                    <TableHead className="text-[12px] font-bold text-gray-500 py-3.5">Bảng dữ liệu / ID</TableHead>
-                    <TableHead className="text-[12px] font-bold text-gray-500 py-3.5 min-w-[320px]">Payload thay đổi (JSON)</TableHead>
-                    <TableHead className="text-[12px] font-bold text-gray-500 py-3.5">Địa chỉ IP</TableHead>
-                    <TableHead className="text-[12px] font-bold text-gray-500 py-3.5 pr-6">Thời gian</TableHead>
+                    <TableHead className="text-[12px] font-bold font-vietnam text-[#FFE500] py-3.5 pl-6">NGƯỜI THAO TÁC</TableHead>
+                    <TableHead className="text-[12px] font-bold font-vietnam text-white py-3.5">HÀNH ĐỘNG</TableHead>
+                    <TableHead className="text-[12px] font-bold font-vietnam text-white py-3.5">BẢNG DỮ LIỆU / ID</TableHead>
+                    <TableHead className="text-[12px] font-bold font-vietnam text-white py-3.5 min-w-[320px]">PAYLOAD THAY ĐỔI (JSON)</TableHead>
+                    <TableHead className="text-[12px] font-bold font-vietnam text-white py-3.5">ĐỊA CHỈ IP</TableHead>
+                    <TableHead className="text-[12px] font-bold font-vietnam text-[#FFE500] py-3.5 pr-9.5 text-right">THỜI GIAN</TableHead>
                   </TableRow>
                 </TableHeader>
 
@@ -494,7 +510,7 @@ export default function AdminAuditLogsPage() {
                               {isSystem ? <ShieldAlert className="w-4 h-4" /> : log.username?.charAt(0).toUpperCase() || "S"}
                             </div>
                             <div className="min-w-0">
-                              <p className="text-[13px] font-semibold text-gray-700 group-hover:text-primary transition-colors truncate">
+                              <p className="text-[13px] font-semibold text-gray-700 group-hover:text-admin-primary transition-colors truncate">
                                 {log.username || "Hệ thống (System)"}
                               </p>
                               <p className="text-[12px] text-gray-400 truncate mt-0.5">
@@ -562,7 +578,7 @@ export default function AdminAuditLogsPage() {
                             </pre>
 
                             {log.changedData && (
-                              <div className="absolute bottom-1 right-2 flex items-center gap-0.5 text-[10px] font-bold font-vietnam text-gray-400 group-hover/box:text-primary transition-colors">
+                              <div className="absolute bottom-1 right-2 flex items-center gap-0.5 text-[10px] font-bold font-vietnam text-gray-400 group-hover/box:text-admin-primary transition-colors">
                                 {isPayloadExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                               </div>
                             )}

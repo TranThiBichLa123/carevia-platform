@@ -1,6 +1,6 @@
 "use client";
 
-import { Bell, Check, CheckCheck, Loader2 } from "lucide-react";
+import { Bell, Check, CheckCheck, Loader2, RefreshCcw } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +15,7 @@ import {
 import { notificationApi, type NotificationItem } from "@/lib/notificationApi";
 import { useUserStore } from "@/lib/store";
 import { formatDateTime } from "@/lib/backofficeUtils";
+import { cn } from "@/lib/utils";
 
 export default function AdminNotificationsPage() {
 	const { authUser, isAuthenticated } = useUserStore();
@@ -91,7 +92,7 @@ export default function AdminNotificationsPage() {
 	}
 
 	return (
-		<div className="space-y-6 px-4 py-6 md:px-8">
+		<div className="space-y-6 px-4 py-6 md:px-8 font-vietnam">
 			<div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
 				<div>
 					<h1 className="text-3xl font-bold tracking-tight">Thông báo hệ thống</h1>
@@ -99,10 +100,60 @@ export default function AdminNotificationsPage() {
 						Theo dõi các sự kiện booking, đơn hàng và thanh toán phát sinh trong hệ thống.
 					</p>
 				</div>
-				<div className="flex flex-wrap gap-2">
-					<Button variant={showUnreadOnly ? "outline" : "default"} onClick={() => setShowUnreadOnly(false)}>Tất cả</Button>
-					<Button variant={showUnreadOnly ? "default" : "outline"} onClick={() => setShowUnreadOnly(true)}>Chưa đọc</Button>
-					<Button variant="outline" onClick={() => void loadNotifications()} disabled={loading}>Làm mới</Button>
+				<div className="flex flex-wrap gap-2.5 font-vietnam">
+					{/* NÚT 1: TẤT CẢ */}
+					<Button
+						variant={showUnreadOnly ? "outline" : "default"}
+						onClick={() => setShowUnreadOnly(false)}
+						className={cn(
+							"rounded-lg px-5 h-[38px] text-[13px]  tracking-tight transition-all duration-300 active:scale-95 shadow-sm",
+							!showUnreadOnly
+								? "bg-admin-primary text-white hover:bg-admin-primary/95 shadow-md shadow-admin-primary/10 border-transparent"
+								: "border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+						)}
+					>
+						Tất cả
+					</Button>
+
+					{/* NÚT 2: CHƯA ĐỌC */}
+					<Button
+						variant={showUnreadOnly ? "default" : "outline"}
+						onClick={() => setShowUnreadOnly(true)}
+						className={cn(
+							"rounded-lg px-5 h-[38px] text-[13px]  tracking-tight transition-all duration-300 active:scale-95 shadow-sm",
+							showUnreadOnly
+								? "bg-admin-primary text-white hover:bg-admin-primary/95 shadow-md shadow-admin-primary/10 border-transparent"
+								: "border-slate-200 bg-white text-slate-600 hover:bg-slate-50 hover:text-slate-900"
+						)}
+					>
+						Chưa đọc
+					</Button>
+
+					{/* NÚT 3: LÀM MỚI (Tích hợp hiệu ứng trượt nền và xoay icon cao cấp) */}
+					<Button
+						variant="outline"
+						onClick={() => void loadNotifications()}
+						disabled={loading}
+						className={cn(
+							"group relative overflow-hidden rounded-lg px-4 h-[38px] text-[13px] font-medium tracking-tight shadow-sm",
+							"border border-slate-200 bg-white text-slate-600 transition-all duration-500",
+							"hover:border-admin-primary active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
+						)}
+					>
+						{/* Lớp nền trượt màu xanh dương thương hiệu khi hover */}
+						<span className="absolute inset-y-0 left-0 w-0 bg-admin-primary transition-all duration-500 ease-out group-hover:w-full" />
+
+						{/* Khối nội dung chữ và icon tự đổi màu trắng mượt mà khi hover */}
+						<div className="relative z-10 flex items-center justify-center group-hover:text-white transition-colors duration-500">
+							<RefreshCcw
+								className={cn(
+									"w-3.5 h-3.5 mr-1.5 transition-transform duration-700 ease-in-out text-slate-400 group-hover:text-white",
+									loading ? "animate-spin" : "group-hover:rotate-180"
+								)}
+							/>
+							<span>Làm mới</span>
+						</div>
+					</Button>
 				</div>
 			</div>
 

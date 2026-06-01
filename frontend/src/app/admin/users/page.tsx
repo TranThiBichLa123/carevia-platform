@@ -238,7 +238,7 @@ export default function AdminUsersPage() {
 											<div
 												key={item.value}
 												onClick={() => setRoleFilter(item.value as RoleFilter)}
-												className={`px-3 py-2.5 text-[13px] cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors ${roleFilter === item.value ? 'text-primary font-bold bg-gray-50' : 'text-gray-700 hover:bg-gray-50'} font-vietnam`}
+												className={`px-3 py-2.5 text-[13px] cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors ${roleFilter === item.value ? 'text-admin-primary font-bold bg-gray-50' : 'text-gray-700 hover:bg-gray-50'} font-vietnam`}
 											>
 												{item.label}
 											</div>
@@ -278,7 +278,7 @@ export default function AdminUsersPage() {
 											<div
 												key={item.value}
 												onClick={() => setStatusFilter(item.value as StatusFilter)}
-												className={`px-3 py-2.5 text-[13px] cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors ${statusFilter === item.value ? 'text-primary font-bold bg-gray-50' : 'text-gray-700 hover:bg-gray-50'} font-vietnam`}
+												className={`px-3 py-2.5 text-[13px] cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors ${statusFilter === item.value ? 'text-admin-primary font-bold bg-gray-50' : 'text-gray-700 hover:bg-gray-50'} font-vietnam`}
 											>
 												{item.label}
 											</div>
@@ -295,12 +295,12 @@ export default function AdminUsersPage() {
 									"group relative overflow-hidden",
 									"font-vietnam text-[13px] font-medium激活 whitespace-nowrap",
 									"border border-gray-200 bg-white text-gray-700", // Hạ màu viền xuống gray-100 cho mỏng nhẹ như ảnh
-									"hover:border-primary transition-all duration-500",
+									"hover:border-admin-primary transition-all duration-500",
 									"h-9.5 rounded-md px-4 active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
 								)}
 							>
 								{/* Lớp nền trượt màu Primary: Trượt ra khi hover và giữ nguyên khi chuột ở đó */}
-								<span className="absolute inset-y-0 left-0 w-0 bg-primary transition-all duration-500 ease-out group-hover:w-full" />
+								<span className="absolute inset-y-0 left-0 w-0 bg-admin-primary transition-all duration-500 ease-out group-hover:w-full" />
 
 								{/* Nội dung chữ và Icon: Chuyển sang màu trắng mượt mà khi hover */}
 								<div className="relative z-10 flex items-center justify-center text-gray-700 group-hover:text-white transition-colors duration-500">
@@ -318,14 +318,14 @@ export default function AdminUsersPage() {
 
 					</div>
 				</CardHeader>
-				<CardContent className="p-0 font-vietnam">
+				<CardContent className=" font-vietnam">
 					{loading ? (
 						<div className="py-24 text-center flex flex-col items-center justify-center gap-3">
-							<div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+							<div className="w-6 h-6 border-2 border-admin-primary border-t-transparent rounded-full animate-spin" />
 							<p className="text-[13px] font-medium text-gray-400">Đang tải danh sách tài khoản...</p>
 						</div>
 					) : (
-						<div className="overflow-x-auto">
+						<div className="overflow-x-auto rounded-lg">
 							<Table className="w-full border-collapse">
 								<TableHeader className="bg-gray-50/70 border-b border-gray-100">
 									<TableRow className="hover:bg-transparent">
@@ -369,7 +369,7 @@ export default function AdminUsersPage() {
 														</div>
 
 														<div className="min-w-0">
-															<p className="text-[13px] font-semibold text-gray-700 group-hover:text-primary transition-colors truncate">
+															<p className="text-[13px] font-semibold text-gray-700 group-hover:text-admin-primary transition-colors truncate">
 																{account.username}
 															</p>
 															<p className="text-[12px] text-gray-400 truncate mt-0.5">{account.email}</p>

@@ -8,6 +8,7 @@
   /* Brand Colors */
   --primary: #159fd8;
   --staff-primary:#173E77;
+  --admin-primary:#0f172b;
   /* Nếu bạn muốn hover khác màu thì đổi mã ở đây, hiện tại đang để giống nhau theo ý bạn */
   --primary-hover: #159fd8;
   --purple-hover: #A96BDE;
@@ -29,6 +30,7 @@
   /* Tailwind sẽ tự tạo: text-primary, bg-primary, border-primary, ... */
   --color-primary: var(--primary);
   --color-staff-primary: var(--staff-primary);
+  --color-admin-primary: var(--admin-primary);
   --color-primary-hover: var(--primary-hover);
   --color-purple: var(--purple);
   --color-purple-hover: var(--purple-hover);

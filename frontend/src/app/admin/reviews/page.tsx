@@ -140,11 +140,11 @@ export default function AdminReviewsPage() {
         </Card>
       </div>
 
-      {legacyReplyCount > 0 && (
+      {/* {legacyReplyCount > 0 && (
         <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
           Có {legacyReplyCount} review vẫn đang chứa phản hồi công khai từ phiên bản cũ. Trang này chỉ hiển thị để admin theo dõi lịch sử moderation, không tạo phản hồi mới.
         </div>
-      )}
+      )} */}
 
       <Card>
         <CardHeader>
@@ -159,14 +159,14 @@ export default function AdminReviewsPage() {
               {/* 1. Ô tìm kiếm thông minh tích hợp Icon */}
               <div className="relative w-full sm:w-80 group">
                 <div className="absolute inset-y-0 left-3 flex items-center pointer-events-none">
-                  <Search className="w-4 h-4 text-gray-400 group-focus-within:text-primary transition-colors" />
+                  <Search className="w-4 h-4 text-gray-400 group-focus-within:text-admin-primary transition-colors" />
                 </div>
                 <input
                   type="text"
                   value={search}
                   onChange={(event) => setSearch(event.target.value)}
                   placeholder="Tìm theo thiết bị, khách hàng, nội dung..."
-                  className="h-9.5 w-full rounded-md border border-gray-100 bg-white pl-9 pr-4 text-[13px] font-medium text-gray-700 placeholder-gray-400 outline-none shadow-sm hover:border-gray-200 focus:border-primary transition-all duration-300"
+                  className="h-9.5 w-full rounded-md border border-gray-100 bg-white pl-9 pr-4 text-[13px] font-medium text-gray-700 placeholder-gray-400 outline-none shadow-sm hover:border-gray-200 focus:border-admin-primary transition-all duration-300"
                 />
               </div>
 
@@ -195,7 +195,7 @@ export default function AdminReviewsPage() {
                       <div
                         key={item.value}
                         onClick={() => setVisibilityFilter(item.value as VisibilityFilter)}
-                        className={`px-3 py-2.5 text-[13px] cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors ${visibilityFilter === item.value ? 'text-primary font-bold bg-gray-50' : 'text-gray-700 hover:bg-gray-50'}`}
+                        className={`px-3 py-2.5 text-[13px] cursor-pointer border-b border-gray-100 last:border-b-0 transition-colors ${visibilityFilter === item.value ? 'text-admin-primary font-bold bg-gray-50' : 'text-gray-700 hover:bg-gray-50'}`}
                       >
                         {item.label}
                       </div>
@@ -212,12 +212,12 @@ export default function AdminReviewsPage() {
                   "group relative overflow-hidden w-full sm:w-auto",
                   "text-[13px] font-medium whitespace-nowrap",
                   "border border-gray-100 bg-white text-gray-700",
-                  "hover:border-primary transition-all duration-500",
+                  "hover:border-admin-primary transition-all duration-500",
                   "h-9.5 shrink-0 rounded-md px-4 shadow-sm active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
                 )}
               >
                 {/* Lớp nền trượt màu Primary thương hiệu */}
-                <span className="absolute inset-y-0 left-0 w-0 bg-primary transition-all duration-500 ease-out group-hover:w-full" />
+                <span className="absolute inset-y-0 left-0 w-0 bg-admin-primary transition-all duration-500 ease-out group-hover:w-full" />
 
                 {/* Nội dung chữ và Icon xoay chuyển màu trắng mượt mà */}
                 <div className="relative z-10 flex items-center justify-center text-gray-700 group-hover:text-white transition-colors duration-500">
@@ -241,14 +241,14 @@ export default function AdminReviewsPage() {
           ) : (
             <div className="overflow-x-auto rounded-xl border border-gray-100 bg-white">
               <Table className="w-full border-collapse font-vietnam">
-                <TableHeader className="bg-gray-50/70 border-b border-gray-100">
+                <TableHeader className="bg-admin-primary border-b border-gray-100">
                   <TableRow className="hover:bg-transparent">
-                    <TableHead className="min-w-55 py-3.5 pl-6 text-[12px] font-bold text-gray-500">Thiết bị / Khách hàng</TableHead>
-                    <TableHead className="min-w-70 py-3.5 text-[12px] font-bold text-gray-500">Nội dung đánh giá</TableHead>
-                    <TableHead className="text-[12px] font-bold text-gray-500 py-3.5">Trạng thái</TableHead>
-                    <TableHead className="min-w-70 py-3.5 text-[12px] font-bold text-gray-500">Phản hồi công khai hiện có</TableHead>
-                    <TableHead className="text-[12px] font-bold text-gray-500 py-3.5">Thời gian</TableHead>
-                    <TableHead className="text-[12px] font-bold text-gray-500 py-3.5 pr-6 text-right">Thao tác</TableHead>
+                    <TableHead className="min-w-55 py-3.5 pl-6 text-[12px] font-bold font-vietnam text-[#FFE500]">THIẾT BỊ / KHÁCH HÀNG</TableHead>
+                    <TableHead className="min-w-70 py-3.5 text-[12px] font-bold font-vietnam text-white">NỘI DUNG ĐÁNH GIÁ</TableHead>
+                    <TableHead className="text-[12px] font-bold font-vietnam text-white py-3.5">TRẠNG THÁI</TableHead>
+                    <TableHead className="min-w-70 py-3.5 text-[12px] font-bold font-vietnam text-white">PHẢN HỒI CÔNG KHAI HIỆN CÓ</TableHead>
+                    <TableHead className="text-[12px] font-bold font-vietnam text-white py-3.5">THỜI GIAN</TableHead>
+                    <TableHead className="text-[12px] font-bold font-vietnam text-[#FFE500] py-3.5 pr-6 text-right">THAO TÁC</TableHead>
                   </TableRow>
                 </TableHeader>
 
@@ -273,7 +273,7 @@ export default function AdminReviewsPage() {
                                   onError={(e) => { e.currentTarget.src = "https://unsplash.com"; }}
                                 />
                               </div> */}
-                              <p className="text-[13px] font-bold text-gray-800 line-clamp-2 leading-tight group-hover:text-primary transition-colors">
+                              <p className="text-[13px] font-bold text-gray-800 line-clamp-2 leading-tight group-hover:text-admin-primary transition-colors">
                                 {review.deviceName || "Thiết bị không xác định"}
                               </p>
                             </div>
@@ -326,7 +326,7 @@ export default function AdminReviewsPage() {
 
                             {/* Icon mũi tên nhỏ báo hiệu có thể click mở rộng */}
                             {review.comment && (
-                              <div className="absolute bottom-1 right-2 flex items-center gap-0.5 text-[10px] font-bold text-gray-400 group-hover/box:text-primary transition-colors">
+                              <div className="absolute bottom-1 right-2 flex items-center gap-0.5 text-[10px] font-bold text-gray-400 group-hover/box:text-admin-primary transition-colors">
                                 {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                               </div>
                             )}
@@ -366,7 +366,7 @@ export default function AdminReviewsPage() {
                               )}>
                                 {review.adminReply}
                               </p>
-                              <div className="absolute bottom-1 right-2 text-gray-400 group-hover/reply:text-primary">
+                              <div className="absolute bottom-1 right-2 text-gray-400 group-hover/reply:text-admin-primary">
                                 {isExpanded ? <ChevronUp className="w-3 h-3" /> : <ChevronDown className="w-3 h-3" />}
                               </div>
                             </div>

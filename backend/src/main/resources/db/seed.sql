@@ -53,7 +53,11 @@ SET password_hash = '$2a$10$l6ZVK9xpG39mMeViACh1ueV2ZbfD8kihbBE10kuu9DTAaRSPRJvG
     updated_by = 'admin' 
 WHERE email = 'admin@carevia.vn';
 
-
+UPDATE accounts
+SET
+    avatar_url = 'https://i.pinimg.com/736x/5a/81/c0/5a81c0616095f150c74367dfb8e1fc91.jpg',
+    updated_at = NOW()
+WHERE id = 10;
 -- mật khẩu của admin là Admin@123
 
 

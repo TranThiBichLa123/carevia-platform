@@ -148,8 +148,9 @@ export default function AdminSettingsPage() {
                   <span>Ghi chú hỗ trợ</span>
                   <textarea value={form.supportNote} onChange={(event) => updateField("supportNote", event.target.value)} rows={4} className="w-full rounded-md border border-slate-200 px-3 py-2 outline-none transition focus:border-slate-400" />
                 </label>
-                <div className="flex justify-end">
-                  <Button onClick={() => void handleSave()} disabled={saving}>
+                <div className="flex justify-end ">
+                  <Button onClick={() => void handleSave()} disabled={saving} 
+                  className="rounded-lg bg-admin-primary hover:bg-admin-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-admin-primary focus-visible:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-admin-primary/90"> 
                     <Save className="mr-2 size-4" />{saving ? "Đang lưu..." : "Lưu cấu hình"}
                   </Button>
                 </div>
