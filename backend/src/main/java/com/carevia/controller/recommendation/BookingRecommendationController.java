@@ -3,6 +3,8 @@ package com.carevia.controller.recommendation;
 import com.carevia.service.recommendation.FuzzyTopsisService;
 import com.carevia.shared.dto.recommendation.BookingRecommendationRequest;
 import com.carevia.shared.dto.recommendation.BookingRecommendationResponse;
+
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/recommendations/bookings/fuzzy-topsis")
+@Tag(name = "Booking Recommendation", description = "APIs for recommending bookings using Fuzzy Topsis method")
 public class BookingRecommendationController {
 
 	private final FuzzyTopsisService fuzzyTopsisService;

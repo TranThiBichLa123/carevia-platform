@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.authentication.configurati
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -46,25 +47,54 @@ public class SecurityConfig {
     }
 
     @Bean
+    public WebSecurityCustomizer webSecurityCustomizer() {
+        return (web) -> web.ignoring().requestMatchers(
+                "/v3/api-docs/**",
+                "/v3/api-docs.yaml",
+                "/swagger-ui/**",
+                "/swagger-ui/index.html",
+                "/swagger-resources/**",
+                "/webjars/**");
+    }
+
+    @Bean
     SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                // !!! ADD THIS LINE !!!
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
+                // CHÈN ĐOẠN NÀY: Vô hiệu hóa điểm chặn Pre-auth đối với các tài nguyên Swagger
+                .exceptionHandling(exceptions -> exceptions
+                        .defaultAuthenticationEntryPointFor(
+                                (request, response, authException) -> {
+                                    // Cho phép tiếp tục luồng và không ném lỗi 403 với Swagger
+                                    response.setStatus(org.springframework.http.HttpStatus.OK.value());
+                                },
+                                org.springframework.security.web.util.matcher.AntPathRequestMatcher
+                                        .antMatcher("/swagger-ui/**")))
+
                 .authorizeHttpRequests(auth -> auth
+                        // Cho phép truy cập công khai tuyệt đối vào toàn bộ endpoint Swagger tầng dữ
+                        // liệu và UI
+                        .requestMatchers(
+                                "/v3/api-docs/**",
+                                "/v3/api-docs.yaml",
+                                "/swagger-ui/**",
+                                "/swagger-ui/index.html",
+                                "/swagger-resources/**",
+                                "/webjars/**",
+                                "/favicon.ico")
+                        .permitAll()
+
                         .requestMatchers("/error").permitAll()
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/recommendations/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/devices/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/system-settings/**").permitAll()
-                        // ZaloPay callback is called by ZaloPay servers (no JWT)
                         .requestMatchers("/api/v1/payments/zalopay/callback").permitAll()
-
-                        // THÊM DÒNG NÀY: Cho phép người dùng đã đăng nhập truy cập Wishlist
                         .requestMatchers("/api/v1/wishlist/**").authenticated()
-
                         .anyRequest().authenticated())
 
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);

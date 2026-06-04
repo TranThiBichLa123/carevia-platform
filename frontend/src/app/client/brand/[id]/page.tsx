@@ -88,7 +88,7 @@ const BrandDetailPage = () => {
       {/* Brand Hero */}
       {brand && (
         <div className="container mx-auto mb-6">
-          <div className="bg-white border border-gray-200 overflow-hidden">
+          <div className="bg-white border border-gray-200 overflow-hidden rounded-lg">
             <div className="relative bg-blue-50 p-8 md:p-12">
               <div className="flex flex-col md:flex-row items-center gap-8">
                 {brand.image && (
@@ -138,8 +138,8 @@ const BrandDetailPage = () => {
       )}
 
       {/* Products Section */}
-      <div className="container mx-auto">
-        <div className="bg-white border border-gray-200 p-6">
+      <div className="container mx-auto ">
+        <div className="bg-white border border-gray-200 p-6 rounded-lg">
           {/* Toolbar */}
           <div className="flex flex-wrap justify-between items-end mb-6 pb-4 border-b border-gray-200 gap-4">
             <div>
@@ -153,7 +153,7 @@ const BrandDetailPage = () => {
             <div className="flex items-center gap-3 flex-wrap">
               <button
                 onClick={handleDiscountToggle}
-                className={`flex items-center gap-1.5 text-[12px] font-bold px-3 py-2 border transition-colors ${onlyDiscounted
+                className={`flex items-center gap-1.5 text-[12px] font-bold px-3 py-2 rounded-lg border transition-colors ${onlyDiscounted
                   ? "bg-yellow-400 border-yellow-400 text-gray-900"
                   : "border-gray-200 text-gray-600 hover:border-yellow-400"
                   }`}
@@ -224,13 +224,13 @@ const BrandDetailPage = () => {
               {onlyDiscounted ? (
                 <button
                   onClick={() => setOnlyDiscounted(false)}
-                  className="mt-6 px-6 py-3 bg-primary text-white text-xs font-bold uppercase tracking-widest hover:bg-primary-dark transition-all"
+                  className="mt-6 rounded-lg px-6 py-3 bg-primary text-white text-xs font-bold uppercase tracking-widest hover:bg-primary-dark transition-all"
                 >
                   Xem tất cả sản phẩm
                 </button>
               ) : (
                 <Link href="/client/devices">
-                  <button className="mt-6 px-6 py-3 bg-primary text-white text-xs font-bold uppercase tracking-widest hover:bg-primary-dark transition-all">
+                  <button className="mt-6 rounded-lg px-6 py-3 bg-primary text-white text-xs font-bold uppercase tracking-widest hover:bg-primary-dark transition-all">
                     Xem tất cả sản phẩm
                   </button>
                 </Link>

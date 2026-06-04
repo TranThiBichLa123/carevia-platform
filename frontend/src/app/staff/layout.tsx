@@ -33,7 +33,7 @@ const staffSections = [
   { title: "Phiên trải nghiệm", href: "/staff/sessions", icon: Layers3 },
   { title: "Quản lý Voucher", href: "/staff/vouchers", icon: TicketPercent },
   { title: "CRM & Đánh giá", href: "/staff/reviews", icon: MessageSquareMore },
-  { title: "Thống kê brand", href: "/staff/statistics", icon: ChartColumnBig },
+  // { title: "Thống kê brand", href: "/staff/statistics", icon: ChartColumnBig },
 ];
 
 export default function StaffLayout({ children }: { children: React.ReactNode }) {

@@ -120,7 +120,7 @@ export default function AdminDashboardPage() {
 									<CardDescription>{section.description}</CardDescription>
 								</CardHeader>
 								<CardContent>
-									<Button asChild className="w-full">
+									<Button asChild className="w-full bg-admin-primary hover:bg-admin-primary text-white">
 										<Link href={section.href}>Truy cập</Link>
 									</Button>
 								</CardContent>

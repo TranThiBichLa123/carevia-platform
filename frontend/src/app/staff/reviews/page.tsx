@@ -96,7 +96,7 @@ export default function StaffReviewsPage() {
           type="button" // Đảm bảo không bị kích hoạt submit form ngoài ý muốn
           onClick={() => void loadReviews()}
           disabled={loading}
-          className="group relative h-9 shrink-0 overflow-hidden rounded-lg border border-gray-100 bg-white px-4 text-[13px] font-semibold whitespace-nowrap text-gray-700 shadow-xs transition-all duration-500 hover:border-staff-primary active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer font-vietnam"
+          className="group relative h-9 shrink-0 overflow-hidden rounded-lg border border-gray-100 bg-white px-4 text-[13px]  whitespace-nowrap text-gray-700 shadow-xs transition-all duration-500 hover:border-staff-primary active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer font-vietnam"
         >
           {/* Lớp nền màu xanh trượt mượt mà từ trái sang phải khi hover chuột vào */}
           <span className="absolute inset-y-0 left-0 w-0 bg-staff-primary transition-all duration-500 ease-out group-hover:w-full" />
@@ -113,9 +113,7 @@ export default function StaffReviewsPage() {
 
       </div>
 
-      <div className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-        Trang này hiện đang ở chế độ <span className="font-semibold">read-only</span>. Kiến trúc role đã chuyển quyền sở hữu review sang Brand Staff, nhưng backend chưa có API brand-scoped để phản hồi hoặc ẩn spam theo từng brand.
-      </div>
+
 
       <div className="grid gap-4 md:grid-cols-3">
         <Card>

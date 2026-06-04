@@ -22,7 +22,7 @@ const ProductsList = async () => {
   }
 
   return (
-    <div className="w-full max-w-7xl mx-auto px-4 py-10">
+    <div className="w-full max-w-7xl mx-auto  py-10 font-vietnam">
       <div className="flex items-center justify-between mb-8 border-b border-gray-100 pb-2">
         <div className="relative">
           <h2 className="text-base md:text-2xl font-bold text-gray-800 flex items-center gap-2">

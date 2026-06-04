@@ -113,7 +113,6 @@ const CategoriesSection = () => {
             >
               {sub.emoji && <span>{sub.emoji}</span>}
               <span className="flex-1">{sub.name}</span>
-              <ChevronRight size={13} className="text-gray-300 group-hover/item:text-primary transition-colors" />
             </a>
           ))}
         </div>
@@ -123,7 +122,6 @@ const CategoriesSection = () => {
   return (
     <nav className="hidden md:flex items-center bg-white h-12 border-t border-gray-100">
       {/* 1. DANH MỤC SẢN PHẨM */}
-      {/* 1. DANH MỤC SẢN PHẨM */}
       <div className="flex items-center gap-2 py-3 pr-2 cursor-pointer hover:text-primary transition-colors border-r border-gray-100">
         <Menu size={18} />
         <span className="text-[13px] font-vietnam font-semibold uppercase whitespace-nowrap">
@@ -131,9 +129,9 @@ const CategoriesSection = () => {
         </span>
       </div>
 
-
       {/* 2. DANH MỤC NỔI BẬT */}
-      <NavItem title="Danh mục nổi bật" items={hotCategories} />
+      <NavItem 
+       title="Danh mục nổi bật" items={hotCategories} />
 
       {/* 3. GỢI Ý CHO BẠN — Fuzzy TOPSIS */}
       <NavItem title="Gợi ý cho bạn" items={recommendationItems} />

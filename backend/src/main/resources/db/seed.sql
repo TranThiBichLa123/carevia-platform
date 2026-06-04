@@ -47,6 +47,12 @@ VALUES
   (6, 'client_cuong','cuong.le@gmail.com',     '$2a$10$N9qo8uLOickgx2ZMRZoMyeIjZAgcfl7p92ldGxad68LJZdL17lhu0', 'CLIENT', 'ACTIVE', NULL, 'vi', NOW(), NOW(), 'seed', 'seed')
 ON CONFLICT (id) DO NOTHING;
 
+UPDATE accounts
+SET
+    avatar_url = 'https://res.cloudinary.com/dcisx0vss/image/upload/q_auto/f_auto/v1780308622/download_4_ncdqwh.jpg',
+    updated_at = NOW()
+WHERE id = 6;
+
 UPDATE public.accounts
 SET password_hash = '$2a$10$l6ZVK9xpG39mMeViACh1ueV2ZbfD8kihbBE10kuu9DTAaRSPRJvGC', 
     updated_at = NOW(), 

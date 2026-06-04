@@ -21,18 +21,15 @@ export default async function Home() {
     // brands stays empty, HomeBrand will return null
   }
   return (
-    <div className="bg-white min-h-screen">
+    <div className="bg-white min-h-screen font-vietnam">
       <Container className="min-h-screen flex py-3 gap-3">
-        {/* py-7 = padding trên + dưới là 1.75rem (28px)
-pt-X = chỉ padding trên
-Tăng số (vd: py-10, pt-8) = khoảng cách lớn hơn */}
-        {/* <CategoriesSection /> */}
+       
         <div className="flex-1">
           <Banner />
           <ProductsList />
           <HomeBrand brands={brands} />
 
-          <section className="my-8 overflow-hidden rounded-[28px] border border-slate-200 bg-linear-to-r from-slate-50 via-white to-sky-50 p-6 shadow-sm">
+          <section className="my-8 overflow-hidden rounded-lg border border-slate-200 bg-linear-to-r from-slate-50 via-white to-sky-50 p-6 shadow-sm">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="max-w-2xl">
                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Seller onboarding</p>
@@ -42,10 +39,10 @@ Tăng số (vd: py-10, pt-8) = khoảng cách lớn hơn */}
                 </p>
               </div>
               <div className="flex flex-wrap gap-3">
-                <Button asChild>
+                <Button asChild className="rounded-lg">
                   <Link href="/sell-with-carevia">Đăng ký brand</Link>
                 </Button>
-                <Button asChild variant="outline">
+                <Button asChild  variant="outline" className="rounded-lg">
                   <Link href="/auth/signup?role=STAFF">Tạo tài khoản seller</Link>
                 </Button>
               </div>

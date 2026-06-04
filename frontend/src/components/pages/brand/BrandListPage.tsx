@@ -30,21 +30,22 @@ const BrandListPage = ({ brands }: Props) => {
                 />
             </div>
             {/* Header */}
-            <div >
-                
+            <div className="flex items-center justify-between">
                 <p className="text-sm text-gray-500">
                     {brands.length} thương hiệu đang có mặt tại Carevia
                 </p>
 
-                {/* Search */}
-                <div className="relative mt-4 max-w-sm">
-                    <Search size={16} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                <div className="relative w-full max-w-sm">
+                    <Search
+                        size={16}
+                        className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                    />
                     <input
                         type="text"
                         placeholder="Tìm thương hiệu..."
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
-                        className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 bg-white focus:outline-none focus:border-primary rounded-lg shadow-sm transition-colors"
+                        className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 bg-white focus:outline-none focus:border-primary rounded-lg shadow-sm"
                     />
                 </div>
             </div>
@@ -62,7 +63,7 @@ const BrandListPage = ({ brands }: Props) => {
                                 className="bg-white border border-white hover:border-primary rounded-lg hover:shadow-md transition-all group overflow-hidden flex flex-col relative"
                             >
                                 {/* Logo */}
-                                <div className="aspect-square bg-gray-50 flex items-center justify-center p-6 overflow-hidden relative">
+                                <div className="aspect-square  flex items-center justify-center  overflow-hidden relative">
                                     {brand.image ? (
                                         <Image
                                             src={brand.image}

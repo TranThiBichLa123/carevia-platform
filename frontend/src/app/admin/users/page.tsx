@@ -352,21 +352,41 @@ export default function AdminUsersPage() {
 													<div className="flex items-center gap-3">
 
 														{/* Khối bọc Avatar tròn */}
-														<div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-gray-200/40 bg-linear-to-br from-gray-100 to-gray-200/60 text-[14px] font-bold text-gray-500 shadow-inner">
-															{hasAvatar ? (
+														<div className="relative flex h-9 w-9 shrink-0 items-center justify-center overflow-hidden rounded-full border border-slate-200/60 bg-slate-100 font-vietnam text-[13px] font-bold text-slate-500 shadow-inner">
+															{hasAvatar && account.avatarUrl ? (
 																<img
-																	src={account.avatarUrl || ""}
+																	src={account.avatarUrl}
 																	alt={account.username}
-																	className="w-full h-full object-cover"
+																	className="absolute inset-0 w-full h-full object-cover z-10 bg-white" // Thêm z-10 và bg-white để che hoàn toàn lớp nền xám phía dưới
 																	onError={(e) => {
-																		// Nếu link ảnh từ server bị lỗi (404), ẩn thẻ img để hiện chữ cái thay thế
-																		e.currentTarget.style.display = 'none';
+																		{/* 
+          THAY ĐỔI MẤU CHỐT: 
+          Khi ảnh lỗi, ta chủ động xóa ảnh khỏi DOM và kích hoạt 
+          hiển thị chữ cái thay thế bằng cách tìm phần tử kế tiếp
+        */}
+																		const parent = e.currentTarget.parentElement;
+																		if (parent) {
+																			e.currentTarget.remove(); // Xóa hẳn thẻ img bị lỗi
+																			const fallbackSpan = parent.querySelector('.avatar-fallback');
+																			if (fallbackSpan) fallbackSpan.classList.remove('hidden'); // Hiện chữ cái lên
+																		}
 																	}}
 																/>
 															) : null}
-															{/* Chữ cái thay thế luôn nằm ẩn phía dưới, xuất hiện khi không có ảnh hoặc ảnh lỗi */}
-															<span className="absolute z-0">{account.username.charAt(0).toUpperCase()}</span>
+
+															{/* 
+    Chữ cái thay thế: 
+    Mặc định nếu có avatar (hasAvatar = true) thì ta thêm class `hidden` để ẩn giấu nó đi ngay từ đầu, 
+    tránh hiện tượng chữ lộ ra khi ảnh đang load.
+  */}
+															<span className={cn(
+																"avatar-fallback font-bold text-slate-500 select-none",
+																hasAvatar ? "hidden" : ""
+															)}>
+																{account.username ? account.username.charAt(0).toUpperCase() : "U"}
+															</span>
 														</div>
+
 
 														<div className="min-w-0">
 															<p className="text-[13px] font-semibold text-gray-700 group-hover:text-admin-primary transition-colors truncate">

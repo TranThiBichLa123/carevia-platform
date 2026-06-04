@@ -129,7 +129,7 @@ const BookingServiceSection = () => {
         ) : (
           <>
             {/* Card 1 */}
-            <Card className="flex flex-col group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-gray-200 hover:border-primary/50 p-0 h-full">
+            <Card className="flex flex-col rounded-lg group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-gray-200 hover:border-primary/50 p-0 h-full">
               <div className="relative h-48 w-full overflow-hidden">
                 <img
                   src="https://images.unsplash.com/photo-1600948836101-f9ffda59d250?auto=format&fit=crop&w=800&q=80"
@@ -144,7 +144,7 @@ const BookingServiceSection = () => {
                 </p>
                 <div className="mt-auto">
                   <Link href="/client/booking">
-                    <Button className="w-full text-white bg-primary hover:bg-primary-hover">
+                    <Button className="w-full text-white bg-primary rounded-lg hover:bg-primary-hover">
                       Đặt lịch ngay
                     </Button>
                   </Link>
@@ -153,7 +153,7 @@ const BookingServiceSection = () => {
             </Card>
 
             {/* Card 2 */}
-            <Card className="flex flex-col group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-gray-200 hover:border-primary/50 p-0 h-full">
+            <Card className="flex flex-col rounded-lg group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-gray-200 hover:border-primary/50 p-0 h-full">
               <div className="relative h-48 w-full overflow-hidden">
                 <img
                   src="https://diva.edu.vn/wp-content/uploads/2024/07/chuyen-vien-tu-van-tham-my-12.jpg"
@@ -168,7 +168,7 @@ const BookingServiceSection = () => {
                 </p>
                 <div className="mt-auto">
                   <Link href="/client/booking">
-                    <Button className="w-full text-white bg-primary hover:bg-primary-hover">
+                    <Button className="w-full text-white bg-primary rounded-lg hover:bg-primary-hover">
                       Đặt lịch ngay
                     </Button>
                   </Link>
@@ -177,7 +177,7 @@ const BookingServiceSection = () => {
             </Card>
 
             {/* Card 3 */}
-            <Card className="flex flex-col group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-gray-200 hover:border-primary/50 p-0 h-full">
+            <Card className="flex flex-col rounded-lg group hover:shadow-xl  transition-all duration-300 cursor-pointer overflow-hidden border-gray-200 hover:border-primary/50 p-0 h-full">
               <div className="relative h-48 w-full overflow-hidden">
                 <img
                   src="https://trungmy.com/wp-content/uploads/2023/11/may-phan-tich-da-la-gi.jpg"
@@ -192,7 +192,7 @@ const BookingServiceSection = () => {
                 </p>
                 <div className="mt-auto">
                   <Link href="/client/booking">
-                    <Button className="w-full text-white bg-primary hover:bg-primary-hover">
+                    <Button className="w-full text-white bg-primary rounded-lg hover:bg-primary-hover">
                       Đặt lịch ngay
                     </Button>
                   </Link>
@@ -201,7 +201,7 @@ const BookingServiceSection = () => {
             </Card>
 
             {/* Card 4 */}
-            <Card className="flex flex-col group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-gray-200 hover:border-primary/50 p-0 h-full">
+            <Card className="flex flex-col rounded-lg group hover:shadow-xl transition-all duration-300 cursor-pointer overflow-hidden border-gray-200 hover:border-primary/50 p-0 h-full">
               <div className="relative h-48 w-full overflow-hidden">
                 <img
                   src="https://images.unsplash.com/photo-1600334129128-685c5582fd35?auto=format&fit=crop&w=800&q=80"
@@ -216,7 +216,7 @@ const BookingServiceSection = () => {
                 </p>
                 <div className="mt-auto">
                   <Link href="/client/booking">
-                    <Button className="w-full text-white bg-primary hover:bg-primary-hover">
+                    <Button className="w-full text-white bg-primary rounded-lg hover:bg-primary-hover">
                       Đặt lịch ngay
                     </Button>
                   </Link>
@@ -229,26 +229,75 @@ const BookingServiceSection = () => {
 
 
       {/* Promotional Banner: Màu Primary đặc */}
-      <div className="relative overflow-hidden bg-primary rounded-3xl p-8 md:p-14 min-h-[220px] flex items-center text-white shadow-xl">
+      <div className="relative overflow-hidden bg-primary rounded-lg  md:p-9  min-h-[260px] md:min-h-[240px] flex items-center text-white shadow-xl">
 
-        {/* Icon % trang trí ẩn dưới nền */}
-        <div className="absolute right-[-2%] bottom-[-10%] pointer-events-none select-none opacity-10">
-          <Percent className="w-64 h-64 md:w-96 md:h-96 text-white transform rotate-12" />
+        {/* ================= BACKGROUND BONG BÓNG RÕ NÉT VÀ NỔI BẬT ================= */}
+        {/* Tăng opacity tổng từ 40% lên 75% để nhìn rõ bong bóng hơn */}
+        <div className="absolute inset-0 overflow-hidden pointer-events-none z-0 opacity-75">
+
+          {/* Bong bóng lớn 1 - Góc phải trên (Tăng nền lên bg-white/25 để hiện rõ) */}
+          <div
+            className="absolute right-[-5%] top-[-10%] bg-white/25 rounded-full blur-[0.5px] animate-[floatAround_20s_infinite_ease-in-out]"
+            style={{ width: '280px', height: '280px', animationDelay: '0s' }}
+          />
+
+          {/* Bong bóng lớn 2 - Góc trái dưới (bg-white/20 giúp giữ chiều sâu) */}
+          <div
+            className="absolute left-[25%] bottom-[-30%] bg-white/20 rounded-full blur-[1px] animate-[floatAround_25s_infinite_ease-in-out]"
+            style={{ width: '200px', height: '200px', animationDelay: '-5s' }}
+          />
+
+          {/* Bong bóng trung tâm - Hiện rõ ở vùng giữa phải (bg-white/25 và viền nhẹ) */}
+          <div
+            className="absolute right-[22%] top-[20%] bg-white/25 border border-white/10 rounded-full blur-[0.5px] animate-[floatAround_18s_infinite_ease-in-out]"
+            style={{ width: '180px', height: '180px', animationDelay: '-2s' }}
+          />
+
+
+          {/* Bong bóng nhỏ tạo điểm nhấn sắc nét */}
+          <div
+            className="absolute left-[35%] top-[-2%] bg-white/30 rounded-full animate-[floatAround_15s_infinite_ease-in-out]"
+            style={{ width: '60px', height: '60px', animationDelay: '-8s' }}
+          />
+
+          {/* Bong bóng nhỏ tạo điểm nhấn sắc nét */}
+          <div
+            className="absolute right-[35%] bottom-[-5%] bg-white/30 rounded-full animate-[floatAround_15s_infinite_ease-in-out]"
+            style={{ width: '70px', height: '70px', animationDelay: '-8s' }}
+          />
+
         </div>
 
-        {/* Khối mờ 1 */}
-        <div className="absolute right-[-5%] top-[-10%] w-72 h-72 bg-white/20 rounded-full blur-3xl pointer-events-none animate-blob" />
-
-        {/* Khối mờ 2 */}
-        <div className="absolute right-20 top-1/2 -translate-y-1/2 w-56 h-56 bg-white/10 rounded-[40%_60%_30%_70%/60%_30%_70%_40%] hidden lg:block pointer-events-none animate-spin-slow" />
+        {/* Định nghĩa chuyển động trôi bồng bềnh, lắc lư qua lại không biến mất */}
+        <style dangerouslySetInnerHTML={{
+          __html: `
+    @keyframes floatAround {
+      0% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+      }
+      25% {
+        transform: translate(35px, -25px) scale(1.05) rotate(5deg);
+      }
+      50% {
+        transform: translate(-15px, 35px) scale(0.95) rotate(-10deg);
+      }
+      75% {
+        transform: translate(-35px, -15px) scale(1.02) rotate(8deg);
+      }
+      100% {
+        transform: translate(0, 0) scale(1) rotate(0deg);
+      }
+    }
+  `}} />
+        {/* ==================================================================== */}
 
         <div className="relative z-10 w-full">
           <div className="flex flex-col items-center md:items-start text-center md:text-left">
-            <div className="max-w-xl mb-6">
+            <div className="max-w-xl mb-4">
               <h3 className="text-2xl md:text-3xl font-bold mb-3 tracking-tight">
                 Nâng tầm vẻ đẹp làn da cùng chuyên gia
               </h3>
-              <p className="text-white/90 text-base md:text-lg leading-relaxed">
+              <p className="text-white/90 text-base md:text-[14px] leading-relaxed">
                 Thấu hiểu làn da qua công nghệ phân tích hiện đại. Đặt lịch tư vấn ngay hôm nay để nhận voucher 20% và bộ quà tặng trải nghiệm miễn phí.
               </p>
             </div>
@@ -257,7 +306,7 @@ const BookingServiceSection = () => {
               <Button
                 size="lg"
                 variant="outline"
-                className="bg-white text-primary border-white hover:bg-white/90 transition-all duration-300 px-10 py-7 rounded-full font-bold shadow-lg hover:scale-105"
+                className="bg-white text-primary border-white hover:bg-white/90 transition-all duration-300 px-7 py-5 rounded-lg font-bold shadow-lg hover:scale-105"
               >
                 Đặt lịch ngay
                 <ArrowRight className="w-5 h-5 ml-2" />
@@ -268,9 +317,10 @@ const BookingServiceSection = () => {
       </div>
 
 
+
       <div className="mt-8 text-center md:hidden">
         <Link href="/client/booking">
-          <Button className="w-full text-white bg-primary hover:bg-primary-hover">
+          <Button className="w-full text-white bg-primary rounded-lg hover:bg-primary-hover">
             Đặt lịch ngay
             <ArrowRight className="w-4 h-4 ml-2" />
           </Button>

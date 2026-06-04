@@ -6,6 +6,7 @@ import {
 	ArrowDownToLine,
 	ArrowUpFromLine,
 	Boxes,
+	Check,
 	ClipboardCheck,
 	ImagePlus,
 	Layers,
@@ -580,13 +581,13 @@ export default function StaffInventoryPage() {
 				{/* VÙNG CHỨA NÚT THAO TÁC */}
 				<div className="flex flex-col gap-2.5 sm:flex-row sm:items-center font-vietnam">
 
-					{/* 1. Nút Nhập sản phẩm mới (Đồng bộ style, chiều cao và font chữ) */}
+					{/* 1. Nút Nhập thiết bị mới (Đồng bộ style, chiều cao và font chữ) */}
 					<button
 						onClick={() => void openCreateDialog()}
 						className="inline-flex h-9.5 items-center justify-center gap-1.5 whitespace-nowrap rounded-md bg-staff-primary px-4 text-[13px] text-white shadow-sm transition-all duration-200 active:scale-95  font-vietnam"
 					>
 						<Plus className="w-4 h-4" />
-						<span>Nhập sản phẩm mới</span>
+						<span>Nhập thiết bị mới</span>
 					</button>
 
 					{/* 2. Nút Làm mới (Hiệu ứng trượt đồng màu với nút thêm mới) */}
@@ -604,7 +605,7 @@ export default function StaffInventoryPage() {
 							"h-9.5 shrink-0 rounded-md px-4 shadow-sm active:scale-95 disabled:cursor-not-allowed disabled:opacity-50"
 						)}
 					>
-						{/* Lớp nền trượt màu Primary: Khớp hoàn toàn với màu gốc của nút Nhập sản phẩm mới */}
+						{/* Lớp nền trượt màu Primary: Khớp hoàn toàn với màu gốc của nút Nhập thiết bị mới */}
 						<span className="absolute inset-y-0 left-0 w-0 bg-staff-primary transition-all duration-500 ease-out group-hover:w-full" />
 
 						{/* Nội dung chữ và Icon: Chuyển sang màu trắng tinh tế khi lớp nền trượt qua */}
@@ -622,232 +623,399 @@ export default function StaffInventoryPage() {
 				</div>
 			</div>
 
-			{/* <Card className="border-l-4 border-l-[#052962] bg-slate-50/70">
-				<CardContent className="flex flex-col gap-3 py-4 text-sm text-muted-foreground md:flex-row md:items-center md:justify-between">
-					<div>
-						<div className="font-vietnam text-foreground">Tab này đã gộp UC-08 và nghiệp vụ tồn kho.</div>
-						<div>Thêm, sửa, soft delete, đổi trạng thái, gán voucher, nhập xuất và bảo trì đều xử lý tại đây để staff không phải chuyển tab.</div>
-					</div>
-					{deviceError ? (
-						<div className="rounded-xl border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900">
-							{deviceError} Nếu vừa cập nhật backend, hãy restart server để nạp route staff mới.
-						</div>
-					) : null}
-				</CardContent>
-			</Card> */}
 
-			<Dialog open={deviceDialogOpen} onOpenChange={(open) => { if (!open) { closeDeviceDialog(); } else { setDeviceDialogOpen(true); } }}>
-				<DialogContent className="sm:max-w-4xl">
-					<DialogHeader>
-						<DialogTitle>{deviceDialogMode === "create" ? "Tạo sản phẩm mới trong kho" : "Cập nhật thiết bị"}</DialogTitle>
-						<DialogDescription>
+			<Dialog
+				open={deviceDialogOpen}
+				onOpenChange={(open) => { if (!open) { closeDeviceDialog(); } else { setDeviceDialogOpen(true); } }}
+			>
+
+				<DialogContent className="sm:max-w-4xl font-vietnam h-[88vh] flex flex-col p-0 overflow-hidden border-gray-100 shadow-xl rounded-2xl">
+
+					<DialogHeader className="p-5 pb-4 border-b border-gray-100 shrink-0 bg-white">
+						<DialogTitle className="text-2xl font-bold tracking-tight text-gray-900 flex items-center gap-2">
+							<span>{deviceDialogMode === "create" ? "Thêm thiết bị mới vào kho" : "Cập nhật thiết bị"}</span>
+
+
+						</DialogTitle>
+
+						<DialogDescription className="text-xs text-muted-foreground mt-1 leading-relaxed max-w-2xl">
 							{deviceDialogMode === "create"
-								? "Dùng khi thiết bị chưa từng tồn tại trong hệ thống. Sau khi tạo xong, staff có thể tiếp tục nhập xuất và bảo trì như các sản phẩm khác."
-								: "Chỉnh sửa thông tin thiết bị, đổi trạng thái vận hành và quản lý voucher áp dụng riêng nếu cần."}
+								? `Khai báo hồ sơ thiết bị gốc vào không gian lưu trữ của ${authUser?.brand_name || "thương hiệu"}. Hệ thống tự động liên kết mã định danh phân phối trực tiếp từ hãng chính thức.`
+								: "Chỉnh sửa thông số kỹ thuật, cập nhật trạng thái vận hành hoặc liên kết phân bổ mã ưu đãi đặc quyền cho sản phẩm."}
 						</DialogDescription>
 					</DialogHeader>
 
-					<div className="grid gap-6 lg:grid-cols-[1.45fr_1fr]">
-						<div className="space-y-5">
-							<Card className="border-dashed border-slate-300 bg-slate-50/60">
-								<CardHeader className="pb-4">
-									<CardTitle className="text-base">Ảnh đại diện thiết bị</CardTitle>
-									<CardDescription>
-										Ảnh tải lên sẽ được đồng bộ qua Cloudinary trong folder device/devices.
-									</CardDescription>
-								</CardHeader>
-								<CardContent>
-									<div className="grid gap-4 lg:grid-cols-[220px_1fr] lg:items-start">
-										<div className="relative aspect-4/3 overflow-hidden rounded-2xl border bg-white shadow-sm">
-											{deviceForm.image ? (
-												<Image
-													src={deviceForm.image}
-													alt={deviceForm.name || "Device preview"}
-													fill
-													sizes="(max-width: 1024px) 100vw, 220px"
-													className="object-cover"
-												/>
-											) : (
-												<div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center text-sm text-muted-foreground">
-													<div className="flex size-14 items-center justify-center rounded-full bg-slate-100 text-slate-500">
-														<ImagePlus className="size-6" />
-													</div>
-													<div>
-														<div className="font-medium text-foreground">Chưa có ảnh đại diện</div>
-														<div>Chọn ảnh để staff dễ kiểm tra và nhận diện thiết bị hơn.</div>
-													</div>
-												</div>
-											)}
-										</div>
 
-										<div className="space-y-3">
-											<div className="space-y-1">
-												<Label className="text-sm font-medium">Tải ảnh mới</Label>
-												<p className="text-sm text-muted-foreground">
-													Hỗ trợ JPG, PNG, WEBP. Khi đổi ảnh ở chế độ sửa, hệ thống sẽ cập nhật lại asset Cloudinary tương ứng.
-												</p>
-											</div>
 
-											<div className="flex flex-wrap gap-2">
-												<label
-													htmlFor="device-image-upload"
-													className={cn(
-														"inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-md bg-primary px-4 text-sm font-medium text-primary-foreground shadow-sm transition-colors hover:bg-primary/90",
-														uploadingImage && "pointer-events-none opacity-70"
-													)}
-												>
-													{uploadingImage ? <Loader2 className="size-4 animate-spin" /> : <ImagePlus className="size-4" />}
-													{deviceForm.image ? "Đổi ảnh" : "Tải ảnh lên"}
-												</label>
-												<input
-													id="device-image-upload"
-													type="file"
-													accept="image/*"
-													className="hidden"
-													disabled={uploadingImage}
-													onChange={(event) => {
-														const file = event.target.files?.[0];
-														event.target.value = "";
-														if (file) {
-															void handleUploadDeviceImage(file);
-														}
-													}}
-												/>
+					<div className="flex-1 overflow-y-auto p-5 scrollbar-thin space-y-5 bg-slate-50/30">
+						{/* HÀNG 1 */}
+						{/* Khung chia cột chính (Tỷ lệ cột trái rộng hơn cột phải) */}
+						<div className="grid gap-5 lg:grid-cols-[1.35fr_1fr] items-start">
+
+							{/* Cột trái: Nhóm thông tin cốt lõi của thiết bị */}
+							<div className="space-y-4">
+								{/*  Card: Ảnh đại diện thiết bị (Đã thu gọn chiều cao tối đa) */}
+								<Card className="border rounded-lg border-slate-200/80 bg-white shadow-xs">
+									<CardContent className="p-4">
+										{/* Thu nhỏ tỷ lệ cột ảnh từ 220px xuống còn 160px để tiết kiệm không gian dọc */}
+										<div className="grid gap-4 sm:grid-cols-[160px_1fr] items-center">
+
+											{/* Khối hiển thị Preview Ảnh (Đổi sang tỉ lệ vuông 1:1 cho gọn) */}
+											<div className="relative aspect-square overflow-hidden rounded-xl border border-gray-100 bg-slate-50 shadow-inner">
 												{deviceForm.image ? (
-													<Button
-														type="button"
-														variant="outline"
-														onClick={() => setDeviceForm((current) => ({ ...current, image: "", imagePublicId: "" }))}
-														disabled={uploadingImage}
+													<Image
+														src={deviceForm.image}
+														alt={deviceForm.name || "Device preview"}
+														fill
+														sizes="160px"
+														className="object-cover"
+													/>
+												) : (
+													<div className="flex h-full flex-col items-center justify-center gap-1.5 p-2 text-center text-xs text-muted-foreground">
+														<div className="rounded-full bg-slate-100 p-2 text-slate-400">
+															<ImagePlus className="size-4" />
+														</div>
+														<span className="font-medium text-gray-700">Chưa có ảnh</span>
+													</div>
+												)}
+											</div>
+
+											{/* Khối nút bấm và thao tác Tải ảnh */}
+											{/*  Chuyển sang flex flex-col với gap-3.5 (hoặc gap-4) để ép 3 khối lớn cách đều nhau tăm tắp */}
+											<div className="flex flex-col gap-3.5">
+
+												{/* Khối 1: Tiêu đề và mô tả ảnh (Đã gộp chung dòng để ăn theo khoảng cách đều) */}
+												<div className="space-y-1">
+													<Label className="text-[14px] font-semibold text-gray-700 block">Hình ảnh đại diện</Label>
+													<p className="text-[11px] text-muted-foreground leading-normal font-vietnam">
+														Hỗ trợ định dạng JPG, PNG, WEBP. Ảnh được tự động đồng bộ hóa trên CDN Cloudinary.
+													</p>
+												</div>
+
+												{/* Khối 2: Cụm nút bấm hành động */}
+												<div className="flex flex-wrap gap-2">
+													<label
+														htmlFor="device-image-upload"
+														className={cn(
+															"inline-flex h-8.5 cursor-pointer items-center justify-center gap-1.5 rounded-lg bg-staff-primary px-3 text-xs font-medium text-white shadow-sm transition-all hover:bg-staff-primary/90 active:scale-95",
+															uploadingImage && "pointer-events-none opacity-70"
+														)}
 													>
-														<Trash2 className="size-4" />
-														Gỡ ảnh
-													</Button>
-												) : null}
+														{uploadingImage ? <Loader2 className="size-3.5 animate-spin" /> : <ImagePlus className="size-3.5" />}
+														{deviceForm.image ? "Đổi ảnh" : "Tải ảnh lên"}
+													</label>
+													<input
+														id="device-image-upload"
+														type="file"
+														accept="image/*"
+														className="hidden"
+														disabled={uploadingImage}
+														onChange={(event) => {
+															const file = event.target.files?.[0];
+															event.target.value = "";
+															if (file) {
+																void handleUploadDeviceImage(file);
+															}
+														}}
+													/>
+
+													{deviceForm.image && (
+														<Button
+															type="button"
+															variant="outline"
+															className="h-8.5 text-xs px-3 text-rose-600 border-rose-100 hover:bg-rose-50 hover:text-rose-700 transition-colors"
+															disabled={uploadingImage}
+															onClick={() => setDeviceForm((current) => ({ ...current, image: "", imagePublicId: "" }))}
+														>
+															<Trash2 className="size-3.5" />
+															Gỡ ảnh
+														</Button>
+													)}
+												</div>
+
+												{/* Khối 3: Dòng chú thích hệ thống */}
+												<div className="text-[10px] text-gray-400 bg-gray-50/50 p-2 rounded-lg border border-gray-100/60 leading-normal font-vietnam">
+													💡 Asset lưu tự động theo cấu trúc thư mục của Brand để tối ưu hóa tốc độ tải trang.
+												</div>
 											</div>
 
-											<div className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs text-muted-foreground">
-												Ảnh sẽ được lưu tập trung trên Cloudinary theo folder device/devices để lần cập nhật sau staff chỉ cần đổi ảnh là asset được đồng bộ lại đúng chỗ.
-											</div>
+
 										</div>
+									</CardContent>
+								</Card>
+							</div>
+							{/*  Cột phải: Quản lý cấu hình Voucher đặc quyền cho sản phẩm (Gọn gàng, hạn chế phình dọc) */}
+							<Card className="h-fit rounded-xl border border-gray-200/80 bg-white shadow-xs">
+								<CardHeader className="p-3.5 border-b border-gray-100 bg-slate-50/50">
+									<div className="flex items-center gap-2">
+										<TicketPercent className="h-4 w-4 text-violet-600" />
+										<CardTitle className="text-[14px] font-semibold text-slate-600 font-vietnam">Voucher áp dụng </CardTitle>
 									</div>
-								</CardContent>
-							</Card>
 
-							<Card>
-								<CardHeader className="pb-4">
-									<CardTitle className="text-base">Thông tin sản phẩm</CardTitle>
-									<CardDescription>Nhóm lại các trường chính để staff nhập nhanh và dễ quét mắt hơn.</CardDescription>
 								</CardHeader>
-								<CardContent className="grid gap-4 md:grid-cols-2">
-									<div className="space-y-2 md:col-span-2">
-										<Label className="text-sm font-vietnam">Tên sản phẩm</Label>
-										<Input value={deviceForm.name} onChange={(event) => setDeviceForm((current) => ({ ...current, name: event.target.value }))} placeholder="Ví dụ: Máy điện di chăm sóc da" />
-									</div>
-									<div className="space-y-2 md:col-span-2">
-										<Label className="text-sm font-vietnam">Mô tả ngắn</Label>
-										<Textarea value={deviceForm.description} onChange={(event) => setDeviceForm((current) => ({ ...current, description: event.target.value }))} placeholder="Mô tả ngắn để staff dễ nhận diện sản phẩm" rows={4} />
-									</div>
-									<div className="space-y-2">
-										<Label className="text-sm font-vietnam">Giá bán</Label>
-										<Input type="number" min="0" value={deviceForm.price} onChange={(event) => setDeviceForm((current) => ({ ...current, price: event.target.value }))} placeholder="0" />
-									</div>
-									<div className="space-y-2">
-										<Label className="text-sm font-vietnam">Tồn kho</Label>
-										<Input type="number" min="0" value={deviceForm.stock} onChange={(event) => setDeviceForm((current) => ({ ...current, stock: event.target.value }))} placeholder="0" />
-									</div>
-									<div className="space-y-2">
-										<Label className="text-sm font-vietnam">Loại da</Label>
-										<Input value={deviceForm.skinType} onChange={(event) => setDeviceForm((current) => ({ ...current, skinType: event.target.value }))} placeholder="Ví dụ: Da dầu, da nhạy cảm" />
-									</div>
-									<div className="space-y-2">
-										<Label className="text-sm font-vietnam">Trạng thái</Label>
-										{deviceDialogMode === "edit" ? (
-											<Select value={deviceForm.status} onValueChange={(value) => setDeviceForm((current) => ({ ...current, status: value as StaffDeviceStatus }))}>
-												<SelectTrigger className="bg-white"><SelectValue /></SelectTrigger>
-												<SelectContent>{DEVICE_STATUS_OPTIONS.filter((option) => option.value !== "ALL").map((option) => <SelectItem key={option.value} value={option.value}>{option.label}</SelectItem>)}</SelectContent>
-											</Select>
-										) : (
-											<div className="rounded-xl border bg-white px-3 py-2 text-sm text-muted-foreground">Thiết bị mới sẽ mặc định ở trạng thái sẵn sàng. Sau khi tạo, staff có thể sửa lại trạng thái.</div>
-										)}
-									</div>
-									<div className="space-y-2">
-										<Label className="text-sm font-vietnam">Danh mục</Label>
-										<Select value={deviceForm.categoryId} onValueChange={(value) => setDeviceForm((current) => ({ ...current, categoryId: value }))}>
-											<SelectTrigger className="bg-white"><SelectValue placeholder="Chọn danh mục" /></SelectTrigger>
-											<SelectContent><SelectItem value="NONE">Không chọn</SelectItem>{categories.map((category) => <SelectItem key={category.id} value={String(category.id)}>{category.name}</SelectItem>)}</SelectContent>
-										</Select>
-									</div>
-									<div className="space-y-2">
-										<Label className="text-sm font-vietnam">Thương hiệu</Label>
-										<Select value={deviceForm.brandId} onValueChange={(value) => setDeviceForm((current) => ({ ...current, brandId: value }))}>
-											<SelectTrigger className="bg-white"><SelectValue placeholder="Chọn thương hiệu" /></SelectTrigger>
-											<SelectContent><SelectItem value="NONE">Không chọn</SelectItem>{brands.map((brand) => <SelectItem key={brand.id} value={String(brand.id)}>{brand.name}</SelectItem>)}</SelectContent>
-										</Select>
-									</div>
-									<div className="space-y-2 md:col-span-2">
-										<Label className="text-sm font-vietnam">SKU</Label>
-										<Input value={deviceForm.sku} onChange={(event) => setDeviceForm((current) => ({ ...current, sku: event.target.value }))} placeholder="Ví dụ: DEV-CAREVIA-001" />
-									</div>
+
+								<CardContent className="p-4 space-y-4">
+									{metadataLoading ? (
+										<div className="flex min-h-24 flex-col items-center justify-center gap-1">
+											<Loader2 className="size-4 animate-spin text-staff-primary" />
+											<span className="text-[10px] text-muted-foreground font-vietnam">Đang tải...</span>
+										</div>
+									) : deviceDialogMode === "edit" && editingDevice ? (
+										<>
+											{/* Khối 1: Danh sách voucher đang liên kết */}
+											<div className="space-y-1.5">
+												<div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider font-vietnam">Voucher đang gán</div>
+												{assignedVouchersForEditingDevice.length ? (
+													/* Khóa chiều cao tối đa 140px và cho cuộn nội bộ tránh đẩy nát layout */
+													<div className="space-y-2 max-h-35 overflow-y-auto pr-0.5 scrollbar-thin">
+														{assignedVouchersForEditingDevice.map((voucher) => (
+															<div key={voucher.id} className="flex items-center justify-between rounded-lg border border-gray-100 bg-slate-50/50 p-2 text-xs">
+																<div className="min-w-0 pr-2">
+																	<div className="font-mono font-bold text-xs text-violet-700 bg-violet-50 px-1.5 py-0.5 rounded border border-violet-100/50 w-fit">
+																		{voucher.code}
+																	</div>
+																	<div className="text-[10px] text-muted-foreground mt-0.5 truncate font-vietnam">
+																		Đích: {voucher.applicableDeviceName || editingDevice.name}
+																	</div>
+																</div>
+																<Button
+																	size="default"
+																	variant="outline"
+																	className="h-7 text-[11px] font-medium text-rose-600 border-rose-100 hover:bg-rose-50 hover:border-rose-200 transition-colors shrink-0"
+																	disabled={voucherLoading}
+																	onClick={() => void handleRemoveVoucher(voucher)}
+																>
+																	Bỏ gán
+																</Button>
+															</div>
+														))}
+													</div>
+												) : (
+													<div className="rounded-lg border border-dashed border-gray-200 bg-gray-50/40 py-4 text-center text-xs text-muted-foreground italic font-vietnam">
+														Thiết bị này chưa áp dụng voucher.
+													</div>
+												)}
+											</div>
+
+											{/* Khối 2: Form gán voucher mới */}
+											<div className="space-y-2 pt-2 border-t border-gray-100">
+												<label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block font-vietnam">Gán voucher hiện có</label>
+												<Select value={voucherSelection} onValueChange={setVoucherSelection}>
+													<SelectTrigger className="bg-white h-8.5 text-xs"><SelectValue placeholder="Chọn voucher" /></SelectTrigger>
+													<SelectContent>
+														<SelectItem value="NONE" className="text-xs">Chọn voucher để gán</SelectItem>
+														{assignableVouchers.map((voucher) => (
+															<SelectItem key={voucher.id} value={String(voucher.id)} className="text-xs font-mono">
+																{voucher.code} {voucher.applicableDeviceName ? `(${voucher.applicableDeviceName})` : ""}
+															</SelectItem>
+														))}
+													</SelectContent>
+												</Select>
+
+												<Button
+													className="w-full h-8.5 text-xs font-medium bg-staff-primary text-white hover:bg-staff-primary/90 transition-all active:scale-[0.98] shadow-2xs"
+													disabled={voucherLoading || voucherSelection === "NONE"}
+													onClick={() => void handleAssignVoucher()}
+												>
+													{voucherLoading ? <Loader2 className="animate-spin size-3.5 mr-1.5" /> : <Plus className="size-3.5 mr-1.5" />}
+													Liên kết voucher vào máy
+												</Button>
+											</div>
+										</>
+									) : (
+										/* Khối Empty State cao cấp thay thế text thô khi ở chế độ tạo mới sản phẩm */
+										<div className="flex flex-col items-center justify-center text-center p-5 bg-gray-50/30 rounded-xl border border-dashed border-gray-200/80">
+											<div className="rounded-full bg-white p-2 text-gray-400 mb-2 border border-gray-100 shadow-3xs">
+												<TicketPercent className="h-4 w-4 stroke-[1.5]" />
+											</div>
+											<p className="text-xs font-medium text-gray-400 max-w-[200px] leading-normal font-vietnam">
+												Tạo thiết bị trước, sau đó mở chế độ sửa để cấu hình voucher.
+											</p>
+										</div>
+									)}
 								</CardContent>
 							</Card>
 						</div>
+						{/* HÀNG 2 */}
+						{/*  Card: Thông tin sản phẩm (Đã tinh gọn diện tích dọc & tích hợp logic tự động gán Brand) */}
+						<Card className="border border-slate-200/80 bg-white shadow-xs rounded-xl overflow-hidden">
+							<CardContent className="p-5 space-y-5">
 
-						<Card className="h-fit rounded-2xl border bg-slate-50/70">
-							<CardHeader className="pb-4">
-								<CardTitle className="text-base">Voucher áp dụng riêng</CardTitle>
-								<CardDescription>Voucher chỉ tải khi cần chỉnh sửa thiết bị, để tránh phát sinh request thừa lúc mở trang.</CardDescription>
-							</CardHeader>
-							<CardContent className="space-y-4">
-								{metadataLoading ? (
-									<div className="flex min-h-28 items-center justify-center text-muted-foreground"><Loader2 className="size-5 animate-spin" /></div>
-								) : deviceDialogMode === "edit" && editingDevice ? (
-									<>
-										<div className="space-y-2">
-											<div className="text-sm font-medium">Voucher đang gán</div>
-											{assignedVouchersForEditingDevice.length ? (
-												<div className="space-y-2">
-													{assignedVouchersForEditingDevice.map((voucher) => (
-														<div key={voucher.id} className="flex items-center justify-between rounded-xl border bg-white px-3 py-2">
-															<div>
-																<div className="font-medium">{voucher.code}</div>
-																<div className="text-xs text-muted-foreground">Thiết bị đích: {voucher.applicableDeviceName || editingDevice.name}</div>
-															</div>
-															<Button size="sm" variant="outline" disabled={voucherLoading} onClick={() => void handleRemoveVoucher(voucher)}>Bỏ gán</Button>
-														</div>
-													))}
-												</div>
-											) : <div className="text-sm text-muted-foreground">Thiết bị này chưa có voucher riêng.</div>}
+								{/* 🧩 Phân khu 1: Định danh cơ bản (Dòng chảy dọc) */}
+								<div className="space-y-4">
+									{/* Tên sản phẩm */}
+									<div className="space-y-1.5">
+										<Label className="text-[14px] font-semibold text-slate-600 font-vietnam tracking-wide">Tên thiết bị chăm sóc da</Label>
+										<Input
+											className="h-9.5 text-[8px] bg-slate-50/30 focus-visible:bg-white border-slate-200 focus-visible:ring-staff-primary/20 focus-visible:border-staff-primary/60 transition-all font-medium text-gray-800"
+											value={deviceForm.name}
+											onChange={(event) => setDeviceForm((current) => ({ ...current, name: event.target.value }))}
+											placeholder="Ví dụ: Máy sủi da chết và đẩy tinh chất siêu âm"
+										/>
+									</div>
+
+									{/* Mô tả ngắn */}
+									<div className="space-y-1.5">
+										<Label className="text-[14px] font-semibold text-slate-600 font-vietnam tracking-wide">Mô tả đặc tính cốt lõi</Label>
+										<Textarea
+											className="text-xs p-3 bg-slate-50/30 focus-visible:bg-white border-slate-200 focus-visible:ring-staff-primary/20 focus-visible:border-staff-primary/60 transition-all font-vietnam leading-relaxed text-gray-600 resize-none"
+											value={deviceForm.description}
+											onChange={(event) => setDeviceForm((current) => ({ ...current, description: event.target.value }))}
+											placeholder="Tóm tắt công dụng chính, tần suất sóng âm hoặc công nghệ tích hợp để nhân viên tư vấn nhanh cho khách..."
+											rows={2.5}
+										/>
+									</div>
+								</div>
+
+								{/* ⚙️ Phân khu 2: Thông số vận hành & Thương mại (Lưới Grid 2 cột gọn gàng) */}
+								<div className="grid gap-x-4 gap-y-4 border-t border-slate-100 pt-4 sm:grid-cols-2">
+
+									{/* Giá bán (Có hậu tố VND tích hợp bên trong ô nhập) */}
+									<div className="space-y-1.5">
+										<Label className="text-[14px] font-semibold text-slate-600 font-vietnam tracking-wide">Giá cho thuê / bán</Label>
+										<div className="relative flex items-center w-full">
+											<Input
+												className="h-9.5 w-full text-xs pr-12 bg-slate-50/30 focus-visible:bg-white border-slate-200 focus-visible:ring-staff-primary/20 focus-visible:border-staff-primary/60 font-medium text-gray-800"
+												type="number"
+												min="0"
+												value={deviceForm.price}
+												onChange={(event) => setDeviceForm((current) => ({ ...current, price: event.target.value }))}
+												placeholder="0"
+											/>
+											<span className="absolute right-3 text-[14px] font-bold text-slate-400 select-none pointer-events-none">VND</span>
 										</div>
+									</div>
 
-										<div className="space-y-2">
-											<label className="text-sm font-medium">Gán voucher hiện có</label>
-											<Select value={voucherSelection} onValueChange={setVoucherSelection}>
-												<SelectTrigger className="bg-white"><SelectValue placeholder="Chọn voucher" /></SelectTrigger>
-												<SelectContent>
-													<SelectItem value="NONE">Chọn voucher để gán</SelectItem>
-													{assignableVouchers.map((voucher) => <SelectItem key={voucher.id} value={String(voucher.id)}>{voucher.code} - {voucher.applicableDeviceName || "Chưa gán"}</SelectItem>)}
+									{/* Tồn kho (Có hậu tố Máy tích hợp bên trong ô nhập) */}
+									<div className="space-y-1.5">
+										<Label className="text-[14px] font-semibold text-slate-600 font-vietnam tracking-wide">Số lượng tồn kho khởi tạo</Label>
+										<div className="relative flex items-center w-full">
+											<Input
+												className="h-9.5 w-full text-xs pr-12 bg-slate-50/30 focus-visible:bg-white border-slate-200 focus-visible:ring-staff-primary/20 focus-visible:border-staff-primary/60 font-medium text-gray-800"
+												type="number"
+												min="0"
+												value={deviceForm.stock}
+												onChange={(event) => setDeviceForm((current) => ({ ...current, stock: event.target.value }))}
+												placeholder="0"
+											/>
+											<span className="absolute right-3 text-[14px] font-bold text-slate-400 select-none pointer-events-none">Máy</span>
+										</div>
+									</div>
+
+									{/* Loại da chỉ định */}
+									<div className="space-y-1.5">
+										<Label className="text-[14px] font-semibold text-slate-600 font-vietnam tracking-wide">Loại da chỉ định</Label>
+										<Input
+											className="h-9.5 w-full text-xs bg-slate-50/30 focus-visible:bg-white border-slate-200 focus-visible:ring-staff-primary/20 focus-visible:border-staff-primary/60 font-medium text-gray-800"
+											value={deviceForm.skinType}
+											onChange={(event) => setDeviceForm((current) => ({ ...current, skinType: event.target.value }))}
+											placeholder="Ví dụ: Da dầu mụn, da nhạy cảm"
+										/>
+									</div>
+
+									{/* Danh mục phân loại (Đã chỉnh w-full và đồng bộ màu nền đè) */}
+									<div className="space-y-1.5">
+										<Label className="text-[14px] font-semibold text-slate-600 font-vietnam tracking-wide">Danh mục phân loại</Label>
+										<Select
+											value={deviceForm.categoryId}
+											onValueChange={(value) => setDeviceForm((current) => ({ ...current, categoryId: value }))}
+										>
+											{/* 💡 Đồng bộ text-gray-800 và font-medium cho chữ hiển thị khi đã chọn mục */}
+											<SelectTrigger className="w-full h-9.5 text-xs bg-slate-50/30 border-slate-200 focus:bg-white focus:ring-staff-primary/20 focus:border-staff-primary/60 text-gray-800 font-medium rounded-lg shadow-2xs transition-all">
+												<SelectValue placeholder="Chọn danh mục gốc" />
+											</SelectTrigger>
+
+											<SelectContent className="bg-white border border-slate-100 shadow-xl rounded-xl max-h-[240px] z-50 overflow-y-auto p-1 font-vietnam animate-in fade-in-50 zoom-in-95 duration-100">
+												{categories.map((category) => (
+													<SelectItem
+														key={category.id}
+														value={String(category.id)}
+														className="text-[14px] text-gray-800 font-medium rounded-md focus:bg-staff-primary/10 focus:text-staff-primary cursor-pointer py-2 pl-8 pr-2 transition-colors data-[state=checked]:font-semibold data-[state=checked]:text-staff-primary"
+													>
+													{category.name}
+													</SelectItem>
+												))}
+											</SelectContent>
+										</Select>
+									</div>
+
+									{/* Trạng thái vận hành */}
+									<div className="space-y-1.5">
+										<Label className="text-[14px] font-semibold text-slate-600 font-vietnam tracking-wide">Trạng thái cấu hình</Label>
+										{deviceDialogMode === "edit" ? (
+											<Select value={deviceForm.status} onValueChange={(value) => setDeviceForm((current) => ({ ...current, status: value as StaffDeviceStatus }))}>
+												{/* Đồng bộ kích thước h-9.5 và w-full */}
+												<SelectTrigger className="w-full h-9.5 text-xs bg-slate-50/30 border-slate-200 focus:bg-white text-gray-800 font-medium rounded-lg">
+													<SelectValue />
+												</SelectTrigger>
+												<SelectContent className="bg-white z-50 border border-slate-100 shadow-xl rounded-xl p-1">
+													{DEVICE_STATUS_OPTIONS.filter((option) => option.value !== "ALL").map((option) => (
+														<SelectItem key={option.value} value={option.value} className="text-xs text-gray-800 font-medium">{option.label}</SelectItem>
+													))}
 												</SelectContent>
 											</Select>
-											<Button className="w-full" disabled={voucherLoading || voucherSelection === "NONE"} onClick={() => void handleAssignVoucher()}>
-												{voucherLoading ? <Loader2 className="animate-spin" /> : <TicketPercent className="size-4" />}
-												Gán voucher cho thiết bị
-											</Button>
+										) : (
+											<div className="w-full h-9.5 rounded-lg border border-dashed border-emerald-200 bg-emerald-50/20 px-3 flex items-center text-[14px] text-emerald-700 font-semibold font-vietnam select-none">
+												Hệ thống tự động kích hoạt: Sẵn sàng
+											</div>
+										)}
+									</div>
+
+									{/* Mã định danh SKU */}
+									<div className="space-y-1.5">
+										<Label className="text-[14px] font-semibold text-slate-600 font-vietnam tracking-wide">Mã định danh sản phẩm (SKU)</Label>
+										<Input
+											className="h-9.5 w-full text-xs font-vietnam  tracking-wider bg-slate-50/30 focus-visible:bg-white border-slate-200 focus-visible:ring-staff-primary/20 focus-visible:border-slate-200 text-slate-700 font-bold"
+											value={deviceForm.sku}
+											onChange={(event) => setDeviceForm((current) => ({ ...current, sku: event.target.value }))}
+											placeholder="Ví dụ: SKU-FOREO-LUNA4"
+										/>
+									</div>
+								</div>
+
+								{/*  Khối thông báo pháp nhân sở hữu thương hiệu (Đã được sửa lỗi nhảy chữ) */}
+								{authUser?.brand_name && (
+									<div className="text-[11px] text-amber-700 bg-amber-50/50 border border-amber-100/70 rounded-xl p-3 flex items-start gap-2.5 shadow-3xs border-dashed mt-1">
+										<span className="shrink-0 mt-0.5 text-xs select-none">🛡️</span>
+										<div className="leading-relaxed font-vietnam font-medium">
+											Thiết bị này được đăng ký độc quyền trong không gian lưu trữ của thương hiệu <strong className="font-bold text-amber-800 bg-amber-100/40 px-1.5 py-0.5 rounded mx-0.5">{authUser.brand_name}</strong> và do chính hãng trực tiếp cung ứng.
 										</div>
-									</>
-								) : (
-									<div className="text-sm text-muted-foreground">Tạo thiết bị trước. Sau đó mở chế độ sửa để cập nhật trạng thái và gán voucher áp dụng riêng.</div>
+									</div>
 								)}
+
 							</CardContent>
 						</Card>
 					</div>
 
-					<DialogFooter>
-						<Button variant="outline" onClick={closeDeviceDialog} disabled={savingDevice || voucherLoading || metadataLoading || uploadingImage}>Hủy</Button>
-						<Button onClick={() => void handleSaveDevice()} disabled={savingDevice || voucherLoading || metadataLoading || uploadingImage}>
-							{savingDevice ? <Loader2 className="animate-spin" /> : deviceDialogMode === "create" ? <Plus className="size-4" /> : <Pencil className="size-4" />}
-							{deviceDialogMode === "create" ? "Tạo sản phẩm" : "Lưu thay đổi"}
+					<DialogFooter className="p-4 border-t border-gray-100 shrink-0 bg-slate-50/50 flex flex-row items-center gap-2 justify-end rounded-b-2xl">
+
+						{/* Nút hủy thao tác */}
+						<Button
+							variant="outline"
+							className="h-9 text-xs px-4 font-medium text-gray-600 border-gray-200 bg-white hover:bg-gray-50 transition-colors rounded-lg font-vietnam"
+							onClick={closeDeviceDialog}
+							disabled={savingDevice || voucherLoading || metadataLoading || uploadingImage}
+						>
+							Hủy bỏ
 						</Button>
+
+						{/* Nút lưu hành động chính */}
+						<Button
+							className="h-9 text-xs px-4 font-medium bg-staff-primary hover:bg-staff-primary/90 text-white shadow-sm transition-all duration-200 active:scale-95 disabled:opacity-40 rounded-lg font-vietnam"
+							onClick={() => void handleSaveDevice()}
+							disabled={savingDevice || voucherLoading || metadataLoading || uploadingImage}
+						>
+							{savingDevice ? (
+								<Loader2 className="animate-spin size-3.5 mr-1.5" />
+							) : deviceDialogMode === "create" ? (
+								<Plus className="size-3.5 mr-1.5" />
+							) : (
+								<Check className="size-3.5 mr-1.5" /> // ✨ Đổi sang icon Check trực quan khi lưu thay đổi thành công
+							)}
+
+							{deviceDialogMode === "create" ? "Tạo sản phẩm ngay" : "Cập nhật thay đổi"}
+						</Button>
+
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>
@@ -861,7 +1029,7 @@ export default function StaffInventoryPage() {
 				</Card>
 				<Card>
 					<CardHeader className="gap-2 px-8 py-5">
-						<CardDescription>Low stock</CardDescription>
+						<CardDescription>Thiết bị sắp hết hàng</CardDescription>
 						<CardTitle className="flex items-center gap-3 text-3xl text-amber-600">{lowStockCount}</CardTitle>
 					</CardHeader>
 				</Card>
@@ -1075,7 +1243,7 @@ export default function StaffInventoryPage() {
 												</TableCell>
 
 												{/* CỘT 6: THÔNG TIN BẢO TRÌ ĐÓNG HỘP TINH TẾ */}
-												<TableCell className="py-3.5 align-top">
+												<TableCell className="py-3.5 ">
 													{device.maintenanceReason ? (
 														<div className="max-w-fit space-y-0.5 rounded-lg border border-gray-100/50 bg-gray-50/60 p-2 text-[11px] font-medium text-gray-500">
 															<div className="text-gray-700 font-semibold truncate">🔧 {device.maintenanceReason}</div>
@@ -1088,9 +1256,7 @@ export default function StaffInventoryPage() {
 															)}
 														</div>
 													) : (
-														<TableCell className="  px-0 py-3.5">
-															<span className="text-[12px] text-gray-300 italic">Sẵn sàng vận hành</span>
-														</TableCell>
+														<span className=" px-3 text-[12px] text-gray-300 italic">Sẵn sàng vận hành</span>
 													)}
 												</TableCell>
 

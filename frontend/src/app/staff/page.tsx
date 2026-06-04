@@ -1,71 +1,31 @@
 "use client";
 
-import Link from "next/link";
-import { AlertTriangle, Boxes, ChevronRight, Loader2, RefreshCw } from "lucide-react";
+import { AlertTriangle, Boxes, CalendarCheck2, ClipboardList, Loader2, RefreshCw, TicketPercent, TrendingUp, BarChart3, PieChart } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend, Cell, Pie, PieChart as RechartsPieChart } from "recharts";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { backofficeApi, type StaffDashboard } from "@/lib/backofficeApi";
 import { formatDate, getBackofficeErrorMessage } from "@/lib/backofficeUtils";
 import { useUserStore } from "@/lib/store";
 
-const staffSections = [
-	{
-        title: "Thiết bị & tồn kho của brand",
-        description: "Quản lý catalog, giá, tồn kho, bảo trì và tình trạng hiển thị của sản phẩm thuộc brand bạn phụ trách.",
-		href: "/staff/inventory",
-		tag: "Catalog"
-	},
-    {
-        title: "Quản lý booking",
-        description: "Xử lý booking trải nghiệm phát sinh trên sản phẩm và phiên thuộc brand đang vận hành.",
-        href: "/staff/bookings",
-        tag: "Operational"
-    },
-    {
-        title: "Quản lý đơn hàng",
-        description: "Theo dõi các đơn cần đóng gói, xử lý và hoàn tất trong phạm vi seller workspace.",
-        href: "/staff/orders",
-        tag: "Financial"
-    },
-    {
-        title: "Phiên trải nghiệm",
-        description: "Tạo lịch demo, kiểm soát slot và điều phối trải nghiệm cho khách hàng của brand.",
-        href: "/staff/sessions",
-        tag: "Configuration"
-    },
-    {
-        title: "Quản lý Voucher",
-        description: "Tạo mã khuyến mãi cho brand, gán voucher cho catalog phù hợp và theo dõi hạn dùng.",
-        href: "/staff/vouchers",
-        tag: "Marketing"
-    },
-    {
-        title: "CRM & Đánh giá",
-        description: "Theo dõi review thuộc catalog đang quản lý để chuẩn bị phản hồi và moderation theo brand.",
-        href: "/staff/reviews",
-        tag: "CRM"
-    },
-    {
-        title: "Thống kê brand",
-        description: "Tổng hợp KPI vận hành chính theo ngày để tách brand-level metrics khỏi dashboard platform.",
-        href: "/staff/statistics",
-        tag: "Analytics"
-    },
-];
+const bookingStats = [
+    { key: "pendingOrders", label: "Đơn chờ xử lý", icon: ClipboardList, color: "text-indigo-600", bg: "bg-indigo-50/50", border: "hover:border-indigo-200" },
+    { key: "bookingsToday", label: "Booking hôm nay", icon: CalendarCheck2, color: "text-sky-600", bg: "bg-sky-50/50", border: "hover:border-sky-200" },
+    { key: "pendingBookings", label: "Booking chờ duyệt", icon: CalendarCheck2, color: "text-amber-600", bg: "bg-amber-50/50", border: "hover:border-amber-200" },
+    { key: "checkedInToday", label: "Khách đã check-in", icon: CalendarCheck2, color: "text-emerald-600", bg: "bg-emerald-50/50", border: "hover:border-emerald-200" },
+] as const;
 
-const metricStyles = [
-	"border-[#052962]",
-	"border-[#0B6E4F]",
-	"border-[#B45309]",
-	"border-[#9F1239]",
-	"border-[#1D4ED8]",
-	"border-[#7C3AED]",
-];
+const alertStats = [
+    { key: "lowStockDevices", label: "Sản phẩm sắp hết", icon: Boxes, color: "text-rose-600", bg: "bg-rose-50/50", border: "hover:border-rose-200" },
+    { key: "maintenanceDevices", label: "Thiết bị bảo trì", icon: AlertTriangle, color: "text-orange-600", bg: "bg-orange-50/50", border: "hover:border-orange-200" },
+    { key: "vouchersExpiringSoon", label: "Voucher sắp hết hạn", icon: TicketPercent, color: "text-violet-600", bg: "bg-violet-50/50", border: "hover:border-violet-200" },
+] as const;
 
-export default function StaffDashboardPage() {
-    const { authUser } = useUserStore();
+
+export default function StaffStatisticsPage() {
+    const { authUser, isAuthenticated } = useUserStore();
     const [dashboard, setDashboard] = useState<StaffDashboard | null>(null);
     const [loading, setLoading] = useState(true);
 
@@ -75,200 +35,396 @@ export default function StaffDashboardPage() {
             const response = await backofficeApi.getStaffDashboard();
             setDashboard(response);
         } catch (error) {
-            toast.error(getBackofficeErrorMessage(error, "Không thể tải dashboard vận hành."));
+            toast.error(getBackofficeErrorMessage(error, "Không thể tải thống kê brand."));
         } finally {
             setLoading(false);
         }
     }, []);
 
     useEffect(() => {
+        if (!isAuthenticated) {
+            setLoading(false);
+            return;
+        }
         void loadDashboard();
-    }, [loadDashboard]);
+    }, [isAuthenticated, loadDashboard]);
 
-    const metrics = dashboard
-        ? [
-              { label: "Booking hôm nay", value: dashboard.bookingsToday, hint: `${dashboard.pendingBookings} chờ xác nhận` },
-              { label: "Khách đã check-in", value: dashboard.checkedInToday, hint: "Theo lịch hôm nay" },
-              { label: "Đơn chờ xử lý", value: dashboard.pendingOrders, hint: "PENDING_PAYMENT, PAID, PROCESSING" },
-                            { label: "Sản phẩm sắp hết", value: dashboard.lowStockDevices, hint: "Ngưỡng cảnh báo <= 5" },
-                            { label: "Thiết bị bảo trì", value: dashboard.maintenanceDevices, hint: "Tạm khóa trong workspace" },
-              { label: "Voucher sắp hết hạn", value: dashboard.vouchersExpiringSoon, hint: "Trong 7 ngày tới" },
-          ]
-        : [];
+    if (!isAuthenticated) {
+        return <div className="flex min-h-[50vh] items-center justify-center text-sm text-muted-foreground">Đăng nhập bằng tài khoản Brand Staff để xem thống kê.</div>;
+    }
+
+    if (authUser?.role !== "STAFF") {
+        return <div className="flex min-h-[50vh] items-center justify-center text-sm text-muted-foreground">Chỉ Brand Staff mới truy cập được trang này.</div>;
+    }
+
+    //  Chuẩn bị dữ liệu cho Biểu đồ Phễu Booking (Bar Chart)
+    const bookingChartData = [
+        {
+            name: "Trạng thái Booking",
+            "Tổng hôm nay": dashboard?.bookingsToday || 0,
+            "Chờ xác nhận": dashboard?.pendingBookings || 0,
+            "Đã check-in": dashboard?.checkedInToday || 0,
+        }
+    ];
+
+    //  Chuẩn bị dữ liệu cho Biểu đồ Cảnh báo Vận hành (Donut Chart)
+    const alertChartData = [
+        { name: "Sản phẩm sắp hết", value: dashboard?.lowStockDevices || 0, color: "#f43f5e" },
+        { name: "Thiết bị bảo trì", value: dashboard?.maintenanceDevices || 0, color: "#f97316" },
+        { name: "Voucher sắp hết hạn", value: dashboard?.vouchersExpiringSoon || 0, color: "#8b5cf6" },
+    ].filter(item => item.value > 0); // Chỉ hiển thị mục có số lượng > 0
 
     return (
-        <div className="space-y-8">
-            <div className="border-b-4 border-[#111111] pb-2 mb-8">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-[#C70000] font-sans">
-                    Carevia Marketplace / Brand Staff Workspace
-                </div>
-                <h1 className="mt-1 font-vietnam text-3xl font-extrabold tracking-tight text-[#111111] sm:text-4xl md:text-5xl">
-                    Dashboard brand
-                </h1>
-                {/* <p className="mt-3 text-sm md:text-base text-[#444444] font-vietnam max-w-3xl leading-relaxed">
-                    Khu vực vận hành dành cho seller staff, tập trung vào catalog, booking, đơn hàng, voucher và trải nghiệm khách hàng của brand bạn đang phụ trách.
-                </p> */}
-            </div>
+        <div className="space-y-6 p-1 font-vietnam">
+            {/* Header section */}
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between border-b border-gray-200 pb-5">
+                <div>
+                    <h1 className="text-2xl font-bold tracking-tight text-gray-900 md:text-3xl flex flex-wrap items-baseline gap-x-2">
+                        <span>Tổng quan thương hiệu</span>
+                        {/* 🏪 Nếu có tên thương hiệu thì hiển thị động, dùng màu thương hiệu để tạo điểm nhấn */}
+                        {authUser?.brand_name ? (
+                            <span className="text-staff-primary font-extrabold">{authUser.brand_name}</span>
+                        ) : (
+                            <span className="text-gray-400 italic text-xl font-normal">(Chưa gán brand)</span>
+                        )}
+                    </h1>
 
-            {/* <div className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-sm text-emerald-900">
-                Workspace này đang chạy theo phạm vi brand hiện tại. Mọi sản phẩm, booking, đơn hàng, voucher và phiên trải nghiệm chỉ hiển thị trong <span className="font-semibold">brand_id = current_staff.brand_id</span>.
-            </div> */}
+                    <p className="text-sm text-muted-foreground mt-1.5">
+                        Workspace kiểm soát KPI, dữ liệu đặt lịch và cảnh báo rủi ro hệ thống tại brand-level.
+                    </p>
+                </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 border-b border-[#DCDCDC] pb-6 mb-8 text-xs font-vietnam">
-                <div className="border-l-2 border-[#052962] pl-2">
-                    <span className="text-[#666666] block">Phiên làm việc</span>
-                    <span className="font-bold text-[#111111]">Brand workspace</span>
-                </div>
-                <div className="border-l-2 border-[#052962] pl-2">
-                    <span className="text-[#666666] block">Tài khoản brand staff</span>
-                    <span className="font-bold text-[#111111]">{authUser?.email || "N/A"}</span>
-                </div>
-                <div className="border-l-2 border-[#052962] pl-2">
-                    <span className="text-[#666666] block">Phạm vi truy cập</span>
-                    <span className="font-bold text-[#111111]">Catalog và vận hành của brand</span>
-                </div>
-                <div className="border-l-2 border-[#052962] pl-2">
-                    <span className="text-[#666666] block">Brand đang quản lý</span>
-                    <span className="font-bold text-[#111111]">{authUser?.brand_name || "Chưa xác định"}</span>
-                </div>
-                <div className="border-l-2 border-[#052962] pl-2">
-                    <span className="text-[#666666] block">Ngôn ngữ vận hành</span>
-                    <span className="font-bold text-[#111111]">Tiếng Việt (VI)</span>
-                </div>
-                <div className="border-l-2 border-[#052962] pl-2 col-span-2 md:col-span-1">
-                    <span className="text-[#666666] block">Trạng thái workspace</span>
-                    <span className="font-bold text-emerald-700 flex items-center gap-1">
-                        <span className="h-1.5 w-1.5 rounded-full bg-emerald-600 inline-block" /> Trực tuyến
-                    </span>
-                </div>
-                <div className="border-l-2 border-[#052962] pl-2 col-span-2 md:col-span-1">
-                    <span className="text-[#666666] block">Ngày vận hành</span>
-                    <span className="font-bold text-[#111111]">{dashboard ? formatDate(dashboard.date) : "--/--/----"}</span>
+
+                <div className="flex items-center gap-3">
+
+                    <div className="hidden border-r border-gray-200 pr-4 text-right md:block">
+                        <div className="text-xs text-muted-foreground">Ngày vận hành</div>
+                        <div className="text-sm font-semibold text-gray-800">{dashboard ? formatDate(dashboard.date) : "--/--/----"}</div>
+                    </div>
+
+                    <Button
+                        onClick={() => void loadDashboard()}
+                        disabled={loading}
+                        variant="none"
+                        className="group relative h-10 shrink-0 overflow-hidden rounded-lg border border-gray-200 bg-white px-4 text-[13px] font-medium text-gray-700 shadow-sm transition-all duration-300 hover:border-staff-primary active:scale-95 disabled:opacity-50"
+                    >
+                        <span className="absolute inset-y-0 left-0 w-0 bg-staff-primary transition-all duration-500 ease-out group-hover:w-full" />
+                        <div className="relative z-10 flex items-center justify-center transition-colors duration-500 group-hover:text-white">
+                            <RefreshCw className={`mr-2 h-4 w-4 text-gray-400 group-hover:text-white ${loading ? "animate-spin" : "group-hover:rotate-180"}`} />
+                            <span>Làm mới số liệu</span>
+                        </div>
+                    </Button>
                 </div>
             </div>
 
-            <div className="flex items-center justify-end">
-                <Button variant="outline" onClick={() => void loadDashboard()} disabled={loading}>
-                    <RefreshCw className={loading ? "animate-spin" : ""} />
-                    Làm mới dashboard
-                </Button>
-            </div>
 
             {loading ? (
-                <div className="flex min-h-40 items-center justify-center text-muted-foreground">
-                    <Loader2 className="size-5 animate-spin" />
+                <div className="flex min-h-[50vh] items-center justify-center text-muted-foreground">
+                    <Loader2 className="size-6 animate-spin text-staff-primary" />
                 </div>
             ) : (
-                <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-                    {metrics.map((metric, index) => (
-                        <Card key={metric.label} className={`border-l-4 ${metricStyles[index % metricStyles.length]}`}>
-                            <CardHeader>
-                                <CardTitle className="text-base font-semibold">{metric.label}</CardTitle>
+                <>
+                    {/* Row 1: Hệ thống thẻ số liệu phân tầng */}
+                    <div className="space-y-5">
+
+                        {/* Nhóm 1: KPI Đặt lịch & Đơn hàng (Hàng 4 cột cân đối) */}
+                        <div>
+                            <div className="text-xs font-semibold text-gray-400 mb-2.5 tracking-wide">Hiệu suất vận hành ngày</div>
+                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                                {bookingStats.map((item) => {
+                                    const Icon = item.icon;
+                                    const value = dashboard ? dashboard[item.key] : 0;
+                                    return (
+                                        <Card key={item.key} className={`overflow-hidden border-gray-100/70 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 ${item.border}`}>
+                                            <CardContent className="p-5 flex items-center justify-between">
+                                                <div className="space-y-1.5 min-w-0">
+                                                    {/* Đã bỏ uppercase để chữ mềm mại, sang hơn */}
+                                                    <p className="text-[13px] font-medium text-gray-500 truncate">{item.label}</p>
+                                                    <h3 className="text-2xl font-bold tracking-tight text-gray-900">{value}</h3>
+                                                </div>
+                                                <div className={`p-3 rounded-xl shrink-0 ${item.bg} ${item.color}`}>
+                                                    <Icon className="size-5" />
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                        {/* Nhóm 2: Chỉ số rủi ro & Hệ thống (Hàng 3 cột lấp đầy khoảng trống) */}
+                        <div>
+                            <div className="text-xs font-semibold text-rose-500/80 mb-2.5 tracking-wide">Giám sát rủi ro & Cảnh báo</div>
+                            <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                                {alertStats.map((item) => {
+                                    const Icon = item.icon;
+                                    const value = dashboard ? dashboard[item.key] : 0;
+
+                                    // Tạo highlight đặc biệt nếu số lượng cảnh báo > 0 để gây chú ý cho Staff
+                                    const isAlertActive = value > 0;
+
+                                    return (
+                                        <Card key={item.key} className={`overflow-hidden border-gray-100/70 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 ${isAlertActive ? 'ring-1 ring-rose-100/50 bg-rose-50/5' : ''} ${item.border}`}>
+                                            <CardContent className="p-4 flex items-center justify-between">
+                                                <div className="space-y-1.5 min-w-0">
+                                                    <p className="text-[13px] font-medium text-gray-500 truncate">{item.label}</p>
+                                                    <div className="flex items-baseline gap-2">
+                                                        <h3 className={`text-2xl font-bold tracking-tight ${isAlertActive ? 'text-rose-600' : 'text-gray-900'}`}>{value}</h3>
+                                                        {isAlertActive && (
+                                                            <span className="animate-pulse flex h-2 w-2 rounded-full bg-rose-500 mb-1" />
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className={`p-3 rounded-xl shrink-0 ${isAlertActive ? 'bg-rose-100/70 text-rose-600' : `${item.bg} ${item.color}`}`}>
+                                                    <Icon className="size-5" />
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    );
+                                })}
+                            </div>
+                        </div>
+
+                    </div>
+
+                    {/* Row 2: Khu vực Biểu đồ Phân tích Đa dạng */}
+                    <div className="grid gap-6 lg:grid-cols-3">
+                        {/* Biểu đồ Cột tiến độ Booking */}
+                        <Card className="lg:col-span-2 border-gray-100 shadow-sm">
+                            <CardHeader className="flex flex-row items-center justify-between pb-4">
+                                <div className="space-y-1">
+                                    <CardTitle className="text-base font-semibold flex items-center gap-2">
+                                        <BarChart3 className="size-4 text-staff-primary" /> Tiến độ xử lý Booking hôm nay
+                                    </CardTitle>
+                                    <CardDescription>So sánh tương quan lượng khách đặt lịch, chờ duyệt và check-in thực tế.</CardDescription>
+                                </div>
                             </CardHeader>
-                            <CardContent>
-                                <div className="text-4xl font-black text-[#111111]">{metric.value}</div>
-                                <p className="mt-2 text-sm text-muted-foreground">{metric.hint}</p>
+                            <CardContent className="pt-2">
+                                <div className="h-70 w-full">
+                                    <ResponsiveContainer width="100%" height="100%">
+                                        <BarChart data={bookingChartData} barGap={12}>
+                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                            <XAxis dataKey="name" hide={true} />
+                                            <YAxis allowDecimals={false} stroke="#94a3b8" fontSize={12} />
+                                            <Tooltip cursor={{ fill: '#f8fafc' }} />
+                                            <Legend iconType="circle" wrapperStyle={{ fontSize: '13px', paddingTop: '10px' }} />
+                                            <Bar dataKey="Tổng hôm nay" fill="#0284c7" radius={[6, 6, 0, 0]} maxBarSize={60} />
+                                            <Bar dataKey="Chờ xác nhận" fill="#d97706" radius={[6, 6, 0, 0]} maxBarSize={60} />
+                                            <Bar dataKey="Đã check-in" fill="#059669" radius={[6, 6, 0, 0]} maxBarSize={60} />
+                                        </BarChart>
+                                    </ResponsiveContainer>
+                                </div>
                             </CardContent>
                         </Card>
-                    ))}
-                </div>
+
+                        {/* Biểu đồ tròn Cơ cấu cảnh báo rủi ro */}
+                        <Card className="border-gray-100 shadow-sm">
+                            <CardHeader className="pb-2">
+                                <CardTitle className="text-base font-semibold flex items-center gap-2">
+                                    <PieChart className="size-4 text-rose-500" /> Tỷ lệ Cảnh báo Hệ thống
+                                </CardTitle>
+                                <CardDescription>Phân phối các đầu việc cần xử lý gấp để tránh gián đoạn.</CardDescription>
+                            </CardHeader>
+                            <CardContent className="flex flex-col items-center justify-center">
+                                {alertChartData.length > 0 ? (
+                                    <>
+                                        <div className="h-50 w-full relative flex items-center justify-center">
+                                            <ResponsiveContainer width="100%" height="100%">
+                                                <RechartsPieChart>
+                                                    <Tooltip formatter={(value) => [`${value} mục`, "Số lượng"]} />
+                                                    <Pie
+                                                        data={alertChartData}
+                                                        cx="50%"
+                                                        cy="50%"
+                                                        innerRadius={60}
+                                                        outerRadius={85}
+                                                        paddingAngle={5}
+                                                        dataKey="value"
+                                                    >
+                                                        {alertChartData.map((entry, index) => (
+                                                            <Cell key={`cell-${index}`} fill={entry.color} />
+                                                        ))}
+                                                    </Pie>
+                                                </RechartsPieChart>
+                                            </ResponsiveContainer>
+                                            <div className="absolute flex flex-col items-center justify-center">
+                                                <span className="text-2xl font-bold text-gray-800">
+                                                    {alertChartData.reduce((acc, curr) => acc + curr.value, 0)}
+                                                </span>
+                                                <span className="text-xs text-muted-foreground">Tổng cảnh báo</span>
+                                            </div>
+                                        </div>
+                                        <div className="w-full mt-4">
+                                            {alertChartData.map((item, index) => (
+                                                <div key={index} className="flex items-center gap-2 mb-2">
+                                                    <span className="block w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
+                                                    <span className="text-sm text-gray-700">{item.name}: {item.value}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </>
+                                ) : (
+                                    <div className="flex flex-col items-center gap-2">
+                                        <AlertTriangle className="size-6 text-muted-foreground" />
+                                        <span className="text-sm text-muted-foreground">Không có cảnh báo nào trong hệ thống.</span>
+                                    </div>
+                                )}
+
+                            </CardContent>
+                        </Card>
+                    </div>
+
+                    {/* Row 3: Danh sách các Alert Chi tiết */}
+                    <div className="grid gap-6 lg:grid-cols-3">
+
+                        {/* Cột 1: Kho hàng (Sản phẩm sắp hết) */}
+                        <Card className="flex flex-col border-rose-100/80 shadow-sm transition-all hover:shadow-md">
+                            <CardHeader className="border-b border-rose-50/50 bg-rose-50/20 pb-4">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="rounded-md bg-rose-100 p-1.5 text-rose-600">
+                                        <Boxes className="h-4 w-4" />
+                                    </div>
+                                    <div>
+                                        <CardTitle className="text-base font-semibold text-gray-900">Cần bổ sung tồn kho</CardTitle>
+                                        <CardDescription className="text-xs text-rose-600/80 font-medium mt-0.5">
+                                            {dashboard?.lowStockAlerts.length || 0} sản phẩm dưới ngưỡng an toàn
+                                        </CardDescription>
+                                    </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="flex-1 p-4">
+                                <div className="space-y-2.5 max-h-90 overflow-y-auto pr-1 scrollbar-thin">
+                                    {dashboard?.lowStockAlerts.length ? (
+                                        dashboard.lowStockAlerts.map((item) => (
+                                            <div
+                                                key={item.deviceId}
+                                                className="flex items-center justify-between rounded-lg border border-gray-100 bg-white p-3 transition-colors hover:bg-gray-50/50"
+                                            >
+                                                <div className="space-y-1 min-w-0 flex-1 pr-2">
+                                                    <div className="font-medium text-sm text-gray-800 truncate">{item.deviceName}</div>
+                                                    <div className="text-xs text-gray-400">ID:{String(item.deviceId).substring(0, 8)}...</div>
+                                                </div>
+                                                <div className="text-right shrink-0">
+                                                    <span className="inline-flex items-center rounded-md bg-rose-50 px-2 py-1 text-xs font-semibold text-rose-700 ring-1 ring-inset ring-rose-600/10">
+                                                        Còn {item.stock} máy
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center py-12 text-center">
+                                            <div className="rounded-full bg-emerald-50 p-2.5 text-emerald-500 mb-2">
+                                                <Boxes className="h-5 w-5" />
+                                            </div>
+                                            <p className="text-xs font-medium text-gray-500">Tồn kho vận hành an toàn</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Cột 2: Trạng thái thiết bị bảo trì */}
+                        <Card className="flex flex-col border-orange-100/80 shadow-sm transition-all hover:shadow-md">
+                            <CardHeader className="border-b border-orange-50/50 bg-orange-50/20 pb-4">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="rounded-md bg-orange-100 p-1.5 text-orange-600">
+                                        <AlertTriangle className="h-4 w-4" />
+                                    </div>
+                                    <div>
+                                        <CardTitle className="text-base font-semibold text-gray-900">Thiết bị bảo trì</CardTitle>
+                                        <CardDescription className="text-xs text-orange-600/80 font-medium mt-0.5">
+                                            Tạm khóa khỏi luồng đặt lịch vận hành
+                                        </CardDescription>
+                                    </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="flex-1 p-4">
+                                <div className="space-y-2.5 max-h-90 overflow-y-auto pr-1 scrollbar-thin">
+                                    {dashboard?.maintenanceAlerts.length ? (
+                                        dashboard.maintenanceAlerts.map((item) => (
+                                            <div
+                                                key={item.deviceId}
+                                                className="rounded-lg border border-gray-100 bg-white p-3 transition-colors hover:bg-gray-50/50"
+                                            >
+                                                <div className="flex items-start justify-between gap-2">
+                                                    <div className="font-medium text-sm text-gray-800 line-clamp-1 flex-1">{item.deviceName}</div>
+                                                    <span className="inline-flex items-center rounded-md bg-amber-50 px-2 py-0.5 text-[11px] font-medium text-amber-800 ring-1 ring-inset ring-amber-600/10 shrink-0">
+                                                        Đang sửa
+                                                    </span>
+                                                </div>
+                                                <div className="mt-1.5 flex items-center justify-between text-xs">
+                                                    <div className="text-gray-500 italic truncate max-w-[70%]">
+                                                        🔧 {item.maintenanceReason || "Bảo trì định kỳ"}
+                                                    </div>
+                                                    <div className="text-gray-400 text-[11px]">ID: {String(item.deviceId).substring(0, 6)}</div>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center py-12 text-center">
+                                            <div className="rounded-full bg-emerald-50 p-2.5 text-emerald-500 mb-2">
+                                                <AlertTriangle className="h-5 w-5" />
+                                            </div>
+                                            <p className="text-xs font-medium text-gray-500">Mọi thiết bị sẵn sàng vận hành</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                        {/* Cột 3: Quản lý ưu đãi (Voucher sắp hết hạn) */}
+                        <Card className="flex flex-col border-violet-100/80 shadow-sm transition-all hover:shadow-md">
+                            <CardHeader className="border-b border-violet-50/50 bg-violet-50/20 pb-4">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="rounded-md bg-violet-100 p-1.5 text-violet-600">
+                                        <TicketPercent className="h-4 w-4" />
+                                    </div>
+                                    <div>
+                                        <CardTitle className="text-base font-semibold text-gray-900">Voucher sắp hết hạn</CardTitle>
+                                        <CardDescription className="text-xs text-violet-600/80 font-medium mt-0.5">
+                                            Cần gia hạn hoặc dừng phát hành sớm
+                                        </CardDescription>
+                                    </div>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="flex-1 p-4">
+                                <div className="space-y-2.5 max-h-90 overflow-y-auto pr-1 scrollbar-thin">
+                                    {dashboard?.voucherAlerts.length ? (
+                                        dashboard.voucherAlerts.map((item) => (
+                                            <div
+                                                key={item.voucherId}
+                                                className="rounded-lg border border-gray-100 bg-white p-3 transition-colors hover:bg-gray-50/50"
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <span className="font-mono font-bold text-sm text-violet-700 bg-violet-50 px-2 py-0.5 rounded border border-violet-100/60">
+                                                        {item.code}
+                                                    </span>
+                                                    <span className="text-xs text-gray-500 font-medium">
+                                                        Còn lại: <span className="text-gray-900 font-semibold">{item.remainingQuantity}</span>
+                                                    </span>
+                                                </div>
+                                                <div className="mt-2 flex items-center justify-between text-xs border-t border-gray-50 pt-1.5 text-gray-400">
+                                                    <div>Hạn dùng: <span className="text-gray-600 font-medium">{formatDate(item.endDate)}</span></div>
+                                                    <div className="text-[10px]">ID: {String(item.voucherId).substring(0, 5)}</div>
+                                                </div>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="flex flex-col items-center justify-center py-12 text-center">
+                                            <div className="rounded-full bg-emerald-50 p-2.5 text-emerald-500 mb-2">
+                                                <TicketPercent className="h-5 w-5" />
+                                            </div>
+                                            <p className="text-xs font-medium text-gray-500">Không có voucher nào sắp hết hạn trong 7 ngày tới.</p>
+                                        </div>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+
+                    </div>
+
+                </>
             )}
-
-            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-2">
-                {staffSections.map((section) => {
-                    return (
-                        <div
-                            key={section.href}
-                            className="flex flex-col justify-between bg-white border-t-4 border-[#
-                            ] p-5 shadow-[0_1px_3px_rgba(0,0,0,0.05)] hover:shadow-md transition-shadow"
-                        >
-                            <div>
-                                {/* Meta Topic Tag */}
-                                <span className="text-[11px] font-bold uppercase tracking-wider text-[#C70000] font-vietnam">
-                                    {section.tag}
-                                </span>
-                                {/* Card Title */}
-                                <h2 className="mt-2 font-vietnam text-xl font-bold tracking-tight text-[#111111] hover:text-[#052962] transition-colors">
-                                    <Link href={section.href}>{section.title}</Link>
-                                </h2>
-                                {/* Card Description */}
-                                <p className="mt-2 text-sm leading-relaxed text-[#333333] font-vietnam">
-                                    {section.description}
-                                </p>
-                            </div>
-
-                            {/* Guardian Style CTA Link Button */}
-                            <div className="mt-6 pt-4 border-t border-[#EDEDED] flex justify-end">
-                                <Button asChild className="rounded-none bg-[#052962] hover:bg-[#031F4B] text-white text-xs font-bold px-4 py-2">
-                                    <Link href={section.href} className="flex items-center gap-1.5">
-                                        Xử lý phân hệ <ChevronRight className="size-3" />
-                                    </Link>
-                                </Button>
-                            </div>
-                        </div>
-                    );
-                })}
-            </div>
-
-            <div className="grid gap-6 xl:grid-cols-3">
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-lg"><Boxes className="size-5 text-[#052962]" /> Tồn kho cần bổ sung</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3 text-sm">
-                        {dashboard?.lowStockAlerts.length ? dashboard.lowStockAlerts.map((item) => (
-                            <div key={item.deviceId} className="rounded-xl border bg-muted/20 p-3">
-                                <div className="font-semibold text-[#111111]">{item.deviceName}</div>
-                                <div className="text-muted-foreground">Tồn kho còn {item.stock}</div>
-                            </div>
-                        )) : <div className="text-muted-foreground">Không có thiết bị nào đang ở ngưỡng cảnh báo.</div>}
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-lg"><Boxes className="size-5 text-[#0B6E4F]" /> Catalog của brand</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3 text-sm">
-                        <div className="rounded-xl border bg-muted/20 p-3">
-                            <div className="font-semibold text-[#111111]">Quản lý sản phẩm thuộc brand</div>
-                            <div className="text-muted-foreground">Brand Staff thao tác catalog, tồn kho, bảo trì và voucher ngay trong một luồng làm việc thống nhất.</div>
-                        </div>
-                        <Button asChild variant="outline">
-                            <Link href="/staff/inventory">Mở catalog</Link>
-                        </Button>
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="flex items-center gap-2 text-lg"><AlertTriangle className="size-5 text-[#B45309]" /> Thiết bị cần bảo trì</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3 text-sm">
-                        {dashboard?.maintenanceAlerts.length ? dashboard.maintenanceAlerts.map((item) => (
-                            <div key={item.deviceId} className="rounded-xl border bg-muted/20 p-3">
-                                <div className="font-semibold text-[#111111]">{item.deviceName}</div>
-                                <div className="text-muted-foreground">{item.maintenanceReason || "Đang bảo trì định kỳ"}</div>
-                            </div>
-                        )) : <div className="text-muted-foreground">Hiện không có thiết bị nào trong trạng thái bảo trì.</div>}
-                    </CardContent>
-                </Card>
-
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="text-lg">Voucher Sắp Hết Hạn</CardTitle>
-                    </CardHeader>
-                    <CardContent className="space-y-3 text-sm">
-                        {dashboard?.voucherAlerts.length ? dashboard.voucherAlerts.map((item) => (
-                            <div key={item.voucherId} className="rounded-xl border bg-muted/20 p-3">
-                                <div className="font-semibold text-[#111111]">{item.code}</div>
-                                <div className="text-muted-foreground">Hết hạn: {formatDate(item.endDate)}</div>
-                                <div className="text-muted-foreground">Còn lại: {item.remainingQuantity}</div>
-                            </div>
-                        )) : <div className="text-muted-foreground">Không có voucher nào sắp hết hạn trong 7 ngày tới.</div>}
-                    </CardContent>
-                </Card>
-            </div>
         </div>
     );
 }

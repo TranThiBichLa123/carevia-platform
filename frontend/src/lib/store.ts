@@ -126,19 +126,16 @@ const mapCartItemToProduct = (
         tags: item.productId.tags || [],
         videoUrl: item.productId.videoUrl,
         createdAt: item.productId.createdAt || new Date(0).toISOString(),
-    },
+    } as Product,
     quantity: item.quantity,
 });
 
 const mapCartInfoToProduct = (item: any): CartProductWithQuantity => {
-    // Lấy ID từ mọi trường hợp có thể xảy ra (deviceId, device_id, hoặc id)
     const rawId = item.deviceId || item.device_id || item.id;
 
     return {
         product: {
-            // 🟢 Chuyển sang String một cách an toàn, tránh ra chữ "undefined"
             id: rawId ? String(rawId) : Math.random().toString(36).substr(2, 9),
-
             name: item.deviceName || "Sản phẩm không tên",
             slug: toSlug(item.deviceName || "san-pham"),
             description: "",
@@ -166,10 +163,13 @@ const mapCartInfoToProduct = (item: any): CartProductWithQuantity => {
             tags: [],
             videoUrl: undefined,
             createdAt: new Date().toISOString(),
+
+            wishlistCount: 0,
         },
         quantity: item.quantity || 1,
     };
 };
+
 
 
 export interface User {

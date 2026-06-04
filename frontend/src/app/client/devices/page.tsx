@@ -95,7 +95,7 @@ const AllProductsContent = () => {
             const selectedPrice = priceOptions.find(p => p.id === priceRange);
             const params: DeviceQueryParams = {
                 page: pageNum,
-                size: 12,
+                size: 9999,
                 sort: getSortParam(sortBy),
             };
             if (selectedCategoryId) params.categoryId = selectedCategoryId;
@@ -359,7 +359,7 @@ const AllProductsContent = () => {
                                 </div>
 
                                 {/* Load More */}
-                                {hasNext && (
+                                {/* {hasNext && (
                                     <div className="mt-16 flex flex-col items-center">
                                         <div className="w-64 h-1 bg-gray-200 rounded-full mb-4">
                                             <div
@@ -378,7 +378,7 @@ const AllProductsContent = () => {
                                             {loadingMore ? "Đang tải..." : "Xem thêm sản phẩm"}
                                         </button>
                                     </div>
-                                )}
+                                )} */}
                             </>
                         )}
                     </main>
