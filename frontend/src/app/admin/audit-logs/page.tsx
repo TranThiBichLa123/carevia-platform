@@ -294,7 +294,7 @@ export default function AdminAuditLogsPage() {
   };
 
   return (
-    <div className="space-y-6 px-4 py-6 md:px-8">
+    <div className="w-full max-w-full overflow-hidden space-y-6 px-4 py-6 md:px-8">
 
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 w-full font-vietnam">
 
@@ -468,144 +468,148 @@ export default function AdminAuditLogsPage() {
         </CardHeader>
 
         {/* ================= KHỐI BẢNG AUDIT LOGS DỮ LIỆU ================= */}
-        <CardContent className="">
+        <CardContent className="px-8 ">
           {loading ? (
             <div className="py-24 text-center flex flex-col items-center justify-center gap-3">
               <div className="w-6 h-6 border-2 border-admin-primary border-t-transparent rounded-full animate-spin" />
               <p className="text-[13px] font-medium text-gray-400">Đang đồng bộ dữ liệu nhật ký...</p>
             </div>
           ) : (
-            <div className="overflow-x-auto rounded-lg ">
-              <Table className="w-full border-collapse ">
-                <TableHeader className="bg-admin-primary border-b border-gray-100 ">
-                  <TableRow className="hover:bg-transparent">
-                    <TableHead className="text-[12px] font-bold font-vietnam text-[#FFE500] py-3.5 pl-6">NGƯỜI THAO TÁC</TableHead>
-                    <TableHead className="text-[12px] font-bold font-vietnam text-white py-3.5">HÀNH ĐỘNG</TableHead>
-                    <TableHead className="text-[12px] font-bold font-vietnam text-white py-3.5">BẢNG DỮ LIỆU / ID</TableHead>
-                    <TableHead className="text-[12px] font-bold font-vietnam text-white py-3.5 min-w-[320px]">PAYLOAD THAY ĐỔI (JSON)</TableHead>
-                    <TableHead className="text-[12px] font-bold font-vietnam text-white py-3.5">ĐỊA CHỈ IP</TableHead>
-                    <TableHead className="text-[12px] font-bold font-vietnam text-[#FFE500] py-3.5 pr-9.5 text-right">THỜI GIAN</TableHead>
-                  </TableRow>
-                </TableHeader>
+            < div className="w-full overflow-hidden  rounded-xl border border-gray-100 bg-white shadow-sm font-vietnam">
 
-                <TableBody className="divide-y divide-gray-50">
-                  {logs.map((log) => {
-                    const isSystem = !log.username;
-                    const isPayloadExpanded = !!expandedPayloads[log.id];
-                    const payload = parseAuditPayload(log.changedData);
-                    const payloadHighlights = getPayloadHighlights(payload);
-                    const actionConfig = ACTION_CONFIGS[log.action];
-                    const roleLabel = log.role ? ROLE_LABELS[log.role] : null;
+              <div className="w-full overflow-x-auto">
 
-                    return (
-                      <TableRow key={log.id} className="hover:bg-gray-50/30 transition-colors group">
+                <Table className="w-full min-w-250 border-collapse ">
+                  <TableHeader className="bg-admin-primary border-b border-gray-100 ">
+                    <TableRow className="hover:bg-transparent">
+                      <TableHead className="text-[12px] font-bold font-vietnam text-[#FFE500] py-3.5 pl-6">NGƯỜI THAO TÁC</TableHead>
+                      <TableHead className="text-[12px] font-bold font-vietnam text-white py-3.5">HÀNH ĐỘNG</TableHead>
+                      <TableHead className="text-[12px] font-bold font-vietnam text-white py-3.5">BẢNG DỮ LIỆU / ID</TableHead>
+                      <TableHead className="text-[12px] font-bold font-vietnam text-white py-3.5 min-w-[320px]">PAYLOAD THAY ĐỔI (JSON)</TableHead>
+                      <TableHead className="text-[12px] font-bold font-vietnam text-white py-3.5">ĐỊA CHỈ IP</TableHead>
+                      <TableHead className="text-[12px] font-bold font-vietnam text-[#FFE500] py-3.5 pr-9.5 text-right">THỜI GIAN</TableHead>
+                    </TableRow>
+                  </TableHeader>
 
-                        {/* Cột 1: Người thao tác kèm Avatar đại diện thông minh */}
-                        <TableCell className="py-3.5 pl-6 align-top">
-                          <div className="flex items-center gap-3">
-                            <div className={cn(
-                              "w-9 h-9 rounded-full flex items-center justify-center font-bold text-[14px] shrink-0 border shadow-inner relative overflow-hidden",
-                              isSystem ? "bg-amber-50 border-amber-100 text-amber-600" : "bg-linear-to-br from-gray-100 to-gray-200/60 border-gray-200/40 text-gray-600"
-                            )}>
-                              {isSystem ? <ShieldAlert className="w-4 h-4" /> : log.username?.charAt(0).toUpperCase() || "S"}
+                  <TableBody className="divide-y divide-gray-50">
+                    {logs.map((log) => {
+                      const isSystem = !log.username;
+                      const isPayloadExpanded = !!expandedPayloads[log.id];
+                      const payload = parseAuditPayload(log.changedData);
+                      const payloadHighlights = getPayloadHighlights(payload);
+                      const actionConfig = ACTION_CONFIGS[log.action];
+                      const roleLabel = log.role ? ROLE_LABELS[log.role] : null;
+
+                      return (
+                        <TableRow key={log.id} className="hover:bg-gray-50/30 transition-colors group">
+
+                          {/* Cột 1: Người thao tác kèm Avatar đại diện thông minh */}
+                          <TableCell className="py-3.5 pl-6 align-top">
+                            <div className="flex items-center gap-3">
+                              <div className={cn(
+                                "w-9 h-9 rounded-full flex items-center justify-center font-bold text-[14px] shrink-0 border shadow-inner relative overflow-hidden",
+                                isSystem ? "bg-amber-50 border-amber-100 text-amber-600" : "bg-linear-to-br from-gray-100 to-gray-200/60 border-gray-200/40 text-gray-600"
+                              )}>
+                                {isSystem ? <ShieldAlert className="w-4 h-4" /> : log.username?.charAt(0).toUpperCase() || "S"}
+                              </div>
+                              <div className="min-w-0">
+                                <p className="text-[13px] font-semibold text-gray-700 group-hover:text-admin-primary transition-colors truncate">
+                                  {log.username || "Hệ thống (System)"}
+                                </p>
+                                <p className="text-[12px] text-gray-400 truncate mt-0.5">
+                                  {isSystem
+                                    ? "system@internal.api"
+                                    : [roleLabel, log.email].filter(Boolean).join(" · ")}
+                                </p>
+                              </div>
                             </div>
-                            <div className="min-w-0">
-                              <p className="text-[13px] font-semibold text-gray-700 group-hover:text-admin-primary transition-colors truncate">
-                                {log.username || "Hệ thống (System)"}
-                              </p>
-                              <p className="text-[12px] text-gray-400 truncate mt-0.5">
-                                {isSystem
-                                  ? "system@internal.api"
-                                  : [roleLabel, log.email].filter(Boolean).join(" · ")}
+                          </TableCell>
+
+                          {/* Cột 2: Badge Hành động */}
+                          <TableCell className="py-3.5 align-top pt-4">
+                            <div className="space-y-1.5">
+                              <span className={cn(
+                                "inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-bold border uppercase tracking-wider font-vietnam shadow-sm",
+                                actionConfig?.className || "bg-gray-50 border-gray-200 text-gray-600"
+                              )}>
+                                {actionConfig?.label || humanizeText(log.action)}
+                              </span>
+                              <p className="max-w-55 text-[12px] leading-relaxed text-gray-500">
+                                {getLogSummary(log, payload)}
                               </p>
                             </div>
-                          </div>
-                        </TableCell>
+                          </TableCell>
 
-                        {/* Cột 2: Badge Hành động */}
-                        <TableCell className="py-3.5 align-top pt-4">
-                          <div className="space-y-1.5">
-                            <span className={cn(
-                              "inline-flex items-center px-2.5 py-0.5 rounded text-[11px] font-bold border uppercase tracking-wider font-vietnam shadow-sm",
-                              actionConfig?.className || "bg-gray-50 border-gray-200 text-gray-600"
-                            )}>
-                              {actionConfig?.label || humanizeText(log.action)}
+                          {/* Cột 3: Tên bảng & Record ID */}
+                          <TableCell className="py-3.5 align-top pt-3.5">
+                            <div className="flex items-center gap-1.5 text-[13px] font-semibold text-gray-700">
+                              <Database className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+                              <span>{getTableLabel(log.tableName)}</span>
+                            </div>
+                            <p className="mt-1 text-[11px] text-gray-400">{log.tableName}</p>
+                            <div className="text-[11px] font-bold text-gray-400 mt-1 uppercase tracking-wide bg-gray-50 border border-gray-100 w-fit px-1.5 py-0.5 rounded">
+                              ID: #{log.recordId}
+                            </div>
+                          </TableCell>
+
+                          {/* Cột 4: Payload thay đổi (BẤM VÀO ĐỂ THU PHÓNG THÔNG MINH) */}
+                          <TableCell className="py-3.5 align-top max-w-xl">
+                            <div
+                              onClick={() => togglePayload(log.id)}
+                              className={cn(
+                                "relative rounded-lg border border-gray-100 bg-gray-50/50 p-2.5 hover:bg-white hover:border-gray-200 cursor-pointer transition-all overflow-hidden group/box font-mono text-[11px]",
+                                isPayloadExpanded ? "max-h-none pb-7" : "max-h-16"
+                              )}
+                            >
+                              {payloadHighlights.length > 0 && (
+                                <div className="mb-2 flex flex-wrap gap-1.5 font-vietnam">
+                                  {payloadHighlights.map((item) => (
+                                    <span
+                                      key={`${log.id}-${item.key}`}
+                                      className="rounded-full border border-gray-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-gray-500"
+                                    >
+                                      {item.label}: {item.value}
+                                    </span>
+                                  ))}
+                                </div>
+                              )}
+                              <pre className={cn(
+                                "text-gray-600 whitespace-pre-wrap break-all leading-relaxed",
+                                !isPayloadExpanded && "line-clamp-2"
+                              )}>
+                                {log.changedData || "Không có dữ liệu payload"}
+                              </pre>
+
+                              {log.changedData && (
+                                <div className="absolute bottom-1 right-2 flex items-center gap-0.5 text-[10px] font-bold font-vietnam text-gray-400 group-hover/box:text-admin-primary transition-colors">
+                                  {isPayloadExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                                </div>
+                              )}
+                            </div>
+                          </TableCell>
+
+                          {/* Cột 5: IP Address */}
+                          <TableCell className="py-3.5 align-top text-[13px] text-gray-500 font-medium pt-4">
+                            <span className="bg-neutral-50 px-2 py-0.5 border border-neutral-100 rounded text-gray-600 text-[12px]">
+                              {log.ipAddress || "::1"}
                             </span>
-                            <p className="max-w-55 text-[12px] leading-relaxed text-gray-500">
-                              {getLogSummary(log, payload)}
-                            </p>
-                          </div>
-                        </TableCell>
+                          </TableCell>
 
-                        {/* Cột 3: Tên bảng & Record ID */}
-                        <TableCell className="py-3.5 align-top pt-3.5">
-                          <div className="flex items-center gap-1.5 text-[13px] font-semibold text-gray-700">
-                            <Database className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-                            <span>{getTableLabel(log.tableName)}</span>
-                          </div>
-                          <p className="mt-1 text-[11px] text-gray-400">{log.tableName}</p>
-                          <div className="text-[11px] font-bold text-gray-400 mt-1 uppercase tracking-wide bg-gray-50 border border-gray-100 w-fit px-1.5 py-0.5 rounded">
-                            ID: #{log.recordId}
-                          </div>
-                        </TableCell>
+                          {/* Cột 6: Thời gian tạo */}
+                          <TableCell className="py-3.5 pr-6 align-top text-[13px] text-gray-600 font-semibold pt-4 whitespace-nowrap">
+                            {formatDateTime(log.createdAt)}
+                          </TableCell>
 
-                        {/* Cột 4: Payload thay đổi (BẤM VÀO ĐỂ THU PHÓNG THÔNG MINH) */}
-                        <TableCell className="py-3.5 align-top max-w-xl">
-                          <div
-                            onClick={() => togglePayload(log.id)}
-                            className={cn(
-                              "relative rounded-lg border border-gray-100 bg-gray-50/50 p-2.5 hover:bg-white hover:border-gray-200 cursor-pointer transition-all overflow-hidden group/box font-mono text-[11px]",
-                              isPayloadExpanded ? "max-h-none pb-7" : "max-h-16"
-                            )}
-                          >
-                            {payloadHighlights.length > 0 && (
-                              <div className="mb-2 flex flex-wrap gap-1.5 font-vietnam">
-                                {payloadHighlights.map((item) => (
-                                  <span
-                                    key={`${log.id}-${item.key}`}
-                                    className="rounded-full border border-gray-200 bg-white px-2 py-0.5 text-[10px] font-semibold text-gray-500"
-                                  >
-                                    {item.label}: {item.value}
-                                  </span>
-                                ))}
-                              </div>
-                            )}
-                            <pre className={cn(
-                              "text-gray-600 whitespace-pre-wrap break-all leading-relaxed",
-                              !isPayloadExpanded && "line-clamp-2"
-                            )}>
-                              {log.changedData || "Không có dữ liệu payload"}
-                            </pre>
-
-                            {log.changedData && (
-                              <div className="absolute bottom-1 right-2 flex items-center gap-0.5 text-[10px] font-bold font-vietnam text-gray-400 group-hover/box:text-admin-primary transition-colors">
-                                {isPayloadExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
-                              </div>
-                            )}
-                          </div>
-                        </TableCell>
-
-                        {/* Cột 5: IP Address */}
-                        <TableCell className="py-3.5 align-top text-[13px] text-gray-500 font-medium pt-4">
-                          <span className="bg-neutral-50 px-2 py-0.5 border border-neutral-100 rounded text-gray-600 text-[12px]">
-                            {log.ipAddress || "::1"}
-                          </span>
-                        </TableCell>
-
-                        {/* Cột 6: Thời gian tạo */}
-                        <TableCell className="py-3.5 pr-6 align-top text-[13px] text-gray-600 font-semibold pt-4 whitespace-nowrap">
-                          {formatDateTime(log.createdAt)}
-                        </TableCell>
-
-                      </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+                        </TableRow>
+                      );
+                    })}
+                  </TableBody>
+                </Table>
+              </div>
             </div>
           )}
         </CardContent>
       </Card>
-    </div>
+    </div >
   );
 }

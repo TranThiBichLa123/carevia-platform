@@ -29,7 +29,7 @@ const sidebarItems = [
         icon: Building2,
     },
     {
-        title: "User & Seller Staff",
+        title: "Người dùng & Đối tác",
         href: "/admin/users",
         icon: Shield,
     },
@@ -38,11 +38,7 @@ const sidebarItems = [
         href: "/admin/reviews",
         icon: MessageSquareMore,
     },
-    {
-        title: "Thống kê hệ thống",
-        href: "/admin/statistics",
-        icon: ChartColumnBig,
-    },
+   
     {
         title: "Audit Log",
         href: "/admin/audit-logs",

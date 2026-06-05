@@ -16,8 +16,8 @@ const mockBanners: Banners[] = [
   },
   {
     _id: "2",
-    name: "Special Offer",
-    title: "Up To 50% Off",
+    name: "Ưu đãi hấp dẫn",
+    title: "Giảm giá lên đến 50%",
     image: "https://www.wearebodybeautiful.com/wp-content/uploads/2022/07/Anti-ageing-skincare-beauty-tech-devices-multi-1.jpg",
     startFrom: new Date().getTime(),
     bannerType: "featured",
@@ -56,7 +56,7 @@ const Banner = async () => {
           className="w-full h-72 md:min-h-100 object-cover group-hover:scale-110 hoverEffect"
         />
         <div className="absolute top-0 left-0 w-full h-full flex flex-col gap-3 items-center justify-center">
-          <p className="text-amber-400 font-semibold text-sm italic">{imageOne?.name}</p>
+          <p className="text-white font-semibold text-sm italic">{imageOne?.name}</p>
           <h2 className="text-3xl md:text-4xl font-medium max-w-md text-center capitalize text-white">
             {imageOne?.title}
           </h2>
@@ -77,7 +77,7 @@ const Banner = async () => {
           className="w-full h-72 md:min-h-100 object-cover group-hover:scale-110 hoverEffect"
         />
         <div className="absolute top-8 left-0 w-full h-full flex flex-col gap-2 items-center justify-start text-white">
-          <p className="font-semibold text-sm">{imageTwo?.name}</p>
+          <p className="font-semibold italic text-sm">{imageTwo?.name}</p>
           <h2 className="text-2xl md:text-3xl font-medium max-w-48 text-center capitalize">
             {imageTwo?.title}
           </h2>

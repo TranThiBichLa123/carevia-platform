@@ -280,7 +280,7 @@ export default function AdminStatisticsPage() {
 								return (
 									<Link
 										key={device.id}
-										href={`/admin/statistics/${device.id}`}
+										href={`/admin/${device.id}`}
 										className="group relative flex items-center justify-between gap-4 p-4 transition-all duration-300 hover:bg-slate-50/60"
 									>
 										{/* Vùng bên trái: Số thứ hạng + Ảnh + Thông tin */}

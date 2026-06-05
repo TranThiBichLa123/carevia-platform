@@ -194,8 +194,8 @@ export default function AdminUsersPage() {
 	return (
 		<div className="space-y-6 px-4 py-6 md:px-8">
 			<div>
-				<h1 className="text-3xl font-bold tracking-tight">Quản lý User & Seller Staff</h1>
-				<p className="text-sm text-muted-foreground">Khóa hoặc mở khóa tài khoản, duyệt seller staff và theo dõi hàng đợi onboarding của marketplace.</p>
+				<h1 className="text-3xl font-bold tracking-tight">Quản lý Người dùng & Đối tác</h1>
+				<p className="text-sm text-muted-foreground">Khóa hoặc mở khóa tài khoản, duyệt đối tác và theo dõi hàng đợi onboarding của marketplace.</p>
 			</div>
 
 			<div className="grid gap-4 md:grid-cols-3">
@@ -329,12 +329,12 @@ export default function AdminUsersPage() {
 							<Table className="w-full border-collapse">
 								<TableHeader className="bg-gray-50/70 border-b border-gray-100">
 									<TableRow className="hover:bg-transparent">
-										<TableHead className="text-[12px] font-bold text-gray-500 py-3.5 pl-6">Tài khoản</TableHead>
-										<TableHead className="text-[12px] font-bold text-gray-500 py-3.5">Vai trò</TableHead>
-										<TableHead className="text-[12px] font-bold text-gray-500 py-3.5">Trạng thái</TableHead>
-										<TableHead className="text-[12px] font-bold text-gray-500 py-3.5">Đăng nhập cuối</TableHead>
-										<TableHead className="text-[12px] font-bold text-gray-500 py-3.5">Ngày tạo</TableHead>
-										<TableHead className="text-[12px] font-bold text-gray-500 py-3.5 pr-6 text-right">Thao tác</TableHead>
+										<TableHead className="text-[12px] bg-admin-primary uppercase font-bold text-[#FFE500] py-3.5 pl-6">Tài khoản</TableHead>
+										<TableHead className="text-[12px] bg-admin-primary uppercase font-bold text-white py-3.5">Vai trò</TableHead>
+										<TableHead className="text-[12px] bg-admin-primary uppercase font-bold text-white py-3.5">Trạng thái</TableHead>
+										<TableHead className="text-[12px] bg-admin-primary uppercase font-bold text-white py-3.5">Đăng nhập cuối</TableHead>
+										<TableHead className="text-[12px] bg-admin-primary uppercase font-bold text-white py-3.5">Ngày tạo</TableHead>
+										<TableHead className="text-[12px] bg-admin-primary uppercase font-bold text-[#FFE500] py-3.5 pr-6 text-right">Thao tác</TableHead>
 									</TableRow>
 								</TableHeader>
 

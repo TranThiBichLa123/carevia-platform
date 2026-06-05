@@ -111,7 +111,7 @@ export default function AdminBrandsPage() {
         </Card>
       </div>
 
-      <div className="grid gap-6 xl:grid-cols-[1.2fr_0.8fr]">
+      <div className="grid gap-6 ">
         <Card className="w-full overflow-hidden border border-gray-100 bg-white shadow-sm rounded-2xl font-vietnam">
           {/* ĐỒNG BỘ HEADER CARD: Tách nền mờ nhẹ nhàng */}
           <CardHeader className="p-5 md:p-6 border-b border-gray-50 bg-gray-50/10 pb-4">
@@ -222,11 +222,11 @@ export default function AdminBrandsPage() {
 
         </Card>
 
-        <div className="space-y-6">
+        {/* <div className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle>Hàng đợi seller onboarding</CardTitle>
-              <CardDescription>Các tài khoản Brand Staff đang chờ platform admin xét duyệt.</CardDescription>
+              <CardTitle>Hàng đợi đối tác onboarding</CardTitle>
+              <CardDescription>Các tài khoản đối tác đang chờ platform admin xét duyệt.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-3">
               {pendingSellerAccounts.length ? (
@@ -238,29 +238,15 @@ export default function AdminBrandsPage() {
                   </div>
                 ))
               ) : (
-                <div className="rounded-xl border border-dashed p-4 text-sm text-muted-foreground">Không có seller staff nào đang chờ duyệt.</div>
+                <div className="rounded-xl border border-dashed p-4 text-sm text-muted-foreground">Không có đối tác nào đang chờ duyệt.</div>
               )}
               <Button asChild className="w-full bg-admin-primary hover:bg-admin-primary-dark text-white rounded-lg">
-                <Link href="/admin/users">Mở danh sách duyệt seller</Link>
+                <Link href="/admin/users">Mở danh sách duyệt đối tác</Link>
               </Button>
             </CardContent>
           </Card>
-
-          {/* <Card>
-            <CardHeader>
-              <CardTitle>Quy tắc marketplace</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3 text-sm text-slate-700">
-              <div className="rounded-xl border bg-slate-50 p-3">Brand Staff chỉ nên thao tác trên dữ liệu thuộc brand của mình.</div>
-              <div className="rounded-xl border bg-slate-50 p-3">Platform Admin duyệt brand, giám sát moderation và không trực tiếp vận hành shop.</div>
-              <div className="rounded-xl border bg-slate-50 p-3">Client chỉ nhìn thấy brand và sản phẩm sau khi brand được duyệt hiển thị.</div>
-              <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-amber-900">
-                <ShieldAlert className="mb-2 size-4" />
-                Commission, khóa brand và hồ sơ pháp lý brand cần API admin riêng để hoàn chỉnh RBAC marketplace.
-              </div>
-            </CardContent>
-          </Card> */}
-        </div>
+        </div> */}
+        
       </div>
 
       {!!featuredBrands.length && (

@@ -992,7 +992,7 @@ export default function StaffInventoryPage() {
 						{/* Nút hủy thao tác */}
 						<Button
 							variant="outline"
-							className="h-9 text-xs px-4 font-medium text-gray-600 border-gray-200 bg-white hover:bg-gray-50 transition-colors rounded-lg font-vietnam"
+							className="h-9 text-[14px] px-4 font-medium text-gray-600 border-gray-200 bg-white hover:bg-gray-50 transition-colors rounded-lg font-vietnam"
 							onClick={closeDeviceDialog}
 							disabled={savingDevice || voucherLoading || metadataLoading || uploadingImage}
 						>
@@ -1001,7 +1001,7 @@ export default function StaffInventoryPage() {
 
 						{/* Nút lưu hành động chính */}
 						<Button
-							className="h-9 text-xs px-4 font-medium bg-staff-primary hover:bg-staff-primary/90 text-white shadow-sm transition-all duration-200 active:scale-95 disabled:opacity-40 rounded-lg font-vietnam"
+							className="h-9 text-[14px] px-4 font-medium bg-staff-primary hover:bg-staff-primary/90 text-white shadow-sm transition-all duration-200 active:scale-95 disabled:opacity-40 rounded-lg font-vietnam"
 							onClick={() => void handleSaveDevice()}
 							disabled={savingDevice || voucherLoading || metadataLoading || uploadingImage}
 						>
