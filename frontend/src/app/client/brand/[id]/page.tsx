@@ -168,7 +168,7 @@ const BrandDetailPage = () => {
                   {/* Hiển thị giá trị đang chọn */}
                   <div className="flex items-center justify-between px-3 py-2 bg-white border border-gray-200 rounded-md cursor-pointer hover:border-primary transition-all">
                     <span className="text-[13px] font-vietnam font-medium text-gray-700">
-                      {sortBy === 'popular' && "Phổ biến nhất"}
+                      {sortBy === 'popular' && "Bán chạy nhất"}
                       {sortBy === 'newest' && "Mới nhất"}
                       {sortBy === 'price-asc' && "Giá: Thấp → Cao"}
                       {sortBy === 'price-desc' && "Giá: Cao → Thấp"}
@@ -183,7 +183,7 @@ const BrandDetailPage = () => {
                   <div className="absolute top-full left-0 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg overflow-hidden z-50 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200">
                     <div className="flex flex-col whitespace-nowrap">
                       {[
-                        { v: 'popular', l: 'Phổ biến nhất' },
+                        { v: 'popular', l: 'Bán chạy nhất' },
                         { v: 'newest', l: 'Mới nhất' },
                         { v: 'price-asc', l: 'Giá: Thấp → Cao' },
                         { v: 'price-desc', l: 'Giá: Cao → Thấp' },

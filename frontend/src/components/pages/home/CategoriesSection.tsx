@@ -48,7 +48,7 @@ const CategoriesSection = () => {
   // Gợi ý dành cho bạn — xếp hạng bởi thuật toán Fuzzy TOPSIS
   // Tiêu chí: phù hợp loại da (BENEFIT), đánh giá (BENEFIT), lượt bán (BENEFIT), giá (COST)
   const recommendationItems: Category[] = [
-    { id: 'r1', name: 'Phổ biến nhất', emoji: '🔥', color: '#FF8A65', type: 'featured', path: `/client/devices?categoryName=${encodeURIComponent('Phổ biến nhất')}&sortBy=best_selling` },
+    { id: 'r1', name: 'Bán chạy nhất', emoji: '🔥', color: '#FF8A65', type: 'featured', path: `/client/devices?categoryName=${encodeURIComponent('Bán chạy nhất')}&sortBy=best_selling` },
     { id: 'r2', name: 'Đánh giá cao nhất', emoji: '⭐', color: '#FFD54F', type: 'featured', path: `/client/devices?categoryName=${encodeURIComponent('Đánh giá cao nhất')}&sortBy=rating_desc` },
     { id: 'r3', name: 'Giá thấp nhất', emoji: '💰', color: '#2196F3', type: 'featured', path: `/client/devices?categoryName=${encodeURIComponent('Giá thấp nhất')}&sortBy=price_asc` },
     { id: 'r4', name: 'Sản phẩm phù hợp nhất', emoji: '🌟', color: '#4CAF50', type: 'featured', path: '/client/recommendations/devices' },
@@ -59,8 +59,7 @@ const CategoriesSection = () => {
   // Quick Links
   const quickLinks = [
     { id: 'q1', name: 'Tất cả sản phẩm', emoji: '🛍️', color: '#4FC3F7', path: '/devices' },
-    { id: 'q2', name: 'Sản phẩm mới', emoji: '🆕', color: '#66BB6A', path: '/new-arrivals' },
-    { id: 'q3', name: 'Dưới 1 triệu', emoji: '💰', color: '#FFA726', path: '/under-1m' },
+    { id: 'q2', name: 'Sản phẩm mới', emoji: '🆕', color: '#66BB6A', path: '/devices?categoryName=Sản phẩm mới&sortBy=newest' },
     { id: 'q4', name: 'Đơn hàng của tôi', emoji: '📦', color: '#AB47BC', path: '/account?tab=orders' },
   ];
 
@@ -139,8 +138,7 @@ const CategoriesSection = () => {
       {/* 4. TRUY CẬP NHANH */}
       <NavItem title="Truy cập nhanh" items={[
         { name: 'Tất cả sản phẩm', emoji: '🛍️', path: '/client/devices' },
-        { name: 'Sản phẩm mới', emoji: '🆕', path: '/client/new-arrivals' },
-        { name: 'Dưới 1 triệu', emoji: '💰', path: '/client/under-1m' },
+        { name: 'Sản phẩm mới', emoji: '🆕', path: '/client/devices?categoryName=Sản phẩm mới&sortBy=newest' },
         { name: 'Đơn hàng của tôi', emoji: '📦', path: '/client/account?tab=orders' }
       ]} />
 

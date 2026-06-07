@@ -29,7 +29,7 @@ export default async function Home() {
           <ProductsList />
           <HomeBrand brands={brands} />
 
-          <section className="my-8 overflow-hidden rounded-lg border border-slate-200 bg-linear-to-r from-slate-50 via-white to-sky-50 p-6 shadow-sm">
+          {/* <section className="my-8 overflow-hidden rounded-lg border border-slate-200 bg-linear-to-r from-slate-50 via-white to-sky-50 p-6 shadow-sm">
             <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
               <div className="max-w-2xl">
                 <p className="text-sm font-semibold uppercase tracking-[0.2em] text-primary">Seller onboarding</p>
@@ -47,7 +47,7 @@ export default async function Home() {
                 </Button>
               </div>
             </div>
-          </section>
+          </section> */}
 
           <BookingExperienceSection />
           <ComfyApparelSection />

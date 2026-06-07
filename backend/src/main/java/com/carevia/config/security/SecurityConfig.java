@@ -64,19 +64,25 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // CHÈN ĐOẠN NÀY: Vô hiệu hóa điểm chặn Pre-auth đối với các tài nguyên Swagger
+                // 1. CẤU HÌNH XỬ LÝ LỖI PHÂN QUYỀN CHUẨN (Thay thế đoạn ép mã OK cũ)
                 .exceptionHandling(exceptions -> exceptions
-                        .defaultAuthenticationEntryPointFor(
-                                (request, response, authException) -> {
-                                    // Cho phép tiếp tục luồng và không ném lỗi 403 với Swagger
-                                    response.setStatus(org.springframework.http.HttpStatus.OK.value());
-                                },
-                                org.springframework.security.web.util.matcher.AntPathRequestMatcher
-                                        .antMatcher("/swagger-ui/**")))
+                        .authenticationEntryPoint((request, response, authException) -> {
+                            // Trả về đúng mã 401 Unauthorized khi không có Token hợp lệ
+                            response.setStatus(org.springframework.http.HttpStatus.UNAUTHORIZED.value());
+                            response.setContentType("application/json;charset=UTF-8");
+
+                            // Đóng gói cấu trúc lỗi an toàn thông tin (ApiResponse) dạng JSON
+                            String jsonResponse = "{"
+                                    + "\"status\": 401,"
+                                    + "\"error\": \"Unauthorized\","
+                                    + "\"message\": \"Yêu cầu quyền truy cập hệ thống (Thiếu Bearer Token).\""
+                                    + "}";
+                            response.getWriter().write(jsonResponse);
+                        }))
 
                 .authorizeHttpRequests(auth -> auth
-                        // Cho phép truy cập công khai tuyệt đối vào toàn bộ endpoint Swagger tầng dữ
-                        // liệu và UI
+                        // Cho phép truy cập công khai vào Swagger (Đã có cấu hình WebSecurityCustomizer
+                        // bỏ qua bộ lọc ở trên)
                         .requestMatchers(
                                 "/v3/api-docs/**",
                                 "/v3/api-docs.yaml",
@@ -87,14 +93,25 @@ public class SecurityConfig {
                                 "/favicon.ico")
                         .permitAll()
 
-                        .requestMatchers("/error").permitAll()
+                        // Không permitAll vô điều kiện cho /error để tránh lọt lưới bảo mật
+                        // .requestMatchers("/error").permitAll() // <-- XÓA HOẶC LÀM MỜ DÒNG NÀY ĐI
+
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/recommendations/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/devices/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/system-settings/**").permitAll()
                         .requestMatchers("/api/v1/payments/zalopay/callback").permitAll()
+
+                        // Cấu hình cụ thể cho Orders (Có thể viết hiển thị hoặc để rơi vào
+                        // .anyRequest())
+                        .requestMatchers("/api/v1/orders/**").authenticated()
+
                         .requestMatchers("/api/v1/wishlist/**").authenticated()
+                        .requestMatchers("/api/v1/bookings/**").authenticated()
+
+                        // Tất cả các request khác (bao gồm cả orders nếu không khai báo trên) đều phải
+                        // login
                         .anyRequest().authenticated())
 
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
