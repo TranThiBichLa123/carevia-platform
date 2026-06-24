@@ -129,6 +129,7 @@ export default function ProductDescription({ product }: ProductDescriptionProps)
   const reviewerName = user?.full_name || user?.username || 'Khách hàng Carevia';
   const reviewerAvatar = user?.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(reviewerName)}&background=159fd8&color=fff`;
   const reviewTotal = totalReviews || product?.reviewCount || 0;
+  const shouldHideReviewComposer = Boolean(user && reviewEligibility?.alreadyReviewed);
 
   const fetchReviews = useCallback(async (page: number, append = false) => {
     if (!product?.id) return;
@@ -444,7 +445,7 @@ export default function ProductDescription({ product }: ProductDescriptionProps)
           <div className="space-y-0">
             {/* Summary */}
             {reviewTotal > 0 && (
-              <div className="bg-linear-to-r from-accent/5 to-secondary/10 border-b border-accent/20 p-8 flex flex-col md:flex-row items-center gap-8">
+              <div className="bg-linear-to-r from-accent/5 to-secondary/10 border-b border-border/70 p-8 flex flex-col md:flex-row items-center gap-8">
                 <div className="text-center md:border-r-2 md:border-border md:pr-8">
                   <div className="text-accent text-5xl font-bold">{averageRating.toFixed(1)}</div>
                   <div className="text-sm text-muted-foreground mt-1">trên 5</div>
@@ -474,32 +475,33 @@ export default function ProductDescription({ product }: ProductDescriptionProps)
             )}
 
             {/* Review Form */}
-            <div className="p-6 border-b border-border bg-muted/20">
-              <h4 className="font-bold text-foreground mb-4 flex items-center gap-2">
-                <MessageSquare size={18} className="text-primary" />
-                Viết đánh giá của bạn
-              </h4>
-              {!user ? (
-                <p className="text-sm text-muted-foreground">
-                  Vui lòng{' '}
-                  <a href="/auth/sign-in" className="text-primary font-bold underline">đăng nhập</a>
-                  {' '}để gửi đánh giá.
-                </p>
-              ) : loadingEligibility ? (
-                <div className="rounded-xl border border-border bg-white px-4 py-4 text-sm text-muted-foreground">
-                  Đang kiểm tra điều kiện viết đánh giá...
-                </div>
-              ) : reviewEligibility?.canReview === false ? (
-                <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-900">
-                  <p className="font-semibold">{reviewEligibility.message}</p>
-                  {reviewEligibility.hasCompletedOrder && reviewEligibility.completedOrderCode && (
-                    <p className="mt-2 text-xs text-amber-800">
-                      Đơn liên quan: {reviewEligibility.completedOrderCode}
-                    </p>
-                  )}
-                </div>
-              ) : (
-                <form onSubmit={handleSubmitReview} className="space-y-4">
+            {!shouldHideReviewComposer && (
+              <div className="p-6 border-b border-border bg-muted/20">
+                <h4 className="font-bold text-foreground mb-4 flex items-center gap-2">
+                  <MessageSquare size={18} className="text-primary" />
+                  Viết đánh giá của bạn
+                </h4>
+                {!user ? (
+                  <p className="text-sm text-muted-foreground">
+                    Vui lòng{' '}
+                    <a href="/auth/sign-in" className="text-primary font-bold underline">đăng nhập</a>
+                    {' '}để gửi đánh giá.
+                  </p>
+                ) : loadingEligibility ? (
+                  <div className="rounded-xl border border-border bg-white px-4 py-4 text-sm text-muted-foreground">
+                    Đang kiểm tra điều kiện viết đánh giá...
+                  </div>
+                ) : reviewEligibility?.canReview === false ? (
+                  <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-4 text-sm text-amber-900">
+                    <p className="font-semibold">{reviewEligibility.message}</p>
+                    {reviewEligibility.hasCompletedOrder && reviewEligibility.completedOrderCode && (
+                      <p className="mt-2 text-xs text-amber-800">
+                        Đơn liên quan: {reviewEligibility.completedOrderCode}
+                      </p>
+                    )}
+                  </div>
+                ) : (
+                  <form onSubmit={handleSubmitReview} className="space-y-4">
                   <div className="flex items-center gap-3 rounded-2xl border border-border bg-white px-4 py-3 shadow-sm">
                     <img
                       src={reviewerAvatar}
@@ -630,17 +632,18 @@ export default function ProductDescription({ product }: ProductDescriptionProps)
                   />
                   {submitError && <p className="text-sm text-red-500">{submitError}</p>}
                   {submitSuccess && <p className="text-sm text-emerald-600 font-medium">✓ Đánh giá của bạn đã được gửi!</p>}
-                  <button
-                    type="submit"
-                    disabled={submitting || uploadingImages}
-                    className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white font-bold text-sm rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
-                  >
-                    {submitting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
-                    {submitting ? 'Đang gửi...' : 'Gửi đánh giá'}
-                  </button>
-                </form>
-              )}
-            </div>
+                    <button
+                      type="submit"
+                      disabled={submitting || uploadingImages}
+                      className="flex items-center gap-2 px-6 py-2.5 bg-primary text-white font-bold text-sm rounded-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
+                    >
+                      {submitting ? <Loader2 size={16} className="animate-spin" /> : <Send size={16} />}
+                      {submitting ? 'Đang gửi...' : 'Gửi đánh giá'}
+                    </button>
+                  </form>
+                )}
+              </div>
+            )}
 
             {reviewLoadError && (
               <div className="border-b border-border bg-rose-50 px-6 py-4 text-sm text-rose-700">

@@ -1,5 +1,19 @@
 import apiClient from "@/services/apiClient";
-import authApi from "@/lib/authApi";
+
+const getToken = (): string | undefined => {
+  if (typeof document === "undefined") return undefined;
+  const cookies = document.cookie.split(";").reduce((acc, cookie) => {
+    const [name, value] = cookie.trim().split("=");
+    acc[name] = value;
+    return acc;
+  }, {} as Record<string, string>);
+  return cookies.auth_token;
+};
+
+const authHeaders = () => {
+  const token = getToken();
+  return token ? { Authorization: `Bearer ${token}` } : {};
+};
 
 export interface DeviceData {
   id: number;
@@ -230,12 +244,10 @@ export const reviewApi = {
   },
 
   getEligibility: async (deviceId: number | string): Promise<ReviewEligibilityData> => {
-    const response = await authApi.get<ReviewEligibilityData>(`/devices/${deviceId}/reviews/eligibility`);
-    if (!response.success || !response.data) {
-      throw new Error(response.error?.message || "Không thể kiểm tra điều kiện viết đánh giá.");
-    }
-
-    return response.data;
+    const res = await apiClient.get(`/devices/${deviceId}/reviews/eligibility`, {
+      headers: authHeaders(),
+    });
+    return res.data;
   },
 
   create: async (
@@ -250,7 +262,9 @@ export const reviewApi = {
       mediaUrls?: string[];
     }
   ): Promise<ReviewData> => {
-    const res = await apiClient.post(`/devices/${deviceId}/reviews`, data);
+    const res = await apiClient.post(`/devices/${deviceId}/reviews`, data, {
+      headers: authHeaders(),
+    });
     return res.data;
   },
 
@@ -258,11 +272,9 @@ export const reviewApi = {
     const formData = new FormData();
     formData.append("file", file);
 
-    const response = await authApi.upload<ReviewImageUploadResult>(`/devices/${deviceId}/reviews/images`, formData);
-    if (!response.success || !response.data) {
-      throw new Error(response.error?.message || "Không thể tải ảnh đánh giá lên.");
-    }
-
-    return response.data;
+    const res = await apiClient.post(`/devices/${deviceId}/reviews/images`, formData, {
+      headers: authHeaders(),
+    });
+    return res.data;
   },
 };

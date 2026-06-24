@@ -25,6 +25,7 @@ import {
 import {
 	backofficeApi,
 	type BackofficeOrder,
+	type BackofficePaymentStatus,
 	type BackofficeOrderStatus,
 } from "@/lib/backofficeApi";
 import {
@@ -54,6 +55,25 @@ const ORDER_VARIANTS: Record<
 	SHIPPING: "secondary",
 	COMPLETED: "default",
 	FAILED: "destructive",
+	CANCELLED: "destructive",
+};
+
+const PAYMENT_LABELS: Record<BackofficePaymentStatus, string> = {
+	INITIATED: "Chờ thanh toán",
+	SUCCESS: "Đã thanh toán",
+	FAILED: "Thanh toán lỗi",
+	TIMEOUT: "Hết thời gian thanh toán",
+	CANCELLED: "Đã hủy thanh toán",
+};
+
+const PAYMENT_VARIANTS: Record<
+	BackofficePaymentStatus,
+	"default" | "secondary" | "destructive" | "outline"
+> = {
+	INITIATED: "outline",
+	SUCCESS: "default",
+	FAILED: "destructive",
+	TIMEOUT: "secondary",
 	CANCELLED: "destructive",
 };
 
@@ -151,10 +171,18 @@ export default function StaffOrderDetailPage() {
 						</div>
 					</CardHeader>
 					<CardContent className="p-4 text-xs space-y-2.5 text-gray-600 font-medium">
-						<div className="flex justify-between items-center border-b border-slate-50 pb-1.5">
+						<div className="flex justify-between items-center border-b border-slate-50 pb-1.5 gap-3">
+							<span className="text-slate-400">Tên khách hàng:</span>
+							<span className="text-right text-gray-900 font-bold">{order.customerName || "Chưa có thông tin"}</span>
+						</div>
+						<div className="flex justify-between items-center border-b border-slate-50 pb-1.5 gap-3">
+							<span className="text-slate-400">Số điện thoại:</span>
+							<span className="text-right text-gray-900 font-bold">{order.customerPhone || "Chưa có thông tin"}</span>
+						</div>
+						{/* <div className="flex justify-between items-center border-b border-slate-50 pb-1.5">
 							<span className="text-slate-400">Mã tài khoản:</span>
 							<span className="font-mono text-gray-900 font-bold">{order.accountId}</span>
-						</div>
+						</div> */}
 						<div className="space-y-1">
 							<span className="text-slate-400 block">Địa chỉ bàn giao:</span>
 							<p className="text-gray-800 leading-relaxed bg-slate-50/50 p-2 rounded-lg border border-slate-100/70">
@@ -177,14 +205,14 @@ export default function StaffOrderDetailPage() {
 								<CreditCard className="h-4 w-4 text-indigo-600" />
 								<CardTitle className="text-xs font-bold uppercase tracking-wider">Luồng giao dịch tài chính</CardTitle>
 							</div>
-							<Badge className="text-[10px] font-bold px-2 py-0.5 rounded-md" variant={ORDER_VARIANTS[order.status]}>
-								{ORDER_LABELS[order.status]}
+							<Badge className="text-[10px] font-bold px-2 py-0.5 rounded-md" variant={PAYMENT_VARIANTS[order.paymentStatus]}>
+								{PAYMENT_LABELS[order.paymentStatus]}
 							</Badge>
 						</div>
 					</CardHeader>
 					<CardContent className="p-4 text-xs space-y-2 text-gray-600 font-medium">
 						<div className="flex justify-between items-center border-b border-slate-50 pb-1.5">
-							<span className="text-slate-400">Tổng thu tiền mặt:</span>
+							<span className="text-slate-400">Tổng tiền thanh toán:</span>
 							<span className="text-base font-bold text-gray-900">{formatCurrency(order.totalAmount)}</span>
 						</div>
 						<div className="flex justify-between items-center">
@@ -231,7 +259,7 @@ export default function StaffOrderDetailPage() {
 						)}
 						{order.status === "PROCESSING" && (
 							<Button
-								className="w-full h-9 text-xs font-medium bg-staff-primary text-white  transition-all active:scale-95 shadow-2xs"
+								className="w-full h-9 text-xs hover:bg-staff-primary font-medium bg-staff-primary text-white  transition-all active:scale-95 shadow-2xs"
 								disabled={updating}
 								onClick={() => void handleStatusUpdate("COMPLETED")}
 							>
@@ -251,10 +279,21 @@ export default function StaffOrderDetailPage() {
 
 						{/* Trường hợp đơn hàng đã hoàn tất hoặc bị hủy không thể thao tác nữa */}
 						{["COMPLETED", "CANCELLED"].includes(order.status) && (
-							<div className="text-center text-xs py-6 text-slate-400 font-medium border border-dashed rounded-xl bg-slate-50/50 leading-normal">
-								🔒 Hồ sơ đặt lịch đóng băng.<br />Trạng thái cuối cùng không thể sửa đổi tiếp.
+							<div className="text-center text-xs py-6 text-slate-400 font-medium border border-dashed rounded-xl bg-slate-50/50 leading-normal font-vietnam">
+								{order.status === "COMPLETED" ? (
+									<>
+										✅ Đơn hàng đã hoàn thành.<br />
+										Hồ sơ mua hàng đã đóng và không thể chỉnh sửa tiếp.
+									</>
+								) : (
+									<>
+										❌ Đơn hàng đã bị hủy.<br />
+										Trạng thái đơn hàng đã kết thúc và không thể thay đổi.
+									</>
+								)}
 							</div>
 						)}
+
 					</CardContent>
 				</Card>
 			</div>

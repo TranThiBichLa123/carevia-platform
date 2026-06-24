@@ -15,7 +15,6 @@ import {
   CheckCircle,
   Package,
   Clock,
-  CreditCard,
   ArrowLeft,
   FileText,
   ShoppingBag,
@@ -41,7 +40,6 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 
-// â”€â”€â”€ Cancel reason options â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const CANCEL_REASONS = [
   "Tôi muốn thay đổi phương thức thanh toán",
   "Tôi đặt nhầm sản phẩm / số lượng",
@@ -228,7 +226,8 @@ const OrderDetailsPage = () => {
           // Kiểm tra thông báo thành công chỉ chạy 1 lần duy nhất
           if (success === "true" && orderData.status?.toUpperCase() === "PAID") {
             toast.success("Thanh toán thành công! Đơn hàng đã được xác nhận.");
-          }
+          }          
+
         } else {
           toast.error("Không tìm thấy đơn hàng");
           router.push("/client/account?tab=orders");
@@ -360,6 +359,8 @@ const OrderDetailsPage = () => {
   const policy = getCancelPolicy(order.status);
   const banner = getStatusBanner(order.status);
   const isCancelled = order.status?.toUpperCase() === "CANCELLED";
+  const isPendingPayment = order.status?.toUpperCase() === "PENDING_PAYMENT";
+  const hasTrackingCode = ["PROCESSING", "COMPLETED"].includes(order.status?.toUpperCase());
 
   return (
     <Container className="">
@@ -376,39 +377,34 @@ const OrderDetailsPage = () => {
           <motion.div
             initial={{ opacity: 0, y: -8 }}
             animate={{ opacity: 1, y: 0 }}
-            className={`flex items-start gap-3 rounded-2xl border p-5 mb-6 ${banner.bg}`}
+            className={`rounded-2xl border p-5 mb-6 ${banner.bg}`}
           >
-            <div className="mt-0.5 shrink-0">{banner.icon}</div>
-            <div>
-              <p className={`font-bold font-vietnam text-sm ${banner.titleColor}`}>{banner.title}</p>
-              <p className={`text-[13px] font-vietnam mt-0.5 ${banner.descColor}`}>{banner.desc}</p>
-              {/* Show cancel reason if cancelled */}
-              {isCancelled && order.cancelReason && (
-                <p className="text-[12px] text-red-600 mt-1 font-vietnam">
-                  Lý do hủy: <span className="font-semibold">{order.cancelReason}</span>
-                </p>
+            <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+              <div className="flex items-start gap-3">
+                <div className="mt-0.5 shrink-0">{banner.icon}</div>
+                <div>
+                  <p className={`font-bold font-vietnam text-sm ${banner.titleColor}`}>{banner.title}</p>
+                  <p className={`text-[13px] font-vietnam mt-0.5 ${banner.descColor}`}>{banner.desc}</p>
+                  {/* Show cancel reason if cancelled */}
+                  {isCancelled && order.cancelReason && (
+                    <p className="text-[12px] text-red-600 mt-1 font-vietnam">
+                      Lý do hủy: <span className="font-semibold">{order.cancelReason}</span>
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              {isPendingPayment && (
+                <Button
+                  size="sm"
+                  className="bg-amber-500 hover:bg-amber-600 text-white font-vietnam rounded-xl px-4 self-start md:self-center"
+                  onClick={() => router.push(`/client/user/checkout?orderId=${order._id}`)}
+                >
+                  Thanh toán ngay
+                </Button>
               )}
             </div>
           </motion.div>
-        )}
-
-        {/* PENDING_PAYMENT: pay now prompt */}
-        {order.status?.toUpperCase() === "PENDING_PAYMENT" && (
-          <div className="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6">
-            <div className="flex items-center gap-2">
-              <CreditCard className="w-4 h-4 text-amber-600" />
-              <span className="text-sm font-vietnam text-amber-800 font-medium">
-                Đơn hàng chưa được thanh toán
-              </span>
-            </div>
-            <Button
-              size="sm"
-              className="bg-amber-500 hover:bg-amber-600 text-white font-vietnam rounded-xl px-4"
-              onClick={() => router.push(`/client/user/checkout?orderId=${order._id}`)}
-            >
-              Thanh toán ngay
-            </Button>
-          </div>
         )}
 
         {/* SECTION 1: Shipping status tracker */}
@@ -521,9 +517,9 @@ const OrderDetailsPage = () => {
             )}
             {order.refundStatus && (
               <div className={`mt-3 inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border ${order.refundStatus === 'SUCCESS' ? 'bg-emerald-50 text-emerald-700 border-emerald-200' :
-                  order.refundStatus === 'REQUESTED' ? 'bg-amber-50 text-amber-700 border-amber-200' :
-                    (order.refundStatus === 'APPROVED' || order.refundStatus === 'PROCESSING') ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                      'bg-slate-50 text-slate-600 border-slate-200'
+                order.refundStatus === 'REQUESTED' ? 'bg-amber-50 text-amber-700 border-amber-200' :
+                  (order.refundStatus === 'APPROVED' || order.refundStatus === 'PROCESSING') ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                    'bg-slate-50 text-slate-600 border-slate-200'
                 }`}>
                 {order.refundStatus === 'REQUESTED' && '⏳ Hoàn tiền đang chờ xét duyệt'}
                 {order.refundStatus === 'APPROVED' && '✅ Hoàn tiền đã được duyệt'}
@@ -614,15 +610,25 @@ const OrderDetailsPage = () => {
                 Thông tin vận chuyển
               </h3>
               <div className="space-y-1 flex-1">
-                <div className="flex items-center justify-between py-4 group">
-                  <div className="flex items-center gap-3">
+
+                {/* Dòng Địa Chỉ - Đã sửa lỗi bị khuất */}
+                <div className="flex items-start justify-between py-4 group gap-4">
+                  <div className="flex items-center gap-3 flex-shrink-0">
                     <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary transition-colors">
-                      <User className="w-4 h-4 text-primary group-hover:text-white" />
+                      {/* Đổi icon sang MapPin cho đúng ngữ nghĩa Địa chỉ */}
+                      <MapPin className="w-4 h-4 text-primary group-hover:text-white" />
                     </div>
-                    <span className="text-sm font-medium text-gray-500 font-vietnam">Người nhận</span>
+                    <span className="text-sm font-medium text-gray-500 font-vietnam">Địa chỉ:</span>
                   </div>
-                  <span className="text-sm font-bold text-gray-900 font-vietnam">{order.shippingAddress || "—"}</span>
+                  <span className="text-sm font-bold text-gray-900 font-vietnam text-right max-w-[65%] break-words">
+                    {[
+                      order.shippingAddress,
+                      order.shippingCity,
+                      order.shippingCountry
+                    ].filter(Boolean).join(', ')}
+                  </span>
                 </div>
+
                 <div className="flex items-center justify-between py-4 border-y border-gray-50 group">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary transition-colors">
@@ -632,17 +638,27 @@ const OrderDetailsPage = () => {
                   </div>
                   <span className="text-sm font-bold text-gray-900 font-vietnam">Giao Hàng Nhanh (GHN)</span>
                 </div>
-                <div className="flex items-start justify-between py-4 group">
+
+                {/* Dòng Mã vận đơn */}
+                <div className="flex items-center justify-between py-4 group">
                   <div className="flex items-center gap-3">
                     <div className="p-2 bg-primary/10 rounded-lg group-hover:bg-primary transition-colors">
-                      <MapPin className="w-4 h-4 text-primary group-hover:text-white" />
+                      <FileText className="w-4 h-4 text-primary group-hover:text-white" />
                     </div>
-                    <span className="text-sm font-medium text-gray-500 font-vietnam">Thành phố</span>
+                    <span className="text-sm font-medium text-gray-500 font-vietnam">Mã vận đơn:</span>
                   </div>
                   <span className="text-sm font-bold text-gray-900 font-vietnam text-right max-w-[180px]">
-                    {order.shippingCity || "—"}
+                    {hasTrackingCode ? (
+                      `GHN${order.orderCode?.replace("ORD-", "") || "MOCK"}`
+                    ) : (
+                      <span className="text-gray-400 font-normal italic text-xs">
+                        Đang chuẩn bị hàng...
+                      </span>
+                    )}
                   </span>
                 </div>
+
+
               </div>
               <div className="mt-6 pt-6 border-t border-dashed border-gray-100">
                 <p className="text-[11px] text-gray-400 font-medium italic font-vietnam">
@@ -650,6 +666,7 @@ const OrderDetailsPage = () => {
                 </p>
               </div>
             </div>
+
           </div>
         )}
 

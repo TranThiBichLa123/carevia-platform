@@ -49,3 +49,12 @@ backend/node_modules/
 
 # Chặn toàn bộ file và thư mục con bên trong folder docs
 docs/
+
+
+# Environment files (Chặn file chứa mật khẩu, key)
+.env
+.env.local
+
+# Chặn file cấu hình Spring Boot chứa thông tin nhạy cảm
+**/src/main/resources/application.yml
+**/src/main/resources/application.properties

@@ -2,6 +2,10 @@ package com.carevia.core.domain;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import java.util.List;
 import com.carevia.shared.entity.BaseEntity;
 
 @Entity
@@ -51,8 +55,9 @@ public class Review extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String comment;
 
-    @Column(name = "media_urls", columnDefinition = "JSON")
-    private String mediaUrls;
+    @JdbcTypeCode(SqlTypes.JSON)
+    @Column(name = "media_urls", columnDefinition = "json")
+    private List<String> mediaUrls;
 
     @Column(name = "is_verified_purchase", nullable = false)
     @Builder.Default

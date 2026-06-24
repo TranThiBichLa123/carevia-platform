@@ -44,6 +44,15 @@ ON CONFLICT (id) DO NOTHING;
 -- =============================================================
 -- B. 30 MORE DEVICES FOR RECOMMENDATION DEMO
 -- =============================================================
+UPDATE devices 
+SET skin_type = 'Da thường' 
+WHERE id = 31;
+
+UPDATE devices 
+SET review_count=1, average_rating = 5.0 
+WHERE id = 2;
+
+
 INSERT INTO devices (id, name, slug, description, content, price, original_price, discount_percentage, stock, average_rating, image, category_id, brand_id, sku, warranty_period, warranty_policy, origin, device_condition, skin_type, skin_concerns, status, sold, review_count, view_count, is_booking_available, booking_price, video_url, created_at, updated_at, created_by, updated_by)
 VALUES
   (11, 'Foreo BEAR 2 - Máy nâng cơ vi dòng', 'foreo-bear-2', 'Thiết bị vi dòng nâng cơ mặt và cải thiện độ săn chắc.', '<p>Foreo BEAR 2 phù hợp cho nhu cầu nâng cơ nhanh tại nhà và chăm sóc gương mặt hằng ngày.</p>', 7900000, 8900000, 11.24, 12, 4.9, 'https://placehold.co/600x400?text=Foreo+Bear+2', 2, 1, 'FOREO-BEAR2-001', 24, '24 tháng bảo hành chính hãng', 'Thụy Điển', 'new', 'Mọi loại da', 'Chảy xệ, Nếp nhăn', 'AVAILABLE', 34, 11, 980, true, 550000, NULL, NOW(), NOW(), 'seed-demo', 'seed-demo'),

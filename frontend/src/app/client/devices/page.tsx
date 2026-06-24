@@ -21,6 +21,7 @@ type DeviceQueryParams = {
     page: number;
     size: number;
     sort: string;
+    search?: string;
     categoryId?: number;
     brandId?: number;
     minPrice?: number;
@@ -51,6 +52,7 @@ const AllProductsContent = () => {
     const [selectedCategoryName, setSelectedCategoryName] = useState<string | null>(null);
     const [selectedSkinType, setSelectedSkinType] = useState<string | null>(null);
     const [selectedSkinTypeName, setSelectedSkinTypeName] = useState<string | null>(null);
+    const [searchKeyword, setSearchKeyword] = useState("");
     const [selectedBrandIds, setSelectedBrandIds] = useState<number[]>([]);
     const [priceRange, setPriceRange] = useState<string | null>(null);
     const [sortBy, setSortBy] = useState<SortOption>("newest");
@@ -71,6 +73,7 @@ const AllProductsContent = () => {
         setSelectedCategoryName(searchParams.get("categoryName"));
         setSelectedSkinType(searchParams.get("skinType"));
         setSelectedSkinTypeName(searchParams.get("skinTypeName"));
+        setSearchKeyword(searchParams.get("search")?.trim() ?? "");
         setSortBy((searchParams.get("sortBy") as SortOption | null) ?? "newest");
         setSearchParamsReady(true);
     }, [isHydrated, searchParams]);
@@ -98,6 +101,7 @@ const AllProductsContent = () => {
                 size: 9999,
                 sort: getSortParam(sortBy),
             };
+            if (searchKeyword) params.search = searchKeyword;
             if (selectedCategoryId) params.categoryId = selectedCategoryId;
             if (selectedBrandIds.length === 1) params.brandId = selectedBrandIds[0];
             if (selectedPrice?.minPrice !== undefined) params.minPrice = selectedPrice.minPrice;
@@ -136,7 +140,7 @@ const AllProductsContent = () => {
             setLoading(false);
             setLoadingMore(false);
         }
-    }, [sortBy, selectedBrandIds, selectedCategoryId, priceRange, selectedSkinType]);
+    }, [sortBy, searchKeyword, selectedBrandIds, selectedCategoryId, priceRange, selectedSkinType]);
 
     useEffect(() => {
         if (!searchParamsReady) {

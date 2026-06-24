@@ -20,6 +20,8 @@ public class OrderResponse {
     private Long id;
     private String orderCode;
     private Long accountId;
+    private String customerName;
+    private String customerPhone;
     private List<OrderItemInfo> items;
     private BigDecimal subtotal;
     private BigDecimal discountAmount;

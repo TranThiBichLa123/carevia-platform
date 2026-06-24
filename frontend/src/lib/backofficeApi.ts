@@ -186,6 +186,8 @@ export type BackofficeOrder = {
   id: number;
   orderCode: string;
   accountId: number;
+  customerName: string | null;
+  customerPhone: string | null;
   items: Array<{
     id: number;
     deviceId: number;

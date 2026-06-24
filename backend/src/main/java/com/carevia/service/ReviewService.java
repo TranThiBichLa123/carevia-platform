@@ -2,8 +2,6 @@ package com.carevia.service;
 
 import com.carevia.service.storage.CloudinaryStorageService;
 import com.carevia.shared.dto.response.device.DeviceImageUploadResponse;
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.carevia.core.domain.Account;
 import com.carevia.core.domain.Device;
 import com.carevia.core.domain.Order;
@@ -40,17 +38,15 @@ public class ReviewService {
     private final DeviceRepository deviceRepository;
     private final AccountRepository accountRepository;
         private final OrderRepository orderRepository;
-        private final ObjectMapper objectMapper;
         private final CloudinaryStorageService cloudinaryStorageService;
 
     public ReviewService(ReviewRepository reviewRepository, DeviceRepository deviceRepository,
-                                                AccountRepository accountRepository, OrderRepository orderRepository, ObjectMapper objectMapper,
+                        AccountRepository accountRepository, OrderRepository orderRepository,
                         CloudinaryStorageService cloudinaryStorageService) {
         this.reviewRepository = reviewRepository;
         this.deviceRepository = deviceRepository;
         this.accountRepository = accountRepository;
-                                this.orderRepository = orderRepository;
-                this.objectMapper = objectMapper;
+                this.orderRepository = orderRepository;
                 this.cloudinaryStorageService = cloudinaryStorageService;
     }
 
@@ -114,15 +110,15 @@ public class ReviewService {
         Review review = Review.builder()
                 .device(device)
                 .account(account)
-                                .order(completedOrder)
+                .order(completedOrder)
                 .rating(request.getRating())
                 .effectivenessRating(request.getEffectivenessRating())
                 .safetyRating(request.getSafetyRating())
                 .ergonomicsRating(request.getErgonomicsRating())
                 .durabilityRating(request.getDurabilityRating())
-                .mediaUrls(serializeMediaUrls(request.getMediaUrls()))
+                .mediaUrls(normalizeMediaUrls(request.getMediaUrls()))
                 .comment(request.getComment())
-                                .isVerifiedPurchase(true)
+                .isVerifiedPurchase(true)
                 .isHidden(false)
                 .build();
 
@@ -200,11 +196,11 @@ public class ReviewService {
                 .accountName(r.getAccount().getUsername())
                 .accountAvatar(r.getAccount().getAvatarUrl())
                 .rating(r.getRating())
-                                .effectivenessRating(r.getEffectivenessRating())
-                                .safetyRating(r.getSafetyRating())
-                                .ergonomicsRating(r.getErgonomicsRating())
-                                .durabilityRating(r.getDurabilityRating())
-                .mediaUrls(readMediaUrls(r.getMediaUrls()))
+                .effectivenessRating(r.getEffectivenessRating())
+                .safetyRating(r.getSafetyRating())
+                .ergonomicsRating(r.getErgonomicsRating())
+                .durabilityRating(r.getDurabilityRating())
+                .mediaUrls(r.getMediaUrls() != null ? r.getMediaUrls() : List.of())
                 .comment(r.getComment())
                 .isVerifiedPurchase(r.getIsVerifiedPurchase())
                 .adminReply(r.getAdminReply())
@@ -225,7 +221,7 @@ public class ReviewService {
                                 .safetyRating(review.getSafetyRating())
                                 .ergonomicsRating(review.getErgonomicsRating())
                                 .durabilityRating(review.getDurabilityRating())
-                                .mediaUrls(readMediaUrls(review.getMediaUrls()))
+                                .mediaUrls(review.getMediaUrls() != null ? review.getMediaUrls() : List.of())
                                 .comment(review.getComment())
                                 .isVerifiedPurchase(review.getIsVerifiedPurchase())
                                 .adminReply(review.getAdminReply())
@@ -273,31 +269,16 @@ public class ReviewService {
                 deviceRepository.save(device);
         }
 
-        private String serializeMediaUrls(List<String> mediaUrls) {
+        private List<String> normalizeMediaUrls(List<String> mediaUrls) {
                 if (mediaUrls == null || mediaUrls.isEmpty()) {
                         return null;
                 }
 
-                try {
-                        return objectMapper.writeValueAsString(mediaUrls.stream()
-                                        .filter(url -> url != null && !url.isBlank())
-                                        .limit(4)
-                                        .toList());
-                } catch (Exception exception) {
-                        return null;
-                }
-        }
+                List<String> normalizedUrls = mediaUrls.stream()
+                                .filter(url -> url != null && !url.isBlank())
+                                .limit(4)
+                                .toList();
 
-        private List<String> readMediaUrls(String rawMediaUrls) {
-                if (rawMediaUrls == null || rawMediaUrls.isBlank()) {
-                        return List.of();
-                }
-
-                try {
-                        return objectMapper.readValue(rawMediaUrls, new TypeReference<List<String>>() {
-                        });
-                } catch (Exception exception) {
-                        return List.of();
-                }
+                return normalizedUrls.isEmpty() ? null : normalizedUrls;
         }
 }

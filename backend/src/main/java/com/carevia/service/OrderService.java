@@ -30,6 +30,7 @@ public class OrderService {
     private final AccountRepository accountRepository;
     private final VoucherRepository voucherRepository;
     private final CartRepository cartRepository;
+    private final ClientRepository clientRepository;
     private final UserBehaviorRepository userBehaviorRepository;
     private final NotificationService notificationService;
     private final RefundService refundService;
@@ -38,7 +39,7 @@ public class OrderService {
 
     public OrderService(OrderRepository orderRepository, DeviceRepository deviceRepository,
             AccountRepository accountRepository, VoucherRepository voucherRepository,
-            CartRepository cartRepository, UserBehaviorRepository userBehaviorRepository,
+            CartRepository cartRepository, ClientRepository clientRepository, UserBehaviorRepository userBehaviorRepository,
             NotificationService notificationService, RefundService refundService,
             RefundRepository refundRepository, StaffBrandAccessService staffBrandAccessService) {
         this.orderRepository = orderRepository;
@@ -46,6 +47,7 @@ public class OrderService {
         this.accountRepository = accountRepository;
         this.voucherRepository = voucherRepository;
         this.cartRepository = cartRepository;
+        this.clientRepository = clientRepository;
         this.userBehaviorRepository = userBehaviorRepository;
         this.notificationService = notificationService;
         this.refundService = refundService;
@@ -264,11 +266,20 @@ public class OrderService {
         BigDecimal scopedSubtotal = visibleItems.stream()
             .map(OrderItem::getSubtotal)
             .reduce(BigDecimal.ZERO, BigDecimal::add);
+        Client client = clientRepository.findByAccount(o.getAccount()).orElse(null);
+        String customerName = client != null && client.getFullName() != null && !client.getFullName().isBlank()
+            ? client.getFullName()
+            : o.getReceiverName();
+        String customerPhone = client != null && client.getPhone() != null && !client.getPhone().isBlank()
+            ? client.getPhone()
+            : o.getReceiverPhone();
 
         return OrderResponse.builder()
                 .id(o.getId())
                 .orderCode(o.getOrderCode())
                 .accountId(o.getAccount().getId())
+            .customerName(customerName)
+            .customerPhone(customerPhone)
             .items(visibleItems.stream().map(i -> OrderResponse.OrderItemInfo.builder()
                         .id(i.getId())
                         .deviceId(i.getDevice().getId())

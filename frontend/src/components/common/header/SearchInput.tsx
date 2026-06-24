@@ -1,10 +1,9 @@
 "use client";
 
 import { Product } from "@/types_enum/devices";
-import { mockProducts } from "../../../constants/data";
 import { deviceApi, DeviceData } from "@/lib/deviceApi";
+import { mapDeviceToProduct } from "@/lib/mappers";
 import { Input } from "../../../components/ui/input";
-import { fetchData, hasExplicitApiEndpoint } from "../../../lib/api";
 import { Loader2, Search, X, Camera, Mic } from "lucide-react";
 import Link from "next/link";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -13,22 +12,25 @@ import { motion, AnimatePresence } from "framer-motion";
 import AddToCartButton from "../products/AddToCartButton";
 import { DotLottieReact } from '@lottiefiles/dotlottie-react';
 
-interface ProductsResponse {
-  products: Product[];
-  total: number;
-}
-
 const placeholders = [
   "DEAL HOT hôm nay",
   "Sản phẩm bán chạy",
   "Tìm kiếm tại đây",
 ];
 
+const normalizeSearchText = (value: string) =>
+  value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/\s+/g, " ")
+    .trim();
+
 const SearchInput = () => {
   const [search, setSearch] = useState("");
   const [debouncedSearch] = useDebounce(search, 300);
-  const [products, setProducts] = useState<any[]>([]);
-  const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<Product[]>([]);
+  const [featuredProducts, setFeaturedProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showResults, setShowResults] = useState(false);
@@ -38,29 +40,28 @@ const SearchInput = () => {
   const mobileInputRef = useRef<HTMLInputElement>(null);
 
   const filterMockProducts = useCallback(async (searchTerm: string) => {
-    const normalizedTerm = searchTerm.trim().toLowerCase();
+    const normalizedTerm = normalizeSearchText(searchTerm);
     if (!normalizedTerm) return [];
 
     try {
-      // Đợi API trả về dữ liệu (Giả sử DevicePageResponse có field 'content' chứa mảng Product)
-      const response = await deviceApi.getAll();
-
-      // Lưu ý: Kiểm tra cấu trúc DevicePageResponse của bạn, ví dụ là response.content hoặc response.data
+      const response = await deviceApi.getAll({ page: 0, size: 1000, sort: "createdAt,desc" });
       const allProducts = response.items || [];
-      // Đổi (product: Product) thành (product: DeviceData)
-      return allProducts.filter((product: DeviceData) => {
-        const searchableText = [
+      return allProducts
+        .filter((product: DeviceData) => {
+          const searchableText = normalizeSearchText([
           product.name,
           product.description,
+          product.content,
           product.category?.name,
           product.brand?.name,
+          product.skinType,
         ]
-          .filter(Boolean)
-          .join(" ")
-          .toLowerCase();
+            .filter(Boolean)
+            .join(" "));
 
-        return searchableText.includes(normalizedTerm);
-      });
+          return searchableText.includes(normalizedTerm);
+        })
+        .map(mapDeviceToProduct);
 
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu:", error);
@@ -70,24 +71,11 @@ const SearchInput = () => {
 
 
   const fetchFeaturedProducts = useCallback(async () => {
-    // Nếu không có API thật, dùng hàm getPopular từ deviceApi
-    if (!hasExplicitApiEndpoint()) {
-      try {
-        const data = await deviceApi.getPopular(); // Gọi hàm và đợi dữ liệu về
-        setFeaturedProducts(data.slice(0, 6));     // Lúc này data mới là mảng để slice
-      } catch (err) {
-        console.error("Lỗi lấy sản phẩm phổ biến:", err);
-      }
-      return;
-    }
-
     try {
-      const response = await fetchData<ProductsResponse>("/products?page=1&limit=6");
-      setFeaturedProducts(response.products);
-    } catch {
-      // Tương tự cho phần catch
       const data = await deviceApi.getPopular();
-      setFeaturedProducts(data.slice(0, 6));
+      setFeaturedProducts(data.slice(0, 6).map(mapDeviceToProduct));
+    } catch (err) {
+      console.error("Lỗi lấy sản phẩm phổ biến:", err);
     }
   }, []);
 
@@ -103,22 +91,17 @@ const SearchInput = () => {
       setLoading(true);
       setError(null);
 
-      if (!hasExplicitApiEndpoint()) {
-        // Sửa trong fetchProducts
-        const filtered = await filterMockProducts(searchTerm);
-        setProducts(filtered as unknown as Product[]); // Ép kiểu để TypeScript không báo lỗi
-        setLoading(false);
-        return;
-      }
-
       try {
-        const response = await fetchData<ProductsResponse>(
-          `/products?page=1&limit=10&search=${encodeURIComponent(searchTerm)}`
-        );
-        setProducts(response.products);
+        const response = await deviceApi.getAll({
+          search: searchTerm.trim(),
+          page: 0,
+          size: 10,
+          sort: "createdAt,desc",
+        });
+        setProducts((response.items || []).map(mapDeviceToProduct));
       } catch {
         const filtered = await filterMockProducts(searchTerm);
-        setProducts(filtered.slice(0, 10) as unknown as Product[]);
+        setProducts(filtered.slice(0, 10));
         setError("Dang hien thi ket qua tu du lieu mau");
       } finally {
         setLoading(false);

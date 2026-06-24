@@ -301,7 +301,7 @@ export default function StaffOrdersPage() {
                                                     </TableCell>
 
                                                     {/* Trạng thái - Dạng nhãn phẳng, không bo tròn góc */}
-                                                    <TableCell className="py-4 align-top">
+                                                    <TableCell className="py-4 align-middle">
                                                         <Badge
                                                             variant={ORDER_VARIANTS[order.status]}
                                                             className="rounded-lg px-2.5 py-1 text-[10px]  font-vietnam font-bold uppercase border-none tracking-wider"
@@ -311,12 +311,12 @@ export default function StaffOrdersPage() {
                                                     </TableCell>
 
                                                     {/* Tạo lúc */}
-                                                    <TableCell className="py-4 align-top text-xs text-[#333333] font-vietnam">
+                                                    <TableCell className="py-4 align-middle text-xs text-[#333333] font-vietnam">
                                                         {formatDateTime(order.createdAt)}
                                                     </TableCell>
 
                                                     {/* Thao tác */}
-                                                    <TableCell className="py-4 pr-4 align-top">
+                                                    <TableCell className="py-4 pr-4 align-middle">
                                                         <div className="flex flex-col sm:flex-row justify-end items-end sm:items-center gap-1.5">
                                                             <Button
                                                                 asChild

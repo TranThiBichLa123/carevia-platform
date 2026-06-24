@@ -1,9 +1,7 @@
 import BackToHome from "@/components/common/buttons/BackToHome";
 import Container from "@/components/common/Container";
 import PriceFormatter from "@/components/common/PriceFormatter";
-import ProductDescription from "@/components/pages/product/ProductDescription";
 import ProductActions from "@/components/pages/product/ProductActions";
-import PersonalizedRecommendationShelf from "@/components/pages/product/PersonalizedRecommendationShelf";
 import { deviceApi } from "@/lib/deviceApi";
 import { mapDeviceToProduct } from "@/lib/mappers";
 import { formatDiscountPercentage } from "@/lib/utils";
@@ -18,9 +16,32 @@ import {
   BadgePercent,
 } from "lucide-react";
 import Image from "next/image";
+import dynamic from "next/dynamic";
 import React from "react";
 import FavoriteBadge from "@/components/common/FavoriteBadge";
 import PageBreadcrumb from "@/components/common/PageBreadcrumb";
+
+const ProductDescription = dynamic(
+  () => import("@/components/pages/product/ProductDescription"),
+  {
+    loading: () => (
+      <div className="rounded-2xl border border-border bg-white p-6 text-sm text-muted-foreground">
+        Đang tải nội dung sản phẩm...
+      </div>
+    ),
+  }
+);
+
+const PersonalizedRecommendationShelf = dynamic(
+  () => import("@/components/pages/product/PersonalizedRecommendationShelf"),
+  {
+    loading: () => (
+      <div className="mt-10 rounded-2xl border border-border bg-white p-6 text-sm text-muted-foreground">
+        Đang tải gợi ý dành cho bạn...
+      </div>
+    ),
+  }
+);
 
 const ProductDetails = async ({
   params,
@@ -72,12 +93,12 @@ const ProductDetails = async ({
 
             {/* Left: Image Section */}
             <div className="space-y-4">
-              <div className="aspect-square bg-background rounded-xl overflow-hidden border-2 border-border shadow-sm group relative">
+              <div className="aspect-square bg-background rounded-xl overflow-hidden border-2 border-border shadow-sm group relative p-4 md:p-6">
                 <Image
                   src={product.image}
                   alt={product.name}
                   fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  className="object-contain p-2 group-hover:scale-105 transition-transform duration-500"
                 />
               </div>
 

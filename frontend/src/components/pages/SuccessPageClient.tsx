@@ -448,11 +448,10 @@ const SuccessPageClient = () => {
                 <span className="text-primary font-bold">1</span>
               </div>
               <h4 className="font-semibold text-gray-900 mb-2">
-                Order Confirmation
+                Tiếp nhận đơn
               </h4>
               <p className="text-sm text-gray-600">
-                Bạn sẽ nhận được email xác nhận với chi tiết đơn hàng của mình
-              </p>
+                Đơn hàng của bạn đã được hệ thống ghi nhận thành công              </p>
             </div>
 
             <div className="text-center">
