@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Loader2, Percent, RefreshCw, Ticket, TicketPercent, WalletCards } from "lucide-react";
+import { Loader2, Percent, RefreshCw, Search, Ticket, TicketPercent, WalletCards, ArrowUpDown } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
@@ -14,13 +14,6 @@ import {
 	CardTitle,
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@/components/ui/select";
 import {
 	Table,
 	TableBody,
@@ -44,7 +37,6 @@ import {
 	getBackofficeErrorMessage,
 	toIsoDateTime,
 } from "@/lib/backofficeUtils";
-import { cn } from "@/lib/utils";
 
 const VOUCHER_LABELS: Record<BackofficeVoucherStatus, string> = {
 	ACTIVE: "Đang chạy",
@@ -53,19 +45,17 @@ const VOUCHER_LABELS: Record<BackofficeVoucherStatus, string> = {
 	DISABLED: "Tạm dừng",
 };
 
-const VOUCHER_VARIANTS: Record<BackofficeVoucherStatus, "default" | "secondary" | "destructive" | "outline"> = {
-	ACTIVE: "default",
-	EXPIRED: "outline",
-	USED_UP: "secondary",
-	DISABLED: "destructive",
-};
-
 export default function StaffVouchersPage() {
 	const { authUser, isAuthenticated } = useUserStore();
 	const [devices, setDevices] = useState<StaffDevice[]>([]);
 	const [vouchers, setVouchers] = useState<BackofficeVoucher[]>([]);
 	const [loading, setLoading] = useState(true);
 	const [saving, setSaving] = useState(false);
+
+	{/* 🌟 STATE MỚI: Quản lý Tìm kiếm và Sắp xếp */ }
+	const [searchTerm, setSearchTerm] = useState("");
+	const [sortBy, setSortBy] = useState<"NEWEST" | "OLDEST">("NEWEST");
+
 	const [form, setForm] = useState({
 		code: "",
 		description: "",
@@ -104,23 +94,20 @@ export default function StaffVouchersPage() {
 			setLoading(false);
 			return;
 		}
-
 		void loadInitialData();
 	}, [isAuthenticated, loadInitialData]);
 
-	const activeCount = vouchers.filter((voucher) => voucher.status === "ACTIVE").length;
-	const disabledCount = vouchers.filter((voucher) => voucher.status === "DISABLED").length;
-	const expiredCount = vouchers.filter((voucher) => voucher.status === "EXPIRED").length;
-	const usedUpCount = vouchers.filter((voucher) => voucher.status === "USED_UP").length;
+	const activeCount = vouchers.filter((v) => v.status === "ACTIVE").length;
+	const disabledCount = vouchers.filter((v) => v.status === "DISABLED").length;
+	const expiredCount = vouchers.filter((v) => v.status === "EXPIRED").length;
+	const usedUpCount = vouchers.filter((v) => v.status === "USED_UP").length;
 
 	const handleCreateVoucher = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
-
 		if (!form.startDate || !form.endDate) {
 			toast.error("Chọn thời gian bắt đầu và kết thúc cho voucher.");
 			return;
 		}
-
 		if (!form.applicableDeviceId) {
 			toast.error("Chọn thiết bị thuộc brand của bạn để tạo voucher.");
 			return;
@@ -151,44 +138,55 @@ export default function StaffVouchersPage() {
 	};
 
 	const handleToggleStatus = async (voucher: BackofficeVoucher) => {
-		const nextStatus: BackofficeVoucherStatus =
-			voucher.status === "DISABLED" ? "ACTIVE" : "DISABLED";
+		{/* Chặn triệt để xử lý nếu voucher không ở trạng thái ACTIVE */ }
+		if (voucher.status !== "ACTIVE") return;
 
 		try {
-			await backofficeApi.updateVoucherStatus(voucher.id, nextStatus);
-			toast.success(`Đã cập nhật voucher sang ${VOUCHER_LABELS[nextStatus]}.`);
+			await backofficeApi.updateVoucherStatus(voucher.id, "DISABLED");
+			toast.success(`Đã cập nhật voucher sang Tạm dừng.`);
 			await loadInitialData();
 		} catch (error) {
 			toast.error(getBackofficeErrorMessage(error, "Không thể cập nhật trạng thái voucher."));
 		}
 	};
 
+	{/* 🌟 LOGIC MỚI: Xử lý tìm kiếm kết hợp sắp xếp dữ liệu */ }
+	const filteredAndSortedVouchers = vouchers
+		.filter((voucher) => {
+			const search = searchTerm.toLowerCase();
+			const matchCode = voucher.code.toLowerCase().includes(search);
+			const matchDevice = (voucher.applicableDeviceName || "Toàn hệ thống").toLowerCase().includes(search);
+			return matchCode || matchDevice;
+		})
+		.sort((a, b) => {
+			if (sortBy === "NEWEST") return b.id - a.id;
+			return a.id - b.id;
+		});
+
 	if (!isAuthenticated) {
-		return (
-			<div className="flex min-h-[50vh] items-center justify-center text-sm text-muted-foreground">
-				Đăng nhập bằng tài khoản staff để quản lý voucher.
-			</div>
-		);
+		return <div className="flex min-h-[50vh] items-center justify-center text-sm text-muted-foreground">Đăng nhập bằng tài khoản staff để quản lý voucher.</div>;
 	}
 
 	if (authUser?.role !== "STAFF") {
-		return (
-			<div className="flex min-h-[50vh] items-center justify-center text-sm text-muted-foreground">
-				Bạn không có quyền truy cập màn voucher.
-			</div>
-		);
+		return <div className="flex min-h-[50vh] items-center justify-center text-sm text-muted-foreground">Bạn không có quyền truy cập màn voucher.</div>;
 	}
 
 	return (
 		<div className="space-y-6 font-vietnam">
 			<div>
 				<h1 className="text-3xl font-bold tracking-tight">Quản lý voucher</h1>
-				<p className="text-sm text-muted-foreground">
-					Tạo mã giảm giá, gán theo thiết bị và theo dõi trạng thái sử dụng.
-				</p>
+				<p className="text-sm text-muted-foreground">Tạo mã giảm giá, gán theo thiết bị và theo dõi trạng thái sử dụng.</p>
+			</div>
+
+			<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+				<Card><CardHeader><CardDescription>Đang chạy</CardDescription><CardTitle className="flex items-center gap-3 text-3xl"><TicketPercent className="size-6 text-sky-500" />{activeCount}</CardTitle></CardHeader></Card>
+				<Card><CardHeader><CardDescription>Tạm dừng</CardDescription><CardTitle className="flex items-center gap-3 text-3xl"><WalletCards className="size-6 text-rose-500" />{disabledCount}</CardTitle></CardHeader></Card>
+				<Card><CardHeader><CardDescription>Hết hạn</CardDescription><CardTitle className="flex items-center gap-3 text-3xl"><Percent className="size-6 text-amber-500" />{expiredCount}</CardTitle></CardHeader></Card>
+				<Card><CardHeader><CardDescription>Hết lượt</CardDescription><CardTitle className="flex items-center gap-3 text-3xl"><TicketPercent className="size-6 text-indigo-500" />{usedUpCount}</CardTitle></CardHeader></Card>
 			</div>
 
 			<div className="flex flex-col lg:flex-row gap-6 w-full items-start">
+				{/* Cột trái: Form tạo */}
 				<div className="w-full lg:w-[400px] shrink-0">
 					<Card className="border border-gray-100 bg-white shadow-xl shadow-gray-100/50 rounded-2xl overflow-hidden font-vietnam">
 						{/* ĐỒNG BỘ HEADER: Tách nền nhẹ nhàng với border mờ ngăn cách */}
@@ -399,121 +397,146 @@ export default function StaffVouchersPage() {
 						</CardContent>
 					</Card>
 				</div>
-				<div className="flex-1 min-w-0 w-full space-y-6">
-					<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-						<Card><CardHeader><CardDescription>Đang chạy</CardDescription><CardTitle className="flex items-center gap-3 text-3xl"><TicketPercent className="size-6 text-sky-500" />{activeCount}</CardTitle></CardHeader></Card>
-						<Card><CardHeader><CardDescription>Tạm dừng</CardDescription><CardTitle className="flex items-center gap-3 text-3xl"><WalletCards className="size-6 text-rose-500" />{disabledCount}</CardTitle></CardHeader></Card>
-						<Card><CardHeader><CardDescription>Hết hạn</CardDescription><CardTitle className="flex items-center gap-3 text-3xl"><Percent className="size-6 text-amber-500" />{expiredCount}</CardTitle></CardHeader></Card>
-						<Card><CardHeader><CardDescription>Hết lượt</CardDescription><CardTitle className="flex items-center gap-3 text-3xl"><TicketPercent className="size-6 text-indigo-500" />{usedUpCount}</CardTitle></CardHeader></Card>
-					</div>
 
-					<Card className="w-full  overflow-hidden border border-gray-100 bg-white shadow-sm rounded-2xl font-vietnam">
-						<CardHeader className=" border-b border-gray-50 bg-gray-50/10 pb-4">
-							<div className="flex items-center justify-between ">
+
+				{/* Cột phải: Danh sách */}
+				<div className="flex-1 min-w-0 w-full space-y-6">
+					<Card className="w-full overflow-hidden border border-gray-100 bg-white shadow-sm rounded-2xl font-vietnam">
+						{/* 🌟 HÀNG CHỨA: Ô tìm kiếm, bộ lọc Sort và nút làm mới cùng hàng */}
+						<CardHeader className="border-b border-gray-50 bg-gray-50/10 pb-5 p-5 md:p-6">
+							<div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
 								<div>
 									<CardTitle className="text-lg font-bold text-gray-900 tracking-tight">Danh sách voucher</CardTitle>
-									<CardDescription className="text-sm text-gray-500 mt-0.5">{vouchers.length} voucher hiện có.</CardDescription>
+									<CardDescription className="text-sm text-gray-500 mt-0.5">{filteredAndSortedVouchers.length} / {vouchers.length} mã tìm thấy.</CardDescription>
 								</div>
 
-								{/* 🌟 NÚT LÀM MỚI: Giữ nguyên component Button và hàm gốc, chỉ bọc hiệu ứng trượt nền */}
-								<button
-									type="button"
-									onClick={() => void loadInitialData()}
-									disabled={loading}
-									className="group relative h-9 shrink-0 overflow-hidden rounded-lg border border-gray-100 bg-white px-4 text-[13px] font-semibold whitespace-nowrap text-gray-700 shadow-xs transition-all duration-500 hover:border-staff-primary active:scale-95 disabled:cursor-not-allowed disabled:opacity-50 cursor-pointer"
-								>
-									<span className="absolute inset-y-0 left-0 w-0 bg-staff-primary transition-all duration-500 ease-out group-hover:w-full" />
-									<div className="relative z-10 flex items-center justify-center text-gray-700 transition-colors duration-500 group-hover:text-white">
-										<RefreshCw
-											className={`mr-2 h-3.5 w-3.5 text-gray-400 transition-transform duration-700 ease-in-out group-hover:text-white ${loading ? "animate-spin" : "group-hover:rotate-180"
-												}`}
+								{/* Hộp điều khiển tích hợp đồng bộ hàng ngang */}
+								<div className="flex flex-wrap items-center gap-2.5">
+									{/* Thanh tìm kiếm mã hoặc thiết bị */}
+									<div className="relative w-full sm:w-60 md:w-64">
+										<Search className="absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-gray-400" />
+										<Input
+											placeholder="Tìm mã hoặc sản phẩm..."
+											value={searchTerm}
+											onChange={(e) => setSearchTerm(e.target.value)}
+											className="h-9 pl-9 pr-3 text-xs bg-white border border-gray-200 rounded-lg w-full focus-visible:ring-1 focus-visible:ring-staff-primary"
 										/>
-										<span className="relative">Làm mới</span>
 									</div>
-								</button>
+
+									{/* Dropdown sắp xếp mới/cũ */}
+									<div className="group/sort relative">
+										<div className="flex h-9 cursor-pointer items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 text-xs font-semibold text-gray-700 shadow-2xs hover:border-gray-300">
+											<ArrowUpDown className="h-3.5 w-3.5 text-gray-400" />
+											<span>{sortBy === "NEWEST" ? "Mới nhất" : "Cũ nhất"}</span>
+										</div>
+										<div className="invisible absolute right-0 top-full mt-1 z-50 w-28 rounded-lg border border-gray-100 bg-white opacity-0 shadow-md transition-all p-1">
+											<div onClick={() => setSortBy("NEWEST")} className="rounded-md px-2.5 py-1.5 text-xs text-gray-700 hover:bg-gray-50 cursor-pointer">Mới nhất</div>
+											<div onClick={() => setSortBy("OLDEST")} className="rounded-md px-2.5 py-1.5 text-xs text-gray-700 hover:bg-gray-50 cursor-pointer">Cũ nhất</div>
+										</div>
+									</div>
+
+									{/* Nút làm mới */}
+									<button
+										type="button"
+										onClick={() => void loadInitialData()}
+										disabled={loading}
+										className="group relative h-9 shrink-0 overflow-hidden rounded-lg border border-gray-100 bg-white px-4 text-[13px] font-semibold text-gray-700 shadow-2xs hover:border-[#173E77] active:scale-95 disabled:opacity-50 cursor-pointer"
+									>
+										<span className="absolute inset-y-0 left-0 w-0 bg-[#173E77] transition-all duration-300 group-hover:w-full" />
+										<div className="relative z-10 flex items-center justify-center transition-colors group-hover:text-white">
+											<RefreshCw className={`mr-1.5 h-3.5 w-3.5 text-gray-400 group-hover:text-white ${loading ? "animate-spin" : ""}`} />
+											<span>Làm mới</span>
+										</div>
+									</button>
+								</div>
 							</div>
 						</CardHeader>
 
-						<CardContent className=""> {/* Đổi thành p-0 để bảng tràn sát viền hai bên */}
+						<CardContent className="p-0">
 							{loading ? (
 								<div className="py-16 text-center text-sm text-muted-foreground">Đang tải voucher...</div>
 							) : (
-								/* 🌟 CHỐNG TRÀN BẢNG: Ép cấu trúc table-fixed và cho phép cuộn ngang ở màn hình nhỏ */
 								<div className="w-full overflow-x-auto">
 									<Table className="w-full min-w-[850px]">
 										<TableHeader>
-											{/* Ép cứng màu nền xanh đậm, không bị đổi sang nền trắng khi hover chuột */}
 											<TableRow className="bg-[#052962] hover:bg-[#052962] border-none">
 												<TableHead className="h-11 text-xs font-bold uppercase tracking-wider text-[#FFE500] pl-6 w-[18%]">Mã</TableHead>
 												<TableHead className="h-11 text-xs font-bold uppercase tracking-wider text-white/90 w-[18%]">Giảm giá</TableHead>
 												<TableHead className="h-11 text-xs font-bold uppercase tracking-wider text-white/90 w-[20%]">Thiết bị áp dụng</TableHead>
 												<TableHead className="h-11 text-xs font-bold uppercase tracking-wider text-white/90 w-[20%]">Hiệu lực</TableHead>
 												<TableHead className="h-11 text-xs font-bold uppercase tracking-wider text-white/90 w-[10%]">Đã dùng</TableHead>
-												<TableHead className="h-11 text-xs font-bold uppercase tracking-wider text-white/90 w-[12%]">Trạng thái</TableHead>
-												<TableHead className="h-11 text-xs font-bold uppercase tracking-wider text-[#FFE500] pr-6 text-right w-[16%]">Thao tác</TableHead>
+												<TableHead className="h-11 text-xs font-bold uppercase tracking-wider text-[#FFE500] w-[12%]">Trạng thái</TableHead>
+												<TableHead className="h-11 text-xs font-bold uppercase tracking-wider text-white/90 pr-6 text-right w-[16%]">Thao tác</TableHead>
 											</TableRow>
 										</TableHeader>
 										<TableBody>
-											{vouchers.map((voucher) => (
-												<TableRow key={voucher.id} className="hover:bg-gray-50/50 transition-colors border-b border-gray-100 last:border-b-0">
-													<TableCell className="pl-6 py-3.5">
-														<div className="font-bold text-gray-900">{voucher.code}</div>
-														<div className="text-xs text-gray-400 font-medium mt-0.5 truncate max-w-[150px]" title={voucher.description || undefined}>
-															{voucher.description || "Không có mô tả"}
-														</div>
-													</TableCell>
-													<TableCell className="py-3.5">
-														<div className="font-semibold text-gray-800">
-															{voucher.voucherType === "PERCENTAGE"
-																? `${voucher.discountValue}%`
-																: formatCurrency(voucher.discountValue)}
-														</div>
-														<div className="text-xs text-gray-400 font-medium mt-0.5">
-															Đơn tối thiểu {formatCurrency(voucher.minOrderValue || 0)}
-														</div>
-													</TableCell>
-													<TableCell className="py-3.5 font-medium text-gray-600 text-[13px] truncate max-w-[150px]" title={voucher.applicableDeviceName || "Toàn hệ thống"}>
-														{voucher.applicableDeviceName || "Toàn hệ thống"}
-													</TableCell>
-													<TableCell className="py-3.5 text-xs font-medium text-gray-600 space-y-0.5">
-														<div>Từ {formatDateTime(voucher.startDate)}</div>
-														<div>Đến {formatDateTime(voucher.endDate)}</div>
-													</TableCell>
-													<TableCell className="py-3.5 font-semibold text-gray-700 text-[13px]">
-														{voucher.usedQuantity}/{voucher.totalQuantity}
-													</TableCell>
-													<TableCell className="py-3.5">
-														<Badge variant={VOUCHER_VARIANTS[voucher.status]} className="shadow-none font-bold uppercase tracking-wider text-[10px] px-2 py-0.5 rounded-md">
-															{VOUCHER_LABELS[voucher.status]}
-														</Badge>
-													</TableCell>
+											{filteredAndSortedVouchers.map((voucher) => {
+												{/* 🌟 FIX TRẠNG THÁI: Định nghĩa cứng màu nền inline tránh lỗi mất màu */ }
+												let badgeStyle = "bg-emerald-50 text-emerald-700 border-emerald-200";
+												if (voucher.status === "DISABLED") badgeStyle = "bg-rose-50 text-rose-700 border-rose-200";
+												if (voucher.status === "EXPIRED") badgeStyle = "bg-gray-100 text-gray-600 border-gray-300";
+												if (voucher.status === "USED_UP") badgeStyle = "bg-amber-50 text-amber-700 border-amber-200";
 
-													{/* Cột Thao tác: Đồng bộ lề phải pr-6 thẳng hàng với chữ THAO TÁC */}
-													<TableCell className="pr-6 py-3.5 text-right">
-														<div className="flex justify-end gap-2">
-															<Button asChild variant="outline" size="sm" className="h-8 px-3 rounded-lg border-gray-200 text-gray-700 shadow-xs hover:bg-gray-50 hover:-translate-y-[0.5px] active:translate-y-0 transition-all text-xs font-semibold cursor-pointer">
-																<Link href={`/staff/vouchers/${voucher.id}`}>Chi tiết</Link>
-															</Button>
-															{voucher.status !== "USED_UP" && voucher.status !== "EXPIRED" ? (
-																<Button
-																	size="sm"
-																	onClick={() => void handleToggleStatus(voucher)}
-																	className="h-8 px-3 rounded-lg font-semibold text-xs shadow-xs transition-all duration-200 hover:-translate-y-[0.5px] active:translate-y-0 cursor-pointer !bg-[#173E77] !text-white hover:!bg-[#052962]"
-																>
-																	{voucher.status === "DISABLED" ? "Kích hoạt" : "Tạm dừng"}
+												return (
+													<TableRow key={voucher.id} className="hover:bg-gray-50/50 transition-colors border-b border-gray-100 last:border-b-0">
+														<TableCell className="pl-6 py-3.5">
+															<div className="font-bold text-gray-900">{voucher.code}</div>
+															<div className="text-xs text-gray-400 font-medium mt-0.5 truncate max-w-[150px]">{voucher.description || "Không có mô tả"}</div>
+														</TableCell>
+														<TableCell className="py-3.5">
+															<div className="font-semibold text-gray-800">
+																{voucher.voucherType === "PERCENTAGE" ? `${voucher.discountValue}%` : formatCurrency(voucher.discountValue)}
+															</div>
+															<div className="text-xs text-gray-400 font-medium mt-0.5">Đơn tối thiểu {formatCurrency(voucher.minOrderValue || 0)}</div>
+														</TableCell>
+														<TableCell className="py-3.5 font-medium text-gray-600 text-[13px] truncate max-w-[150px]">{voucher.applicableDeviceName || "Toàn hệ thống"}</TableCell>
+														<TableCell className="py-3.5 text-xs font-medium text-gray-600 space-y-0.5">
+															<div>Từ {formatDateTime(voucher.startDate)}</div>
+															<div>Đến {formatDateTime(voucher.endDate)}</div>
+														</TableCell>
+														<TableCell className="py-3.5 font-semibold text-gray-700 text-[13px]">{voucher.usedQuantity}/{voucher.totalQuantity}</TableCell>
+
+														{/* 🌟 HIỂN THỊ CỘT TRẠNG THÁI CHUẨN CSS */}
+														<TableCell className="py-3.5">
+															<span className={`inline-flex items-center font-bold uppercase tracking-wide text-[10px] px-2 py-0.5 rounded-md border ${badgeStyle}`}>
+																{VOUCHER_LABELS[voucher.status]}
+															</span>
+														</TableCell>
+
+														{/* 🌟 KHÓA NÚT KÍCH HOẠT SANG MÀU XÁM */}
+														<TableCell className="pr-6 py-3.5 text-right">
+															<div className="flex justify-end gap-2">
+																<Button asChild variant="outline" size="sm" className="h-8 px-3 rounded-lg border-gray-200 text-gray-700 text-xs font-semibold cursor-pointer">
+																	<Link href={`/staff/vouchers/${voucher.id}`}>Chi tiết</Link>
 																</Button>
-															) : null}
-														</div>
-													</TableCell>
-												</TableRow>
-											))}
+																{voucher.status === "ACTIVE" ? (
+																	<Button
+																		size="sm"
+																		onClick={() => void handleToggleStatus(voucher)}
+																		className="h-8 px-3 rounded-lg font-semibold text-xs shadow-xs transition-all duration-200 cursor-pointer !bg-[#173E77] !text-white hover:!bg-[#052962]"
+																	>
+																		Tạm dừng
+																	</Button>
+																) : (
+																	<Button
+																		disabled
+																		size="sm"
+																		className="h-8 px-3 rounded-lg font-semibold text-xs border border-gray-200 bg-gray-100 text-gray-400 cursor-not-allowed select-none shadow-none"
+																	>
+																		Kích hoạt
+																	</Button>
+																)}
+															</div>
+														</TableCell>
+													</TableRow>
+												);
+											})}
 										</TableBody>
 									</Table>
 								</div>
 							)}
 						</CardContent>
 					</Card>
-
 				</div>
 			</div>
 		</div>

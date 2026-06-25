@@ -114,6 +114,7 @@ export default function StaffVoucherDetailPage() {
 						<div className="space-y-1.5">
 							<p className="text-[13px] font-medium text-gray-500 font-vietnam">Trạng thái phát hành</p>
 							<div className="pt-0.5">
+								{/* 💡 Tự động hiển thị nhãn trạng thái động: Đang chạy, Hết hạn, Tạm dừng... */}
 								<Badge variant={VOUCHER_VARIANTS[voucher.status]} className="font-vietnam font-semibold px-2 py-0.5 text-xs">
 									{VOUCHER_LABELS[voucher.status]}
 								</Badge>
@@ -121,30 +122,23 @@ export default function StaffVoucherDetailPage() {
 						</div>
 
 						<div className="shrink-0">
-							{voucher.status !== "USED_UP" && voucher.status !== "EXPIRED" ? (
+							{voucher.status === "ACTIVE" ? (
 								<Button
 									onClick={() => void handleToggleStatus()}
-									className={`h-9.5 text-xs font-medium px-4 shadow-sm transition-all duration-200 active:scale-95 flex items-center gap-1.5 ${voucher.status === "DISABLED"
-										? "bg-staff-primary hover:bg-staff-primary/90 text-white"
-										: "bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100"
-										}`}
+									className="h-9.5 text-xs font-medium px-4 shadow-sm transition-all duration-200 active:scale-95 flex items-center gap-1.5 bg-amber-50 border border-amber-200 text-amber-700 hover:bg-amber-100"
 								>
-									{voucher.status === "DISABLED" ? (
-										<>
-											<ToggleLeft className="size-4" />
-											Kích hoạt mã
-										</>
-									) : (
-										<>
-											<ToggleRight className="size-4" />
-											Tạm dừng phát hành
-										</>
-									)}
+									<ToggleRight className="size-4" />
+									Tạm dừng phát hành
 								</Button>
 							) : (
-								<span className="text-xs font-medium text-gray-400 italic bg-gray-50 px-2.5 py-1.5 rounded-lg border border-dashed select-none">
-									Khóa chỉnh sửa trạng thái
-								</span>
+								/* Khi voucher ở trạng thái DISABLED, EXPIRED, hoặc USED_UP */
+								<Button
+									disabled
+									className="h-9.5 text-xs font-medium px-4 flex items-center gap-1.5 bg-gray-100 border border-gray-200 text-gray-400 cursor-not-allowed shadow-none select-none"
+								>
+									<ToggleLeft className="size-4 text-gray-300" />
+									Kích hoạt mã
+								</Button>
 							)}
 						</div>
 					</CardContent>
