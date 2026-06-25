@@ -13,8 +13,6 @@ import com.carevia.shared.dto.response.order.OrderResponse;
 import com.carevia.shared.exception.InvalidRequestException;
 import com.carevia.shared.exception.ResourceNotFoundException;
 import com.carevia.service.RefundService;
-import com.carevia.core.repository.RefundRepository;
-import com.carevia.core.domain.Refund;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -39,7 +37,8 @@ public class OrderService {
 
     public OrderService(OrderRepository orderRepository, DeviceRepository deviceRepository,
             AccountRepository accountRepository, VoucherRepository voucherRepository,
-            CartRepository cartRepository, ClientRepository clientRepository, UserBehaviorRepository userBehaviorRepository,
+            CartRepository cartRepository, ClientRepository clientRepository,
+            UserBehaviorRepository userBehaviorRepository,
             NotificationService notificationService, RefundService refundService,
             RefundRepository refundRepository, StaffBrandAccessService staffBrandAccessService) {
         this.orderRepository = orderRepository;
@@ -182,6 +181,11 @@ public class OrderService {
                 order.process();
                 notificationService.createOrderNotification(order.getAccount(), order, "ORDER_PROCESSING");
             }
+            case "SHIPPING" -> {
+                // Nếu trong Class Order của bạn có hàm order.ship() hoặc tương tự thì gọi ở đây
+                // Ví dụ: order.setStatus(OrderStatus.SHIPPING);
+                notificationService.createOrderNotification(order.getAccount(), order, "ORDER_SHIPPING");
+            }
             case "COMPLETED" -> {
                 order.complete();
                 notificationService.createOrderNotification(order.getAccount(), order, "ORDER_COMPLETED");
@@ -204,7 +208,8 @@ public class OrderService {
         if (!order.getAccount().getId().equals(accountId)) {
             throw new InvalidRequestException("Cannot cancel another user's order");
         }
-        // Precondition check is inside order.cancel(reason) — throws InvalidStatusException if not allowed
+        // Precondition check is inside order.cancel(reason) — throws
+        // InvalidStatusException if not allowed
         order.cancel(reason);
         Order saved = orderRepository.save(order);
         // Auto-create refund if order was paid
@@ -250,37 +255,37 @@ public class OrderService {
         }
     }
 
-        private OrderResponse toResponse(Order o) {
+    private OrderResponse toResponse(Order o) {
         return toResponse(o, null);
-        }
+    }
 
-        private OrderResponse toResponse(Order o, Long scopedBrandId) {
+    private OrderResponse toResponse(Order o, Long scopedBrandId) {
         List<OrderItem> visibleItems = scopedBrandId == null
-            ? o.getItems()
-            : o.getItems().stream()
-                .filter(item -> item.getDevice() != null
-                    && item.getDevice().getBrand() != null
-                    && scopedBrandId.equals(item.getDevice().getBrand().getId()))
-                .toList();
+                ? o.getItems()
+                : o.getItems().stream()
+                        .filter(item -> item.getDevice() != null
+                                && item.getDevice().getBrand() != null
+                                && scopedBrandId.equals(item.getDevice().getBrand().getId()))
+                        .toList();
 
         BigDecimal scopedSubtotal = visibleItems.stream()
-            .map(OrderItem::getSubtotal)
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+                .map(OrderItem::getSubtotal)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
         Client client = clientRepository.findByAccount(o.getAccount()).orElse(null);
         String customerName = client != null && client.getFullName() != null && !client.getFullName().isBlank()
-            ? client.getFullName()
-            : o.getReceiverName();
+                ? client.getFullName()
+                : o.getReceiverName();
         String customerPhone = client != null && client.getPhone() != null && !client.getPhone().isBlank()
-            ? client.getPhone()
-            : o.getReceiverPhone();
+                ? client.getPhone()
+                : o.getReceiverPhone();
 
         return OrderResponse.builder()
                 .id(o.getId())
                 .orderCode(o.getOrderCode())
                 .accountId(o.getAccount().getId())
-            .customerName(customerName)
-            .customerPhone(customerPhone)
-            .items(visibleItems.stream().map(i -> OrderResponse.OrderItemInfo.builder()
+                .customerName(customerName)
+                .customerPhone(customerPhone)
+                .items(visibleItems.stream().map(i -> OrderResponse.OrderItemInfo.builder()
                         .id(i.getId())
                         .deviceId(i.getDevice().getId())
                         .deviceName(i.getDevice().getName())
@@ -289,11 +294,11 @@ public class OrderService {
                         .unitPrice(i.getUnitPrice())
                         .subtotal(i.getSubtotal())
                         .build()).collect(Collectors.toList()))
-                    .subtotal(scopedBrandId == null ? o.getSubtotal() : scopedSubtotal)
-                    .discountAmount(scopedBrandId == null ? o.getDiscountAmount() : BigDecimal.ZERO)
-                    .shippingFee(scopedBrandId == null ? o.getShippingFee() : BigDecimal.ZERO)
-                    .taxAmount(scopedBrandId == null ? o.getTaxAmount() : BigDecimal.ZERO)
-                    .totalAmount(scopedBrandId == null ? o.getTotalAmount() : scopedSubtotal)
+                .subtotal(scopedBrandId == null ? o.getSubtotal() : scopedSubtotal)
+                .discountAmount(scopedBrandId == null ? o.getDiscountAmount() : BigDecimal.ZERO)
+                .shippingFee(scopedBrandId == null ? o.getShippingFee() : BigDecimal.ZERO)
+                .taxAmount(scopedBrandId == null ? o.getTaxAmount() : BigDecimal.ZERO)
+                .totalAmount(scopedBrandId == null ? o.getTotalAmount() : scopedSubtotal)
                 .status(o.getStatus())
                 .paymentStatus(o.getPaymentStatus())
                 .paymentMethod(o.getPaymentMethod())
@@ -317,7 +322,8 @@ public class OrderService {
 
     private PageResponse<OrderResponse> toPageResponse(Page<Order> page, Long scopedBrandId) {
         return PageResponse.<OrderResponse>builder()
-                .items(page.getContent().stream().map(order -> toResponse(order, scopedBrandId)).collect(Collectors.toList()))
+                .items(page.getContent().stream().map(order -> toResponse(order, scopedBrandId))
+                        .collect(Collectors.toList()))
                 .page(page.getNumber())
                 .size(page.getSize())
                 .totalItems(page.getTotalElements())

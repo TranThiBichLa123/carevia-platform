@@ -1,5 +1,4 @@
 import apiClient from "@/services/apiClient";
-
 const getToken = (): string | undefined => {
   if (typeof document === "undefined") return undefined;
   const cookies = document.cookie.split(";").reduce((acc, cookie) => {
@@ -111,6 +110,9 @@ export interface ExperienceStepData {
   durationMinutes?: number;
 }
 
+// ==========================================
+// 🛠️ ĐÚNG NƠI: ĐÃ DỜI VỀ ĐÂY
+// ==========================================
 export const deviceApi = {
   getAll: async (params?: {
     search?: string;
@@ -137,7 +139,7 @@ export const deviceApi = {
     if (params?.page !== undefined) searchParams.append("page", String(params.page));
     if (params?.size) searchParams.append("size", String(params.size));
     if (params?.sort) searchParams.append("sort", params.sort);
-    
+
     const res = await apiClient.get(`/devices?${searchParams}`);
     return res.data;
   },
@@ -190,6 +192,22 @@ export const deviceApi = {
   getSkinTypes: async (): Promise<string[]> => {
     const res = await apiClient.get("/devices/skin-types");
     return res.data;
+  },
+
+  getVouchersByDeviceId: async (deviceId: string | number): Promise<any[]> => {
+    try {
+      //  ĐỔI ĐƯỜNG DẪN: Sửa từ "/client/vouchers/device/..." thành "/vouchers/device/..."
+      // Không cần truyền token nữa vì đây là endpoint GET public cho client xem
+      const response = await apiClient.get(`/vouchers/device/${deviceId}`);
+      return response.data || [];
+    } catch (error) {
+      console.error(`Failed to fetch vouchers for device ${deviceId}:`, error);
+      return [];
+    }
+  },
+  getVoucherByCode: async (code: string): Promise<any> => {
+    const response = await apiClient.get(`/vouchers/code/${code}`);
+    return response.data;
   },
 };
 

@@ -485,8 +485,10 @@ export default function StaffVouchersPage() {
 														</TableCell>
 														<TableCell className="py-3.5">
 															<div className="font-semibold text-gray-800">
-																{voucher.voucherType === "PERCENTAGE" ? `${voucher.discountValue}%` : formatCurrency(voucher.discountValue)}
-															</div>
+																{voucher.voucherType === "PERCENTAGE"
+																	? `${Number(voucher.discountValue)}%`
+																	: formatCurrency(Math.round(voucher.discountValue))
+																}															</div>
 															<div className="text-xs text-gray-400 font-medium mt-0.5">Đơn tối thiểu {formatCurrency(voucher.minOrderValue || 0)}</div>
 														</TableCell>
 														<TableCell className="py-3.5 font-medium text-gray-600 text-[13px] truncate max-w-[150px]">{voucher.applicableDeviceName || "Toàn hệ thống"}</TableCell>

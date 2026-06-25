@@ -144,6 +144,11 @@ export type StaffDashboard = {
     endDate: string;
     remainingQuantity: number;
   }>;
+  totalRevenue?: number;              // Tổng doanh thu tích lũy
+  revenueChangePercentage?: number;   // % Biến động tăng trưởng doanh thu
+  monthlyRevenue?: Array<{ month: string; revenue: number }>; // Biểu đồ biến động doanh thu
+
+
 };
 
 export type StaffDeviceCategory = {
@@ -470,6 +475,7 @@ export const backofficeApi = {
     });
     return res.data;
   },
+
 
   async getStaffBrand(): Promise<StaffDeviceBrand> {
     const res = await apiClient.get("/staff/brand", {
@@ -961,6 +967,16 @@ export const backofficeApi = {
     const res = await apiClient.get("/admin/audit-logs/suggestions", {
       headers: authHeaders(),
     });
+    return res.data;
+  },
+
+  getBrandAnalytics: async (brandId: number | string): Promise<{
+    totalRevenue: number;
+    totalOrders: number;
+    revenueChangePercentage: number; // Tỷ lệ biến động doanh thu (%)
+    monthlyRevenue: Array<{ month: string; revenue: number }>; // Dữ liệu vẽ biểu đồ
+  }> => {
+    const res = await apiClient.get(`/staff/brands/${brandId}/analytics`, { headers: authHeaders() });
     return res.data;
   },
 };

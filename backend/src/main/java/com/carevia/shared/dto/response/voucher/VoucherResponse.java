@@ -2,6 +2,9 @@ package com.carevia.shared.dto.response.voucher;
 
 import com.carevia.shared.constant.VoucherStatus;
 import com.carevia.shared.constant.VoucherType;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.databind.ser.std.ToStringSerializer;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,9 +22,17 @@ public class VoucherResponse {
     private String code;
     private String description;
     private VoucherType voucherType;
+
+   
+    @JsonSerialize(using = ToStringSerializer.class)
     private BigDecimal discountValue;
+
+    @JsonSerialize(using = ToStringSerializer.class)
     private BigDecimal minOrderValue;
+
+    @JsonSerialize(using = ToStringSerializer.class)
     private BigDecimal maxDiscount;
+
     private Integer totalQuantity;
     private Integer usedQuantity;
     private Integer remainingQuantity;

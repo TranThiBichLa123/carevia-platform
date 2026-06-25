@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal; // Đã thêm import chuẩn
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
@@ -25,6 +26,9 @@ public class StaffDashboardResponse {
     private List<DeviceAlert> lowStockAlerts;
     private List<DeviceAlert> maintenanceAlerts;
     private List<VoucherAlert> voucherAlerts;
+
+    private BigDecimal totalRevenue;
+    private BigDecimal revenueChangePercentage;
 
     @Data
     @Builder

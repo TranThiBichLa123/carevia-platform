@@ -1,14 +1,15 @@
 "use client";
 
-import { AlertTriangle, Boxes, CalendarCheck2, ClipboardList, Loader2, RefreshCw, TicketPercent, TrendingUp, BarChart3, PieChart } from "lucide-react";
+import { AlertTriangle, Boxes, CalendarCheck2, ClipboardList, Loader2, RefreshCw, TicketPercent, TrendingUp, BarChart3, PieChart, DollarSign, TrendingDown, ArrowUpRight } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
-import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend, Cell, Pie, PieChart as RechartsPieChart } from "recharts";
+import { ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid, Legend, Cell, Pie, PieChart as RechartsPieChart, LineChart, Line } from "recharts";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { backofficeApi, type StaffDashboard } from "@/lib/backofficeApi";
 import { formatDate, getBackofficeErrorMessage } from "@/lib/backofficeUtils";
 import { useUserStore } from "@/lib/store";
+import PriceFormatter from "@/components/common/PriceFormatter";
 
 const bookingStats = [
     { key: "pendingOrders", label: "Đơn chờ xử lý", icon: ClipboardList, color: "text-indigo-600", bg: "bg-indigo-50/50", border: "hover:border-indigo-200" },
@@ -127,6 +128,48 @@ export default function StaffStatisticsPage() {
                     {/* Row 1: Hệ thống thẻ số liệu phân tầng */}
                     <div className="space-y-5">
 
+
+                        {/* 🌟 THÊM MỚI: NHÓM SỐ LIỆU TÀI CHÍNH (DOANH THU & BIẾN ĐỘNG) */}
+                        <div>
+                            <div className="text-xs font-semibold text-emerald-600 mb-2.5 tracking-wide">Hiệu suất tài chính brand</div>
+                            <div className="grid gap-4 sm:grid-cols-2">
+                                {/* Thẻ tổng doanh thu */}
+                                <Card className="overflow-hidden border-gray-100/70 shadow-sm border-l-4 border-l-emerald-500 transition-all duration-300 hover:shadow-md">
+                                    <CardContent className="p-5 flex items-center justify-between">
+                                        <div className="space-y-1">
+                                            <p className="text-[13px] font-medium text-gray-500">Tổng doanh thu tích lũy</p>
+                                            <h3 className="text-2xl font-bold tracking-tight text-gray-900">
+                                                <PriceFormatter amount={dashboard?.totalRevenue || 0} />
+                                            </h3>
+                                        </div>
+                                        <div className="p-3 rounded-xl shrink-0 bg-emerald-50 text-emerald-600">
+                                            <DollarSign className="size-5" />
+                                        </div>
+                                    </CardContent>
+                                </Card>
+
+                                {/* Thẻ biến động tăng trưởng */}
+                                <Card className="overflow-hidden border-gray-100/70 shadow-sm border-l-4 border-l-indigo-500 transition-all duration-300 hover:shadow-md">
+                                    <CardContent className="p-5 flex items-center justify-between">
+                                        <div className="space-y-1">
+                                            <p className="text-[13px] font-medium text-gray-500">Biến động doanh thu tháng này</p>
+                                            <div className="flex items-baseline gap-2">
+                                                <h3 className={`text-2xl font-bold tracking-tight ${(dashboard?.revenueChangePercentage || 0) >= 0 ? 'text-green-600' : 'text-rose-600'}`}>
+                                                    {(dashboard?.revenueChangePercentage || 0) >= 0 ? "+" : ""}
+                                                    {dashboard?.revenueChangePercentage || 0}%
+                                                </h3>
+                                                <span className="text-xs text-muted-foreground">so với tháng trước</span>
+                                            </div>
+                                        </div>
+                                        <div className={`p-3 rounded-xl shrink-0 ${(dashboard?.revenueChangePercentage || 0) >= 0 ? 'bg-green-50 text-green-600' : 'bg-rose-50 text-rose-600'}`}>
+                                            {(dashboard?.revenueChangePercentage || 0) >= 0 ? <TrendingUp className="size-5" /> : <TrendingDown className="size-5" />}
+                                        </div>
+                                    </CardContent>
+                                </Card>
+                            </div>
+                        </div>
+
+
                         {/* Nhóm 1: KPI Đặt lịch & Đơn hàng (Hàng 4 cột cân đối) */}
                         <div>
                             <div className="text-xs font-semibold text-gray-400 mb-2.5 tracking-wide">Hiệu suất vận hành ngày</div>
@@ -189,6 +232,47 @@ export default function StaffStatisticsPage() {
 
                     {/* Row 2: Khu vực Biểu đồ Phân tích Đa dạng */}
                     <div className="grid gap-6 lg:grid-cols-3">
+                        {/* 🌟 CẬP NHẬT: THAY BIỂU ĐỒ HOẶC BỔ SUNG ĐƯỜNG XU HƯỚNG BIẾN ĐỘNG DOANH THU */}
+                        <Card className="lg:col-span-2 border-gray-100 shadow-sm">
+                            <CardHeader className="flex flex-row items-center justify-between pb-4">
+                                <div className="space-y-1">
+                                    <CardTitle className="text-base font-semibold flex items-center gap-2">
+                                        <ArrowUpRight className="size-4 text-emerald-600" /> Biến động doanh thu theo các tháng
+                                    </CardTitle>
+                                    <CardDescription>Báo cáo trực quan hóa đường xu hướng doanh thu phát sinh của Brand qua các mốc thời gian.</CardDescription>
+                                </div>
+                            </CardHeader>
+                            <CardContent className="pt-2">
+                                <div className="h-72 w-full">
+                                    {dashboard?.monthlyRevenue && dashboard.monthlyRevenue.length > 0 ? (
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <LineChart data={dashboard.monthlyRevenue}>
+                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                                <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} tickLine={false} />
+                                                <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} tickFormatter={(val) => `${(val / 1000000).toFixed(0)}M`} />
+                                                <Tooltip formatter={(value: any) => [<PriceFormatter amount={value} />, "Doanh thu"]} />
+                                                <Line type="monotone" dataKey="revenue" stroke="#059669" strokeWidth={3} activeDot={{ r: 6 }} dot={{ strokeWidth: 2, r: 4 }} />
+                                            </LineChart>
+                                        </ResponsiveContainer>
+                                    ) : (
+                                        /* Nếu chưa có hoặc chưa tích hợp được cục data biểu đồ của backend, ta giữ lại biểu đồ cột Booking cũ làm fallback */
+                                        <ResponsiveContainer width="100%" height="100%">
+                                            <BarChart data={bookingChartData} barGap={12}>
+                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                                                <XAxis dataKey="name" hide={true} />
+                                                <YAxis allowDecimals={false} stroke="#94a3b8" fontSize={12} />
+                                                <Tooltip cursor={{ fill: '#f8fafc' }} />
+                                                <Legend iconType="circle" wrapperStyle={{ fontSize: '13px', paddingTop: '10px' }} />
+                                                <Bar dataKey="Tổng hôm nay" fill="#0284c7" radius={[6, 6, 0, 0]} maxBarSize={60} />
+                                                <Bar dataKey="Chờ xác nhận" fill="#d97706" radius={[6, 6, 0, 0]} maxBarSize={60} />
+                                                <Bar dataKey="Đã check-in" fill="#059669" radius={[6, 6, 0, 0]} maxBarSize={60} />
+                                            </BarChart>
+                                        </ResponsiveContainer>
+                                    )}
+                                </div>
+                            </CardContent>
+                        </Card>
+
                         {/* Biểu đồ Cột tiến độ Booking */}
                         <Card className="lg:col-span-2 border-gray-100 shadow-sm">
                             <CardHeader className="flex flex-row items-center justify-between pb-4">
@@ -287,14 +371,13 @@ export default function StaffStatisticsPage() {
                                     <div>
                                         <CardTitle className="text-base font-semibold text-gray-900">Cần bổ sung tồn kho</CardTitle>
                                         <CardDescription className="text-xs text-rose-600/80 font-medium mt-0.5">
-                                            {dashboard?.lowStockAlerts.length || 0} sản phẩm dưới ngưỡng an toàn
-                                        </CardDescription>
+                                            {dashboard?.lowStockAlerts?.length ?? 0} sản phẩm dưới ngưỡng an toàn                                        </CardDescription>
                                     </div>
                                 </div>
                             </CardHeader>
                             <CardContent className="flex-1 p-4">
                                 <div className="space-y-2.5 max-h-90 overflow-y-auto pr-1 scrollbar-thin">
-                                    {dashboard?.lowStockAlerts.length ? (
+                                    {dashboard?.lowStockAlerts?.length ? (
                                         dashboard.lowStockAlerts.map((item) => (
                                             <div
                                                 key={item.deviceId}
@@ -340,7 +423,7 @@ export default function StaffStatisticsPage() {
                             </CardHeader>
                             <CardContent className="flex-1 p-4">
                                 <div className="space-y-2.5 max-h-90 overflow-y-auto pr-1 scrollbar-thin">
-                                    {dashboard?.maintenanceAlerts.length ? (
+                                    {dashboard?.maintenanceAlerts?.length ? (
                                         dashboard.maintenanceAlerts.map((item) => (
                                             <div
                                                 key={item.deviceId}
@@ -389,7 +472,7 @@ export default function StaffStatisticsPage() {
                             </CardHeader>
                             <CardContent className="flex-1 p-4">
                                 <div className="space-y-2.5 max-h-90 overflow-y-auto pr-1 scrollbar-thin">
-                                    {dashboard?.voucherAlerts.length ? (
+                                    {dashboard?.voucherAlerts?.length ? (
                                         dashboard.voucherAlerts.map((item) => (
                                             <div
                                                 key={item.voucherId}

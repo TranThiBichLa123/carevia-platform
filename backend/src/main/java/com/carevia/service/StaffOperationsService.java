@@ -12,7 +12,6 @@ import com.carevia.core.repository.OrderRepository;
 import com.carevia.core.repository.VoucherRepository;
 import com.carevia.shared.constant.BookingStatus;
 import com.carevia.shared.constant.DeviceStatus;
-import com.carevia.shared.constant.InventoryTransactionType;
 import com.carevia.shared.constant.OrderStatus;
 import com.carevia.shared.dto.PageResponse;
 import com.carevia.shared.dto.request.device.CreateDeviceRequest;
@@ -66,8 +65,8 @@ public class StaffOperationsService {
     private final CloudinaryStorageService cloudinaryStorageService;
     private final StaffBrandAccessService staffBrandAccessService;
 
-        @Value("${app.avatar.max-size-bytes}")
-        private long maxSizeBytes;
+    @Value("${app.avatar.max-size-bytes}")
+    private long maxSizeBytes;
 
     public StaffOperationsService(
             BrandRepository brandRepository,
@@ -266,7 +265,7 @@ public class StaffOperationsService {
     @Transactional
     public VoucherResponse assignVoucherToDevice(Long deviceId, Long voucherId) {
         Device device = deviceRepository.findById(deviceId)
-            .orElseThrow(() -> new ResourceNotFoundException("Device not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Device not found"));
         staffBrandAccessService.requireManageableDevice(device);
         return voucherService.assignVoucherToDevice(voucherId, deviceId);
     }
@@ -274,7 +273,7 @@ public class StaffOperationsService {
     @Transactional
     public VoucherResponse removeVoucherFromDevice(Long deviceId, Long voucherId) {
         Device device = deviceRepository.findById(deviceId)
-            .orElseThrow(() -> new ResourceNotFoundException("Device not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Device not found"));
         staffBrandAccessService.requireManageableDevice(device);
         return voucherService.removeVoucherFromDevice(voucherId, deviceId);
     }
@@ -366,12 +365,14 @@ public class StaffOperationsService {
                     : inventoryTransactionRepository.findAllByOrderByCreatedAtDesc(pageable);
         } else {
             page = deviceId != null
-                    ? inventoryTransactionRepository.findByDeviceIdAndDeviceBrandIdOrderByCreatedAtDesc(deviceId, scopedBrandId, pageable)
+                    ? inventoryTransactionRepository.findByDeviceIdAndDeviceBrandIdOrderByCreatedAtDesc(deviceId,
+                            scopedBrandId, pageable)
                     : inventoryTransactionRepository.findByDeviceBrandIdOrderByCreatedAtDesc(scopedBrandId, pageable);
         }
 
         return PageResponse.<InventoryTransactionResponse>builder()
-                .items(page.getContent().stream().map(this::toInventoryTransactionResponse).collect(Collectors.toList()))
+                .items(page.getContent().stream().map(this::toInventoryTransactionResponse)
+                        .collect(Collectors.toList()))
                 .page(page.getNumber())
                 .size(page.getSize())
                 .totalItems(page.getTotalElements())
@@ -388,23 +389,23 @@ public class StaffOperationsService {
         Long scopedBrandId = staffBrandAccessService.getScopedBrandIdOrNull();
 
         List<StaffDashboardResponse.DeviceAlert> lowStockAlerts = deviceRepository.findAll(
-                        (root, query, cb) -> cb.and(
-                                cb.isNull(root.get("deletedAt")),
-                    scopedBrandId != null ? cb.equal(root.get("brand").get("id"), scopedBrandId) : cb.conjunction(),
-                                cb.lessThanOrEqualTo(root.get("stock"), LOW_STOCK_THRESHOLD),
-                                cb.notEqual(root.get("status"), DeviceStatus.INACTIVE)),
-                        PageRequest.of(0, DASHBOARD_ALERT_LIMIT, Sort.by(Sort.Direction.ASC, "stock")))
+                (root, query, cb) -> cb.and(
+                        cb.isNull(root.get("deletedAt")),
+                        scopedBrandId != null ? cb.equal(root.get("brand").get("id"), scopedBrandId) : cb.conjunction(),
+                        cb.lessThanOrEqualTo(root.get("stock"), LOW_STOCK_THRESHOLD),
+                        cb.notEqual(root.get("status"), DeviceStatus.INACTIVE)),
+                PageRequest.of(0, DASHBOARD_ALERT_LIMIT, Sort.by(Sort.Direction.ASC, "stock")))
                 .getContent()
                 .stream()
                 .map(this::toDeviceAlert)
                 .collect(Collectors.toList());
 
         List<StaffDashboardResponse.DeviceAlert> maintenanceAlerts = deviceRepository.findAll(
-                        (root, query, cb) -> cb.and(
-                                cb.isNull(root.get("deletedAt")),
-                    scopedBrandId != null ? cb.equal(root.get("brand").get("id"), scopedBrandId) : cb.conjunction(),
-                                cb.equal(root.get("status"), DeviceStatus.MAINTENANCE)),
-                        PageRequest.of(0, DASHBOARD_ALERT_LIMIT, Sort.by(Sort.Direction.DESC, "updatedAt")))
+                (root, query, cb) -> cb.and(
+                        cb.isNull(root.get("deletedAt")),
+                        scopedBrandId != null ? cb.equal(root.get("brand").get("id"), scopedBrandId) : cb.conjunction(),
+                        cb.equal(root.get("status"), DeviceStatus.MAINTENANCE)),
+                PageRequest.of(0, DASHBOARD_ALERT_LIMIT, Sort.by(Sort.Direction.DESC, "updatedAt")))
                 .getContent()
                 .stream()
                 .map(this::toDeviceAlert)
@@ -412,13 +413,13 @@ public class StaffOperationsService {
 
         List<StaffDashboardResponse.VoucherAlert> voucherAlerts = voucherRepository.findAll(
                 (root, query, cb) -> cb.and(
-                    cb.equal(root.get("status"), com.carevia.shared.constant.VoucherStatus.ACTIVE),
-                    cb.between(root.get("endDate"), now, voucherThreshold),
-                    scopedBrandId != null
-                        ? cb.equal(root.get("applicableDevice").get("brand").get("id"), scopedBrandId)
-                        : cb.conjunction()),
+                        cb.equal(root.get("status"), com.carevia.shared.constant.VoucherStatus.ACTIVE),
+                        cb.between(root.get("endDate"), now, voucherThreshold),
+                        scopedBrandId != null
+                                ? cb.equal(root.get("applicableDevice").get("brand").get("id"), scopedBrandId)
+                                : cb.conjunction()),
                 PageRequest.of(0, DASHBOARD_ALERT_LIMIT, Sort.by(Sort.Direction.ASC, "endDate")))
-            .getContent()
+                .getContent()
                 .stream()
                 .map(this::toVoucherAlert)
                 .collect(Collectors.toList());
@@ -428,41 +429,139 @@ public class StaffOperationsService {
             jakarta.persistence.criteria.Join<Object, Object> itemJoin = root.join("items");
             jakarta.persistence.criteria.Join<Object, Object> deviceJoin = itemJoin.join("device");
             return cb.and(
-                scopedBrandId != null ? cb.equal(deviceJoin.get("brand").get("id"), scopedBrandId) : cb.conjunction(),
-                root.get("status").in(OrderStatus.PENDING_PAYMENT, OrderStatus.PAID, OrderStatus.PROCESSING));
+                    scopedBrandId != null ? cb.equal(deviceJoin.get("brand").get("id"), scopedBrandId)
+                            : cb.conjunction(),
+                    root.get("status").in(OrderStatus.PENDING_PAYMENT, OrderStatus.PAID, OrderStatus.PROCESSING));
         });
+
+        // ==========================================
+        // 🌟 TÍNH DOANH THU THÁNG HIỆN TẠI (CURRENT MONTH)
+        // ==========================================
+        LocalDate firstDayOfCurrentMonth = today.withDayOfMonth(1);
+        java.time.ZoneId sysZone = java.time.ZoneId.systemDefault();
+
+        // 1a. Đơn hàng Thiết bị - THÁNG NÀY
+        java.math.BigDecimal currentDeviceRevenue = orderRepository.findAll().stream()
+                .filter(order -> order.getStatus().name().matches("PAID|PROCESSING|SHIPPING|COMPLETED"))
+                .filter(order -> order.getCreatedAt() != null
+                        && !LocalDate.ofInstant(order.getCreatedAt(), sysZone).isBefore(firstDayOfCurrentMonth))
+                .flatMap(order -> order.getItems().stream())
+                .filter(item -> item.getDevice() != null && item.getDevice().getBrand() != null
+                        && (scopedBrandId == null || scopedBrandId.equals(item.getDevice().getBrand().getId())))
+                .map(item -> item.getTotalPrice() != null ? item.getTotalPrice() : java.math.BigDecimal.ZERO)
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+
+        // 1b. Lịch hẹn Dịch vụ - THÁNG NÀY
+        java.math.BigDecimal currentBookingRevenue = bookingRepository.findAll().stream()
+                .filter(b -> b.getStatus().name().matches("CONFIRMED|CHECKED_IN|COMPLETED"))
+                .filter(b -> b.getAppointmentDate() != null && !b.getAppointmentDate().isBefore(firstDayOfCurrentMonth))
+                .filter(b -> b.getDevice() != null && b.getDevice().getBrand() != null
+                        && (scopedBrandId == null || scopedBrandId.equals(b.getDevice().getBrand().getId())))
+                .map(b -> b.getTotalPrice() != null ? b.getTotalPrice() : java.math.BigDecimal.ZERO)
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+
+        java.math.BigDecimal currentMonthTotalRevenue = currentDeviceRevenue.add(currentBookingRevenue);
+
+        // TỔNG TRỌN ĐỜI (Sử dụng logic cũ của bạn để lấy tổng tất cả thời gian)
+        // TỔNG TRỌN ĐỜI (Sửa lỗi tại đây)
+        java.math.BigDecimal totalDeviceRevenue = orderRepository.findAll().stream()
+                .filter(order -> order.getStatus().name().matches("PAID|PROCESSING|SHIPPING|COMPLETED"))
+                .flatMap(order -> order.getItems().stream())
+                .filter(item -> item.getDevice() != null && item.getDevice().getBrand() != null
+                        && (scopedBrandId == null || scopedBrandId.equals(item.getDevice().getBrand().getId())))
+                .map(item -> item.getTotalPrice() != null ? item.getTotalPrice() : java.math.BigDecimal.ZERO)
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+
+        java.math.BigDecimal totalBookingRevenue = bookingRepository.findAll().stream()
+                .filter(b -> b.getStatus().name().matches("CONFIRMED|CHECKED_IN|COMPLETED"))
+                .filter(b -> b.getDevice() != null && b.getDevice().getBrand() != null
+                        && (scopedBrandId == null || scopedBrandId.equals(b.getDevice().getBrand().getId())))
+                .map(b -> b.getTotalPrice() != null ? b.getTotalPrice() : java.math.BigDecimal.ZERO)
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+
+        java.math.BigDecimal totalRevenue = totalDeviceRevenue.add(totalBookingRevenue);
+        // ==========================================
+        // 🌟 TÍNH DOANH THU THÁNG TRƯỚC (PREVIOUS MONTH)
+        // ==========================================
+        LocalDate firstDayOfLastMonth = firstDayOfCurrentMonth.minusMonths(1);
+        LocalDate lastDayOfLastMonth = firstDayOfCurrentMonth.minusDays(1);
+
+        // 2a. Đơn hàng Thiết bị - THÁNG TRƯỚC
+        java.math.BigDecimal lastDeviceRevenue = orderRepository.findAll().stream()
+                .filter(order -> order.getStatus().name().matches("PAID|PROCESSING|SHIPPING|COMPLETED"))
+                .filter(order -> order.getCreatedAt() != null)
+                .filter(order -> {
+                    LocalDate date = LocalDate.ofInstant(order.getCreatedAt(), sysZone);
+                    return !date.isBefore(firstDayOfLastMonth) && !date.isAfter(lastDayOfLastMonth);
+                })
+                .flatMap(order -> order.getItems().stream())
+                .filter(item -> item.getDevice() != null && item.getDevice().getBrand() != null
+                        && (scopedBrandId == null || scopedBrandId.equals(item.getDevice().getBrand().getId())))
+                .map(item -> item.getTotalPrice() != null ? item.getTotalPrice() : java.math.BigDecimal.ZERO)
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+
+        // 2b. Lịch hẹn Dịch vụ - THÁNG TRƯỚC
+        java.math.BigDecimal lastBookingRevenue = bookingRepository.findAll().stream()
+                .filter(b -> b.getStatus().name().matches("CONFIRMED|CHECKED_IN|COMPLETED"))
+                .filter(b -> b.getAppointmentDate() != null && !b.getAppointmentDate().isBefore(firstDayOfLastMonth)
+                        && !b.getAppointmentDate().isAfter(lastDayOfLastMonth))
+                .filter(b -> b.getDevice() != null && b.getDevice().getBrand() != null
+                        && (scopedBrandId == null || scopedBrandId.equals(b.getDevice().getBrand().getId())))
+                .map(b -> b.getTotalPrice() != null ? b.getTotalPrice() : java.math.BigDecimal.ZERO)
+                .reduce(java.math.BigDecimal.ZERO, java.math.BigDecimal::add);
+
+        java.math.BigDecimal lastMonthTotalRevenue = lastDeviceRevenue.add(lastBookingRevenue);
+
+        // ==========================================
+        // 🌟 TÍNH % BIẾN ĐỘNG CHÍNH XÁC
+        // ==========================================
+        java.math.BigDecimal revenueChangePercentage = java.math.BigDecimal.ZERO;
+        if (lastMonthTotalRevenue.compareTo(java.math.BigDecimal.ZERO) > 0) {
+            revenueChangePercentage = currentMonthTotalRevenue.subtract(lastMonthTotalRevenue)
+                    .multiply(java.math.BigDecimal.valueOf(100))
+                    .divide(lastMonthTotalRevenue, 2, java.math.RoundingMode.HALF_UP);
+        } else if (currentMonthTotalRevenue.compareTo(java.math.BigDecimal.ZERO) > 0) {
+            revenueChangePercentage = java.math.BigDecimal.valueOf(100.00);
+        }
 
         return StaffDashboardResponse.builder()
                 .date(today)
-            .bookingsToday(bookingRepository.count((root, query, cb) -> cb.and(
-                cb.equal(root.get("appointmentDate"), today),
-                scopedBrandId != null ? cb.equal(root.get("device").get("brand").get("id"), scopedBrandId) : cb.conjunction(),
-                cb.not(root.get("status").in(BookingStatus.CANCELLED, BookingStatus.EXPIRED)))))
-            .pendingBookings(bookingRepository.count((root, query, cb) -> cb.and(
-                cb.equal(root.get("appointmentDate"), today),
-                cb.equal(root.get("status"), BookingStatus.PENDING_CONFIRM),
-                scopedBrandId != null ? cb.equal(root.get("device").get("brand").get("id"), scopedBrandId) : cb.conjunction())))
-            .checkedInToday(bookingRepository.count((root, query, cb) -> cb.and(
-                cb.equal(root.get("appointmentDate"), today),
-                cb.equal(root.get("status"), BookingStatus.CHECKED_IN),
-                scopedBrandId != null ? cb.equal(root.get("device").get("brand").get("id"), scopedBrandId) : cb.conjunction())))
+                .bookingsToday(bookingRepository.count((root, query, cb) -> cb.and(
+                        cb.equal(root.get("appointmentDate"), today),
+                        scopedBrandId != null ? cb.equal(root.get("device").get("brand").get("id"), scopedBrandId)
+                                : cb.conjunction(),
+                        cb.not(root.get("status").in(BookingStatus.CANCELLED, BookingStatus.EXPIRED)))))
+                .pendingBookings(bookingRepository.count((root, query, cb) -> cb.and(
+                        cb.equal(root.get("appointmentDate"), today),
+                        cb.equal(root.get("status"), BookingStatus.PENDING_CONFIRM),
+                        scopedBrandId != null ? cb.equal(root.get("device").get("brand").get("id"), scopedBrandId)
+                                : cb.conjunction())))
+                .checkedInToday(bookingRepository.count((root, query, cb) -> cb.and(
+                        cb.equal(root.get("appointmentDate"), today),
+                        cb.equal(root.get("status"), BookingStatus.CHECKED_IN),
+                        scopedBrandId != null ? cb.equal(root.get("device").get("brand").get("id"), scopedBrandId)
+                                : cb.conjunction())))
                 .pendingOrders(pendingOrders)
-            .lowStockDevices(deviceRepository.count((root, query, cb) -> cb.and(
-                cb.isNull(root.get("deletedAt")),
-                scopedBrandId != null ? cb.equal(root.get("brand").get("id"), scopedBrandId) : cb.conjunction(),
-                cb.notEqual(root.get("status"), DeviceStatus.INACTIVE),
-                cb.lessThanOrEqualTo(root.get("stock"), LOW_STOCK_THRESHOLD))))
-            .maintenanceDevices(deviceRepository.count((root, query, cb) -> cb.and(
-                cb.isNull(root.get("deletedAt")),
-                scopedBrandId != null ? cb.equal(root.get("brand").get("id"), scopedBrandId) : cb.conjunction(),
-                cb.equal(root.get("status"), DeviceStatus.MAINTENANCE))))
-            .vouchersExpiringSoon(voucherRepository.count((root, query, cb) -> cb.and(
-                cb.equal(root.get("status"), com.carevia.shared.constant.VoucherStatus.ACTIVE),
-                cb.between(root.get("endDate"), now, voucherThreshold),
-                scopedBrandId != null ? cb.equal(root.get("applicableDevice").get("brand").get("id"), scopedBrandId) : cb.conjunction())))
+                .lowStockDevices(deviceRepository.count((root, query, cb) -> cb.and(
+                        cb.isNull(root.get("deletedAt")),
+                        scopedBrandId != null ? cb.equal(root.get("brand").get("id"), scopedBrandId) : cb.conjunction(),
+                        cb.notEqual(root.get("status"), DeviceStatus.INACTIVE),
+                        cb.lessThanOrEqualTo(root.get("stock"), LOW_STOCK_THRESHOLD))))
+                .maintenanceDevices(deviceRepository.count((root, query, cb) -> cb.and(
+                        cb.isNull(root.get("deletedAt")),
+                        scopedBrandId != null ? cb.equal(root.get("brand").get("id"), scopedBrandId) : cb.conjunction(),
+                        cb.equal(root.get("status"), DeviceStatus.MAINTENANCE))))
+                .vouchersExpiringSoon(voucherRepository.count((root, query, cb) -> cb.and(
+                        cb.equal(root.get("status"), com.carevia.shared.constant.VoucherStatus.ACTIVE),
+                        cb.between(root.get("endDate"), now, voucherThreshold),
+                        scopedBrandId != null
+                                ? cb.equal(root.get("applicableDevice").get("brand").get("id"), scopedBrandId)
+                                : cb.conjunction())))
                 .lowStockAlerts(lowStockAlerts)
                 .maintenanceAlerts(maintenanceAlerts)
                 .voucherAlerts(voucherAlerts)
+                .totalRevenue(totalRevenue)
+                .revenueChangePercentage(revenueChangePercentage)
                 .build();
     }
 

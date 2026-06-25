@@ -71,10 +71,10 @@ export interface Order {
   paymentMethod: string;
   paymentTransactionId: string; // Đây là trường quan trọng từ DB của bạn
   // Các trường ảo (Alias) để không bị lỗi UI cũ
-  paidAt?: string; 
+  paidAt?: string;
   paymentIntentId?: string;
   stripeSessionId?: string;
-  
+
   voucherCode: string;
   shippingAddress: string;
   shippingCity: string;
@@ -131,20 +131,20 @@ const normalizeOrder = (o: any): Order => ({
   _id: String(o.id || ""),
   userId: Number(o.accountId || 0),
   total: o.totalAmount || 0,
-  
+
   // Ép kiểu các Enum/String
   status: o.status as OrderStatus,
   paymentStatus: o.paymentStatus as PaymentStatus,
-  
+
   // Ánh xạ các trường từ DB
   paymentIntentId: o.paymentTransactionId,
   stripeSessionId: o.paymentTransactionId,
-  
+
   paidAt: (o.status === 'PAID' || o.paymentStatus === 'SUCCESS') ? o.updatedAt : undefined,
-  
+
   createdAt: o.createdAt || new Date().toISOString(),
   updatedAt: o.updatedAt || o.createdAt || new Date().toISOString(),
-  
+
   items: (o.items || []).map((item: any) => ({
     ...item,
     productId: String(item.deviceId || ""),
@@ -161,7 +161,7 @@ const normalizeOrder = (o: any): Order => ({
 export const createOrderFromCart = async (
   _token: string,
   cartItems: CartItem[],
-  shippingAddress: ShippingAddress
+  shippingAddress: ShippingAddress & { voucherCode?: string } // 🌟 Thêm kiểu giao thoa để chấp nhận voucherCode tại đây
 ): Promise<CreateOrderResponse> => {
   try {
     const res = await apiClient.post("/orders", {
@@ -171,6 +171,7 @@ export const createOrderFromCart = async (
       shippingCountry: "",
       shippingPostalCode: "",
       paymentMethod: "ZALOPAY",
+      voucherCode: shippingAddress.voucherCode || "", // 🌟 GỬI MÃ VOUCHER LÊN BACKEND BODY TẠI ĐÂY
     }, { headers: authHeaders() });
     return { success: true, order: normalizeOrder(res.data) };
   } catch (error: unknown) {

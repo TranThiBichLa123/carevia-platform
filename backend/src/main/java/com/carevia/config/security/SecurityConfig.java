@@ -100,6 +100,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/auth/**").permitAll()
                         .requestMatchers("/api/v1/recommendations/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/devices/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/vouchers/device/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/system-settings/**").permitAll()
                         .requestMatchers("/api/v1/payments/zalopay/callback").permitAll()
 

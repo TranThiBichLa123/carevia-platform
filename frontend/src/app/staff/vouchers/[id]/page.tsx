@@ -150,8 +150,10 @@ export default function StaffVoucherDetailPage() {
 						<div className="space-y-1">
 							<p className="text-[13px] font-medium text-gray-500 font-vietnam">Mức giảm doanh thu</p>
 							<h3 className="text-2xl font-black tracking-tight text-gray-900">
-								{voucher.voucherType === "PERCENTAGE" ? `${voucher.discountValue}%` : formatCurrency(voucher.discountValue)}
-							</h3>
+								{voucher.voucherType === "PERCENTAGE"
+									? `${Number(voucher.discountValue)}%`
+									: formatCurrency(Math.round(voucher.discountValue))
+								}							</h3>
 							<p className="text-[11px] text-muted-foreground font-vietnam">
 								Đơn tối thiểu: <span className="text-gray-700 font-semibold">{voucher.minOrderValue ? formatCurrency(voucher.minOrderValue) : "0 đ"}</span>
 							</p>

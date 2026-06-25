@@ -2,10 +2,12 @@ import BackToHome from "@/components/common/buttons/BackToHome";
 import Container from "@/components/common/Container";
 import PriceFormatter from "@/components/common/PriceFormatter";
 import ProductActions from "@/components/pages/product/ProductActions";
+import ProductVouchers from "@/components/pages/product/ProductVoucher";
 import { deviceApi } from "@/lib/deviceApi";
 import { mapDeviceToProduct } from "@/lib/mappers";
 import { formatDiscountPercentage } from "@/lib/utils";
 import { Product } from "@/types_enum/devices";
+import { cookies } from "next/headers";
 import {
   Share2,
   Star,
@@ -50,13 +52,23 @@ const ProductDetails = async ({
 }) => {
   const { id } = await params;
   let product: Product | undefined;
-  try {
-    const deviceData = await deviceApi.getById(id);
-    product = mapDeviceToProduct(deviceData);
-  } catch (error) {
-    console.log("Failed to fetch device:", id, error);
-  }
+  let vouchers: any[] = [];
 
+  try {
+    // Gọi đồng thời cả 2 API để tối ưu tốc độ tải trang
+    const cookieStore = await cookies();
+    const token = cookieStore.get("auth_token")?.value;
+
+    const [deviceData, voucherData] = await Promise.all([
+      deviceApi.getById(id),
+      deviceApi.getVouchersByDeviceId(id) // 🌟 Giờ đã có thể gọi trực tiếp an tâm
+    ]);
+
+    product = mapDeviceToProduct(deviceData);
+    vouchers = voucherData || [];
+  } catch (error) {
+    console.log("Failed to fetch device or vouchers:", id, error);
+  }
   if (!product) {
     return (
       <div className="min-h-[50vh] flex flex-col gap-4 items-center justify-center p-10 text-center">
@@ -77,18 +89,15 @@ const ProductDetails = async ({
 
   return (
     <div className=" bg-white ">
-
       <Container>
         {/* Breadcrumb */}
         <div className="my-4">
           <PageBreadcrumb
             items={[{ label: "Tất cả sản phẩm", href: "/client/devices" }]}
             currentPage={product.name}
-
           />
         </div>
         <div className=" mx-auto bg-white rounded-2xl shadow-xl font-vietnam overflow-hidden border border-border">
-
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8 p-6 md:p-8">
 
             {/* Left: Image Section */}
@@ -103,25 +112,21 @@ const ProductDetails = async ({
               </div>
 
               <div className="flex items-center justify-between text-sm text-muted-foreground">
-
                 <button className="flex items-center gap-2 hover:text-primary hoverEffect">
                   <Heart size={18} />
                   <span>
                     Yêu thích ({product.wishlistCount > 999
                       ? `${(product.wishlistCount / 1000).toFixed(1)}k`
                       : product.wishlistCount})
-                  </span>                </button>
+                  </span>
+                </button>
               </div>
             </div>
 
             {/* Right: Product Info */}
             <div className="space-y-6">
-
               {/* Product Name */}
               <div>
-                {/* <span className="inline-block bg-primary text-white text-xs font-bold px-3 py-1 rounded-md mb-3 shadow-sm">
-                  YÊU THÍCH
-                </span> */}
                 <FavoriteBadge productId={product.id} />
                 <h1 className="text-2xl md:text-3xl font-bold text-foreground leading-tight">
                   {product.name}
@@ -170,8 +175,10 @@ const ProductDetails = async ({
                   )}
                 </div>
               </div>
+              {/* Voucher section */}
+              <ProductVouchers vouchers={vouchers} />
 
-              {/* Vouchers */}
+              {/* Điểm nổi bật */}
               <div className="space-y-3">
                 <p className="text-sm font-medium text-muted-foreground">Điểm nổi bật</p>
                 <div className="flex flex-wrap gap-2">
@@ -205,7 +212,7 @@ const ProductDetails = async ({
                   </div>
                   <p className="mt-2 text-sm text-muted-foreground font-vietnam">
                     {product.warranty.period > 0
-                    ? `${product.warranty.period} tháng`
+                      ? `${product.warranty.period} tháng`
                       : "Liên hệ tư vấn"}
                   </p>
                 </div>
@@ -244,7 +251,6 @@ const ProductDetails = async ({
           <ProductDescription product={product} />
         </div>
         <PersonalizedRecommendationShelf currentDeviceId={id} currentDeviceName={product.name} />
-
 
       </Container>
     </div >

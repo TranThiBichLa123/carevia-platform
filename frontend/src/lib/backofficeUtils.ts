@@ -25,8 +25,16 @@ export const formatTime = (value: string) => value.slice(0, 5);
 
 export const getTodayInputValue = () => new Date().toISOString().slice(0, 10);
 
-export const toIsoDateTime = (value: string) => new Date(value).toISOString();
-
+// Định dạng chuẩn chỉnh gửi lên không lo lệch 7 tiếng
+export const toIsoDateTime = (value: string, isEndDate = false) => {
+  const date = new Date(value);
+  if (isEndDate) {
+    date.setHours(23, 59, 59, 999);
+  } else {
+    date.setHours(0, 0, 0, 0);
+  }
+  return date.toISOString();
+};
 export const getBackofficeErrorMessage = (
   error: unknown,
   fallback: string
