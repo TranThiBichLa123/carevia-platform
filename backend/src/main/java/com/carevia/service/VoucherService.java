@@ -79,8 +79,11 @@ public class VoucherService {
     }
 
     public List<VoucherResponse> getActiveVouchers() {
-        return voucherRepository.findByStatus(VoucherStatus.ACTIVE).stream()
-                .map(this::toResponse).collect(Collectors.toList());
+        // Chỉ lấy các voucher có trạng thái ACTIVE và ngày kết thúc sau thời điểm hiện
+        // tại
+        return voucherRepository.findByStatusAndEndDateAfter(VoucherStatus.ACTIVE, Instant.now()).stream()
+                .map(this::toResponse)
+                .collect(Collectors.toList());
     }
 
     public VoucherResponse getVoucherByCode(String code) {
@@ -94,7 +97,18 @@ public class VoucherService {
         Voucher voucher = voucherRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Voucher not found"));
         staffBrandAccessService.requireManageableVoucher(voucher);
-        voucher.setStatus(VoucherStatus.valueOf(status));
+
+        VoucherStatus nextStatus = VoucherStatus.valueOf(status);
+
+        // Nếu staff bấm kích hoạt lại (ACTIVE), phải kiểm tra xem voucher đã quá hạn
+        // hay chưa
+        if (nextStatus == VoucherStatus.ACTIVE && voucher.getEndDate() != null
+                && voucher.getEndDate().isBefore(Instant.now())) {
+            throw new InvalidRequestException(
+                    "Không thể kích hoạt voucher đã quá hạn! Vui lòng gia hạn ngày kết thúc trước.");
+        }
+
+        voucher.setStatus(nextStatus);
         return toResponse(voucherRepository.save(voucher));
     }
 
@@ -136,8 +150,16 @@ public class VoucherService {
     }
 
     public List<VoucherResponse> getVouchersForDevice(Long deviceId) {
-        return voucherRepository.findByApplicableDeviceId(deviceId).stream()
-                .filter(Voucher::isValid)
+        deviceRepository.findById(deviceId)
+                .orElseThrow(() -> new ResourceNotFoundException("Device not found"));
+
+        Instant now = Instant.now(); // Lấy thời gian hiện tại
+
+        return voucherRepository.findAll().stream()
+                .filter(voucher -> voucher.getApplicableDevice() == null
+                        || voucher.getApplicableDevice().getId().equals(deviceId))
+                // Sửa điều kiện lọc: Phải ACTIVE và ngày kết thúc phải sau thời điểm hiện tại
+                .filter(voucher -> voucher.getStatus() == VoucherStatus.ACTIVE && voucher.getEndDate().isAfter(now))
                 .map(this::toResponse)
                 .collect(Collectors.toList());
     }
@@ -159,6 +181,7 @@ public class VoucherService {
                 .status(v.getStatus())
                 .applicableDeviceId(v.getApplicableDevice() != null ? v.getApplicableDevice().getId() : null)
                 .applicableDeviceName(v.getApplicableDevice() != null ? v.getApplicableDevice().getName() : null)
+                .applicableDeviceImage(v.getApplicableDevice() != null ? v.getApplicableDevice().getImage() : null)
                 .applicableCategoryId(v.getApplicableCategoryId())
                 .createdAt(v.getCreatedAt())
                 .build();

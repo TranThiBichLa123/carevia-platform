@@ -15,16 +15,23 @@ import java.util.Optional;
 @Repository
 public interface VoucherRepository extends JpaRepository<Voucher, Long>, JpaSpecificationExecutor<Voucher> {
     Optional<Voucher> findByCode(String code);
+
     List<Voucher> findByStatus(VoucherStatus status);
+
     boolean existsByCode(String code);
+
     List<Voucher> findByApplicableDeviceId(Long deviceId);
 
-        @org.springframework.data.jpa.repository.Query("SELECT COUNT(v) FROM Voucher v WHERE v.status = com.carevia.shared.constant.VoucherStatus.ACTIVE AND v.endDate BETWEEN :now AND :threshold")
-        long countExpiringBetween(@org.springframework.data.repository.query.Param("now") Instant now,
+    @org.springframework.data.jpa.repository.Query("SELECT COUNT(v) FROM Voucher v WHERE v.status = com.carevia.shared.constant.VoucherStatus.ACTIVE AND v.endDate BETWEEN :now AND :threshold")
+    long countExpiringBetween(@org.springframework.data.repository.query.Param("now") Instant now,
             @org.springframework.data.repository.query.Param("threshold") Instant threshold);
 
-        @org.springframework.data.jpa.repository.Query("SELECT v FROM Voucher v WHERE v.status = com.carevia.shared.constant.VoucherStatus.ACTIVE AND v.endDate BETWEEN :now AND :threshold ORDER BY v.endDate ASC")
-        List<Voucher> findExpiringBetween(@org.springframework.data.repository.query.Param("now") Instant now,
+    @org.springframework.data.jpa.repository.Query("SELECT v FROM Voucher v WHERE v.status = com.carevia.shared.constant.VoucherStatus.ACTIVE AND v.endDate BETWEEN :now AND :threshold ORDER BY v.endDate ASC")
+    List<Voucher> findExpiringBetween(@org.springframework.data.repository.query.Param("now") Instant now,
             @org.springframework.data.repository.query.Param("threshold") Instant threshold,
             Pageable pageable);
+
+    // Tìm các voucher đang active và chưa quá hạn (endDate >= thời gian hiện tại)
+    List<Voucher> findByStatusAndEndDateAfter(VoucherStatus status, Instant now);
+
 }

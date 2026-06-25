@@ -209,13 +209,26 @@ export default function StaffVoucherDetailPage() {
 							<p className="text-xs font-semibold text-slate-400 uppercase tracking-wider font-vietnam">Thiết bị / Danh mục chỉ định</p>
 							<div className="font-semibold text-sm text-gray-800 font-vietnam leading-snug pt-0.5">
 								{voucher.applicableDeviceName ? (
-									<span className="text-staff-primary flex items-center gap-1">
-										🎛️ {voucher.applicableDeviceName}
-									</span>
+									<div className="flex items-center gap-2.5 mt-1 p-1.5 bg-slate-50/80 rounded-lg border border-slate-100 w-fit max-w-full">
+										{/* Khung cố định kích thước cho ảnh */}
+										<div className="w-8 h-8 rounded-md overflow-hidden border border-slate-200 bg-white shrink-0 flex items-center justify-center">
+											<img
+												src={voucher.applicableDeviceImage || "/placeholder-device.png"}
+												alt={voucher.applicableDeviceName}
+												className="w-full h-full object-contain"
+												onError={(e) => {
+													(e.target as HTMLImageElement).src = "/placeholder-device.png";
+												}}
+											/>
+										</div>
+										<span className="text-staff-primary font-semibold font-vietnam text-xs truncate pr-1">
+											{voucher.applicableDeviceName}
+										</span>
+									</div>
 								) : voucher.applicableCategoryId ? (
-									<span className="text-indigo-600">📦 Áp dụng riêng cho ID Danh mục #{voucher.applicableCategoryId}</span>
+									<span className="text-indigo-600 block mt-1">📦 Áp dụng riêng cho ID Danh mục #{voucher.applicableCategoryId}</span>
 								) : (
-									<span className="text-emerald-600">🌍 Toàn bộ thiết bị chăm sóc da trên toàn hệ thống</span>
+									<span className="text-emerald-600 block mt-1">🌍 Toàn bộ thiết bị chăm sóc da trên toàn hệ thống</span>
 								)}
 							</div>
 							{voucher.maxDiscount && voucher.voucherType === "PERCENTAGE" && (

@@ -378,7 +378,7 @@ export default function ProductDescription({ product }: ProductDescriptionProps)
                     <span className="text-muted-foreground font-medium">Bảo hành</span>
                     <span className="col-span-2 text-foreground font-medium">
                       {product.warranty.period > 0 ? `${product.warranty.period} tháng` : 'Liên hệ tư vấn'}
-                      {product.warranty.policy ? ` â€” ${product.warranty.policy}` : ''}
+                    {product.warranty.policy ? ` - ${product.warranty.policy}` : ''}
                     </span>
                   </div>
                 )}

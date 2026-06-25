@@ -30,6 +30,8 @@ public class VoucherResponse {
     private VoucherStatus status;
     private Long applicableDeviceId;
     private String applicableDeviceName;
+    private String applicableDeviceImage;
     private Long applicableCategoryId;
     private Instant createdAt;
+
 }

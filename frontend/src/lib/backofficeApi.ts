@@ -256,6 +256,7 @@ export type BackofficeVoucher = {
   status: BackofficeVoucherStatus;
   applicableDeviceId: number | null;
   applicableDeviceName: string | null;
+  applicableDeviceImage: string | null;
   applicableCategoryId: number | null;
   createdAt: string;
 };

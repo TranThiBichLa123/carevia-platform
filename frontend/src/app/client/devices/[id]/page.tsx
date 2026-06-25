@@ -203,9 +203,9 @@ const ProductDetails = async ({
                     <ShieldCheck size={16} className="text-primary" />
                     Bảo hành
                   </div>
-                  <p className="mt-2 text-sm text-muted-foreground">
+                  <p className="mt-2 text-sm text-muted-foreground font-vietnam">
                     {product.warranty.period > 0
-                      ? `${product.warranty.period} tháng`
+                    ? `${product.warranty.period} tháng`
                       : "Liên hệ tư vấn"}
                   </p>
                 </div>
