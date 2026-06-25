@@ -1,5 +1,6 @@
 package com.carevia.service;
 
+import com.carevia.core.domain.AuditLog;
 import com.carevia.service.storage.CloudinaryStorageService;
 import com.carevia.shared.dto.response.device.DeviceImageUploadResponse;
 import com.carevia.core.domain.Account;
@@ -7,6 +8,7 @@ import com.carevia.core.domain.Device;
 import com.carevia.core.domain.Order;
 import com.carevia.core.domain.Review;
 import com.carevia.core.repository.AccountRepository;
+import com.carevia.core.repository.AuditLogRepository;
 import com.carevia.core.repository.DeviceRepository;
 import com.carevia.core.repository.OrderRepository;
 import com.carevia.core.repository.ReviewRepository;
@@ -18,6 +20,10 @@ import com.carevia.shared.dto.response.review.ReviewEligibilityResponse;
 import com.carevia.shared.dto.response.review.ReviewResponse;
 import com.carevia.shared.exception.InvalidRequestException;
 import com.carevia.shared.exception.ResourceNotFoundException;
+import com.carevia.shared.util.SecurityUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import org.springframework.data.domain.PageRequest;
@@ -26,28 +32,46 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class ReviewService {
+
+        private static final Duration STAFF_REPLY_EDIT_WINDOW = Duration.ofMinutes(30);
+        private static final int STAFF_REPLY_MAX_EDITS = 2;
 
     private final ReviewRepository reviewRepository;
     private final DeviceRepository deviceRepository;
     private final AccountRepository accountRepository;
         private final OrderRepository orderRepository;
         private final CloudinaryStorageService cloudinaryStorageService;
+        private final StaffBrandAccessService staffBrandAccessService;
+        private final AuditLogRepository auditLogRepository;
+        private final ObjectMapper objectMapper;
 
     public ReviewService(ReviewRepository reviewRepository, DeviceRepository deviceRepository,
                         AccountRepository accountRepository, OrderRepository orderRepository,
-                        CloudinaryStorageService cloudinaryStorageService) {
+                        CloudinaryStorageService cloudinaryStorageService,
+                        StaffBrandAccessService staffBrandAccessService,
+                        AuditLogRepository auditLogRepository,
+                        ObjectMapper objectMapper) {
         this.reviewRepository = reviewRepository;
         this.deviceRepository = deviceRepository;
         this.accountRepository = accountRepository;
                 this.orderRepository = orderRepository;
                 this.cloudinaryStorageService = cloudinaryStorageService;
+                this.staffBrandAccessService = staffBrandAccessService;
+                this.auditLogRepository = auditLogRepository;
+                this.objectMapper = objectMapper;
     }
 
     public PageResponse<ReviewResponse> getReviewsByDevice(Long deviceId, Pageable pageable) {
@@ -169,8 +193,7 @@ public class ReviewService {
                                 .orElseThrow(() -> new ResourceNotFoundException("Review not found with id: " + reviewId));
 
                 if (request.getAdminReply() != null) {
-                        String trimmedReply = request.getAdminReply().trim();
-                        review.addAdminReply(trimmedReply.isEmpty() ? null : trimmedReply);
+                        applyReplyUpdate(review, request.getAdminReply(), false);
                 }
 
                 if (request.getHidden() != null) {
@@ -189,6 +212,143 @@ public class ReviewService {
                 return toAdminResponse(saved);
         }
 
+        @Transactional
+        public ReviewResponse replyToReviewAsStaff(Long reviewId, ModerateReviewRequest request) {
+                if (request.getHidden() != null) {
+                        throw new InvalidRequestException("Staff chỉ được cập nhật nội dung phản hồi công khai.");
+                }
+
+                if (request.getAdminReply() == null) {
+                        throw new InvalidRequestException("Nội dung phản hồi không được để trống.");
+                }
+
+                Review review = reviewRepository.findById(reviewId)
+                                .orElseThrow(() -> new ResourceNotFoundException("Review not found with id: " + reviewId));
+
+                staffBrandAccessService.requireManageableDevice(review.getDevice());
+
+                                String trimmedReply = normalizeReply(request.getAdminReply());
+                                if (trimmedReply == null) {
+                        throw new InvalidRequestException("Nội dung phản hồi không được để trống.");
+                }
+
+                                applyReplyUpdate(review, trimmedReply, true);
+                Review saved = reviewRepository.save(review);
+                return toResponse(saved);
+        }
+
+        private void applyReplyUpdate(Review review, String requestedReply, boolean enforceStaffLimits) {
+                String normalizedReply = normalizeReply(requestedReply);
+                String currentReply = normalizeReply(review.getAdminReply());
+                Instant now = Instant.now();
+
+                if (normalizedReply == null) {
+                        if (currentReply != null) {
+                                recordReplyAudit(review, currentReply, null, review.getAdminReplyEditCount(), review.getAdminReplyEditCount());
+                        }
+                        review.addAdminReply(null);
+                        review.setAdminReplyCreatedAt(null);
+                        review.setAdminReplyEditedAt(null);
+                        review.setAdminReplyEditCount(0);
+                        return;
+                }
+
+                if (currentReply == null) {
+                        review.addAdminReply(normalizedReply);
+                        review.setAdminReplyCreatedAt(now);
+                        review.setAdminReplyEditedAt(null);
+                        review.setAdminReplyEditCount(0);
+                        return;
+                }
+
+                if (currentReply.equals(normalizedReply)) {
+                        return;
+                }
+
+                int currentEditCount = review.getAdminReplyEditCount() != null ? review.getAdminReplyEditCount() : 0;
+                if (enforceStaffLimits) {
+                        Instant replyCreatedAt = review.getAdminReplyCreatedAt();
+                        if (replyCreatedAt == null) {
+                                throw new InvalidRequestException("Không xác định được thời điểm đăng phản hồi để chỉnh sửa.");
+                        }
+                        if (now.isAfter(replyCreatedAt.plus(STAFF_REPLY_EDIT_WINDOW))) {
+                                throw new InvalidRequestException("Phản hồi chỉ được chỉnh sửa trong vòng 30 phút kể từ khi đăng.");
+                        }
+                        if (currentEditCount >= STAFF_REPLY_MAX_EDITS) {
+                                throw new InvalidRequestException("Phản hồi chỉ được chỉnh sửa tối đa 2 lần.");
+                        }
+                }
+
+                int nextEditCount = currentEditCount + 1;
+                recordReplyAudit(review, currentReply, normalizedReply, currentEditCount, nextEditCount);
+                review.addAdminReply(normalizedReply);
+                review.setAdminReplyCreatedAt(review.getAdminReplyCreatedAt() != null ? review.getAdminReplyCreatedAt() : now);
+                review.setAdminReplyEditedAt(now);
+                review.setAdminReplyEditCount(nextEditCount);
+        }
+
+        private void recordReplyAudit(Review review, String oldReply, String newReply, Integer previousEditCount, Integer nextEditCount) {
+                Account actor = resolveCurrentActor();
+                if (actor == null) {
+                        return;
+                }
+
+                Map<String, Object> payload = new LinkedHashMap<>();
+                payload.put("reviewId", review.getId());
+                payload.put("deviceId", review.getDevice() != null ? review.getDevice().getId() : null);
+                payload.put("oldReply", oldReply);
+                payload.put("newReply", newReply);
+                payload.put("previousEditCount", previousEditCount != null ? previousEditCount : 0);
+                payload.put("nextEditCount", nextEditCount != null ? nextEditCount : 0);
+                payload.put("replyCreatedAt", review.getAdminReplyCreatedAt());
+                payload.put("replyEditedAt", Instant.now());
+
+                auditLogRepository.save(AuditLog.logUpdate(
+                                "review_reply",
+                                String.valueOf(review.getId()),
+                                toJson(payload),
+                                actor,
+                                resolveIpAddress()));
+        }
+
+        private Account resolveCurrentActor() {
+                return SecurityUtils.getCurrentUserId()
+                                .flatMap(accountRepository::findById)
+                                .orElse(null);
+        }
+
+        private String resolveIpAddress() {
+                ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+                if (attributes == null) {
+                        return null;
+                }
+
+                HttpServletRequest request = attributes.getRequest();
+                String forwardedFor = request.getHeader("X-Forwarded-For");
+                if (forwardedFor != null && !forwardedFor.isBlank()) {
+                        return forwardedFor.split(",")[0].trim();
+                }
+
+                return request.getRemoteAddr();
+        }
+
+        private String toJson(Map<String, Object> payload) {
+                try {
+                        return objectMapper.writeValueAsString(payload);
+                } catch (JsonProcessingException exception) {
+                        return "{\"serializationError\":\"" + exception.getMessage().replace("\"", "'") + "\"}";
+                }
+        }
+
+        private String normalizeReply(String reply) {
+                if (reply == null) {
+                        return null;
+                }
+
+                String trimmedReply = reply.trim();
+                return trimmedReply.isEmpty() ? null : trimmedReply;
+        }
+
     private ReviewResponse toResponse(Review r) {
         return ReviewResponse.builder()
                 .id(r.getId())
@@ -204,6 +364,10 @@ public class ReviewService {
                 .comment(r.getComment())
                 .isVerifiedPurchase(r.getIsVerifiedPurchase())
                 .adminReply(r.getAdminReply())
+                .adminReplyCreatedAt(r.getAdminReplyCreatedAt())
+                .adminReplyEditedAt(r.getAdminReplyEditedAt())
+                .adminReplyEditCount(r.getAdminReplyEditCount() != null ? r.getAdminReplyEditCount() : 0)
+                .adminReplyEdited((r.getAdminReplyEditCount() != null ? r.getAdminReplyEditCount() : 0) > 0)
                 .createdAt(r.getCreatedAt())
                 .build();
     }
@@ -225,6 +389,10 @@ public class ReviewService {
                                 .comment(review.getComment())
                                 .isVerifiedPurchase(review.getIsVerifiedPurchase())
                                 .adminReply(review.getAdminReply())
+                                .adminReplyCreatedAt(review.getAdminReplyCreatedAt())
+                                .adminReplyEditedAt(review.getAdminReplyEditedAt())
+                                .adminReplyEditCount(review.getAdminReplyEditCount() != null ? review.getAdminReplyEditCount() : 0)
+                                .adminReplyEdited((review.getAdminReplyEditCount() != null ? review.getAdminReplyEditCount() : 0) > 0)
                                 .isHidden(review.getIsHidden())
                                 .createdAt(review.getCreatedAt())
                                 .updatedAt(review.getUpdatedAt())

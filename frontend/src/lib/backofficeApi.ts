@@ -1,4 +1,5 @@
 import apiClient from "@/services/apiClient";
+import type { ReviewData } from "@/lib/deviceApi";
 
 export type BackofficePageResponse<T> = {
   items: T[];
@@ -327,6 +328,10 @@ export type AdminReview = {
   comment: string | null;
   isVerifiedPurchase: boolean;
   adminReply: string | null;
+  adminReplyCreatedAt: string | null;
+  adminReplyEditedAt: string | null;
+  adminReplyEditCount: number;
+  adminReplyEdited: boolean;
   isHidden: boolean;
   createdAt: string;
   updatedAt: string;
@@ -891,6 +896,18 @@ export const backofficeApi = {
     }
   ): Promise<AdminReview> {
     const res = await apiClient.patch(`/admin/reviews/${reviewId}`, payload, {
+      headers: authHeaders(),
+    });
+    return res.data;
+  },
+
+  async replyToStaffReview(
+    reviewId: number,
+    payload: {
+      adminReply: string;
+    }
+  ): Promise<ReviewData> {
+    const res = await apiClient.patch(`/staff/reviews/${reviewId}`, payload, {
       headers: authHeaders(),
     });
     return res.data;

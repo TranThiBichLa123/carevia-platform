@@ -24,6 +24,10 @@ public class AdminReviewResponse {
     private String comment;
     private Boolean isVerifiedPurchase;
     private String adminReply;
+    private Instant adminReplyCreatedAt;
+    private Instant adminReplyEditedAt;
+    private Integer adminReplyEditCount;
+    private Boolean adminReplyEdited;
     private Boolean isHidden;
     private Instant createdAt;
     private Instant updatedAt;

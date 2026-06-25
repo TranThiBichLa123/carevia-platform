@@ -22,6 +22,16 @@ import {
 	Wrench,
 } from "lucide-react";
 import { toast } from "sonner";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import {
@@ -74,6 +84,7 @@ import {
 
 type DeviceFilter = "ALL" | StaffDeviceStatus;
 type DeviceDialogMode = "create" | "edit";
+type MaintenanceDialogMode = "start" | "complete";
 
 const DEVICE_STATUS_OPTIONS: Array<{ value: DeviceFilter; label: string }> = [
 	{ value: "ALL", label: "Tất cả trạng thái" },
@@ -89,6 +100,24 @@ const TRANSACTION_LABELS: Record<InventoryTransactionType, string> = {
 	AUDIT_ADJUSTMENT: "Kiểm kê",
 };
 
+const INVENTORY_DIALOG_META: Record<InventoryTransactionType, { title: string; description: string; icon: typeof ArrowDownToLine }> = {
+	IMPORT: {
+		title: "Nhập số lượng vào kho",
+		description: "Ghi nhận lô hàng mới hoặc bổ sung thêm số lượng khả dụng cho thiết bị.",
+		icon: ArrowDownToLine,
+	},
+	EXPORT: {
+		title: "Xuất số lượng khỏi kho",
+		description: "Dùng khi bàn giao hàng, điều chuyển nội bộ hoặc trừ số lượng thực tế đã xuất.",
+		icon: ArrowUpFromLine,
+	},
+	AUDIT_ADJUSTMENT: {
+		title: "Cập nhật kiểm kê thực tế",
+		description: "Đồng bộ tồn kho theo số lượng kiểm kê cuối ngày hoặc sau rà soát chênh lệch.",
+		icon: ClipboardCheck,
+	},
+};
+
 const EMPTY_DEVICE_FORM = {
 	name: "",
 	description: "",
@@ -101,6 +130,25 @@ const EMPTY_DEVICE_FORM = {
 	sku: "",
 	image: "",
 	imagePublicId: "",
+};
+
+const EMPTY_INVENTORY_DIALOG = {
+	open: false,
+	device: null as StaffDevice | null,
+	transactionType: "IMPORT" as InventoryTransactionType,
+	quantity: "1",
+	reason: "",
+	note: "",
+};
+
+const EMPTY_MAINTENANCE_DIALOG = {
+	open: false,
+	device: null as StaffDevice | null,
+	mode: "start" as MaintenanceDialogMode,
+	reason: "",
+	expectedEndDate: "",
+	completedDate: new Date().toISOString().slice(0, 10),
+	cost: "",
 };
 
 export default function StaffInventoryPage() {
@@ -130,6 +178,9 @@ export default function StaffInventoryPage() {
 	const [savingDevice, setSavingDevice] = useState(false);
 	const [voucherLoading, setVoucherLoading] = useState(false);
 	const [voucherSelection, setVoucherSelection] = useState("NONE");
+	const [inventoryDialog, setInventoryDialog] = useState(EMPTY_INVENTORY_DIALOG);
+	const [maintenanceDialog, setMaintenanceDialog] = useState(EMPTY_MAINTENANCE_DIALOG);
+	const [deleteDialogDevice, setDeleteDialogDevice] = useState<StaffDevice | null>(null);
 
 	const loadDevices = useCallback(async () => {
 		try {
@@ -217,42 +268,51 @@ export default function StaffInventoryPage() {
 		);
 	}, [editingDevice, vouchers]);
 
-	const requestInventoryAdjustment = async (
-		deviceId: number,
-		transactionType: InventoryTransactionType
-	) => {
-		const quantityLabel =
-			transactionType === "AUDIT_ADJUSTMENT"
-				? "Nhập số lượng tồn kho thực tế sau kiểm kê"
-				: `Nhập số lượng cho thao tác ${TRANSACTION_LABELS[transactionType].toLowerCase()}`;
-		const quantityRaw = window.prompt(quantityLabel, transactionType === "AUDIT_ADJUSTMENT" ? "0" : "1");
-		if (quantityRaw === null) {
+	const openInventoryAdjustmentDialog = (device: StaffDevice, transactionType: InventoryTransactionType) => {
+		setInventoryDialog({
+			open: true,
+			device,
+			transactionType,
+			quantity: transactionType === "AUDIT_ADJUSTMENT" ? String(device.stock ?? 0) : "1",
+			reason: "",
+			note: "",
+		});
+	};
+
+	const closeInventoryAdjustmentDialog = () => {
+		if (inventoryDialog.device && actionDeviceId === inventoryDialog.device.id) {
+			return;
+		}
+		setInventoryDialog(EMPTY_INVENTORY_DIALOG);
+	};
+
+	const submitInventoryAdjustment = async () => {
+		if (!inventoryDialog.device) {
 			return;
 		}
 
-		const quantity = Number(quantityRaw);
+		const quantity = Number(inventoryDialog.quantity);
 		if (!Number.isFinite(quantity) || quantity < 0 || !Number.isInteger(quantity)) {
 			toast.error("Số lượng phải là số nguyên không âm.");
 			return;
 		}
 
-		const reason = window.prompt("Nhập lý do của giao dịch kho", "");
-		if (!reason || !reason.trim()) {
+		const reason = inventoryDialog.reason.trim();
+		if (!reason) {
 			toast.error("Cần nhập lý do cho giao dịch kho.");
 			return;
 		}
 
-		const note = window.prompt("Ghi chú bổ sung (có thể bỏ trống)", "") ?? undefined;
-
 		try {
-			setActionDeviceId(deviceId);
-			await backofficeApi.adjustStaffInventory(deviceId, {
-				transactionType,
+			setActionDeviceId(inventoryDialog.device.id);
+			await backofficeApi.adjustStaffInventory(inventoryDialog.device.id, {
+				transactionType: inventoryDialog.transactionType,
 				quantity,
-				reason: reason.trim(),
-				note: note?.trim() || undefined,
+				reason,
+				note: inventoryDialog.note.trim() || undefined,
 			});
-			toast.success(`Đã cập nhật ${TRANSACTION_LABELS[transactionType].toLowerCase()} thành công.`);
+			toast.success(`Đã cập nhật ${TRANSACTION_LABELS[inventoryDialog.transactionType].toLowerCase()} thành công.`);
+			setInventoryDialog(EMPTY_INVENTORY_DIALOG);
 			await Promise.all([loadDevices(), loadTransactions()]);
 		} catch (error) {
 			toast.error(getBackofficeErrorMessage(error, "Không thể cập nhật tồn kho."));
@@ -261,52 +321,66 @@ export default function StaffInventoryPage() {
 		}
 	};
 
-	const handleMaintenance = async (device: StaffDevice) => {
+	const openMaintenanceDialog = (device: StaffDevice) => {
+		const isCompleting = device.status === "MAINTENANCE";
+		setMaintenanceDialog({
+			open: true,
+			device,
+			mode: isCompleting ? "complete" : "start",
+			reason: device.maintenanceReason || "",
+			expectedEndDate: device.maintenanceEndDate || "",
+			completedDate: new Date().toISOString().slice(0, 10),
+			cost: device.maintenanceCost != null ? String(device.maintenanceCost) : "",
+		});
+	};
+
+	const closeMaintenanceDialog = () => {
+		if (maintenanceDialog.device && actionDeviceId === maintenanceDialog.device.id) {
+			return;
+		}
+		setMaintenanceDialog(EMPTY_MAINTENANCE_DIALOG);
+	};
+
+	const submitMaintenanceDialog = async () => {
+		if (!maintenanceDialog.device) {
+			return;
+		}
+
+		const normalizedCost = maintenanceDialog.cost.trim();
+		const cost = normalizedCost ? Number(normalizedCost) : undefined;
+		if (normalizedCost && (!Number.isFinite(cost) || (cost ?? 0) < 0)) {
+			toast.error("Chi phí bảo trì phải là số không âm.");
+			return;
+		}
+
 		try {
-			setActionDeviceId(device.id);
+			setActionDeviceId(maintenanceDialog.device.id);
 
-			if (device.status === "MAINTENANCE") {
-				const endDate = window.prompt(
-					"Ngày hoàn tất bảo trì (YYYY-MM-DD, bỏ trống để dùng hôm nay)",
-					new Date().toISOString().slice(0, 10)
-				);
-				if (endDate === null) {
-					setActionDeviceId(null);
-					return;
-				}
-
-				const costRaw = window.prompt(
-					"Chi phí bảo trì (có thể bỏ trống)",
-					device.maintenanceCost?.toString() || ""
-				);
-
-				await backofficeApi.updateStaffDeviceMaintenance(device.id, {
+			if (maintenanceDialog.mode === "complete") {
+				await backofficeApi.updateStaffDeviceMaintenance(maintenanceDialog.device.id, {
 					markCompleted: true,
-					maintenanceEndDate: endDate || undefined,
-					maintenanceCost: costRaw ? Number(costRaw) : undefined,
+					maintenanceEndDate: maintenanceDialog.completedDate || undefined,
+					maintenanceCost: cost,
 				});
 				toast.success("Đã hoàn tất bảo trì thiết bị.");
 			} else {
-				const reason = window.prompt("Nhập lý do bảo trì", device.maintenanceReason || "");
-				if (!reason || !reason.trim()) {
+				const reason = maintenanceDialog.reason.trim();
+				if (!reason) {
 					toast.error("Cần nhập lý do bảo trì.");
-					setActionDeviceId(null);
 					return;
 				}
 
-				const expectedEndDate = window.prompt("Ngày dự kiến hoàn tất (YYYY-MM-DD, có thể bỏ trống)", "") ?? undefined;
-				const costRaw = window.prompt("Chi phí dự kiến (có thể bỏ trống)", "") ?? undefined;
-
-				await backofficeApi.updateStaffDeviceMaintenance(device.id, {
-					maintenanceReason: reason.trim(),
+				await backofficeApi.updateStaffDeviceMaintenance(maintenanceDialog.device.id, {
+					maintenanceReason: reason,
 					maintenanceStartDate: new Date().toISOString().slice(0, 10),
-					maintenanceEndDate: expectedEndDate || undefined,
-					maintenanceCost: costRaw ? Number(costRaw) : undefined,
+					maintenanceEndDate: maintenanceDialog.expectedEndDate || undefined,
+					maintenanceCost: cost,
 					markCompleted: false,
 				});
 				toast.success("Đã đưa thiết bị vào bảo trì.");
 			}
 
+			setMaintenanceDialog(EMPTY_MAINTENANCE_DIALOG);
 			await loadDevices();
 		} catch (error) {
 			toast.error(getBackofficeErrorMessage(error, "Không thể cập nhật trạng thái bảo trì."));
@@ -472,19 +546,24 @@ export default function StaffInventoryPage() {
 		}
 	};
 
-	const handleDeleteDevice = async (device: StaffDevice) => {
-		if (!window.confirm(`Xác nhận chuyển thiết bị \"${device.name}\" sang trạng thái ngừng hoạt động?`)) {
+	const handleDeleteDevice = (device: StaffDevice) => {
+		setDeleteDialogDevice(device);
+	};
+
+	const confirmDeleteDevice = async () => {
+		if (!deleteDialogDevice) {
 			return;
 		}
 
 		try {
-			setActionDeviceId(device.id);
-			await backofficeApi.deleteStaffDevice(device.id);
+			setActionDeviceId(deleteDialogDevice.id);
+			await backofficeApi.deleteStaffDevice(deleteDialogDevice.id);
 			toast.success("Đã soft delete thiết bị.");
-			if (editingDevice?.id === device.id) {
+			if (editingDevice?.id === deleteDialogDevice.id) {
 				setDeviceDialogOpen(false);
 				resetDeviceForm();
 			}
+			setDeleteDialogDevice(null);
 			await loadDevices();
 		} catch (error) {
 			toast.error(getBackofficeErrorMessage(error, "Không thể xóa thiết bị."));
@@ -668,7 +747,7 @@ export default function StaffInventoryPage() {
 														alt={deviceForm.name || "Device preview"}
 														fill
 														sizes="160px"
-														className="object-cover"
+														className="object-contain p-2"
 													/>
 												) : (
 													<div className="flex h-full flex-col items-center justify-center gap-1.5 p-2 text-center text-xs text-muted-foreground">
@@ -764,7 +843,7 @@ export default function StaffInventoryPage() {
 										<>
 											{/* Khối 1: Danh sách voucher đang liên kết */}
 											<div className="space-y-1.5">
-												<div className="text-[11px] font-bold text-gray-400 uppercase tracking-wider font-vietnam">Voucher đang gán</div>
+												<div className="text-[11px] font-bold text-slate-600 uppercase tracking-wider font-vietnam">Voucher đang gán</div>
 												{assignedVouchersForEditingDevice.length ? (
 													/* Khóa chiều cao tối đa 140px và cho cuộn nội bộ tránh đẩy nát layout */
 													<div className="space-y-2 max-h-35 overflow-y-auto pr-0.5 scrollbar-thin">
@@ -798,14 +877,28 @@ export default function StaffInventoryPage() {
 											</div>
 
 											{/* Khối 2: Form gán voucher mới */}
-											<div className="space-y-2 pt-2 border-t border-gray-100">
-												<label className="text-[11px] font-bold text-gray-400 uppercase tracking-wider block font-vietnam">Gán voucher hiện có</label>
+											<div className="space-y-2 pt-2 border-t font-vietnam border-gray-100">
+												<label className="text-[11px] font-bold text-slate-600 uppercase tracking-wider block font-vietnam">Gán voucher hiện có</label>
 												<Select value={voucherSelection} onValueChange={setVoucherSelection}>
-													<SelectTrigger className="bg-white h-8.5 text-xs"><SelectValue placeholder="Chọn voucher" /></SelectTrigger>
-													<SelectContent>
-														<SelectItem value="NONE" className="text-xs">Chọn voucher để gán</SelectItem>
+													{/* 💡 Đồng bộ UI: Thêm shadow-2xs, focus viền xanh và hiệu ứng chuyển động transition */}
+													<SelectTrigger className="w-full h-8.5 text-xs bg-white border-slate-200 focus:bg-white focus:ring-staff-primary/20 focus:border-staff-primary/60 text-gray-800 font-medium rounded-lg shadow-2xs transition-all">
+														<SelectValue placeholder="Chọn voucher để gán" />
+													</SelectTrigger>
+
+													{/* 💡 Đồng bộ UI: Giới hạn max-h-[240px] chống tràn màn hình và thêm các lớp animate mượt mà */}
+													<SelectContent className="bg-white border border-slate-100 shadow-xl rounded-xl max-h-60 z-50 overflow-y-auto p-1 font-vietnam animate-in fade-in-50 zoom-in-95 duration-100">
+														<SelectItem
+															value="NONE"
+															className="text-[11px] text-gray-800 font-medium rounded-md focus:bg-staff-primary/10 focus:text-staff-primary cursor-pointer py-2 pr-2 transition-colors data-[state=checked]:font-semibold data-[state=checked]:text-staff-primary"
+														>
+															Chọn voucher để gán
+														</SelectItem>
 														{assignableVouchers.map((voucher) => (
-															<SelectItem key={voucher.id} value={String(voucher.id)} className="text-xs font-mono">
+															<SelectItem
+																key={voucher.id}
+																value={String(voucher.id)}
+																className="text-xs text-gray-800 font-medium rounded-md focus:bg-staff-primary/10 focus:text-staff-primary cursor-pointer py-2 pr-2 transition-colors data-[state=checked]:font-semibold data-[state=checked]:text-staff-primary"
+															>
 																{voucher.code} {voucher.applicableDeviceName ? `(${voucher.applicableDeviceName})` : ""}
 															</SelectItem>
 														))}
@@ -813,7 +906,7 @@ export default function StaffInventoryPage() {
 												</Select>
 
 												<Button
-													className="w-full h-8.5 text-xs font-medium bg-staff-primary text-white hover:bg-staff-primary/90 transition-all active:scale-[0.98] shadow-2xs"
+													className="w-full h-8.5 text-xs font-medium bg-staff-primary text-white hover:bg-staff-primary/90 transition-all active:scale-[0.98] shadow-2xs mt-1"
 													disabled={voucherLoading || voucherSelection === "NONE"}
 													onClick={() => void handleAssignVoucher()}
 												>
@@ -821,6 +914,8 @@ export default function StaffInventoryPage() {
 													Liên kết voucher vào máy
 												</Button>
 											</div>
+
+
 										</>
 									) : (
 										/* Khối Empty State cao cấp thay thế text thô khi ở chế độ tạo mới sản phẩm */
@@ -828,7 +923,7 @@ export default function StaffInventoryPage() {
 											<div className="rounded-full bg-white p-2 text-gray-400 mb-2 border border-gray-100 shadow-3xs">
 												<TicketPercent className="h-4 w-4 stroke-[1.5]" />
 											</div>
-											<p className="text-xs font-medium text-gray-400 max-w-[200px] leading-normal font-vietnam">
+											<p className="text-xs font-medium text-gray-400 max-w-50 leading-normal font-vietnam">
 												Tạo thiết bị trước, sau đó mở chế độ sửa để cấu hình voucher.
 											</p>
 										</div>
@@ -876,15 +971,23 @@ export default function StaffInventoryPage() {
 										<div className="relative flex items-center w-full">
 											<Input
 												className="h-9.5 w-full text-xs pr-12 bg-slate-50/30 focus-visible:bg-white border-slate-200 focus-visible:ring-staff-primary/20 focus-visible:border-staff-primary/60 font-medium text-gray-800"
-												type="number"
-												min="0"
-												value={deviceForm.price}
-												onChange={(event) => setDeviceForm((current) => ({ ...current, price: event.target.value }))}
+												type="text" // 1. Đổi từ "number" sang "text" để hiển thị được dấu chấm
+												value={deviceForm.price ? Number(deviceForm.price).toLocaleString('vi-VN') : ''} // 2. Tự động định dạng hiển thị thành 850.000
+												onChange={(event) => {
+													// 3. Loại bỏ tất cả dấu chấm khi người dùng gõ để lưu số thuần (850000) vào state
+													const rawValue = event.target.value.replace(/\./g, '');
+
+													// Chỉ cho phép nhập số, tránh người dùng nhập chữ
+													if (/^\d*$/.test(rawValue)) {
+														setDeviceForm((current) => ({ ...current, price: rawValue }));
+													}
+												}}
 												placeholder="0"
 											/>
 											<span className="absolute right-3 text-[14px] font-bold text-slate-400 select-none pointer-events-none">VND</span>
 										</div>
 									</div>
+
 
 									{/* Tồn kho (Có hậu tố Máy tích hợp bên trong ô nhập) */}
 									<div className="space-y-1.5">
@@ -921,18 +1024,18 @@ export default function StaffInventoryPage() {
 											onValueChange={(value) => setDeviceForm((current) => ({ ...current, categoryId: value }))}
 										>
 											{/* 💡 Đồng bộ text-gray-800 và font-medium cho chữ hiển thị khi đã chọn mục */}
-											<SelectTrigger className="w-full h-9.5 text-xs bg-slate-50/30 border-slate-200 focus:bg-white focus:ring-staff-primary/20 focus:border-staff-primary/60 text-gray-800 font-medium rounded-lg shadow-2xs transition-all">
+											<SelectTrigger className="w-full h-9.5 text-[14px] bg-slate-50/30 border-slate-200 focus:bg-white focus:ring-staff-primary/20 focus:border-staff-primary/60 text-gray-800 font-medium rounded-lg shadow-2xs transition-all">
 												<SelectValue placeholder="Chọn danh mục gốc" />
 											</SelectTrigger>
 
-											<SelectContent className="bg-white border border-slate-100 shadow-xl rounded-xl max-h-[240px] z-50 overflow-y-auto p-1 font-vietnam animate-in fade-in-50 zoom-in-95 duration-100">
+											<SelectContent className="bg-white border border-slate-100 shadow-xl rounded-xl max-h-60 z-50 overflow-y-auto p-1 font-vietnam animate-in fade-in-50 zoom-in-95 duration-100">
 												{categories.map((category) => (
 													<SelectItem
 														key={category.id}
 														value={String(category.id)}
-														className="text-[14px] text-gray-800 font-medium rounded-md focus:bg-staff-primary/10 focus:text-staff-primary cursor-pointer py-2 pl-8 pr-2 transition-colors data-[state=checked]:font-semibold data-[state=checked]:text-staff-primary"
+														className="text-[14px] text-gray-800 font-medium rounded-md focus:bg-staff-primary/10 focus:text-staff-primary cursor-pointer py-2 pr-2 transition-colors data-[state=checked]:font-semibold data-[state=checked]:text-staff-primary"
 													>
-													{category.name}
+														{category.name}
 													</SelectItem>
 												))}
 											</SelectContent>
@@ -944,28 +1047,37 @@ export default function StaffInventoryPage() {
 										<Label className="text-[14px] font-semibold text-slate-600 font-vietnam tracking-wide">Trạng thái cấu hình</Label>
 										{deviceDialogMode === "edit" ? (
 											<Select value={deviceForm.status} onValueChange={(value) => setDeviceForm((current) => ({ ...current, status: value as StaffDeviceStatus }))}>
-												{/* Đồng bộ kích thước h-9.5 và w-full */}
-												<SelectTrigger className="w-full h-9.5 text-xs bg-slate-50/30 border-slate-200 focus:bg-white text-gray-800 font-medium rounded-lg">
+												{/* 💡 Học theo UI mẫu: Đồng bộ viền, bóng shadow-2xs, hiệu ứng focus và màu sắc chữ */}
+												<SelectTrigger className="w-full h-9.5 text-[14px] bg-slate-50/30 border-slate-200 focus:bg-white focus:ring-staff-primary/20 focus:border-staff-primary/60 text-gray-800 font-medium rounded-lg shadow-2xs transition-all">
 													<SelectValue />
 												</SelectTrigger>
-												<SelectContent className="bg-white z-50 border border-slate-100 shadow-xl rounded-xl p-1">
+
+												{/* 💡 Học theo UI mẫu: Thêm hiệu ứng animate-in, zoom-in, max-h và font chữ */}
+												<SelectContent className="bg-white border border-slate-100 shadow-xl rounded-xl max-h-60 z-50 overflow-y-auto p-1 font-vietnam animate-in fade-in-50 zoom-in-95 duration-100">
 													{DEVICE_STATUS_OPTIONS.filter((option) => option.value !== "ALL").map((option) => (
-														<SelectItem key={option.value} value={option.value} className="text-xs text-gray-800 font-medium">{option.label}</SelectItem>
+														<SelectItem
+															key={option.value}
+															value={option.value}
+															className="text-[14px] text-gray-800 font-medium rounded-md focus:bg-staff-primary/10 focus:text-staff-primary cursor-pointer py-2 pr-2 transition-colors data-[state=checked]:font-semibold data-[state=checked]:text-staff-primary"
+														>
+															{option.label}
+														</SelectItem>
 													))}
 												</SelectContent>
 											</Select>
 										) : (
-											<div className="w-full h-9.5 rounded-lg border border-dashed border-emerald-200 bg-emerald-50/20 px-3 flex items-center text-[14px] text-emerald-700 font-semibold font-vietnam select-none">
+											<div className="w-full h-9.5 rounded-lg border border-dashed border-emerald-200 bg-emerald-50/20 px-3 flex items-center text-[14px] text-emerald-700 font-medium font-vietnam select-none">
 												Hệ thống tự động kích hoạt: Sẵn sàng
 											</div>
 										)}
 									</div>
 
+
 									{/* Mã định danh SKU */}
 									<div className="space-y-1.5">
 										<Label className="text-[14px] font-semibold text-slate-600 font-vietnam tracking-wide">Mã định danh sản phẩm (SKU)</Label>
 										<Input
-											className="h-9.5 w-full text-xs font-vietnam  tracking-wider bg-slate-50/30 focus-visible:bg-white border-slate-200 focus-visible:ring-staff-primary/20 focus-visible:border-slate-200 text-slate-700 font-bold"
+											className="h-9.5 w-full text-[14px] font-vietnam  tracking-wider bg-slate-50/30 focus-visible:bg-white border-slate-200 focus-visible:ring-staff-primary/20 focus-visible:border-slate-200 text-slate-700 font-bold"
 											value={deviceForm.sku}
 											onChange={(event) => setDeviceForm((current) => ({ ...current, sku: event.target.value }))}
 											placeholder="Ví dụ: SKU-FOREO-LUNA4"
@@ -1019,6 +1131,244 @@ export default function StaffInventoryPage() {
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>
+
+			<Dialog
+				open={inventoryDialog.open}
+				onOpenChange={(open) => {
+					if (!open) {
+						closeInventoryAdjustmentDialog();
+					}
+				}}
+			>
+				<DialogContent className="sm:max-w-xl rounded-2xl border border-gray-100 p-0 overflow-hidden shadow-xl font-vietnam">
+					{(() => {
+						const meta = INVENTORY_DIALOG_META[inventoryDialog.transactionType];
+						const Icon = meta.icon;
+						const isSubmitting = inventoryDialog.device ? actionDeviceId === inventoryDialog.device.id : false;
+
+						return (
+							<>
+								<DialogHeader className="border-b border-gray-100 bg-white px-6 py-5 text-left">
+									<div className="flex items-start gap-3">
+										<div className="rounded-2xl bg-staff-primary/8 p-3 text-staff-primary">
+											<Icon className="size-5" />
+										</div>
+										<div>
+											<DialogTitle className="text-xl font-bold text-gray-900">{meta.title}</DialogTitle>
+											<DialogDescription className="mt-1 text-sm leading-relaxed text-gray-500">
+												{meta.description}
+											</DialogDescription>
+											{inventoryDialog.device && (
+												<p className="mt-2 text-xs font-semibold uppercase tracking-wider text-staff-primary">
+													{inventoryDialog.device.name}
+												</p>
+											)}
+										</div>
+									</div>
+								</DialogHeader>
+
+							<div className="space-y-4 bg-slate-50/40 px-6 py-5 font-vietnam">
+	<div className="grid gap-4 sm:grid-cols-[180px_1fr]">
+		<div className="space-y-1.5">
+			<Label className="text-xs font-bold uppercase tracking-wider text-slate-600">Loại giao dịch</Label>
+			<div className="rounded-xl border border-gray-100 bg-white px-3 py-3 text-sm font-semibold text-gray-700 shadow-2xs">
+				{TRANSACTION_LABELS[inventoryDialog.transactionType]}
+			</div>
+		</div>
+		<div className="space-y-1.5">
+			<Label className="text-xs font-bold uppercase tracking-wider text-slate-600">Số lượng</Label>
+			<Input
+				type="number"
+				min="0"
+				value={inventoryDialog.quantity}
+				onChange={(event) => setInventoryDialog((current) => ({ ...current, quantity: event.target.value }))}
+				className="h-11 bg-white text-sm font-medium text-gray-800 border-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-staff-primary/20 focus-visible:border-staff-primary/60 rounded-xl shadow-2xs transition-all"
+				placeholder="Nhập số lượng"
+			/>
+		</div>
+	</div>
+
+	<div className="space-y-1.5">
+		<Label className="text-xs font-bold uppercase tracking-wider text-slate-600">Lý do giao dịch</Label>
+		<Input
+			value={inventoryDialog.reason}
+			onChange={(event) => setInventoryDialog((current) => ({ ...current, reason: event.target.value }))}
+			className="h-11 bg-white text-sm font-medium text-gray-800 border-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-staff-primary/20 focus-visible:border-staff-primary/60 rounded-xl shadow-2xs transition-all"
+			placeholder="Ví dụ: nhập lô mới từ hãng, xuất cho showroom, cân chỉnh sau kiểm kê..."
+		/>
+	</div>
+
+	<div className="space-y-1.5">
+		<Label className="text-xs font-bold uppercase tracking-wider text-slate-600">Ghi chú bổ sung</Label>
+		<Textarea
+			value={inventoryDialog.note}
+			onChange={(event) => setInventoryDialog((current) => ({ ...current, note: event.target.value }))}
+			className="min-h-24 resize-none bg-white text-sm font-medium text-gray-800 border-slate-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-staff-primary/20 focus-visible:border-staff-primary/60 rounded-xl shadow-2xs transition-all"
+			placeholder="Thông tin thêm cho bộ phận vận hành hoặc kế toán kho..."
+		/>
+	</div>
+</div>
+
+
+								<DialogFooter className="border-t border-gray-100 bg-white px-6 py-4 sm:justify-end">
+									<Button variant="outline" onClick={closeInventoryAdjustmentDialog} disabled={isSubmitting} className="h-10 rounded-xl border-gray-200 font-medium">
+										Hủy thao tác
+									</Button>
+									<Button onClick={() => void submitInventoryAdjustment()} disabled={isSubmitting} className="h-10 rounded-xl bg-staff-primary px-5 font-medium text-white hover:bg-staff-primary/90">
+										{isSubmitting ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Icon className="mr-2 size-4" />}
+										Lưu giao dịch kho
+									</Button>
+								</DialogFooter>
+							</>
+						);
+					})()}
+				</DialogContent>
+			</Dialog>
+
+			<Dialog
+				open={maintenanceDialog.open}
+				onOpenChange={(open) => {
+					if (!open) {
+						closeMaintenanceDialog();
+					}
+				}}
+			>
+				<DialogContent className="sm:max-w-2xl rounded-2xl border border-gray-100 p-0 overflow-hidden shadow-xl font-vietnam">
+					{(() => {
+						const isCompleting = maintenanceDialog.mode === "complete";
+						const isSubmitting = maintenanceDialog.device ? actionDeviceId === maintenanceDialog.device.id : false;
+
+						return (
+							<>
+								<DialogHeader className="border-b border-gray-100 bg-white px-6 py-5 text-left">
+									<div className="flex items-start gap-3">
+										<div className={cn(
+											"rounded-2xl p-3",
+											isCompleting ? "bg-emerald-50 text-emerald-600" : "bg-staff-primary/8 text-staff-primary"
+										)}>
+											{isCompleting ? <Check className="size-5" /> : <Wrench className="size-5" />}
+										</div>
+										<div>
+											<DialogTitle className="text-xl font-bold text-gray-900">
+												{isCompleting ? "Hoàn tất bảo trì thiết bị" : "Yêu cầu bảo trì thiết bị"}
+											</DialogTitle>
+											<DialogDescription className="mt-1 text-sm leading-relaxed text-gray-500">
+												{isCompleting
+													? "Chốt thời điểm hoàn tất và chi phí thực tế để đưa thiết bị quay lại trạng thái sẵn sàng."
+													: "Khai báo lý do, mốc thời gian dự kiến và chi phí sơ bộ trước khi đưa thiết bị vào bảo trì."}
+											</DialogDescription>
+											{maintenanceDialog.device && (
+												<p className="mt-2 text-xs font-semibold uppercase tracking-wider text-staff-primary">
+													{maintenanceDialog.device.name}
+												</p>
+											)}
+										</div>
+									</div>
+								</DialogHeader>
+
+								<div className="space-y-4 bg-slate-50/40 px-6 py-5">
+									{isCompleting ? (
+										<div className="grid gap-4 sm:grid-cols-2">
+											<div className="space-y-1.5">
+												<Label className="text-xs font-bold uppercase tracking-wider text-slate-600">Ngày hoàn tất</Label>
+												<Input
+													type="date"
+													value={maintenanceDialog.completedDate}
+													onChange={(event) => setMaintenanceDialog((current) => ({ ...current, completedDate: event.target.value }))}
+													className="h-11 bg-white"
+												/>
+											</div>
+											<div className="space-y-1.5">
+												<Label className="text-xs font-bold uppercase tracking-wider text-slate-600">Chi phí bảo trì</Label>
+												<Input
+													type="number"
+													min="0"
+													value={maintenanceDialog.cost}
+													onChange={(event) => setMaintenanceDialog((current) => ({ ...current, cost: event.target.value }))}
+													className="h-11 bg-white"
+													placeholder="Ví dụ: 350000"
+												/>
+											</div>
+										</div>
+									) : (
+										<>
+											<div className="space-y-1.5">
+												<Label className="text-xs font-bold uppercase tracking-wider text-slate-600">Lý do bảo trì</Label>
+												<Textarea
+													value={maintenanceDialog.reason}
+													onChange={(event) => setMaintenanceDialog((current) => ({ ...current, reason: event.target.value }))}
+													className="min-h-24 resize-none bg-white"
+													placeholder="Mô tả lỗi, tình trạng kỹ thuật hoặc lý do cần tạm dừng vận hành..."
+												/>
+											</div>
+											<div className="grid gap-4 sm:grid-cols-2">
+												<div className="space-y-1.5">
+													<Label className="text-xs font-bold uppercase tracking-wider text-slate-600">Ngày dự kiến hoàn tất</Label>
+													<Input
+														type="date"
+														value={maintenanceDialog.expectedEndDate}
+														onChange={(event) => setMaintenanceDialog((current) => ({ ...current, expectedEndDate: event.target.value }))}
+														className="h-11 bg-white"
+													/>
+												</div>
+												<div className="space-y-1.5">
+													<Label className="text-xs font-bold uppercase tracking-wider text-slate-600">Chi phí dự kiến</Label>
+													<Input
+														type="number"
+														min="0"
+														value={maintenanceDialog.cost}
+														onChange={(event) => setMaintenanceDialog((current) => ({ ...current, cost: event.target.value }))}
+														className="h-11 bg-white"
+														placeholder="Ví dụ: 500000"
+													/>
+												</div>
+											</div>
+										</>
+									)}
+								</div>
+
+								<DialogFooter className="border-t border-gray-100 bg-white px-6 py-4 sm:justify-end">
+									<Button variant="outline" onClick={closeMaintenanceDialog} disabled={isSubmitting} className="h-10 rounded-xl border-gray-200 font-medium">
+										Hủy thao tác
+									</Button>
+									<Button onClick={() => void submitMaintenanceDialog()} disabled={isSubmitting} className={cn(
+										"h-10 rounded-xl px-5 font-medium text-white",
+										isCompleting ? "bg-emerald-600 hover:bg-emerald-700" : "bg-staff-primary hover:bg-staff-primary/90"
+									)}>
+										{isSubmitting ? <Loader2 className="mr-2 size-4 animate-spin" /> : isCompleting ? <Check className="mr-2 size-4" /> : <Wrench className="mr-2 size-4" />}
+										{isCompleting ? "Xác nhận hoàn tất" : "Đưa vào bảo trì"}
+									</Button>
+								</DialogFooter>
+							</>
+						);
+					})()}
+				</DialogContent>
+			</Dialog>
+
+			<AlertDialog open={Boolean(deleteDialogDevice)} onOpenChange={(open) => { if (!open && actionDeviceId == null) { setDeleteDialogDevice(null); } }}>
+				<AlertDialogContent className="max-w-115 rounded-3xl border-none p-0 overflow-hidden shadow-2xl font-vietnam">
+					<div className="bg-white px-6 py-6">
+						<AlertDialogHeader className="text-left">
+							<div className="mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-rose-50 text-rose-600">
+								<Trash2 className="size-5" />
+							</div>
+							<AlertDialogTitle className="text-xl font-bold text-gray-900">Chuyển thiết bị sang ngừng hoạt động</AlertDialogTitle>
+							<AlertDialogDescription className="text-sm leading-relaxed text-gray-500">
+								{deleteDialogDevice ? `Thiết bị “${deleteDialogDevice.name}” sẽ bị soft delete và không còn xuất hiện ở trạng thái vận hành bình thường.` : "Xác nhận thao tác xóa thiết bị."}
+							</AlertDialogDescription>
+						</AlertDialogHeader>
+					</div>
+					<AlertDialogFooter className="border-t border-gray-100 bg-slate-50/70 px-6 py-4 sm:justify-end">
+						<AlertDialogCancel className="h-10 rounded-xl border-gray-200 font-medium" disabled={actionDeviceId != null}>
+							Giữ lại thiết bị
+						</AlertDialogCancel>
+						<AlertDialogAction onClick={() => void confirmDeleteDevice()} className="h-10 rounded-xl bg-rose-600 px-5 font-medium text-white hover:bg-rose-700" disabled={actionDeviceId != null}>
+							{actionDeviceId != null ? <Loader2 className="mr-2 size-4 animate-spin" /> : <Trash2 className="mr-2 size-4" />}
+							Xác nhận ngừng hoạt động
+						</AlertDialogAction>
+					</AlertDialogFooter>
+				</AlertDialogContent>
+			</AlertDialog>
 
 			<div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
 				<Card>
@@ -1192,7 +1542,7 @@ export default function StaffInventoryPage() {
 																alt={device.name}
 																fill
 																sizes="48px"
-																className="object-cover transition-transform duration-500 group-hover:scale-105"
+																className="object-contain p-1 transition-transform duration-500 group-hover:scale-105"
 															/>
 														</div>
 														<div className="min-w-0">
@@ -1289,7 +1639,7 @@ export default function StaffInventoryPage() {
 
 															{/* 1. Nhập kho */}
 															<DropdownMenuItem
-																onClick={() => void requestInventoryAdjustment(device.id, "IMPORT")}
+																onClick={() => openInventoryAdjustmentDialog(device, "IMPORT")}
 																className="flex items-center gap-2 px-3 py-2 text-[12.5px] font-medium text-gray-600 hover:bg-gray-50 cursor-pointer outline-none transition-colors"
 															>
 																<ArrowDownToLine className="w-3.5 h-3.5 text-gray-400" /> Nhập số lượng
@@ -1297,7 +1647,7 @@ export default function StaffInventoryPage() {
 
 															{/* 2. Xuất kho */}
 															<DropdownMenuItem
-																onClick={() => void requestInventoryAdjustment(device.id, "EXPORT")}
+																onClick={() => openInventoryAdjustmentDialog(device, "EXPORT")}
 																className="flex items-center gap-2 px-3 py-2 text-[12.5px] font-medium text-gray-600 hover:bg-gray-50 cursor-pointer outline-none transition-colors"
 															>
 																<ArrowUpFromLine className="w-3.5 h-3.5 text-gray-400" /> Xuất hàng đi
@@ -1305,7 +1655,7 @@ export default function StaffInventoryPage() {
 
 															{/* 3. Kiểm kê */}
 															<DropdownMenuItem
-																onClick={() => void requestInventoryAdjustment(device.id, "AUDIT_ADJUSTMENT")}
+																onClick={() => openInventoryAdjustmentDialog(device, "AUDIT_ADJUSTMENT")}
 																className="flex items-center gap-2 px-3 py-2 text-[12.5px] font-medium text-gray-600 hover:bg-gray-50 cursor-pointer outline-none transition-colors"
 															>
 																<ClipboardCheck className="w-3.5 h-3.5 text-gray-400" /> Kiểm kê kho
@@ -1313,7 +1663,7 @@ export default function StaffInventoryPage() {
 
 															{/* 4. Điều phối bảo trì */}
 															<DropdownMenuItem
-																onClick={() => void handleMaintenance(device)}
+																onClick={() => openMaintenanceDialog(device)}
 																className={cn(
 																	"flex items-center gap-2 px-3 py-2 text-[12.5px] font-semibold border-t border-gray-50 cursor-pointer outline-none transition-colors",
 																	device.status === "MAINTENANCE" ? "text-emerald-600 hover:bg-emerald-50/50" : "text-staff-primary hover:bg-blue-50/50"
@@ -1336,7 +1686,7 @@ export default function StaffInventoryPage() {
 
 															{/* 6. Xóa bỏ */}
 															<DropdownMenuItem
-																onClick={() => void handleDeleteDevice(device)}
+																onClick={() => handleDeleteDevice(device)}
 																className="flex items-center gap-2 px-3 py-2 text-[12.5px] font-medium text-rose-600 hover:bg-rose-50 cursor-pointer outline-none transition-colors"
 															>
 																<Trash2 className="w-3.5 h-3.5 text-rose-400" /> Xóa thiết bị

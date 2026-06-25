@@ -207,6 +207,10 @@ export interface ReviewData {
   comment: string | null;
   isVerifiedPurchase: boolean;
   adminReply: string | null;
+  adminReplyCreatedAt: string | null;
+  adminReplyEditedAt: string | null;
+  adminReplyEditCount: number;
+  adminReplyEdited: boolean;
   createdAt: string;
 }
 

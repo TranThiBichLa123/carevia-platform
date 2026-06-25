@@ -1,14 +1,53 @@
 "use client";
 
-import { Loader2, MessageSquareMore, RefreshCw, Search, ShieldAlert, Star } from "lucide-react";
+import { Loader2, MessageSquareMore, RefreshCw, Search, SendHorizontal, ShieldAlert, Star } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 import { backofficeApi } from "@/lib/backofficeApi";
 import { formatDateTime, getBackofficeErrorMessage } from "@/lib/backofficeUtils";
 import { reviewApi, type ReviewData } from "@/lib/deviceApi";
 import { useUserStore } from "@/lib/store";
+
+const STAFF_REPLY_EDIT_WINDOW_MINUTES = 30;
+const STAFF_REPLY_EDIT_WINDOW_MS = STAFF_REPLY_EDIT_WINDOW_MINUTES * 60 * 1000;
+const STAFF_REPLY_MAX_EDITS = 2;
+
+function getReplyEditState(review: ReviewData) {
+  const hasReply = Boolean(review.adminReply?.trim());
+
+  if (!hasReply) {
+    return {
+      canEdit: true,
+      reason: `Sau khi đăng, phản hồi chỉ được chỉnh sửa trong ${STAFF_REPLY_EDIT_WINDOW_MINUTES} phút và tối đa ${STAFF_REPLY_MAX_EDITS} lần.`,
+    };
+  }
+
+  const editCount = review.adminReplyEditCount ?? 0;
+  if (editCount >= STAFF_REPLY_MAX_EDITS) {
+    return {
+      canEdit: false,
+      reason: `Phản hồi này đã dùng hết ${STAFF_REPLY_MAX_EDITS} lần chỉnh sửa.`,
+    };
+  }
+
+  if (review.adminReplyCreatedAt) {
+    const editableUntil = new Date(review.adminReplyCreatedAt).getTime() + STAFF_REPLY_EDIT_WINDOW_MS;
+    if (Date.now() > editableUntil) {
+      return {
+        canEdit: false,
+        reason: `Phản hồi chỉ được chỉnh sửa trong vòng ${STAFF_REPLY_EDIT_WINDOW_MINUTES} phút kể từ khi đăng.`,
+      };
+    }
+  }
+
+  return {
+    canEdit: true,
+    reason: `Bạn còn ${STAFF_REPLY_MAX_EDITS - editCount} lần chỉnh sửa trong khoảng ${STAFF_REPLY_EDIT_WINDOW_MINUTES} phút kể từ lúc đăng phản hồi.`,
+  };
+}
 
 type StaffReviewItem = ReviewData & {
   deviceId: number;
@@ -19,6 +58,8 @@ type StaffReviewItem = ReviewData & {
 export default function StaffReviewsPage() {
   const { authUser, isAuthenticated } = useUserStore();
   const [reviews, setReviews] = useState<StaffReviewItem[]>([]);
+  const [replyDrafts, setReplyDrafts] = useState<Record<number, string>>({});
+  const [submittingReviewId, setSubmittingReviewId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
 
@@ -45,12 +86,48 @@ export default function StaffReviewsPage() {
         .sort((left, right) => new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime());
 
       setReviews(mergedReviews);
+      setReplyDrafts(
+        Object.fromEntries(
+          mergedReviews.map((review) => [review.id, review.adminReply ?? ""])
+        )
+      );
     } catch (error) {
       toast.error(getBackofficeErrorMessage(error, "Không thể tải review của catalog brand."));
     } finally {
       setLoading(false);
     }
   }, []);
+
+  const handleReplyChange = useCallback((reviewId: number, value: string) => {
+    setReplyDrafts((current) => ({
+      ...current,
+      [reviewId]: value,
+    }));
+  }, []);
+
+  const handleReplySubmit = useCallback(async (review: StaffReviewItem) => {
+    const trimmedReply = (replyDrafts[review.id] ?? "").trim();
+
+    if (!trimmedReply) {
+      toast.error("Vui lòng nhập nội dung phản hồi trước khi gửi.");
+      return;
+    }
+
+    try {
+      setSubmittingReviewId(review.id);
+      const updatedReview = await backofficeApi.replyToStaffReview(review.id, { adminReply: trimmedReply });
+      setReviews((current) => current.map((item) => item.id === review.id ? { ...item, ...updatedReview } : item));
+      setReplyDrafts((current) => ({
+        ...current,
+        [review.id]: updatedReview.adminReply ?? trimmedReply,
+      }));
+      toast.success(review.adminReply?.trim() ? "Đã cập nhật phản hồi cho khách hàng." : "Đã gửi phản hồi cho khách hàng.");
+    } catch (error) {
+      toast.error(getBackofficeErrorMessage(error, "Không thể gửi phản hồi cho khách hàng."));
+    } finally {
+      setSubmittingReviewId(null);
+    }
+  }, [replyDrafts]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -164,7 +241,23 @@ export default function StaffReviewsPage() {
             filteredReviews.map((review) => (
               /* 🌟 NÂNG CẤP KHỐI ĐÁNH GIÁ: Bo góc rounded-2xl mềm mại, viền gray-100 tinh tế và hiệu ứng hover nhẹ */
               <div key={`${review.deviceId}-${review.id}`} className="rounded-2xl border border-gray-100 bg-white p-5 shadow-xs transition-all hover:shadow-md">
-                <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                {(() => {
+                  const draftReply = replyDrafts[review.id] ?? review.adminReply ?? "";
+                  const normalizedDraftReply = draftReply.trim();
+                  const normalizedExistingReply = review.adminReply?.trim() ?? "";
+                  const isSubmittingReply = submittingReviewId === review.id;
+                  const hasExistingReply = Boolean(normalizedExistingReply);
+                  const isReplyUnchanged = normalizedDraftReply === normalizedExistingReply;
+                  const replyEditState = getReplyEditState(review);
+                  const replyTimestamp = review.adminReplyEditedAt || review.adminReplyCreatedAt;
+                  const shouldLockReplyEditing = hasExistingReply && !replyEditState.canEdit;
+                  const disableSubmit = isSubmittingReply
+                    || !normalizedDraftReply
+                    || (hasExistingReply && (isReplyUnchanged || shouldLockReplyEditing));
+
+                  return (
+                    <>
+                      <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
                   <div className="space-y-2">
                     <div>
                       <p className="font-bold text-gray-900 tracking-tight text-base">{review.deviceName}</p>
@@ -191,24 +284,52 @@ export default function StaffReviewsPage() {
 
                   {/* Thời gian căn phải ở màn hình lớn, chữ mờ nhẹ nhàng */}
                   <div className="text-xs font-medium text-gray-400 md:text-right">{formatDateTime(review.createdAt)}</div>
-                </div>
+                      </div>
 
                 {/* Khung nội dung bình luận của khách hàng */}
                 <div className="mt-4 rounded-xl bg-gray-50/70 p-3.5 text-[13.5px] font-medium text-gray-700 leading-relaxed border border-gray-50">
                   {review.comment || "Khách hàng chưa để lại bình luận."}
                 </div>
 
-                {/* 🌟 NÂNG CẤP KHUNG PHẢN HỒI CỦA ADMIN: Đồng bộ theo tông xanh thương hiệu hệ thống */}
-                {review.adminReply?.trim() && (
-                  <div className="mt-3.5 rounded-xl border border-blue-100/50 bg-blue-50/30 p-3.5 text-[13.5px] text-gray-800 leading-relaxed">
-                    <div className="font-bold text-staff-primary text-xs uppercase tracking-wider flex items-center gap-1.5 mb-1">
-                      <div className="size-1.5 rounded-full bg-staff-primary animate-pulse" />
-                      Phản hồi công khai hiện có
-                    </div>
-                    <div className="font-medium text-gray-600 pl-3 border-l-2 border-staff-primary/30 mt-1.5">{review.adminReply}</div>
+                      <div className="mt-3.5 rounded-xl border border-blue-100/50 bg-blue-50/30 p-3.5 text-[13.5px] text-gray-800 leading-relaxed">
+                        <div className="font-bold text-staff-primary text-xs uppercase tracking-wider flex items-center gap-1.5 mb-1">
+                          <div className="size-1.5 rounded-full bg-staff-primary animate-pulse" />
+                          {hasExistingReply ? "Phản hồi công khai với khách hàng" : "Phản hồi khách hàng"}
+                        </div>
+                        {replyTimestamp && (
+                          <p className="text-[11px] text-gray-500">
+                            {formatDateTime(replyTimestamp)}
+                            {review.adminReplyEdited ? <span className="italic"> (Đã chỉnh sửa)</span> : null}
+                          </p>
+                        )}
+                        <p className="text-xs text-gray-500">Nội dung này sẽ hiển thị công khai với khách trên phần đánh giá sản phẩm.</p>
+                        <Textarea
+                          value={draftReply}
+                          onChange={(event) => handleReplyChange(review.id, event.target.value)}
+                          placeholder="Nhập nội dung phản hồi để giải đáp hoặc cảm ơn khách hàng..."
+                          rows={4}
+                          maxLength={2000}
+                          disabled={isSubmittingReply || shouldLockReplyEditing}
+                          className="mt-3 resize-none border-blue-100 bg-white/90 text-sm leading-relaxed focus-visible:ring-staff-primary"
+                        />
+                        <div className="mt-3 flex flex-col gap-2 text-xs text-gray-500 md:flex-row md:items-center md:justify-between">
+                          <span>{replyEditState.reason}</span>
+                          <span>{normalizedDraftReply.length}/2000 ký tự • Đã sửa {review.adminReplyEditCount ?? 0}/{STAFF_REPLY_MAX_EDITS} lần</span>
+                          <Button
+                            type="button"
+                            onClick={() => void handleReplySubmit(review)}
+                            disabled={disableSubmit}
+                            className="min-w-36 bg-staff-primary text-white hover:bg-staff-primary/90"
+                          >
+                            {isSubmittingReply ? <Loader2 className="mr-2 size-4 animate-spin" /> : <SendHorizontal className="mr-2 size-4" />}
+                            {hasExistingReply ? "Cập nhật phản hồi" : "Gửi phản hồi"}
+                          </Button>
+                        </div>
+                      </div>
+                    </>
+                  );
+                })()}
                   </div>
-                )}
-              </div>
             ))
           ) : (
             /* Khung thông báo trống mềm mại với viền nét đứt gray-200 */

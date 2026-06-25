@@ -16,6 +16,24 @@ ALTER TABLE review
 ALTER TABLE review
     ADD COLUMN IF NOT EXISTS admin_reply TEXT;
 
+ALTER TABLE review
+    ADD COLUMN IF NOT EXISTS admin_reply_created_at TIMESTAMP WITH TIME ZONE;
+
+ALTER TABLE review
+    ADD COLUMN IF NOT EXISTS admin_reply_edited_at TIMESTAMP WITH TIME ZONE;
+
+ALTER TABLE review
+    ADD COLUMN IF NOT EXISTS admin_reply_edit_count INTEGER DEFAULT 0;
+
+UPDATE review
+SET admin_reply_created_at = COALESCE(admin_reply_created_at, created_at)
+WHERE admin_reply IS NOT NULL
+  AND admin_reply_created_at IS NULL;
+
+UPDATE review
+SET admin_reply_edit_count = COALESCE(admin_reply_edit_count, 0)
+WHERE admin_reply_edit_count IS NULL;
+
 UPDATE review
 SET effectiveness_rating = COALESCE(effectiveness_rating, rating, 5),
     safety_rating = COALESCE(safety_rating, rating, 5),
@@ -49,3 +67,9 @@ ALTER TABLE review
 
 ALTER TABLE review
     ALTER COLUMN durability_rating SET NOT NULL;
+
+ALTER TABLE review
+    ALTER COLUMN admin_reply_edit_count SET DEFAULT 0;
+
+ALTER TABLE review
+    ALTER COLUMN admin_reply_edit_count SET NOT NULL;

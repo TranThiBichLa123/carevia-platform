@@ -5,6 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.type.SqlTypes;
 
+import java.time.Instant;
 import java.util.List;
 import com.carevia.shared.entity.BaseEntity;
 
@@ -65,6 +66,16 @@ public class Review extends BaseEntity {
 
     @Column(name = "admin_reply", columnDefinition = "TEXT")
     private String adminReply;
+
+    @Column(name = "admin_reply_created_at")
+    private Instant adminReplyCreatedAt;
+
+    @Column(name = "admin_reply_edited_at")
+    private Instant adminReplyEditedAt;
+
+    @Column(name = "admin_reply_edit_count", nullable = false)
+    @Builder.Default
+    private Integer adminReplyEditCount = 0;
 
     @Column(name = "is_hidden", nullable = false)
     @Builder.Default

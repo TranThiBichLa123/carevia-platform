@@ -296,6 +296,20 @@ export default function ProductDescription({ product }: ProductDescriptionProps)
     try { return new Date(iso).toLocaleDateString('vi-VN'); } catch { return iso; }
   };
 
+  const formatDateTime = (iso: string) => {
+    try {
+      return new Date(iso).toLocaleString('vi-VN', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+      });
+    } catch {
+      return iso;
+    }
+  };
+
   const ratingLabels = ['', 'Rất tệ', 'Tệ', 'Bình thường', 'Tốt', 'Xuất sắc'];
 
   return (
@@ -719,9 +733,17 @@ export default function ProductDescription({ product }: ProductDescriptionProps)
                               ))}
                             </div>
                           )}
-                          {review.adminReply && (
+                          {review.adminReply?.trim() && (
                             <div className="bg-primary/5 border-l-4 border-primary p-3 rounded-r-lg text-sm">
-                              <p className="font-bold text-primary text-xs mb-1">Phản hồi từ Carevia:</p>
+                              <div className="mb-1 flex flex-wrap items-center gap-2">
+                                <p className="font-bold text-primary text-xs">Phản hồi từ Carevia:</p>
+                                {(review.adminReplyEditedAt || review.adminReplyCreatedAt) && (
+                                  <p className="text-[11px] text-muted-foreground">
+                                    {formatDateTime(review.adminReplyEditedAt || review.adminReplyCreatedAt!)}
+                                    {review.adminReplyEdited ? <span className="italic"> (Đã chỉnh sửa)</span> : null}
+                                  </p>
+                                )}
+                              </div>
                               <p className="text-foreground">{review.adminReply}</p>
                             </div>
                           )}

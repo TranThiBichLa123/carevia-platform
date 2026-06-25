@@ -1,10 +1,12 @@
 package com.carevia.controller.staff;
 
+import com.carevia.service.ReviewService;
 import com.carevia.service.StaffOperationsService;
 import com.carevia.shared.annotation.StaffOnly;
 import com.carevia.shared.annotation.StaffOrAdmin;
 import com.carevia.shared.dto.request.device.CreateDeviceRequest;
 import com.carevia.shared.dto.request.device.UpdateDeviceRequest;
+import com.carevia.shared.dto.request.review.ModerateReviewRequest;
 import com.carevia.shared.dto.request.staff.AdjustInventoryRequest;
 import com.carevia.shared.dto.request.staff.UpdateStaffBrandRequest;
 import com.carevia.shared.dto.request.staff.UpdateMaintenanceRequest;
@@ -16,6 +18,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -30,9 +33,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class StaffOperationsController {
 
     private final StaffOperationsService staffOperationsService;
+    private final ReviewService reviewService;
 
-    public StaffOperationsController(StaffOperationsService staffOperationsService) {
+    public StaffOperationsController(StaffOperationsService staffOperationsService, ReviewService reviewService) {
         this.staffOperationsService = staffOperationsService;
+        this.reviewService = reviewService;
     }
 
     @GetMapping("/dashboard")
@@ -173,5 +178,14 @@ public class StaffOperationsController {
             @RequestParam(required = false) Long deviceId,
             Pageable pageable) {
         return ResponseEntity.ok(staffOperationsService.getInventoryTransactions(deviceId, pageable));
+    }
+
+    @PatchMapping("/reviews/{reviewId}")
+    @StaffOnly
+    @Operation(summary = "Reply to a product review as staff")
+    public ResponseEntity<?> replyToReview(
+            @PathVariable Long reviewId,
+            @Valid @RequestBody ModerateReviewRequest request) {
+        return ResponseEntity.ok(reviewService.replyToReviewAsStaff(reviewId, request));
     }
 }
