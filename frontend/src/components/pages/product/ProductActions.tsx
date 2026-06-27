@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Minus,
   Plus,
@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { useCartStore, useUserStore } from "@/lib/store";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { deviceApi } from "@/lib/deviceApi";
 
 type ProductWithLegacyId = Product & {
   deviceId?: string | number;
@@ -38,8 +39,36 @@ const ProductActions: React.FC<ProductActionsProps> = ({ product }) => {
   const router = useRouter();
   const safeProductId = getProductId(product as ProductWithLegacyId);
   const isOutOfStock = product.stock <= 0;
-  const canBook = product.isBookingAvailable && (product.sessionIds?.length ?? 0) > 0;
+  // 1. Thêm các state cần thiết
+  const [isChecking, setIsChecking] = useState(true);
+  const [hasAvailableSessions, setHasAvailableSessions] = useState(false);
 
+  // 2. Thêm useEffect để gọi API check lịch
+  // Trong ProductActions.tsx, thay thế đoạn fetch trong useEffect:
+  useEffect(() => {
+    const checkAvailability = async () => {
+      try {
+        // Dùng hàm có sẵn trong deviceApi
+        const data = await deviceApi.getBookingSessions({ deviceId: safeProductId });
+
+        // Kiểm tra data trả về
+        setHasAvailableSessions(Array.isArray(data) && data.length > 0);
+      } catch (error) {
+        console.error("Lỗi check lịch:", error);
+        setHasAvailableSessions(false);
+      } finally {
+        setIsChecking(false);
+      }
+    };
+
+    if (product.isBookingAvailable && safeProductId) {
+      checkAvailability();
+    } else {
+      setIsChecking(false);
+    }
+  }, [safeProductId, product.isBookingAvailable]);
+  // 3. Định nghĩa biến canBook dựa trên kết quả API
+  const canBook = !isChecking && product.isBookingAvailable && hasAvailableSessions;
 
   const updateQuantity = (nextQuantity: number) => {
     const maxQuantity = Math.max(1, product.stock || 1);
@@ -179,25 +208,29 @@ const ProductActions: React.FC<ProductActionsProps> = ({ product }) => {
         </div>
 
         {/* Booking Experience Button */}
-        {/* Booking Experience Button - Luôn hiển thị để khách biết có dịch vụ này */}
         <div className="space-y-2 pt-4">
           <button
             onClick={handleBooking}
-            disabled={!canBook} // Chặn click khi canBook = false
+            disabled={isChecking || !canBook}
             className={`
-      w-full h-14 flex items-center justify-center gap-2 font-bold rounded-xl transition-all duration-300
-      ${canBook
+    w-full h-14 flex items-center justify-center gap-2 font-bold rounded-xl transition-all duration-300
+    ${canBook
                 ? "bg-linear-to-r from-primary to-primary/80 text-white hover:shadow-lg hover:scale-[1.02] active:scale-95 border-2 border-primary/20 cursor-pointer"
                 : "bg-gray-100 text-gray-400 cursor-not-allowed border border-gray-200 shadow-none scale-100"
               }
-    `}
+  `}
           >
-            <CalendarCheck size={20} className={canBook ? "text-white" : "text-gray-300"} />
+            {isChecking ? (
+              <Loader2 size={20} className="animate-spin" />
+            ) : (
+              <CalendarCheck size={20} className={canBook ? "text-white" : "text-gray-300"} />
+            )}
             <span>
-              {canBook ? "Đặt Lịch Trải Nghiệm (Miễn Phí)" : "Hiện Đã Hết Lịch Trải Nghiệm"}
+              {isChecking
+                ? "Đang kiểm tra..."
+                : (canBook ? "Đặt Lịch Trải Nghiệm" : "Hiện Đã Hết Lịch Trải Nghiệm")}
             </span>
           </button>
-
           <p className="text-[11px] text-center text-muted-foreground italic px-4 leading-tight">
             {canBook
               ? "✨ Xem và trải nghiệm sản phẩm thực tế tại cửa hàng trước khi quyết định mua"

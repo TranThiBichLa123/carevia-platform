@@ -45,9 +45,18 @@ const BookingPage = () => {
             if (selectedPrice?.maxPrice !== undefined) params.maxPrice = selectedPrice.maxPrice;
 
             const data = await deviceApi.getAll(params);
-            const mapped = data.items.map(mapDeviceToProduct);
+
+            // --- THÊM LOGIC LỌC Ở ĐÂY ---
+            const filteredItems = data.items.filter((item: any) => {
+                // Kiểm tra session_date (tùy vào cấu trúc dữ liệu của bạn, có thể là item.session_date hoặc nằm trong object khác)
+                // Và kiểm tra brand_name (đã có sẵn trong object brand)
+                return item.session_date && item.brand?.name;
+            });
+
+            // Map sau khi đã lọc
+            const mapped = filteredItems.map(mapDeviceToProduct);
             setBookingDevices(mapped);
-            setTotalItems(data.totalItems);
+            setTotalItems(filteredItems.length); // Cập nhật lại tổng số item sau khi lọc
         } catch (error) {
             console.error("Failed to fetch booking devices:", error);
         } finally {

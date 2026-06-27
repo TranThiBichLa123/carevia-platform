@@ -103,7 +103,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/v1/vouchers/device/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/system-settings/**").permitAll()
                         .requestMatchers("/api/v1/payments/zalopay/callback").permitAll()
-
+                        .requestMatchers(HttpMethod.GET, "/api/v1/bookings/sessions/available").permitAll()
                         // Cấu hình cụ thể cho Orders (Có thể viết hiển thị hoặc để rơi vào
                         // .anyRequest())
                         .requestMatchers("/api/v1/orders/**").authenticated()

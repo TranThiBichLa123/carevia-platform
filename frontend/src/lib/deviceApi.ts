@@ -148,12 +148,25 @@ export const deviceApi = {
     const res = await apiClient.get(`/devices/${id}`);
     return res.data;
   },
-
+  getActiveBookingDeviceIds: async (): Promise<number[]> => {
+    try {
+      const res = await apiClient.get("/devices/booking-list");
+      return res.data || []; // Giả sử backend trả về mảng số [16, 17, ...]
+    } catch (error) {
+      console.error("Failed to fetch active device IDs:", error);
+      return [];
+    }
+  },
   getBySlug: async (slug: string): Promise<DeviceData> => {
     const res = await apiClient.get(`/devices/slug/${slug}`);
     return res.data;
   },
-
+  // Thêm vào trong object deviceApi ở lib/deviceApi.ts
+  getBookingSessions: async (params?: any): Promise<any> => {
+    // Đảm bảo endpoint này khớp với @GetMapping("/booking-sessions") trong Controller
+    const res = await apiClient.get(`/bookings/sessions/available`, { params });
+    return res.data;
+  },
   getPopular: async (limit = 8): Promise<DeviceData[]> => {
     const res = await apiClient.get(`/devices/popular?limit=${limit}`);
     return res.data;
@@ -208,6 +221,10 @@ export const deviceApi = {
   getVoucherByCode: async (code: string): Promise<any> => {
     const response = await apiClient.get(`/vouchers/code/${code}`);
     return response.data;
+  },
+  getBookingDevices: async (params?: any): Promise<any> => {
+    const res = await apiClient.get("/devices/booking-list", { params });
+    return res.data;
   },
 };
 
