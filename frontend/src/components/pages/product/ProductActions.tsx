@@ -144,7 +144,9 @@ const ProductActions: React.FC<ProductActionsProps> = ({ product }) => {
       return;
     }
 
-    router.push(`/client/booking?deviceId=${safeProductId}`);
+    router.push(`/client/booking/${safeProductId}/schedule`);
+
+
   };
 
   return (
