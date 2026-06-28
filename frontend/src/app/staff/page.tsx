@@ -244,18 +244,42 @@ export default function StaffStatisticsPage() {
                             </CardHeader>
                             <CardContent className="pt-2">
                                 <div className="h-72 w-full">
+                                    {/* SỬA CHỖ NÀY: dashboard.monthlyRevenueList thay vì dashboard.monthlyRevenue */}
                                     {dashboard?.monthlyRevenue && dashboard.monthlyRevenue.length > 0 ? (
                                         <ResponsiveContainer width="100%" height="100%">
+                                            {/* SỬA CHỖ NÀY: truyền data từ list mới */}
                                             <LineChart data={dashboard.monthlyRevenue}>
                                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                                 <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} tickLine={false} />
-                                                <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} tickFormatter={(val) => `${(val / 1000000).toFixed(0)}M`} />
-                                                <Tooltip formatter={(value: any) => [<PriceFormatter amount={value} />, "Doanh thu"]} />
-                                                <Line type="monotone" dataKey="revenue" stroke="#059669" strokeWidth={3} activeDot={{ r: 6 }} dot={{ strokeWidth: 2, r: 4 }} />
+                                                <YAxis
+                                                    stroke="#94a3b8"
+                                                    fontSize={12}
+                                                    tickLine={false}
+                                                    tickFormatter={(val) => val >= 1000000 ? `${(val / 1000000).toFixed(0)}M` : val}
+                                                />
+                                                <Tooltip formatter={(value: any) => [<PriceFormatter amount={value} />, ""]} />
+                                                <Legend />
+                                                {/* Các đường Line không cần sửa vì dataKey đã khớp với DTO */}
+                                                <Line
+                                                    type="monotone"
+                                                    dataKey="equipmentRevenue"
+                                                    name="Doanh thu thiết bị"
+                                                    stroke="#059669"
+                                                    strokeWidth={3}
+                                                    activeDot={{ r: 6 }}
+                                                />
+                                                <Line
+                                                    type="monotone"
+                                                    dataKey="bookingRevenue"
+                                                    name="Doanh thu booking"
+                                                    stroke="#0284c7"
+                                                    strokeWidth={3}
+                                                    activeDot={{ r: 6 }}
+                                                />
                                             </LineChart>
                                         </ResponsiveContainer>
                                     ) : (
-                                        /* Nếu chưa có hoặc chưa tích hợp được cục data biểu đồ của backend, ta giữ lại biểu đồ cột Booking cũ làm fallback */
+                                        // Fallback giữ nguyên
                                         <ResponsiveContainer width="100%" height="100%">
                                             <BarChart data={bookingChartData} barGap={12}>
                                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -274,7 +298,7 @@ export default function StaffStatisticsPage() {
                         </Card>
 
                         {/* Biểu đồ Cột tiến độ Booking */}
-                        <Card className="lg:col-span-2 border-gray-100 shadow-sm">
+                        {/* <Card className="lg:col-span-2 border-gray-100 shadow-sm">
                             <CardHeader className="flex flex-row items-center justify-between pb-4">
                                 <div className="space-y-1">
                                     <CardTitle className="text-base font-semibold flex items-center gap-2">
@@ -299,10 +323,10 @@ export default function StaffStatisticsPage() {
                                     </ResponsiveContainer>
                                 </div>
                             </CardContent>
-                        </Card>
+                        </Card> */}
 
                         {/* Biểu đồ tròn Cơ cấu cảnh báo rủi ro */}
-                        <Card className="border-gray-100 shadow-sm">
+                        {/* <Card className="border-gray-100 shadow-sm">
                             <CardHeader className="pb-2">
                                 <CardTitle className="text-base font-semibold flex items-center gap-2">
                                     <PieChart className="size-4 text-rose-500" /> Tỷ lệ Cảnh báo Hệ thống
@@ -355,7 +379,7 @@ export default function StaffStatisticsPage() {
                                 )}
 
                             </CardContent>
-                        </Card>
+                        </Card> */}
                     </div>
 
                     {/* Row 3: Danh sách các Alert Chi tiết */}

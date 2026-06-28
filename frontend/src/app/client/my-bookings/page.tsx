@@ -138,18 +138,18 @@ const MyBookings = () => {
 
             {/* Booking List */}
             <div className="mt-4 space-y-4">
-                {bookings
-                    .filter(b => filter === 'all' || b.status === filter)
-                    .map((booking) => {
+                {/* Kiểm tra mảng đã lọc */}
+                {filteredBookings.length > 0 ? (
+                    filteredBookings.map((booking) => {
                         const status = getStatusStyle(booking.status);
                         return (
                             <div key={booking.id} className="bg-white border border-gray-200 rounded-sm overflow-hidden group hover:border-primary transition-all">
+                                {/* ... Giữ nguyên nội dung bên trong card như cũ ... */}
                                 <div className="p-5 flex flex-col md:flex-row gap-6">
                                     {/* Ảnh máy */}
                                     <div className="w-full md:w-32 h-32 shrink-0 bg-gray-50 rounded-sm overflow-hidden border border-gray-100">
                                         <img src={booking.image} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" alt="" />
                                     </div>
-
                                     {/* Thông tin chính */}
                                     <div className="flex-1 space-y-3">
                                         <div className="flex justify-between items-start">
@@ -161,7 +161,6 @@ const MyBookings = () => {
                                                 {status.icon} {status.label}
                                             </div>
                                         </div>
-
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-y-2 gap-x-4">
                                             <div className="flex items-center gap-2 text-gray-600">
                                                 <Calendar size={14} className="text-primary" />
@@ -178,7 +177,6 @@ const MyBookings = () => {
                                         </div>
                                     </div>
                                 </div>
-
                                 {/* Footer action */}
                                 <div className="bg-gray-50 px-5 py-3 border-t border-gray-100 flex justify-between items-center">
                                     <div className="text-[12px] font-bold text-gray-900">
@@ -191,9 +189,7 @@ const MyBookings = () => {
                                             <span className="text-primary">MIỄN PHÍ</span>
                                         )}
                                     </div>
-
                                     <div className="flex gap-4">
-                                        {/* Chỉ hiện nút hủy nếu lịch đang là 'upcoming' */}
                                         {booking.status === 'upcoming' && (
                                             <button
                                                 onClick={() => handleCancelBooking(booking.id)}
@@ -203,7 +199,7 @@ const MyBookings = () => {
                                             </button>
                                         )}
                                         <Link
-                                            href={`/client/my-bookings/${booking.id}`} // Đường dẫn tới trang chi tiết với ID động
+                                            href={`/client/my-bookings/${booking.id}`}
                                             className="flex items-center gap-1 text-[11px] font-bold text-primary uppercase tracking-widest group cursor-pointer"
                                         >
                                             Xem chi tiết
@@ -213,18 +209,25 @@ const MyBookings = () => {
                                 </div>
                             </div>
                         );
-                    })}
-
-                {/* Empty State */}
-                {bookings.length === 0 && (
+                    })
+                ) : (
+                    /* Empty State tùy chỉnh theo filter */
                     <div className="py-20 text-center bg-white border-2 border-dashed border-gray-100">
                         <Calendar className="mx-auto w-12 h-12 text-gray-200 mb-4" />
-                        <p className="text-gray-400 text-[11px] font-bold uppercase tracking-widest">Bạn chưa có lịch hẹn nào</p>
-                        <Link href="/client/booking" passHref>
-                            <button className="mt-4 px-8 py-3 bg-primary text-white text-[11px] font-bold uppercase tracking-widest active:scale-95 rounded-lg transition-transform">
-                                Đặt lịch ngay
-                            </button>
-                        </Link>                    </div>
+                        <p className="text-gray-400 text-[11px] font-bold uppercase tracking-widest">
+                            {filter === 'all' && "Bạn chưa có lịch hẹn nào"}
+                            {filter === 'upcoming' && "Bạn không có lịch hẹn sắp tới nào"}
+                            {filter === 'completed' && "Bạn chưa có lịch hẹn nào đã hoàn thành"}
+                            {filter === 'cancelled' && "Bạn không có lịch hẹn nào đã hủy"}
+                        </p>
+                        {filter === 'all' && (
+                            <Link href="/client/booking" passHref>
+                                <button className="mt-4 px-8 py-3 bg-primary text-white text-[11px] font-bold uppercase tracking-widest active:scale-95 rounded-lg transition-transform">
+                                    Đặt lịch ngay
+                                </button>
+                            </Link>
+                        )}
+                    </div>
                 )}
             </div>
         </Container>

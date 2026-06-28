@@ -33,6 +33,7 @@ import {
 	type StaffBookingStatus,
 } from "@/lib/backofficeApi";
 import { useUserStore } from "@/lib/store";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 type BookingFilterValue = "ALL" | StaffBookingStatus;
 
@@ -114,7 +115,39 @@ export default function StaffBookingsPage() {
 	const [loading, setLoading] = useState(true);
 	const [actionBookingId, setActionBookingId] = useState<number | null>(null);
 	const [statusFilter, setStatusFilter] = useState<BookingFilterValue>("ALL");
-
+	// Sửa định nghĩa hàm này trong component
+	const openActionDialog = (
+		title: string,
+		actionFn: (id: number, note: string) => Promise<any>, // Sửa note? thành note
+		bookingId: number
+	) => {
+		setDialogConfig({
+			title,
+			action: async (id, note) => {
+				try {
+					setActionBookingId(id);
+					// Truyền trực tiếp note vào
+					await actionFn(id, note);
+					toast.success("Thao tác thành công.");
+					await loadBookings();
+				} catch (error) {
+					toast.error(getErrorMessage(error, "Thao tác thất bại."));
+				} finally {
+					setActionBookingId(null);
+				}
+			},
+			bookingId
+		});
+		setIsActionDialogOpen(true);
+	};
+	// Thêm vào trong component StaffBookingsPage
+	const [isActionDialogOpen, setIsActionDialogOpen] = useState(false);
+	const [dialogConfig, setDialogConfig] = useState<{
+		title: string;
+		action: (bookingId: number, note: string) => Promise<void>;
+		bookingId: number | null;
+	}>({ title: "", action: async () => { }, bookingId: null });
+	const [noteInput, setNoteInput] = useState("");
 	const loadBookings = useCallback(async () => {
 		try {
 			setLoading(true);
@@ -454,7 +487,7 @@ export default function StaffBookingsPage() {
 														{booking.status === "PENDING_CONFIRM" ? (
 															<Button
 																size="sm"
-																onClick={() => void handleConfirm(booking.id)}
+																onClick={() => openActionDialog("Xác nhận booking", backofficeApi.confirmStaffBooking, booking.id)}
 																disabled={isActing}
 																className="rounded-lg"
 															>
@@ -468,7 +501,7 @@ export default function StaffBookingsPage() {
 																<Button
 																	size="sm"
 																	variant="outline"
-																	onClick={() => void handleCheckIn(booking.id)}
+																	onClick={() => openActionDialog("Ghi chú check-in", backofficeApi.checkInStaffBooking, booking.id)}
 																	disabled={isActing}
 																	className="rounded-lg"
 																>
@@ -478,7 +511,7 @@ export default function StaffBookingsPage() {
 																<Button
 																	size="sm"
 																	variant="outline"
-																	onClick={() => void handleNoShow(booking.id)}
+																	onClick={() => openActionDialog("Lý do No-show", backofficeApi.markStaffBookingNoShow, booking.id)}
 																	disabled={isActing}
 																	className="rounded-lg"
 																>
@@ -489,10 +522,15 @@ export default function StaffBookingsPage() {
 														) : null}
 
 														{booking.status === "CHECKED_IN" ? (
+															// Trong phần gọi nút "Hoàn tất"
 															<Button
 																size="sm"
 																variant="outline"
-																onClick={() => void handleComplete(booking.id)}
+																onClick={() => openActionDialog(
+																	"Hoàn tất booking",
+																	async (id, note) => await backofficeApi.completeStaffBooking(id), // Bỏ qua note ở đây
+																	booking.id
+																)}
 																disabled={isActing}
 																className="rounded-lg"
 															>
@@ -501,13 +539,11 @@ export default function StaffBookingsPage() {
 															</Button>
 														) : null}
 
-														{["PENDING_CONFIRM", "CONFIRMED"].includes(
-															booking.status
-														) ? (
+														{["PENDING_CONFIRM", "CONFIRMED"].includes(booking.status) ? (
 															<Button
 																size="sm"
 																variant="destructive"
-																onClick={() => void handleCancel(booking.id)}
+																onClick={() => openActionDialog("Nhập lý do hủy", backofficeApi.cancelStaffBooking, booking.id)}
 																disabled={isActing}
 																className="rounded-lg"
 															>
@@ -526,6 +562,32 @@ export default function StaffBookingsPage() {
 					)}
 				</CardContent>
 			</Card>
+
+			<Dialog open={isActionDialogOpen} onOpenChange={setIsActionDialogOpen}>
+				<DialogContent>
+					<DialogHeader>
+						<DialogTitle>{dialogConfig.title}</DialogTitle>
+					</DialogHeader>
+					<div className="py-4">
+						<input
+							value={noteInput}
+							onChange={(e) => setNoteInput(e.target.value)}
+							placeholder="Nhập nội dung/ghi chú tại đây..."
+							className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+						/>
+					</div>
+					<div className="flex justify-end gap-2">
+						<Button variant="outline" onClick={() => setIsActionDialogOpen(false)}>Hủy</Button>
+						<Button onClick={async () => {
+							if (dialogConfig.bookingId) {
+								await dialogConfig.action(dialogConfig.bookingId, noteInput);
+								setIsActionDialogOpen(false);
+								setNoteInput("");
+							}
+						}}>Xác nhận</Button>
+					</div>
+				</DialogContent>
+			</Dialog>
 		</div>
 	);
 }

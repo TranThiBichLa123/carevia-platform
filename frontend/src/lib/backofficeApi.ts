@@ -146,8 +146,12 @@ export type StaffDashboard = {
   }>;
   totalRevenue?: number;              // Tổng doanh thu tích lũy
   revenueChangePercentage?: number;   // % Biến động tăng trưởng doanh thu
-  monthlyRevenue?: Array<{ month: string; revenue: number }>; // Biểu đồ biến động doanh thu
-
+  monthlyRevenue?: Array<{
+    month: string;
+    bookingRevenue: number;   // Thêm trường này
+    equipmentRevenue: number; // Thêm trường này
+    revenue?: number;         // Tổng (tuỳ chọn giữ lại)
+  }>;
 
 };
 

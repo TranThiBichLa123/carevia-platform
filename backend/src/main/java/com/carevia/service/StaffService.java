@@ -10,8 +10,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import com.carevia.core.domain.Account;
+import com.carevia.core.domain.Booking;
+import com.carevia.core.domain.Order;
 import com.carevia.core.domain.Staff;
 import com.carevia.core.repository.AccountRepository;
+import com.carevia.core.repository.BookingRepository;
+import com.carevia.core.repository.OrderRepository;
 import com.carevia.core.repository.StaffRepository;
 import com.carevia.service.storage.CloudinaryStorageService;
 import com.carevia.shared.annotation.Audit;
@@ -22,6 +26,7 @@ import com.carevia.shared.dto.PageResponse;
 import com.carevia.shared.dto.request.staff.UpdateStaffRequest;
 import com.carevia.shared.dto.response.account.UploadAvatarResponse;
 import com.carevia.shared.dto.response.client.ClientResponse;
+import com.carevia.shared.dto.response.staff.MonthlyRevenueDto;
 import com.carevia.shared.dto.response.staff.StaffDetailResponse;
 import com.carevia.shared.dto.response.staff.StaffRevenueResponse;
 import com.carevia.shared.dto.response.staff.StaffStatsResponse;
@@ -32,8 +37,9 @@ import com.carevia.shared.util.SecurityUtils;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -49,6 +55,8 @@ public class StaffService {
     private final CloudinaryStorageService cloudinaryStorageService;
     private final CloudinaryUtils cloudinaryUtils;
     private final AccountService accountService;
+    private final OrderRepository orderRepository;
+    private final BookingRepository bookingRepository;
 
     @Value("${app.avatar.max-size-bytes}")
     private long maxSizeBytes;
@@ -57,12 +65,16 @@ public class StaffService {
             AccountRepository accountRepository,
             CloudinaryStorageService cloudinaryStorageService,
             CloudinaryUtils cloudinaryUtils,
-            AccountService accountService) {
+            AccountService accountService, OrderRepository orderRepository,
+                    BookingRepository bookingRepository) {
         this.staffRepository = staffRepository;
         this.accountRepository = accountRepository;
         this.cloudinaryStorageService = cloudinaryStorageService;
         this.cloudinaryUtils = cloudinaryUtils;
         this.accountService = accountService;
+        this.orderRepository = orderRepository;
+        this.bookingRepository = bookingRepository;
+
     }
 
     /**
@@ -547,54 +559,76 @@ public class StaffService {
         Staff staff = staffRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Staff not found with id: " + id));
 
-        // Check authorization - only staff themselves or admin
         validateStaffOwnershipOrAdmin(staff);
 
-        // Implementation pending - requires Payment, Enrollment entities and revenue
-        // calculation logic
-        // When Payment and Enrollment entities are available:
-        //
-        // Calculate total revenue:
-        // Double totalRevenue = paymentRepository
-        // .sumRevenueByStaffId(id, PaymentStatus.COMPLETED);
-        // Double staffShare = totalRevenue * revenueSharePercentage;
-        //
-        // Calculate monthly revenue:
-        // Instant startOfMonth =
-        // LocalDate.now().withDayOfMonth(1).atStartOfDay(ZoneOffset.UTC).toInstant();
-        // Double monthlyRevenue = paymentRepository
-        // .sumRevenueByStaffIdAndDateRange(id, startOfMonth, Instant.now());
-        //
-        // Calculate yearly revenue:
-        // Instant startOfYear =
-        // LocalDate.now().withDayOfYear(1).atStartOfDay(ZoneOffset.UTC).toInstant();
-        // Double yearlyRevenue = paymentRepository
-        // .sumRevenueByStaffIdAndDateRange(id, startOfYear, Instant.now());
-        //
-        // Get enrollment counts:
-        // Long totalEnrollments = enrollmentRepository.countByStaffId(id);
-        // Long monthlyEnrollments = enrollmentRepository
-        // .countByStaffIdAndDateRange(id, startOfMonth, Instant.now());
-        //
-        // Get revenue by course:
-        // List<RevenueByCourse> revenueByCourse = paymentRepository
-        // .getRevenueGroupedByStaffId(id);
+        // 1. Xác định mốc thời gian: Lấy dữ liệu của 6 tháng gần nhất (bao gồm tháng
+        // hiện tại)
+        ZoneId zoneId = ZoneId.of("Asia/Ho_Chi_Minh"); // Set múi giờ thực tế của dự án
+        ZonedDateTime now = ZonedDateTime.now(zoneId);
+        ZonedDateTime sixMonthsAgoDate = now.minusMonths(5).withDayOfMonth(1).withHour(0).withMinute(0).withSecond(0);
+        Instant startDate = sixMonthsAgoDate.toInstant();
 
-        StaffRevenueResponse response = StaffRevenueResponse.builder()
-                .totalRevenue(BigDecimal.ZERO) // Use BigDecimal.ZERO for 0.0
-                .monthlyRevenue(BigDecimal.ZERO)
-                .yearlyRevenue(BigDecimal.ZERO)
-                .totalEnrollments(0L)
-                .monthlyEnrollments(0L)
-                .revenueByCourse(new HashMap<>())
+        // 2. Kéo dữ liệu từ DB lên
+        // (Lưu ý: Nếu OrderRepository có hàm lọc theo staffId, hãy dùng nó thay vì hàm
+        // chung)
+        List<Order> completedOrders = orderRepository.findCompletedOrdersSince(startDate);
+        List<Booking> completedBookings = bookingRepository.findCompletedBookingsByStaffSince(id, startDate);
+
+        // 3. Khởi tạo mảng kết quả 6 tháng với doanh thu = 0
+        List<MonthlyRevenueDto> monthlyChartData = new ArrayList<>();
+        for (int i = 5; i >= 0; i--) {
+            ZonedDateTime monthIter = now.minusMonths(i);
+            monthlyChartData.add(MonthlyRevenueDto.builder()
+                    .month("T" + monthIter.getMonthValue()) // Tạo chuỗi "T1", "T2"...
+                    .equipmentRevenue(BigDecimal.ZERO)
+                    .bookingRevenue(BigDecimal.ZERO)
+                    .build());
+        }
+
+        // 4. Cộng dồn doanh thu Thiết Bị (Order) vào từng tháng tương ứng
+        for (Order order : completedOrders) {
+            ZonedDateTime orderDate = order.getCreatedAt().atZone(zoneId);
+            String monthStr = "T" + orderDate.getMonthValue();
+
+            monthlyChartData.stream()
+                    .filter(m -> m.getMonth().equals(monthStr))
+                    .findFirst()
+                    .ifPresent(m -> {
+                        BigDecimal currentAmt = order.getTotalAmount() != null ? order.getTotalAmount()
+                                : BigDecimal.ZERO;
+                        m.setEquipmentRevenue(m.getEquipmentRevenue().add(currentAmt));
+                    });
+        }
+
+        // 5. Cộng dồn doanh thu Booking vào từng tháng tương ứng
+        for (Booking booking : completedBookings) {
+            ZonedDateTime bookingDate = booking.getCreatedAt().atZone(zoneId);
+            String monthStr = "T" + bookingDate.getMonthValue();
+
+            monthlyChartData.stream()
+                    .filter(m -> m.getMonth().equals(monthStr))
+                    .findFirst()
+                    .ifPresent(m -> {
+                        BigDecimal currentAmt = booking.getTotalPrice() != null ? booking.getTotalPrice()
+                                : BigDecimal.ZERO;
+                        m.setBookingRevenue(m.getBookingRevenue().add(currentAmt));
+                    });
+        }
+
+        // Tính tổng Total chung
+        BigDecimal totalEquipment = monthlyChartData.stream().map(MonthlyRevenueDto::getEquipmentRevenue)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalBooking = monthlyChartData.stream().map(MonthlyRevenueDto::getBookingRevenue)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+        BigDecimal totalRevenue = totalEquipment.add(totalBooking);
+
+        // 6. Trả về kết quả
+        return StaffRevenueResponse.builder()
+                .totalRevenue(totalRevenue)
+                .monthlyRevenueList(monthlyChartData) // Data cho biểu đồ truyền ra đây!
+                // ... (set các trường tổng kết khác nếu bạn cần)
                 .lastUpdated(Instant.now())
                 .build();
-
-        log.debug("Returning revenue data for staff id: {}", id);
-        log.warn(
-                "Revenue calculation pending - requires Payment entity, Enrollment entity, and revenue share configuration");
-
-        return response;
     }
 
     /**

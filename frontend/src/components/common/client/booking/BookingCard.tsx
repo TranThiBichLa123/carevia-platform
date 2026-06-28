@@ -12,21 +12,14 @@ const BookingCard = ({ device, onSelect }: Props) => {
   return (
     <Link href={`/client/booking/${device?.id}`} className="border border-gray-100 rounded-xl group overflow-hidden w-full relative bg-white hover:border-primary hover:shadow-lg transition-all duration-300 flex flex-col h-full">
       {/* Phần hình ảnh tương tự ProductCard */}
-      <div className="overflow-hidden relative block aspect-video">
+      <div className="overflow-hidden relative block aspect-video w-full">
         <Image
           src={device?.image}
-          width={500}
-          height={500}
           alt={device?.name}
-          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+          fill // Thay cho width/height
+          className="object-contain group-hover:scale-110 transition-transform duration-500"
+          sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
         />
-
-        {/* Badge Hot Trial nếu giá bằng 0, style tương tự DiscountBadge */}
-        {device?.bookingPrice === 0 && (
-          <div className="absolute top-2 right-2 bg-red-600 text-white text-[10px] px-2 py-1 rounded-lg font-bold shadow-sm z-10 animate-pulse">
-            HOT TRIAL
-          </div>
-        )}
       </div>
 
       <div className="p-4 flex-1 flex flex-col space-y-2">

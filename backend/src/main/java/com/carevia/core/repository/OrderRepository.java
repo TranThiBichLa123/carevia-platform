@@ -19,7 +19,8 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
 
     Optional<Order> findByOrderCode(String orderCode);
 
-    // THÊM: Lấy danh sách đơn hàng cho Client (không phân trang, sắp xếp mới nhất lên đầu)
+    // THÊM: Lấy danh sách đơn hàng cho Client (không phân trang, sắp xếp mới nhất
+    // lên đầu)
     List<Order> findByAccountIdOrderByCreatedAtDesc(Long accountId);
 
     // Giữ lại các hàm phân trang cho Admin/Staff
@@ -31,7 +32,21 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
 
     long countByStatus(OrderStatus status);
 
-    // SỬA QUERY: Đảm bảo sử dụng tên trường trong Entity (totalAmount, status, createdAt)
+    // Lấy các đơn mua thiết bị thành công từ một mốc thời gian
+    @Query("SELECT o FROM Order o WHERE o.status = com.carevia.shared.constant.OrderStatus.COMPLETED AND o.createdAt >= :startDate")
+    List<Order> findCompletedOrdersSince(@Param("startDate") Instant startDate);
+
+    // GHI CHÚ: Nếu hệ thống của bạn có nhiều Staff/Brand khác nhau và cần lọc Order
+    // thuộc về Staff đó,
+    // bạn cần JOIN qua bảng OrderItem và Device. Ví dụ:
+    // @Query("SELECT DISTINCT o FROM Order o JOIN o.items i WHERE i.device.staff.id
+    // = :staffId AND o.status = com.carevia.shared.constant.OrderStatus.COMPLETED
+    // AND o.createdAt >= :startDate")
+    // List<Order> findCompletedOrdersByStaffSince(@Param("staffId") Long staffId,
+    // @Param("startDate") Instant startDate);
+
+    // SỬA QUERY: Đảm bảo sử dụng tên trường trong Entity (totalAmount, status,
+    // createdAt)
     // Lưu ý: Trong HQL, Enum phải được viết đầy đủ hoặc dùng tên Enum
     @Query("SELECT SUM(o.totalAmount) FROM Order o WHERE o.status = com.carevia.shared.constant.OrderStatus.COMPLETED AND o.createdAt BETWEEN :start AND :end")
     java.math.BigDecimal calculateRevenue(@Param("start") Instant start, @Param("end") Instant end);
@@ -39,7 +54,7 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
     @Query("SELECT COUNT(o) FROM Order o WHERE o.status = com.carevia.shared.constant.OrderStatus.COMPLETED AND o.createdAt BETWEEN :start AND :end")
     long countCompletedOrders(@Param("start") Instant start, @Param("end") Instant end);
 
-        @Query("""
+    @Query("""
             SELECT DISTINCT o
             FROM Order o
             JOIN o.items item
@@ -48,7 +63,7 @@ public interface OrderRepository extends JpaRepository<Order, Long>, JpaSpecific
               AND o.status = com.carevia.shared.constant.OrderStatus.COMPLETED
             ORDER BY o.createdAt DESC
             """)
-        List<Order> findCompletedOrdersForDeviceReview(
+    List<Order> findCompletedOrdersForDeviceReview(
             @Param("accountId") Long accountId,
             @Param("deviceId") Long deviceId,
             Pageable pageable);

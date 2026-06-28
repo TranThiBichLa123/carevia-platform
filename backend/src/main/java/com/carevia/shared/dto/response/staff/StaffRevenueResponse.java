@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import java.time.Instant;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.Map;
 
 @Data
@@ -33,5 +34,7 @@ public class StaffRevenueResponse {
     private BigDecimal completedPayout;
 
     private Map<String, BigDecimal> revenueByCourse; // Course title -> revenue
-    private Instant lastUpdated; 
+    private Instant lastUpdated;
+    // Thêm trường này vào StaffRevenueResponse.java
+    private List<MonthlyRevenueDto> monthlyRevenueList;
 }

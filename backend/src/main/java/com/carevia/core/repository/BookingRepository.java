@@ -46,4 +46,8 @@ public interface BookingRepository extends JpaRepository<Booking, Long>, JpaSpec
 
     @Query("SELECT COUNT(b) FROM Booking b WHERE b.appointmentDate = :date AND b.status = :status")
     long countByAppointmentDateAndStatus(@Param("date") LocalDate date, @Param("status") BookingStatus status);
+
+    // Lấy các đơn booking thành công từ một mốc thời gian của 1 Staff cụ thể
+    @Query("SELECT b FROM Booking b WHERE b.session.assignedStaff.id = :staffId AND b.status = com.carevia.shared.constant.BookingStatus.COMPLETED AND b.createdAt >= :startDate")
+    List<Booking> findCompletedBookingsByStaffSince(@Param("staffId") Long staffId, @Param("startDate") Instant startDate);
 }
