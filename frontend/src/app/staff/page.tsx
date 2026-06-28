@@ -259,71 +259,102 @@ export default function StaffStatisticsPage() {
                     </div>
 
 
-                    {/* Row 2: Khu vực Biểu đồ Phân tích Đa dạng - Đổi thành grid-cols-6 */}
-                    <div className="grid gap-6 lg:grid-cols-6">
+                 {/* Row 2: Khu vực Biểu đồ Phân tích Đa dạng - Grid 6 cột */} 
+<div className="grid gap-6 grid-cols-1 lg:grid-cols-6"> 
+  
+  {/* Card 1: Biến động doanh thu - Chiếm 4/6 phần */} 
+  <Card className="lg:col-span-4 border-gray-100 shadow-sm"> 
+    <CardHeader className="flex flex-row items-center justify-between pb-4"> 
+      <div className="space-y-1"> 
+        <CardTitle className="text-base font-semibold flex items-center gap-2"> 
+          <ArrowUpRight className="size-4 text-emerald-600" /> Biến động doanh thu theo các tháng 
+        </CardTitle> 
+        <CardDescription>Báo cáo xu hướng doanh thu phát sinh qua các mốc thời gian.</CardDescription> 
+      </div> 
+    </CardHeader> 
+    <CardContent className="pt-2"> 
+      <div className="h-72 w-full"> 
+        {dashboard?.monthlyRevenueData && dashboard.monthlyRevenueData.length > 0 ? ( 
+          <ResponsiveContainer width="100%" height="100%"> 
+            <BarChart data={dashboard?.monthlyRevenueData} barSize={40}> 
+              <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" /> 
+              <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} tickLine={false} /> 
+              <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} tickFormatter={(val) => `${(val / 1000000).toFixed(0)}M`} /> 
+              <Tooltip formatter={(value: any) => [<PriceFormatter amount={value} />, "Doanh thu"]} /> 
+              <Legend /> 
+              <Bar dataKey="experienceRevenue" name="Booking trải nghiệm" stackId="revenue" fill="#0ea5e9" radius={[0, 0, 0, 0]} /> 
+              <Bar dataKey="purchaseRevenue" name="Mua thiết bị" stackId="revenue" fill="#059669" radius={[4, 4, 0, 0]} /> 
+            </BarChart> 
+          </ResponsiveContainer> 
+        ) : ( 
+          <div className="flex h-full items-center justify-center text-muted-foreground text-sm">Chưa có dữ liệu doanh thu</div> 
+        )} 
+      </div> 
+    </CardContent> 
+  </Card> 
 
+  {/* Card 2: Tỷ lệ Cảnh báo Hệ thống - Chiếm 2/6 phần còn lại */} 
+  <Card className="lg:col-span-2 border-gray-100 shadow-sm flex flex-col justify-between"> 
+    <CardHeader className="pb-2"> 
+      <CardTitle className="text-base font-semibold flex items-center gap-2"> 
+        <PieChart className="size-4 text-rose-500" /> Tỷ lệ Cảnh báo Hệ thống 
+      </CardTitle> 
+      <CardDescription>Phân phối các đầu việc cần xử lý gấp để tránh gián đoạn.</CardDescription> 
+    </CardHeader> 
+    <CardContent className="flex-1 flex flex-col items-center justify-center pt-2"> 
+      {alertChartData.length > 0 ? ( 
+        <> 
+          {/* Tăng chiều cao lên h-48 để biểu đồ Donut không bị nén quá nhỏ */}
+          <div className="h-48 w-full relative flex items-center justify-center"> 
+            <ResponsiveContainer width="100%" height="100%"> 
+              <RechartsPieChart> 
+                <Tooltip formatter={(value) => [`${value} mục`, "Số lượng"]} /> 
+                <Pie 
+                  data={alertChartData} 
+                  cx="50%" 
+                  cy="50%" 
+                  innerRadius={55} 
+                  outerRadius={75} 
+                  paddingAngle={5} 
+                  dataKey="value" 
+                > 
+                  {alertChartData.map((entry, index) => ( 
+                    <Cell key={`cell-${index}`} fill={entry.color} /> 
+                  ))} 
+                </Pie> 
+              </RechartsPieChart> 
+            </ResponsiveContainer> 
+            <div className="absolute flex flex-col items-center justify-center"> 
+              <span className="text-2xl font-bold text-gray-800"> 
+                {alertChartData.reduce((acc, curr) => acc + curr.value, 0)} 
+              </span> 
+              <span className="text-xs text-muted-foreground">Tổng cảnh báo</span> 
+            </div> 
+          </div> 
+          {/* Legend danh sách cảnh báo */}
+          <div className="w-full mt-4 space-y-1"> 
+            {alertChartData.map((item, index) => ( 
+              <div key={index} className="flex items-center justify-between text-sm"> 
+                <div className="flex items-center gap-2"> 
+                  <span className="block size-2.5 rounded-full" style={{ backgroundColor: item.color }} /> 
+                  <span className="text-gray-600">{item.name}</span> 
+                </div> 
+                <span className="font-medium text-gray-800">{item.value}</span> 
+              </div> 
+            ))} 
+          </div> 
+        </> 
+      ) : ( 
+        <div className="flex flex-col items-center gap-2 my-auto"> 
+          <AlertTriangle className="size-6 text-muted-foreground" /> 
+          <span className="text-sm text-muted-foreground text-center">Không có cảnh báo nào trong hệ thống.</span> 
+        </div> 
+      )} 
+    </CardContent> 
+  </Card>
 
-                        {/* Card 1: Biến động doanh thu - Chiếm 4/6 phần (lớn hơn) */}
-                        <Card className="lg:col-span-4 border-gray-100 shadow-sm">
-                            <CardHeader className="flex flex-row items-center justify-between pb-4">
-                                <div className="space-y-1">
-                                    <CardTitle className="text-base font-semibold flex items-center gap-2">
-                                        <ArrowUpRight className="size-4 text-emerald-600" /> Biến động doanh thu theo các tháng
-                                    </CardTitle>
-                                    <CardDescription>Báo cáo xu hướng doanh thu phát sinh qua các mốc thời gian.</CardDescription>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="pt-2">
-                                <div className="h-72 w-full">
-                                    {/* Giữ nguyên logic hiển thị biểu đồ doanh thu của bạn tại đây */}
-                                    {dashboard?.monthlyRevenueData && dashboard.monthlyRevenueData.length > 0 ? (
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <BarChart data={dashboard?.monthlyRevenueData} barSize={40}>
-                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                                <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} tickLine={false} />
-                                                <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} tickFormatter={(val) => `${(val / 1000000).toFixed(0)}M`} />
-                                                <Tooltip formatter={(value: any) => [<PriceFormatter amount={value} />, "Doanh thu"]} />
-                                                <Legend />
-                                                <Bar dataKey="experienceRevenue" name="Booking trải nghiệm" stackId="revenue" fill="#0ea5e9" radius={[0, 0, 0, 0]} />
-                                                <Bar dataKey="purchaseRevenue" name="Mua thiết bị" stackId="revenue" fill="#059669" radius={[4, 4, 0, 0]} />
-                                            </BarChart>
-                                        </ResponsiveContainer>
-                                    ) : (
-                                        <div className="flex h-full items-center justify-center text-muted-foreground text-sm">Chưa có dữ liệu doanh thu</div>
-                                    )}
-                                </div>
-                            </CardContent>
-                        </Card>
+</div>
 
-
-                        {/* Card 2: Tiến độ xử lý Booking hôm nay - Chiếm 2/6 phần (nhỏ hơn) */}
-                        <Card className="lg:col-span-2 border-gray-100 shadow-sm">
-                            <CardHeader className="flex flex-row items-center justify-between pb-4">
-                                <div className="space-y-1">
-                                    <CardTitle className="text-base font-semibold flex items-center gap-2">
-                                        <BarChart3 className="size-4 text-staff-primary" /> Tiến độ Booking
-                                    </CardTitle>
-                                    <CardDescription>Dữ liệu trong ngày.</CardDescription>
-                                </div>
-                            </CardHeader>
-                            <CardContent className="pt-2">
-                                <div className="h-72 w-full">
-                                    <ResponsiveContainer width="100%" height="100%">
-                                        <BarChart data={bookingChartData} barGap={12}>
-                                            <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                            <XAxis dataKey="name" hide={true} />
-                                            <YAxis allowDecimals={false} stroke="#94a3b8" fontSize={12} />
-                                            <Tooltip cursor={{ fill: '#f8fafc' }} />
-                                            <Legend iconType="circle" wrapperStyle={{ fontSize: '13px', paddingTop: '10px' }} />
-                                            <Bar dataKey="Tổng hôm nay" fill="#0284c7" radius={[6, 6, 0, 0]} maxBarSize={60} />
-                                            <Bar dataKey="Chờ xác nhận" fill="#d97706" radius={[6, 6, 0, 0]} maxBarSize={60} />
-                                            <Bar dataKey="Đã check-in" fill="#059669" radius={[6, 6, 0, 0]} maxBarSize={60} />
-                                        </BarChart>
-                                    </ResponsiveContainer>
-                                </div>
-                            </CardContent>
-                        </Card>
-                    </div>
 
 
                     {/* Row 3: Danh sách các Alert Chi tiết */}
