@@ -1,5 +1,6 @@
 "use client";
 
+
 import { AlertTriangle, Boxes, CalendarCheck2, ClipboardList, Loader2, RefreshCw, TicketPercent, TrendingUp, BarChart3, PieChart, DollarSign, TrendingDown, ArrowUpRight } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -11,12 +12,14 @@ import { formatDate, getBackofficeErrorMessage } from "@/lib/backofficeUtils";
 import { useUserStore } from "@/lib/store";
 import PriceFormatter from "@/components/common/PriceFormatter";
 
+
 const bookingStats = [
     { key: "pendingOrders", label: "Đơn chờ xử lý", icon: ClipboardList, color: "text-indigo-600", bg: "bg-indigo-50/50", border: "hover:border-indigo-200" },
     { key: "bookingsToday", label: "Booking hôm nay", icon: CalendarCheck2, color: "text-sky-600", bg: "bg-sky-50/50", border: "hover:border-sky-200" },
     { key: "pendingBookings", label: "Booking chờ duyệt", icon: CalendarCheck2, color: "text-amber-600", bg: "bg-amber-50/50", border: "hover:border-amber-200" },
     { key: "checkedInToday", label: "Khách đã check-in", icon: CalendarCheck2, color: "text-emerald-600", bg: "bg-emerald-50/50", border: "hover:border-emerald-200" },
 ] as const;
+
 
 const alertStats = [
     { key: "lowStockDevices", label: "Sản phẩm sắp hết", icon: Boxes, color: "text-rose-600", bg: "bg-rose-50/50", border: "hover:border-rose-200" },
@@ -25,10 +28,13 @@ const alertStats = [
 ] as const;
 
 
+
+
 export default function StaffStatisticsPage() {
     const { authUser, isAuthenticated } = useUserStore();
     const [dashboard, setDashboard] = useState<StaffDashboard | null>(null);
     const [loading, setLoading] = useState(true);
+
 
     const loadDashboard = useCallback(async () => {
         try {
@@ -42,6 +48,7 @@ export default function StaffStatisticsPage() {
         }
     }, []);
 
+
     useEffect(() => {
         if (!isAuthenticated) {
             setLoading(false);
@@ -50,13 +57,16 @@ export default function StaffStatisticsPage() {
         void loadDashboard();
     }, [isAuthenticated, loadDashboard]);
 
+
     if (!isAuthenticated) {
         return <div className="flex min-h-[50vh] items-center justify-center text-sm text-muted-foreground">Đăng nhập bằng tài khoản Brand Staff để xem thống kê.</div>;
     }
 
+
     if (authUser?.role !== "STAFF") {
         return <div className="flex min-h-[50vh] items-center justify-center text-sm text-muted-foreground">Chỉ Brand Staff mới truy cập được trang này.</div>;
     }
+
 
     //  Chuẩn bị dữ liệu cho Biểu đồ Phễu Booking (Bar Chart)
     const bookingChartData = [
@@ -68,12 +78,14 @@ export default function StaffStatisticsPage() {
         }
     ];
 
+
     //  Chuẩn bị dữ liệu cho Biểu đồ Cảnh báo Vận hành (Donut Chart)
     const alertChartData = [
         { name: "Sản phẩm sắp hết", value: dashboard?.lowStockDevices || 0, color: "#f43f5e" },
         { name: "Thiết bị bảo trì", value: dashboard?.maintenanceDevices || 0, color: "#f97316" },
         { name: "Voucher sắp hết hạn", value: dashboard?.vouchersExpiringSoon || 0, color: "#8b5cf6" },
     ].filter(item => item.value > 0); // Chỉ hiển thị mục có số lượng > 0
+
 
     return (
         <div className="space-y-6 p-1 font-vietnam">
@@ -90,18 +102,23 @@ export default function StaffStatisticsPage() {
                         )}
                     </h1>
 
+
                     <p className="text-sm text-muted-foreground mt-1.5">
                         Workspace kiểm soát KPI, dữ liệu đặt lịch và cảnh báo rủi ro hệ thống tại brand-level.
                     </p>
                 </div>
 
 
+
+
                 <div className="flex items-center gap-3">
+
 
                     <div className="hidden border-r border-gray-200 pr-4 text-right md:block">
                         <div className="text-xs text-muted-foreground">Ngày vận hành</div>
                         <div className="text-sm font-semibold text-gray-800">{dashboard ? formatDate(dashboard.date) : "--/--/----"}</div>
                     </div>
+
 
                     <Button
                         onClick={() => void loadDashboard()}
@@ -119,6 +136,8 @@ export default function StaffStatisticsPage() {
             </div>
 
 
+
+
             {loading ? (
                 <div className="flex min-h-[50vh] items-center justify-center text-muted-foreground">
                     <Loader2 className="size-6 animate-spin text-staff-primary" />
@@ -127,6 +146,8 @@ export default function StaffStatisticsPage() {
                 <>
                     {/* Row 1: Hệ thống thẻ số liệu phân tầng */}
                     <div className="space-y-5">
+
+
 
 
                         {/* 🌟 THÊM MỚI: NHÓM SỐ LIỆU TÀI CHÍNH (DOANH THU & BIẾN ĐỘNG) */}
@@ -147,6 +168,7 @@ export default function StaffStatisticsPage() {
                                         </div>
                                     </CardContent>
                                 </Card>
+
 
                                 {/* Thẻ biến động tăng trưởng */}
                                 <Card className="overflow-hidden border-gray-100/70 shadow-sm border-l-4 border-l-indigo-500 transition-all duration-300 hover:shadow-md">
@@ -170,9 +192,11 @@ export default function StaffStatisticsPage() {
                         </div>
 
 
+
+
                         {/* Nhóm 1: KPI Đặt lịch & Đơn hàng (Hàng 4 cột cân đối) */}
                         <div>
-                            <div className="text-xs font-semibold text-gray-400 mb-2.5 tracking-wide">Hiệu suất vận hành ngày</div>
+                            <div className="text-xs font-semibold text-indigo-500 mb-2.5 tracking-wide">Hiệu suất vận hành ngày</div>
                             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                                 {bookingStats.map((item) => {
                                     const Icon = item.icon;
@@ -195,16 +219,19 @@ export default function StaffStatisticsPage() {
                             </div>
                         </div>
 
+
                         {/* Nhóm 2: Chỉ số rủi ro & Hệ thống (Hàng 3 cột lấp đầy khoảng trống) */}
-                        <div>
+                        {/* <div>
                             <div className="text-xs font-semibold text-rose-500/80 mb-2.5 tracking-wide">Giám sát rủi ro & Cảnh báo</div>
                             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                                 {alertStats.map((item) => {
                                     const Icon = item.icon;
                                     const value = dashboard ? dashboard[item.key] : 0;
 
+
                                     // Tạo highlight đặc biệt nếu số lượng cảnh báo > 0 để gây chú ý cho Staff
                                     const isAlertActive = value > 0;
+
 
                                     return (
                                         <Card key={item.key} className={`overflow-hidden border-gray-100/70 shadow-sm transition-all duration-300 hover:shadow-md hover:-translate-y-0.5 ${isAlertActive ? 'ring-1 ring-rose-100/50 bg-rose-50/5' : ''} ${item.border}`}>
@@ -226,89 +253,61 @@ export default function StaffStatisticsPage() {
                                     );
                                 })}
                             </div>
-                        </div>
+                        </div> */}
+
 
                     </div>
 
-                    {/* Row 2: Khu vực Biểu đồ Phân tích Đa dạng */}
-                    <div className="grid gap-6 lg:grid-cols-3">
-                        {/* 🌟 CẬP NHẬT: THAY BIỂU ĐỒ HOẶC BỔ SUNG ĐƯỜNG XU HƯỚNG BIẾN ĐỘNG DOANH THU */}
-                        <Card className="lg:col-span-2 border-gray-100 shadow-sm">
+
+                    {/* Row 2: Khu vực Biểu đồ Phân tích Đa dạng - Đổi thành grid-cols-6 */}
+                    <div className="grid gap-6 lg:grid-cols-6">
+
+
+                        {/* Card 1: Biến động doanh thu - Chiếm 4/6 phần (lớn hơn) */}
+                        <Card className="lg:col-span-4 border-gray-100 shadow-sm">
                             <CardHeader className="flex flex-row items-center justify-between pb-4">
                                 <div className="space-y-1">
                                     <CardTitle className="text-base font-semibold flex items-center gap-2">
                                         <ArrowUpRight className="size-4 text-emerald-600" /> Biến động doanh thu theo các tháng
                                     </CardTitle>
-                                    <CardDescription>Báo cáo trực quan hóa đường xu hướng doanh thu phát sinh của Brand qua các mốc thời gian.</CardDescription>
+                                    <CardDescription>Báo cáo xu hướng doanh thu phát sinh qua các mốc thời gian.</CardDescription>
                                 </div>
                             </CardHeader>
                             <CardContent className="pt-2">
                                 <div className="h-72 w-full">
-                                    {/* SỬA CHỖ NÀY: dashboard.monthlyRevenueList thay vì dashboard.monthlyRevenue */}
-                                    {dashboard?.monthlyRevenue && dashboard.monthlyRevenue.length > 0 ? (
+                                    {/* Giữ nguyên logic hiển thị biểu đồ doanh thu của bạn tại đây */}
+                                    {dashboard?.monthlyRevenueData && dashboard.monthlyRevenueData.length > 0 ? (
                                         <ResponsiveContainer width="100%" height="100%">
-                                            {/* SỬA CHỖ NÀY: truyền data từ list mới */}
-                                            <LineChart data={dashboard.monthlyRevenue}>
+                                            <BarChart data={dashboard?.monthlyRevenueData} barSize={40}>
                                                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
                                                 <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} tickLine={false} />
-                                                <YAxis
-                                                    stroke="#94a3b8"
-                                                    fontSize={12}
-                                                    tickLine={false}
-                                                    tickFormatter={(val) => val >= 1000000 ? `${(val / 1000000).toFixed(0)}M` : val}
-                                                />
-                                                <Tooltip formatter={(value: any) => [<PriceFormatter amount={value} />, ""]} />
+                                                <YAxis stroke="#94a3b8" fontSize={12} tickLine={false} tickFormatter={(val) => `${(val / 1000000).toFixed(0)}M`} />
+                                                <Tooltip formatter={(value: any) => [<PriceFormatter amount={value} />, "Doanh thu"]} />
                                                 <Legend />
-                                                {/* Các đường Line không cần sửa vì dataKey đã khớp với DTO */}
-                                                <Line
-                                                    type="monotone"
-                                                    dataKey="equipmentRevenue"
-                                                    name="Doanh thu thiết bị"
-                                                    stroke="#059669"
-                                                    strokeWidth={3}
-                                                    activeDot={{ r: 6 }}
-                                                />
-                                                <Line
-                                                    type="monotone"
-                                                    dataKey="bookingRevenue"
-                                                    name="Doanh thu booking"
-                                                    stroke="#0284c7"
-                                                    strokeWidth={3}
-                                                    activeDot={{ r: 6 }}
-                                                />
-                                            </LineChart>
-                                        </ResponsiveContainer>
-                                    ) : (
-                                        // Fallback giữ nguyên
-                                        <ResponsiveContainer width="100%" height="100%">
-                                            <BarChart data={bookingChartData} barGap={12}>
-                                                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
-                                                <XAxis dataKey="name" hide={true} />
-                                                <YAxis allowDecimals={false} stroke="#94a3b8" fontSize={12} />
-                                                <Tooltip cursor={{ fill: '#f8fafc' }} />
-                                                <Legend iconType="circle" wrapperStyle={{ fontSize: '13px', paddingTop: '10px' }} />
-                                                <Bar dataKey="Tổng hôm nay" fill="#0284c7" radius={[6, 6, 0, 0]} maxBarSize={60} />
-                                                <Bar dataKey="Chờ xác nhận" fill="#d97706" radius={[6, 6, 0, 0]} maxBarSize={60} />
-                                                <Bar dataKey="Đã check-in" fill="#059669" radius={[6, 6, 0, 0]} maxBarSize={60} />
+                                                <Bar dataKey="experienceRevenue" name="Booking trải nghiệm" stackId="revenue" fill="#0ea5e9" radius={[0, 0, 0, 0]} />
+                                                <Bar dataKey="purchaseRevenue" name="Mua thiết bị" stackId="revenue" fill="#059669" radius={[4, 4, 0, 0]} />
                                             </BarChart>
                                         </ResponsiveContainer>
+                                    ) : (
+                                        <div className="flex h-full items-center justify-center text-muted-foreground text-sm">Chưa có dữ liệu doanh thu</div>
                                     )}
                                 </div>
                             </CardContent>
                         </Card>
 
-                        {/* Biểu đồ Cột tiến độ Booking */}
-                        {/* <Card className="lg:col-span-2 border-gray-100 shadow-sm">
+
+                        {/* Card 2: Tiến độ xử lý Booking hôm nay - Chiếm 2/6 phần (nhỏ hơn) */}
+                        <Card className="lg:col-span-2 border-gray-100 shadow-sm">
                             <CardHeader className="flex flex-row items-center justify-between pb-4">
                                 <div className="space-y-1">
                                     <CardTitle className="text-base font-semibold flex items-center gap-2">
-                                        <BarChart3 className="size-4 text-staff-primary" /> Tiến độ xử lý Booking hôm nay
+                                        <BarChart3 className="size-4 text-staff-primary" /> Tiến độ Booking
                                     </CardTitle>
-                                    <CardDescription>So sánh tương quan lượng khách đặt lịch, chờ duyệt và check-in thực tế.</CardDescription>
+                                    <CardDescription>Dữ liệu trong ngày.</CardDescription>
                                 </div>
                             </CardHeader>
                             <CardContent className="pt-2">
-                                <div className="h-70 w-full">
+                                <div className="h-72 w-full">
                                     <ResponsiveContainer width="100%" height="100%">
                                         <BarChart data={bookingChartData} barGap={12}>
                                             <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
@@ -323,67 +322,13 @@ export default function StaffStatisticsPage() {
                                     </ResponsiveContainer>
                                 </div>
                             </CardContent>
-                        </Card> */}
-
-                        {/* Biểu đồ tròn Cơ cấu cảnh báo rủi ro */}
-                        {/* <Card className="border-gray-100 shadow-sm">
-                            <CardHeader className="pb-2">
-                                <CardTitle className="text-base font-semibold flex items-center gap-2">
-                                    <PieChart className="size-4 text-rose-500" /> Tỷ lệ Cảnh báo Hệ thống
-                                </CardTitle>
-                                <CardDescription>Phân phối các đầu việc cần xử lý gấp để tránh gián đoạn.</CardDescription>
-                            </CardHeader>
-                            <CardContent className="flex flex-col items-center justify-center">
-                                {alertChartData.length > 0 ? (
-                                    <>
-                                        <div className="h-50 w-full relative flex items-center justify-center">
-                                            <ResponsiveContainer width="100%" height="100%">
-                                                <RechartsPieChart>
-                                                    <Tooltip formatter={(value) => [`${value} mục`, "Số lượng"]} />
-                                                    <Pie
-                                                        data={alertChartData}
-                                                        cx="50%"
-                                                        cy="50%"
-                                                        innerRadius={60}
-                                                        outerRadius={85}
-                                                        paddingAngle={5}
-                                                        dataKey="value"
-                                                    >
-                                                        {alertChartData.map((entry, index) => (
-                                                            <Cell key={`cell-${index}`} fill={entry.color} />
-                                                        ))}
-                                                    </Pie>
-                                                </RechartsPieChart>
-                                            </ResponsiveContainer>
-                                            <div className="absolute flex flex-col items-center justify-center">
-                                                <span className="text-2xl font-bold text-gray-800">
-                                                    {alertChartData.reduce((acc, curr) => acc + curr.value, 0)}
-                                                </span>
-                                                <span className="text-xs text-muted-foreground">Tổng cảnh báo</span>
-                                            </div>
-                                        </div>
-                                        <div className="w-full mt-4">
-                                            {alertChartData.map((item, index) => (
-                                                <div key={index} className="flex items-center gap-2 mb-2">
-                                                    <span className="block w-3 h-3 rounded-full" style={{ backgroundColor: item.color }} />
-                                                    <span className="text-sm text-gray-700">{item.name}: {item.value}</span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </>
-                                ) : (
-                                    <div className="flex flex-col items-center gap-2">
-                                        <AlertTriangle className="size-6 text-muted-foreground" />
-                                        <span className="text-sm text-muted-foreground">Không có cảnh báo nào trong hệ thống.</span>
-                                    </div>
-                                )}
-
-                            </CardContent>
-                        </Card> */}
+                        </Card>
                     </div>
+
 
                     {/* Row 3: Danh sách các Alert Chi tiết */}
                     <div className="grid gap-6 lg:grid-cols-3">
+
 
                         {/* Cột 1: Kho hàng (Sản phẩm sắp hết) */}
                         <Card className="flex flex-col border-rose-100/80 shadow-sm transition-all hover:shadow-md">
@@ -429,6 +374,7 @@ export default function StaffStatisticsPage() {
                                 </div>
                             </CardContent>
                         </Card>
+
 
                         {/* Cột 2: Trạng thái thiết bị bảo trì */}
                         <Card className="flex flex-col border-orange-100/80 shadow-sm transition-all hover:shadow-md">
@@ -479,6 +425,7 @@ export default function StaffStatisticsPage() {
                             </CardContent>
                         </Card>
 
+
                         {/* Cột 3: Quản lý ưu đãi (Voucher sắp hết hạn) */}
                         <Card className="flex flex-col border-violet-100/80 shadow-sm transition-all hover:shadow-md">
                             <CardHeader className="border-b border-violet-50/50 bg-violet-50/20 pb-4">
@@ -528,10 +475,15 @@ export default function StaffStatisticsPage() {
                             </CardContent>
                         </Card>
 
+
                     </div>
+
 
                 </>
             )}
         </div>
     );
 }
+
+
+
